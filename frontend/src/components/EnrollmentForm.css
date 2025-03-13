@@ -20,8 +20,8 @@
 /* Container for the entire enrollment form */
 .enrollment-container {
   max-width: 1200px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: 1rem auto 2rem; /* Reduced top margin from 2rem to 1rem */
+  padding: 1rem 2rem 2rem; /* Reduced top padding from 2rem to 1rem */
   background-color: var(--secondary-color);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -44,7 +44,7 @@
 }
 
 .form-instructions {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem; /* Reduced from 2rem to 1rem */
   text-align: center;
   color: var(--text-color);
 }
@@ -52,9 +52,10 @@
 /* Section headers */
 .enrollment-form h2, .shopping-cart h2 {
   color: var(--primary-color);
-  margin: 2.5rem 0 1.5rem; /* Increased top and bottom margins */
+  margin: 0.5rem 0 0.75rem; /* Reduced bottom margin from 1.25rem to 0.75rem */
   padding-bottom: 0.5rem;
   border-bottom: 2px solid var(--primary-light);
+  font-size: 1.4rem;
 }
 
 /* Form layout */
@@ -62,8 +63,8 @@
   flex: 1 1 600px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  max-width: 65%;
+  gap: 0.75rem; /* Reduced from 1rem for even more compact layout */
+  max-width: 62%; /* Reduced from 65% to prevent overlap */
 }
 
 /* Shopping cart */
@@ -76,7 +77,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 2rem;
-  max-width: 30%;
+  max-width: 32%; /* Increased from 30% to ensure proper spacing */
   min-width: 300px;
   align-self: flex-start;
 }
@@ -179,27 +180,28 @@
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* Increased from 1rem */
+  gap: 0.75rem; /* Increased from 0.5rem */
 }
 
 .form-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem; /* The space between fields */
-  margin-bottom: 1.5rem; /* Increased from 1.25rem */
+  gap: 1rem; /* Increased from 0.75rem */
+  margin-bottom: 0.75rem; /* Increased from 0.5rem */
 }
 
 .form-group {
   flex: 1 1 300px;
-  margin-bottom: 1.5rem; /* Increased from 1.25rem */
+  margin-bottom: 0.5rem; /* Increased from 0.25rem */
 }
 
 /* Form controls */
 .form-group label {
   display: block;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.4rem; /* Increased from 0.25rem */
   font-weight: 600;
   color: var(--text-color);
+  font-size: 0.95rem;
 }
 
 .required {
@@ -207,14 +209,17 @@
   margin-left: 0.25rem;
 }
 
+/* Reduce height of form fields */
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 0.75rem;
+  padding: 0.4rem; /* Reduced from 0.55rem */
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
-  font-size: 1rem;
+  font-size: 0.95rem;
   transition: var(--transition);
+  height: 2.2rem; /* Added explicit height */
+  box-sizing: border-box; /* Ensure padding doesn't add to height */
 }
 
 .form-group input:focus,
@@ -405,118 +410,45 @@ button:focus-visible {
 
 /* Special handling for city-state-zip row */
 .city-state-zip {
-  margin-top: .25rem; /* Increased from 0.5rem */
-  padding-top: .25rem; /* Increased from 0.5rem */
+  margin-top: 0; /* Removed top margin */
+  padding-top: 0; /* Removed top padding */
+  margin-bottom: 0.5rem; /* Increased from 0.25rem */
 }
 
-/* Address section specific styling */
-.address-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem; /* Reduced from 1.5rem to reduce space between name and address */
-  margin-bottom: .25rem; /* Increased from 1.5rem */
+/* Remove the boxed sections and replace with line separators */
+.section-separator {
+  display: block; /* Show separators again */
+  border-top: 1px solid #e0e0e0;
+  margin: 0.5rem 0; /* Reduced from 1.5rem 0 */
+  width: 100%;
+  opacity: 0.7;
 }
 
-.no-gap {
-  margin: 0;
-  padding: 0;
-}
-
-.full-width {
-  flex: 1 1 100%;
-}
-
-/* Remove any remaining gaps between address fields */
-.address-section .form-group {
-  margin-bottom: 0.25rem; /* Reduced from 1rem */
-}
-
-.address-section .error-message {
-  margin-top: 0.25rem;
-  margin-bottom: 0.25rem;
-}
-
-/* Special styling for name fields */
-.name-row .form-group:first-child, /* First name */
-.name-row .form-group:last-child { /* Last name */
-  flex: 1 1 200px;
-  max-width: 300px;
-}
-
-/* Special styling for middle initial field */
-.middle-initial {
-  flex: 0 0 80px; /* Fixed width for middle initial */
-  min-width: 80px;
-}
-
-/* Make phone fields narrower so they fit on one line */
-.phone-row .form-group {
-  flex: 1 1 150px;
-  max-width: 250px;
-}
-
-/* Make state dropdown narrower */
-.state-select {
-  flex: 0 0 120px; /* Fixed width for state dropdown */
-  min-width: 120px;
-}
-
-/* Make ZIP code field narrower */
-.zip-field {
-  flex: 0 0 150px; /* Fixed width for ZIP code */
-  min-width: 150px;
-}
-
-/* Make date of birth field narrower */
-.dob-field {
-  flex: 0 0 200px; /* Fixed width for date of birth */
-  min-width: 200px;
-}
-
-/* Make gender field narrower */
-.gender-field {
-  flex: 0 0 150px; /* Fixed width for gender */
-  min-width: 150px;
-}
-
-/* Email field styling */
-.email-field {
-  flex: 1; /* Takes remaining space */
-}
-
-/* Date field styling */
-.date-field {
-  flex: 0 0 200px; /* Fixed width for date fields */
-  min-width: 200px;
-}
-
-/* Specific row spacing */
+/* Adjust spacing between sections */
 .start-date-row {
-  margin-bottom: .5rem;
+  margin-bottom: 0.75rem; /* Increased from 0.5rem */
 }
 
 .name-row {
-  margin-bottom: .25rem; /* Reduced from .5rem to shrink space between name and address */
-}
-
-.address-row {
-  margin-bottom: .25rem;
-}
-
-.city-state-zip {
-  margin-bottom: .25rem;
-}
-
-.email-row {
-  margin-bottom: .25rem;
+  margin-bottom: 0.75rem; /* Increased from 0.5rem */
 }
 
 .dob-gender-row {
-  margin-bottom: .25rem;
+  margin-bottom: 0.5rem; /* Increased from 0.25rem */
+}
+
+.address-row {
+  margin-bottom: 0.75rem; /* Increased from 0.5rem */
+}
+
+.city-state-zip {
+  margin-top: 0; /* Keep removed top margin */
+  padding-top: 0; /* Keep removed top padding */
+  margin-bottom: 0.25rem; /* Reduced spacing before separator */
 }
 
 .phone-row {
-  margin-bottom: .25rem;
+  margin-bottom: 0.5rem; /* Increased from 0.25rem */
 }
 
 /* Additional mobile optimizations */
@@ -575,8 +507,9 @@ button:focus-visible {
   
   .form-group input,
   .form-group select {
-    padding: 0.6rem;
+    padding: 0.4rem; /* Reduced from 0.6rem */
     font-size: 0.9rem;
+    height: 2.2rem; /* Maintain consistent height */
   }
   
   .submit-button {
@@ -767,6 +700,7 @@ button:focus-visible {
   .enrollment-layout {
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 2.5rem; /* Increased from 2rem for better separation */
   }
   
   .enrollment-form {
@@ -868,4 +802,165 @@ button:focus-visible {
     margin-top: 0.5rem;
     text-align: left;
   }
+}
+
+/* Special styling for name fields */
+.name-row .form-group:first-child, /* First name */
+.name-row .form-group:last-child { /* Last name */
+  flex: 1 1 170px; /* Reduced from 180px */
+  max-width: 240px; /* Reduced from 250px */
+}
+
+/* Special styling for middle initial field */
+.middle-initial {
+  flex: 0 0 65px; /* Reduced from 70px */
+  min-width: 65px; /* Reduced from 70px */
+}
+
+/* Make phone fields narrower so they fit on one line */
+.phone-row .form-group {
+  flex: 1 1 130px; /* Reduced from 140px */
+  max-width: 200px; /* Reduced from 220px */
+}
+
+/* Make state dropdown narrower */
+.state-select {
+  flex: 0 0 90px; /* Reduced from 100px */
+  min-width: 90px; /* Reduced from 100px */
+}
+
+/* Make ZIP code field narrower */
+.zip-field {
+  flex: 0 0 110px; /* Reduced from 120px */
+  min-width: 110px; /* Reduced from 120px */
+}
+
+/* Make date of birth field narrower */
+.dob-field {
+  flex: 0 0 170px; /* Reduced from 180px */
+  min-width: 170px; /* Reduced from 180px */
+}
+
+/* Make gender field narrower */
+.gender-field {
+  flex: 0 0 120px; /* Reduced from 130px */
+  min-width: 120px; /* Reduced from 130px */
+}
+
+/* Email field styling */
+.email-field {
+  flex: 1; /* Takes remaining space */
+}
+
+/* Date field styling */
+.date-field {
+  flex: 0 0 170px; /* Reduced from 180px */
+  min-width: 170px; /* Reduced from 180px */
+}
+
+/* Special handling for address fields */
+.address-field {
+  flex: 2; /* Takes up more space than address2 */
+}
+
+.address2-field {
+  flex: 1; /* Takes up less space than address1 */
+}
+
+/* Tab panel form styles to match primary form */
+.tab-panel .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Make name fields in tabs fit on one line */
+.tab-panel .form-row:first-of-type {
+  flex-wrap: nowrap;
+}
+
+.tab-panel .form-group {
+  flex: 1 1 auto;
+  margin-bottom: 0.5rem;
+}
+
+.tab-panel .form-group.middle-initial {
+  flex: 0 0 65px;
+  min-width: 65px;
+}
+
+/* Ensure tab panel inputs match primary form height */
+.tab-panel input,
+.tab-panel select {
+  width: 100%;
+  padding: 0.4rem;
+  height: 2.2rem;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+}
+
+/* Responsive adjustments for tab panels */
+@media (max-width: 768px) {
+  .tab-panel .form-row:first-of-type {
+    flex-wrap: wrap;
+  }
+  
+  .tab-panel .form-group {
+    flex: 1 1 100%;
+  }
+  
+  .tab-panel .form-group.middle-initial {
+    flex: 0 0 65px;
+    min-width: 65px;
+  }
+  
+  /* Keep name fields on the same line even on tablet */
+  .tab-panel .name-row,
+  .tab-panel .form-row:first-of-type {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .tab-panel .form-row:first-of-type .form-group:first-child,
+  .tab-panel .form-row:first-of-type .form-group:last-child {
+    flex: 1 1 calc(50% - 90px);
+    min-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-panel .form-row:first-of-type {
+    gap: 0.5rem;
+  }
+  
+  .tab-panel .form-row:first-of-type .form-group:first-child,
+  .tab-panel .form-row:first-of-type .form-group:last-child {
+    flex: 1 1 calc(50% - 45px);
+    min-width: 100px;
+  }
+  
+  .tab-panel .form-group.middle-initial {
+    flex: 0 0 60px;
+    min-width: 60px;
+  }
+}
+
+/* Add blue background to inputs with content */
+.form-group input:not(:placeholder-shown),
+.form-group select:not([value=""]):not(:invalid) {
+  background-color: rgba(232, 240, 254, 0.5) !important; /* Light blue background similar to Chrome's autofill */
+}
+
+/* Also apply to inputs that have been autofilled by the browser */
+.form-group input:-webkit-autofill,
+.form-group select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px rgba(232, 240, 254, 0.5) inset !important;
+  -webkit-text-fill-color: inherit !important;
+}
+
+/* Ensure tab panel inputs also get the same styling */
+.tab-panel input:not(:placeholder-shown),
+.tab-panel select:not([value=""]):not(:invalid) {
+  background-color: rgba(232, 240, 254, 0.5) !important;
 } 

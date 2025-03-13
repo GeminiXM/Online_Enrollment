@@ -11,7 +11,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Fitness Facility Enrollment</h1>
+        <h1>Tabor Center</h1>
       </header>
       <main>
         <Routes>
@@ -22,9 +22,7 @@ function App() {
         </Routes>
       </main>
       <footer>
-        <p>
-          &copy; {new Date().getFullYear()} Fitness Facility Enrollment System
-        </p>
+        <p>&copy; {new Date().getFullYear()} Wellbridge Enrollment System</p>
       </footer>
     </div>
   );

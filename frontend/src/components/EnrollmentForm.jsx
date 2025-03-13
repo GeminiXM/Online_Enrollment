@@ -83,7 +83,7 @@ function EnrollmentForm() {
   const genderOptions = [
     { value: "male", label: "Male" },
     { value: "female", label: "Female" },
-    { value: "prefer_not_to_say", label: "Prefer not to say" }
+    { value: "", label: "Prefer not to say" }
   ];
 
   // Handle input changes for the main form
@@ -243,17 +243,17 @@ function EnrollmentForm() {
       newErrors.cellPhone = "At least one phone number is required";
     }
     
-    // Validate phone number formats if provided
-    if (formData.cellPhone.trim() && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.cellPhone.trim())) {
-      newErrors.cellPhone = "Phone number must be in format (123) 456-7890";
+    // Validate phone number formats if provided - only check for 10 digits
+    if (formData.cellPhone.trim() && !/^\d{10}$/.test(formData.cellPhone.replace(/\D/g, ''))) {
+      newErrors.cellPhone = "Phone number must contain 10 digits";
     }
     
-    if (formData.homePhone.trim() && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.homePhone.trim())) {
-      newErrors.homePhone = "Phone number must be in format (123) 456-7890";
+    if (formData.homePhone.trim() && !/^\d{10}$/.test(formData.homePhone.replace(/\D/g, ''))) {
+      newErrors.homePhone = "Phone number must contain 10 digits";
     }
     
-    if (formData.workPhone.trim() && !/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.workPhone.trim())) {
-      newErrors.workPhone = "Phone number must be in format (123) 456-7890";
+    if (formData.workPhone.trim() && !/^\d{10}$/.test(formData.workPhone.replace(/\D/g, ''))) {
+      newErrors.workPhone = "Phone number must contain 10 digits";
     }
     
     if (!formData.dateOfBirth) {
@@ -281,8 +281,8 @@ function EnrollmentForm() {
     
     if (!formData.emergencyContactPhone.trim()) {
       newErrors.emergencyContactPhone = "Emergency contact phone is required";
-    } else if (!/^\(\d{3}\) \d{3}-\d{4}$/.test(formData.emergencyContactPhone.trim())) {
-      newErrors.emergencyContactPhone = "Phone number must be in format (123) 456-7890";
+    } else if (!/^\d{10}$/.test(formData.emergencyContactPhone.replace(/\D/g, ''))) {
+      newErrors.emergencyContactPhone = "Phone number must contain 10 digits";
     }
     
     // Validate family members if any
@@ -431,31 +431,31 @@ function EnrollmentForm() {
         <form className="enrollment-form" onSubmit={handleSubmit} noValidate>
           <h2>Primary Member Information</h2>
           
-          <div className="address-section">
-            <div className="form-row start-date-row">
-              <div className="form-group date-field">
-                <label htmlFor="requestedStartDate">
-                  Requested Start Date <span className="required">*</span>
-                </label>
-                <input
-                  type="date"
-                  id="requestedStartDate"
-                  name="requestedStartDate"
-                  value={formData.requestedStartDate}
-                  onChange={handleChange}
-                  min={today}
-                  aria-required="true"
-                  aria-invalid={!!errors.requestedStartDate}
-                  aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
-                />
-                {errors.requestedStartDate && (
-                  <div id="requestedStartDate-error" className="error-message">
-                    {errors.requestedStartDate}
-                  </div>
-                )}
-              </div>
+          <div className="form-row start-date-row">
+            <div className="form-group date-field">
+              <label htmlFor="requestedStartDate">
+                Requested Start Date <span className="required">*</span>
+              </label>
+              <input
+                type="date"
+                id="requestedStartDate"
+                name="requestedStartDate"
+                value={formData.requestedStartDate}
+                onChange={handleChange}
+                min={today}
+                aria-required="true"
+                aria-invalid={!!errors.requestedStartDate}
+                aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
+              />
+              {errors.requestedStartDate && (
+                <div id="requestedStartDate-error" className="error-message">
+                  {errors.requestedStartDate}
+                </div>
+              )}
             </div>
-            
+          </div>
+          
+          <div className="personal-info-section">
             <div className="form-row name-row">
               <div className="form-group">
                 <label htmlFor="firstName">
@@ -467,6 +467,7 @@ function EnrollmentForm() {
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
+                  placeholder="Enter first name"
                   aria-required="true"
                   aria-invalid={!!errors.firstName}
                   aria-describedby={errors.firstName ? "firstName-error" : undefined}
@@ -488,6 +489,7 @@ function EnrollmentForm() {
                   name="middleInitial"
                   value={formData.middleInitial}
                   onChange={handleChange}
+                  placeholder="M.I."
                   maxLength="1"
                   aria-invalid={!!errors.middleInitial}
                   aria-describedby={errors.middleInitial ? "middleInitial-error" : undefined}
@@ -509,6 +511,7 @@ function EnrollmentForm() {
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
+                  placeholder="Enter last name"
                   aria-required="true"
                   aria-invalid={!!errors.lastName}
                   aria-describedby={errors.lastName ? "lastName-error" : undefined}
@@ -521,6 +524,83 @@ function EnrollmentForm() {
               </div>
             </div>
             
+            <div className="form-row dob-gender-row">
+              <div className="form-group dob-field">
+                <label htmlFor="dateOfBirth">
+                  Date of Birth <span className="required">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="dateOfBirth"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  placeholder="MM/DD/YYYY"
+                  aria-required="true"
+                  aria-invalid={!!errors.dateOfBirth}
+                  aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
+                />
+                {errors.dateOfBirth && (
+                  <div id="dateOfBirth-error" className="error-message">
+                    {errors.dateOfBirth}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group gender-field">
+                <label htmlFor="gender">
+                  Gender <span className="required">*</span>
+                </label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleChange}
+                  aria-required="true"
+                  aria-invalid={!!errors.gender}
+                  aria-describedby={errors.gender ? "gender-error" : undefined}
+                >
+                  <option value="">Select gender</option>
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.gender && (
+                  <div id="gender-error" className="error-message">
+                    {errors.gender}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group email-field">
+                <label htmlFor="email">
+                  Email <span className="required">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="example@email.com"
+                  aria-required="true"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                />
+                {errors.email && (
+                  <div id="email-error" className="error-message">
+                    {errors.email}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+          
+          <div className="section-separator"></div>
+          
+          <div className="address-section">
             <div className="form-row address-row">
               <div className="form-group address-field">
                 <label htmlFor="address1">
@@ -532,6 +612,7 @@ function EnrollmentForm() {
                   name="address1"
                   value={formData.address1}
                   onChange={handleChange}
+                  placeholder="Enter street address"
                   aria-required="true"
                   aria-invalid={!!errors.address1}
                   aria-describedby={errors.address1 ? "address1-error" : undefined}
@@ -569,6 +650,7 @@ function EnrollmentForm() {
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
+                  placeholder="Enter city"
                   aria-required="true"
                   aria-invalid={!!errors.city}
                   aria-describedby={errors.city ? "city-error" : undefined}
@@ -631,138 +713,72 @@ function EnrollmentForm() {
             </div>
           </div>
           
-          <div className="form-row dob-gender-row">
-            <div className="form-group dob-field">
-              <label htmlFor="dateOfBirth">
-                Date of Birth <span className="required">*</span>
-              </label>
-              <input
-                type="date"
-                id="dateOfBirth"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                aria-required="true"
-                aria-invalid={!!errors.dateOfBirth}
-                aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
-              />
-              {errors.dateOfBirth && (
-                <div id="dateOfBirth-error" className="error-message">
-                  {errors.dateOfBirth}
-                </div>
-              )}
-            </div>
-            
-            <div className="form-group gender-field">
-              <label htmlFor="gender">
-                Gender <span className="required">*</span>
-              </label>
-              <select
-                id="gender"
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                aria-required="true"
-                aria-invalid={!!errors.gender}
-                aria-describedby={errors.gender ? "gender-error" : undefined}
-              >
-                <option value="">Select gender</option>
-                {genderOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              {errors.gender && (
-                <div id="gender-error" className="error-message">
-                  {errors.gender}
-                </div>
-              )}
-            </div>
-            
-            <div className="form-group email-field">
-              <label htmlFor="email">
-                Email <span className="required">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                aria-required="true"
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-              />
-              {errors.email && (
-                <div id="email-error" className="error-message">
-                  {errors.email}
-                </div>
-              )}
+          <div className="section-separator"></div>
+          
+          <div className="contact-info-section">
+            <div className="form-row phone-row">
+              <div className="form-group">
+                <label htmlFor="cellPhone">
+                  Cell Phone 
+                </label>
+                <input
+                  type="tel"
+                  id="cellPhone"
+                  name="cellPhone"
+                  value={formData.cellPhone}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit phone number"
+                  aria-invalid={!!errors.cellPhone}
+                  aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
+                />
+                {errors.cellPhone && (
+                  <div id="cellPhone-error" className="error-message">
+                    {errors.cellPhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="homePhone">Home Phone</label>
+                <input
+                  type="tel"
+                  id="homePhone"
+                  name="homePhone"
+                  value={formData.homePhone}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit phone number"
+                  aria-invalid={!!errors.homePhone}
+                  aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
+                />
+                {errors.homePhone && (
+                  <div id="homePhone-error" className="error-message">
+                    {errors.homePhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="workPhone">Work Phone</label>
+                <input
+                  type="tel"
+                  id="workPhone"
+                  name="workPhone"
+                  value={formData.workPhone}
+                  onChange={handleChange}
+                  placeholder="Enter 10-digit phone number"
+                  aria-invalid={!!errors.workPhone}
+                  aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
+                />
+                {errors.workPhone && (
+                  <div id="workPhone-error" className="error-message">
+                    {errors.workPhone}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          
-          <div className="form-row phone-row">
-            <div className="form-group">
-              <label htmlFor="cellPhone">
-                Cell Phone <span className="required">*</span>
-              </label>
-              <input
-                type="tel"
-                id="cellPhone"
-                name="cellPhone"
-                value={formData.cellPhone}
-                onChange={handleChange}
-                placeholder="(123) 456-7890"
-                aria-invalid={!!errors.cellPhone}
-                aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
-              />
-              {errors.cellPhone && (
-                <div id="cellPhone-error" className="error-message">
-                  {errors.cellPhone}
-                </div>
-              )}
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="homePhone">Home Phone</label>
-              <input
-                type="tel"
-                id="homePhone"
-                name="homePhone"
-                value={formData.homePhone}
-                onChange={handleChange}
-                placeholder="(123) 456-7890"
-                aria-invalid={!!errors.homePhone}
-                aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
-              />
-              {errors.homePhone && (
-                <div id="homePhone-error" className="error-message">
-                  {errors.homePhone}
-                </div>
-              )}
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="workPhone">Work Phone</label>
-              <input
-                type="tel"
-                id="workPhone"
-                name="workPhone"
-                value={formData.workPhone}
-                onChange={handleChange}
-                placeholder="(123) 456-7890"
-                aria-invalid={!!errors.workPhone}
-                aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
-              />
-              {errors.workPhone && (
-                <div id="workPhone-error" className="error-message">
-                  {errors.workPhone}
-                </div>
-              )}
-            </div>
-          </div>
-          
+         
+
           <h2>Family Members & Additional Services</h2>
           
           <div className="tabs-container">
@@ -846,7 +862,7 @@ function EnrollmentForm() {
               {activeTab === 'new_adult' && (
                 <div className="tab-panel">
                   <h3>Add New Adult Member (18+ years)</h3>
-                  <div className="form-row">
+                  <div className="form-row name-row">
                     <div className="form-group">
                       <label htmlFor="adultFirstName">First Name <span className="required">*</span></label>
                       <input 
@@ -893,7 +909,7 @@ function EnrollmentForm() {
                       )}
                     </div>
                   </div>
-                  <div className="form-row">
+                  <div className="form-row dob-gender-row">
                     <div className="form-group dob-field">
                       <label htmlFor="adultDob">Date of Birth <span className="required">*</span></label>
                       <input 
@@ -947,7 +963,7 @@ function EnrollmentForm() {
               {activeTab === 'child' && (
                 <div className="tab-panel">
                   <h3>Add Child (3 weeks - 11 years)</h3>
-                  <div className="form-row">
+                  <div className="form-row name-row">
                     <div className="form-group">
                       <label htmlFor="childFirstName">First Name <span className="required">*</span></label>
                       <input 
@@ -994,7 +1010,7 @@ function EnrollmentForm() {
                       )}
                     </div>
                   </div>
-                  <div className="form-row">
+                  <div className="form-row dob-gender-row">
                     <div className="form-group dob-field">
                       <label htmlFor="childDob">Date of Birth <span className="required">*</span></label>
                       <input 
@@ -1048,7 +1064,7 @@ function EnrollmentForm() {
               {activeTab === 'youth' && (
                 <div className="tab-panel">
                   <h3>Add Youth (12 - 20 years)</h3>
-                  <div className="form-row">
+                  <div className="form-row name-row">
                     <div className="form-group">
                       <label htmlFor="youthFirstName">First Name <span className="required">*</span></label>
                       <input 
@@ -1095,7 +1111,7 @@ function EnrollmentForm() {
                       )}
                     </div>
                   </div>
-                  <div className="form-row">
+                  <div className="form-row dob-gender-row">
                     <div className="form-group dob-field">
                       <label htmlFor="youthDob">Date of Birth <span className="required">*</span></label>
                       <input 
