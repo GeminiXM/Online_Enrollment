@@ -1,0 +1,314 @@
+/* frontend/src/components/EnrollmentForm.css */
+/* Styles for the gym membership enrollment form */
+
+/* CSS Variables for consistent theming */
+:root {
+  --primary-color: #008080; /* Teal */
+  --primary-dark: #006666;
+  --primary-light: #00a3a3;
+  --secondary-color: #f5f5f5; /* Off-white */
+  --text-color: #333333;
+  --error-color: #d32f2f;
+  --success-color: #388e3c;
+  --border-color: #cccccc;
+  --border-radius: 4px;
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+  --field-spacing: 2rem; /* New variable for consistent field spacing */
+}
+
+/* Container for the entire enrollment form */
+.enrollment-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Form title and instructions */
+.enrollment-container h1 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 2rem;
+}
+
+.form-instructions {
+  margin-bottom: 2rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+/* Section headers */
+.enrollment-form h2 {
+  color: var(--primary-color);
+  margin: 2.5rem 0 1.5rem; /* Increased top and bottom margins */
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+/* Form layout */
+.enrollment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Fixed from 0.5rem to 2rem */
+}
+
+/* Form section for grouping related fields */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Increased from 1rem */
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem; /* The space between fields */
+  margin-bottom: 1.5rem; /* Increased from 1.25rem */
+}
+
+.form-group {
+  flex: 1 1 300px;
+  margin-bottom: 1.5rem; /* Increased from 1.25rem */
+}
+
+/* Form controls */
+.form-group label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.required {
+  color: var(--error-color);
+  margin-left: 0.25rem;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
+}
+
+.form-group input::placeholder {
+  color: #999;
+}
+
+/* Error messages */
+.error-message {
+  color: var(--error-color);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  font-weight: bold; /* Make error messages bold */
+}
+
+.form-error {
+  background-color: rgba(211, 47, 47, 0.1);
+  border-left: 4px solid var(--error-color);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: bold; /* Make form error messages bold */
+}
+
+/* Form with errors */
+input:invalid,
+select:invalid,
+input[aria-invalid="true"],
+select[aria-invalid="true"] {
+  border-color: var(--error-color);
+}
+
+/* Submit button */
+.form-actions {
+  margin-top: 3rem; /* Increased from 2rem */
+  text-align: center;
+}
+
+.submit-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.submit-button:hover {
+  background-color: var(--primary-dark);
+}
+
+.submit-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+/* Success message */
+.enrollment-success {
+  max-width: 800px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background-color: var(--secondary-color);
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+}
+
+.enrollment-success h2 {
+  color: var(--success-color);
+  margin-bottom: 1rem;
+}
+
+.enrollment-success p {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Privacy notice */
+.privacy-notice {
+  margin-top: 3rem; /* Increased from 2rem */
+  padding: 1rem;
+  background-color: rgba(0, 128, 128, 0.05);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .enrollment-container {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .form-group {
+    flex: 1 1 100%;
+  }
+}
+
+/* Accessibility focus styles */
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Special handling for address fields */
+.address-field {
+  flex: 2; /* Takes up more space than address2 */
+}
+
+.address2-field {
+  flex: 1; /* Takes up less space than address1 */
+}
+
+/* Special handling for city-state-zip row */
+.city-state-zip {
+  margin-top: .25rem; /* Increased from 0.5rem */
+  padding-top: .25rem; /* Increased from 0.5rem */
+}
+
+/* Address section specific styling */
+.address-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Reduced from 1.5rem to reduce space between name and address */
+  margin-bottom: .25rem; /* Increased from 1.5rem */
+}
+
+.no-gap {
+  margin: 0;
+  padding: 0;
+}
+
+.full-width {
+  flex: 1 1 100%;
+}
+
+/* Remove any remaining gaps between address fields */
+.address-section .form-group {
+  margin-bottom: 0.25rem; /* Reduced from 1rem */
+}
+
+.address-section .error-message {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Special styling for middle initial field */
+.middle-initial {
+  flex: 0 0 80px; /* Fixed width for middle initial */
+  min-width: 80px;
+}
+
+/* Make state dropdown narrower */
+.state-select {
+  flex: 0 0 120px; /* Fixed width for state dropdown */
+  min-width: 120px;
+}
+
+/* Make ZIP code field narrower */
+.zip-field {
+  flex: 0 0 150px; /* Fixed width for ZIP code */
+  min-width: 150px;
+}
+
+/* Make date of birth field narrower */
+.dob-field {
+  flex: 0 0 200px; /* Fixed width for date of birth */
+  min-width: 200px;
+}
+
+/* Make gender field narrower */
+.gender-field {
+  flex: 0 0 150px; /* Fixed width for gender */
+  min-width: 150px;
+}
+
+/* Email field styling */
+.email-field {
+  flex: 1; /* Takes remaining space */
+}
+
+/* Specific row spacing */
+.name-row {
+  margin-bottom: .25rem; /* Reduced from .5rem to shrink space between name and address */
+}
+
+.address-row {
+  margin-bottom: .25rem;
+}
+
+.city-state-zip {
+  margin-bottom: .25rem;
+}
+
+.email-row {
+  margin-bottom: .25rem;
+}
+
+.dob-gender-row {
+  margin-bottom: .25rem;
+}
+
+.phone-row {
+  margin-bottom: .25rem;
+} 

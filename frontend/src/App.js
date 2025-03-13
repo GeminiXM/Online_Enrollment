@@ -1,30 +1,30 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
+import EnrollmentForm from "./components/EnrollmentForm.jsx";
 
 // Import pages
-// Example: import Home from './pages/Home';
-// Example: import Dashboard from './pages/Dashboard';
+// Example: import Home from './pages/Home.js';
+// Example: import Dashboard from './pages/Dashboard.js';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Online Enrollment System</h1>
+        <h1>Fitness Facility Enrollment</h1>
       </header>
       <main>
         <Routes>
           {/* Define your routes here */}
-          {/* Example: <Route path="/" element={<Home />} /> */}
-          {/* Example: <Route path="/dashboard" element={<Dashboard />} /> */}
-          <Route
-            path="/"
-            element={<div>Welcome to Online Enrollment System</div>}
-          />
+          <Route path="/" element={<EnrollmentForm />} />
+          <Route path="/enrollment" element={<EnrollmentForm />} />
+          {/* Add more routes as needed */}
         </Routes>
       </main>
       <footer>
-        <p>&copy; {new Date().getFullYear()} Online Enrollment System</p>
+        <p>
+          &copy; {new Date().getFullYear()} Fitness Facility Enrollment System
+        </p>
       </footer>
     </div>
   );

@@ -1,12 +1,17 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import logger from "./utils/logger.js";
 
 // Import routes
-// const authRoutes = require('./routes/auth');
-// const userRoutes = require('./routes/users');
+// import authRoutes from './routes/auth.js';
+// import userRoutes from './routes/users.js';
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+
+// Configure dotenv
+dotenv.config();
 
 // Create Express app
 const app = express();
@@ -16,34 +21,37 @@ const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(helmet()); // Security headers
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5000'
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "http://localhost:5000",
+  })
+);
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan('dev')); // Logging
+app.use(morgan("dev")); // Logging
 
 // Routes
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'API is running' });
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "OK", message: "API is running" });
 });
 
 // Register route modules
 // app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
+app.use("/api/enrollment", enrollmentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error(`${err.message}`, { stack: err.stack });
   res.status(500).json({
-    status: 'error',
-    message: err.message || 'Internal Server Error'
+    status: "error",
+    message: err.message || "Internal Server Error",
   });
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
 });
 
-module.exports = app; 
+export default app;

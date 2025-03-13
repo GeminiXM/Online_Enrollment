@@ -1,34 +1,112 @@
-// const ibmdb = require('ibm_db');
-require('dotenv').config();
+"use strict";
+
+import ibmdb from "ibm_db"; // For Informix
+import dotenv from "dotenv";
+import { promises as fs } from "fs";
+import path from "path";
+
+dotenv.config();
 
 // Database connection configuration
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 9088,
-  database: process.env.DB_NAME || 'online_enrollment',
-  user: process.env.DB_USER || 'informix',
-  password: process.env.DB_PASSWORD || 'password',
-  server: process.env.DB_SERVER || 'ol_informix1410'
+/**
+ * INFORMIX CONNECTION LOGIC
+ */
+
+// Function to create a connection string for Informix
+const createInformixConnectionString = (databaseConfig) => {
+  const {
+    server,
+    database,
+    host,
+    port,
+    protocol,
+    user,
+    password,
+    authentication,
+  } = databaseConfig;
+
+  const connectionString = `SERVER=${server};DATABASE=${database};HOSTNAME=${host};AUTHENTICATION=${authentication};PORT=${port};PROTOCOL=${protocol};UID=${user};PWD=${password};`;
+  console.log("Generated Informix Connection String:", connectionString);
+  return connectionString;
 };
 
-// Connection string for IBM_DB
-const connectionString = `DATABASE=${dbConfig.database};HOSTNAME=${dbConfig.host};PORT=${dbConfig.port};PROTOCOL=TCPIP;UID=${dbConfig.user};PWD=${dbConfig.password}`;
+// Function to get Informix database settings based on selection
+const getInformixDatabaseConfig = (selectedDatabase) => {
+  console.log("Getting Informix database configuration for:", selectedDatabase);
+  switch (selectedDatabase) {
+    case "Denver":
+      return {
+        server: process.env.INFORMIX_DNV_SERVER,
+        database: process.env.INFORMIX_DNV_DATABASE,
+        host: process.env.INFORMIX_DNV_HOST,
+        port: process.env.INFORMIX_DNV_PORT,
+        protocol: process.env.INFORMIX_DNV_PROTOCOL,
+        user: process.env.INFORMIX_DNV_USER,
+        password: process.env.INFORMIX_DNV_PASSWORD,
+        authentication: process.env.INFORMIX_DNV_AUTHENTICATION,
+      };
+    case "MAC":
+      return {
+        server: process.env.INFORMIX_MAC_SERVER,
+        database: process.env.INFORMIX_MAC_DATABASE,
+        host: process.env.INFORMIX_MAC_HOST,
+        port: process.env.INFORMIX_MAC_PORT,
+        protocol: process.env.INFORMIX_MAC_PROTOCOL,
+        user: process.env.INFORMIX_MAC_USER,
+        password: process.env.INFORMIX_MAC_PASSWORD,
+        authentication: process.env.INFORMIX_MAC_AUTHENTICATION,
+      };
+    case "NMSW":
+      return {
+        server: process.env.INFORMIX_NM_SERVER,
+        database: process.env.INFORMIX_NM_DATABASE,
+        host: process.env.INFORMIX_NM_HOST,
+        port: process.env.INFORMIX_NM_PORT,
+        protocol: process.env.INFORMIX_NM_PROTOCOL,
+        user: process.env.INFORMIX_NM_USER,
+        password: process.env.INFORMIX_NM_PASSWORD,
+        authentication: process.env.INFORMIX_NM_AUTHENTICATION,
+      };
+    default:
+      throw new Error("Invalid Informix database selected");
+  }
+};
+
+// Function to connect to Informix database
+export const getInformixConnection = async (selectedDatabase) => {
+  console.log("Connecting to Informix database:", selectedDatabase);
+  const databaseConfig = getInformixDatabaseConfig(selectedDatabase);
+
+  try {
+    const connStr = createInformixConnectionString(databaseConfig);
+    console.log("Attempting to open Informix connection...");
+    const connection = await ibmdb.open(connStr);
+    console.log(
+      "Connection successful to Informix database:",
+      selectedDatabase
+    );
+    return connection;
+  } catch (error) {
+    console.error("Error connecting to Informix database:", error);
+    throw error;
+  }
+};
 
 // Mock functions for development without IBM_DB
 // Create a connection pool
 // const pool = ibmdb.Pool();
 const pool = {
   open: (connStr, callback) => {
-    console.log('Mock database connection created');
+    console.log("Mock database connection created");
     console.log(`Connection string: ${connStr}`);
-    
+
     // Mock connection object
     const conn = {
       query: (sql, params, callback) => {
         console.log(`Mock query executed: ${sql}`);
         console.log(`Parameters: ${JSON.stringify(params)}`);
-        
-        if (typeof callback === 'function') {
+
+        if (typeof callback === "function") {
           callback(null, []);
         } else {
           return Promise.resolve([]);
@@ -41,41 +119,52 @@ const pool = {
       },
       prepare: (sql, callback) => {
         console.log(`Mock prepare executed: ${sql}`);
-        
+
         const stmt = {
           execute: (params, callback) => {
-            console.log(`Mock statement executed with params: ${JSON.stringify(params)}`);
+            console.log(
+              `Mock statement executed with params: ${JSON.stringify(params)}`
+            );
             callback(null, []);
           },
           executeSync: (params) => {
-            console.log(`Mock statement executeSync with params: ${JSON.stringify(params)}`);
+            console.log(
+              `Mock statement executeSync with params: ${JSON.stringify(
+                params
+              )}`
+            );
             return { fetchAllSync: () => [] };
-          }
+          },
         };
-        
-        if (typeof callback === 'function') {
+
+        if (typeof callback === "function") {
           callback(null, stmt);
         } else {
           return Promise.resolve(stmt);
         }
       },
       close: (callback) => {
-        console.log('Mock connection closed');
-        if (typeof callback === 'function') {
+        console.log("Mock connection closed");
+        if (typeof callback === "function") {
           callback(null);
         } else {
           return Promise.resolve();
         }
-      }
+      },
     };
-    
-    if (typeof callback === 'function') {
+
+    if (typeof callback === "function") {
       callback(null, conn);
     } else {
       return Promise.resolve(conn);
     }
-  }
+  },
 };
+
+// Define a default connection string or remove it from exports if not needed
+const connectionString = createInformixConnectionString(
+  getInformixDatabaseConfig("Denver")
+);
 
 // Test the database connection
 async function testConnection() {
@@ -83,10 +172,10 @@ async function testConnection() {
     // For actual implementation:
     // const conn = await pool.open(connectionString);
     // conn.close();
-    console.log('Database connection successful (mock)');
+    console.log("Database connection successful (mock)");
     return true;
   } catch (err) {
-    console.error('Database connection failed:', err);
+    console.error("Database connection failed:", err);
     return false;
   }
 }
@@ -103,7 +192,7 @@ async function query(sql, params = []) {
     console.log(`Parameters: ${JSON.stringify(params)}`);
     return [];
   } catch (err) {
-    console.error('Query error:', err);
+    console.error("Query error:", err);
     throw err;
   }
 }
@@ -121,14 +210,16 @@ async function executeStatement(sql, params = []) {
     console.log(`Parameters: ${JSON.stringify(params)}`);
     return [];
   } catch (err) {
-    console.error('Statement execution error:', err);
+    console.error("Statement execution error:", err);
     throw err;
   }
 }
 
-module.exports = {
+// Replace the CommonJS exports with ES6 exports
+export {
   connectionString,
+  getInformixConnection,
   testConnection,
   query,
-  executeStatement
-}; 
+  executeStatement,
+};

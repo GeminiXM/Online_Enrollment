@@ -37,5 +37,8 @@
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "online-enrollment": "file:"
   }
 }
