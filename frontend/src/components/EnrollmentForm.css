@@ -3,124 +3,132 @@
 
 /* CSS Variables for consistent theming */
 :root {
-  --primary-color: #008080; /* Teal */
-  --primary-dark: #006666;
-  --primary-light: #00a3a3;
-  --secondary-color: #f5f5f5; /* Off-white */
-  --text-color: #333333;
-  --error-color: #d32f2f;
-  --success-color: #388e3c;
-  --border-color: #cccccc;
-  --border-radius: 4px;
-  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --transition: all 0.3s ease;
-  --field-spacing: 2rem; /* New variable for consistent field spacing */
+  --primary-color: #008080; /* Teal - Used for headers, buttons, and accents */
+  --primary-dark: #006666; /* Darker teal - Used for hover states and emphasis */
+  --primary-light: #00a3a3; /* Lighter teal - Used for borders and subtle elements */
+  --secondary-color: #f5f5f5; /* Off-white - Used for backgrounds and containers */
+  --text-color: #333333; /* Dark gray - Used for main text content */
+  --error-color: #d32f2f; /* Red - Used for error messages and validation */
+  --success-color: #388e3c; /* Green - Used for success messages and confirmations */
+  --border-color: #cccccc; /* Light gray - Used for borders and separators */
+  --border-radius: 4px; /* Consistent border radius for UI elements */
+  --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  --transition: all 0.3s ease; /* Smooth transition for interactive elements */
+  --field-spacing: 2rem; /* Consistent spacing between form fields */
 }
 
-/* Container for the entire enrollment form */
+/* Container for the entire enrollment form - Provides the main wrapper for the form content */
 .enrollment-container {
-  max-width: 1200px;
-  margin: 1rem auto 2rem; /* Reduced top margin from 2rem to 1rem */
-  padding: 1rem 2rem 2rem; /* Reduced top padding from 2rem to 1rem */
-  background-color: var(--secondary-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 1200px; /* Limits the width on larger screens */
+  margin: 1rem auto 2rem; /* Centers the container with compact top spacing */
+  padding: 1rem 2rem 2rem; /* Provides internal spacing with less padding on top */
+  background-color: var(--secondary-color); /* Light background for better readability */
+  border-radius: 8px; /* Rounded corners for a modern look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth and elevation */
 }
 
-/* Layout for form and shopping cart */
+/* Layout for form and shopping cart - Creates a two-column layout */
 .enrollment-layout {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: space-between;
+  display: flex; /* Uses flexbox for responsive layout */
+  flex-wrap: wrap; /* Allows columns to stack on smaller screens */
+  gap: 2rem; /* Provides spacing between the form and cart */
+  justify-content: space-between; /* Distributes space evenly */
 }
 
-/* Form title and instructions */
+/* Form title - Main heading for the enrollment form */
 .enrollment-container h1 {
-  color: var(--primary-color);
-  margin-bottom: 1rem;
-  text-align: center;
-  font-size: 2rem;
+  color: var(--primary-color); /* Teal color for visual hierarchy */
+  margin-bottom: 1rem; /* Compact spacing below the title */
+  text-align: center; /* Centers the title for symmetry */
+  font-size: 2rem; /* Large font size for emphasis */
 }
 
+/* Form instructions - Provides guidance text below the main title */
 .form-instructions {
-  margin-bottom: 1rem; /* Reduced from 2rem to 1rem */
-  text-align: center;
-  color: var(--text-color);
+  margin-bottom: 2rem; /* Compact spacing between instructions and form */
+  text-align: center; /* Centers the text for alignment with title */
+  color: var(--text-color); /* Standard text color for readability */
 }
 
-/* Section headers */
+/* Section headers - Subheadings for form sections and shopping cart */
 .enrollment-form h2, .shopping-cart h2 {
-  color: var(--primary-color);
-  margin: 0.5rem 0 0.75rem; /* Reduced bottom margin from 1.25rem to 0.75rem */
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--primary-light);
-  font-size: 1.4rem;
+  color: var(--primary-color); /* Teal color for visual hierarchy */
+  margin: 0.5rem 0 0.75rem; /* Compact spacing around section headers */
+  padding-bottom: 0.5rem; /* Space before the border */
+  border-bottom: 2px solid var(--primary-light); /* Underline for visual separation */
+  font-size: 1.4rem; /* Smaller than main title but larger than body text */
 }
 
-/* Form layout */
+/* Form layout - Controls the main form column */
 .enrollment-form {
-  flex: 1 1 600px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem; /* Reduced from 1rem for even more compact layout */
-  max-width: 62%; /* Reduced from 65% to prevent overlap */
+  flex: 1 1 600px; /* Allows the form to grow and shrink with a base width */
+  display: flex; /* Uses flexbox for vertical layout */
+  flex-direction: column; /* Stacks form elements vertically */
+  gap: 0.75rem; /* Provides compact spacing between form sections */
+  max-width: 62%; /* Limits width to prevent overlap with shopping cart */
 }
 
-/* Shopping cart */
+/* Shopping cart - Controls the sidebar cart display */
 .shopping-cart {
-  flex: 1 1 300px;
-  background-color: #f8f9fa;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 2rem;
-  max-width: 32%; /* Increased from 30% to ensure proper spacing */
-  min-width: 300px;
-  align-self: flex-start;
+  flex: 1 1 300px; /* Allows the cart to grow and shrink with a base width */
+  background-color: #f8f9fa; /* Slightly different background for visual separation */
+  border: 1px solid #e0e0e0; /* Subtle border for definition */
+  border-radius: 8px; /* Rounded corners matching the main container */
+  padding: 1.5rem; /* Internal spacing for content */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Lighter shadow than main container */
+  position: sticky; /* Makes the cart stick when scrolling */
+  top: 2rem; /* Distance from top when sticky */
+  max-width: 32%; /* Width allocation in the layout */
+  min-width: 300px; /* Ensures cart doesn't get too narrow */
+  align-self: flex-start; /* Aligns to the top when in flex container */
 }
 
+/* Shopping cart header - Styles the cart title */
 .shopping-cart h2 {
-  margin-top: 0;
-  margin-bottom: 1.25rem;
-  color: #333;
-  font-size: 1.5rem;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 0.75rem;
+  margin-top: 0; /* Removes default top margin */
+  margin-bottom: 1.25rem; /* Spacing after the header */
+  color: #333; /* Slightly different than the form headers for distinction */
+  font-size: 1.5rem; /* Slightly larger than form section headers */
+  border-bottom: 1px solid #e0e0e0; /* Lighter border than form headers */
+  padding-bottom: 0.75rem; /* Space before the border */
 }
 
+/* Cart items container - Wraps all items in the cart */
 .cart-items {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem; /* Space before the summary section */
 }
 
+/* Individual cart item - Styles each product in the cart */
 .cart-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  display: flex; /* Uses flexbox for horizontal layout */
+  justify-content: space-between; /* Places item details and price on opposite sides */
+  align-items: flex-start; /* Aligns items to the top */
+  padding: 1rem 0; /* Vertical padding only */
+  border-bottom: 1px solid #e0e0e0; /* Separator between items */
 }
 
+/* Removes border from last item */
 .cart-item:last-child {
   border-bottom: none;
 }
 
+/* Item details container - Holds the product information */
 .item-details {
-  flex: 1;
+  flex: 1; /* Takes up available space */
 }
 
+/* Item title - Styles the product name */
 .item-details h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
-  color: #333;
+  margin: 0 0 0.5rem 0; /* Compact margins with space below */
+  font-size: 1.1rem; /* Slightly larger than body text */
+  color: #333; /* Dark text for readability */
 }
 
+/* Item description - Styles the product description */
 .item-details p {
-  margin: 0 0 0.5rem 0;
-  color: #666;
-  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0; /* Compact margins with space below */
+  color: #666; /* Lighter text for secondary information */
+  font-size: 0.9rem; /* Slightly smaller than body text */
 }
 
 .item-details ul {
@@ -178,216 +186,211 @@
 
 /* Form section for grouping related fields */
 .form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem; /* Increased from 0.5rem */
+  display: flex; /* Uses flexbox for layout */
+  flex-direction: column; /* Stacks elements vertically */
+  gap: 0.75rem; /* Spacing between rows */
 }
 
+/* Form row - Horizontal grouping of related form fields */
 .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem; /* Increased from 0.75rem */
-  margin-bottom: 0.75rem; /* Increased from 0.5rem */
+  display: flex; /* Uses flexbox for horizontal layout */
+  flex-wrap: wrap; /* Allows fields to wrap on smaller screens */
+  gap: 1rem; /* Spacing between fields */
+  margin-bottom: 0.75rem; /* Spacing below each row */
 }
 
+/* Form group - Container for each label and input pair */
 .form-group {
-  flex: 1 1 300px;
-  margin-bottom: 0.5rem; /* Increased from 0.25rem */
+  flex: 1 1 300px; /* Allows groups to grow and shrink with a base width */
+  margin-bottom: 0.5rem; /* Space below each group */
 }
 
-/* Form controls */
+/* Form labels - Styles the text labels for inputs */
 .form-group label {
-  display: block;
-  margin-bottom: 0.4rem; /* Increased from 0.25rem */
-  font-weight: 600;
-  color: var(--text-color);
-  font-size: 0.95rem;
+  display: block; /* Makes labels full width */
+  margin-bottom: 0.4rem; /* Space between label and input */
+  font-weight: 600; /* Semi-bold for emphasis */
+  color: var(--text-color); /* Standard text color */
+  font-size: 0.95rem; /* Slightly smaller than body text */
 }
 
+/* Required field indicator - Styles the asterisk for required fields */
 .required {
-  color: var(--error-color);
-  margin-left: 0.25rem;
+  color: var(--error-color); /* Red color for emphasis */
+  margin-left: 0.25rem; /* Space between label text and asterisk */
 }
 
-/* Reduce height of form fields */
+/* Form inputs and selects - Styles all form controls */
 .form-group input,
 .form-group select {
-  width: 100%;
-  padding: 0.4rem; /* Reduced from 0.55rem */
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius);
-  font-size: 0.95rem;
-  transition: var(--transition);
-  height: 2.2rem; /* Added explicit height */
-  box-sizing: border-box; /* Ensure padding doesn't add to height */
+  width: 100%; /* Full width of container */
+  padding: 0.4rem; /* Internal spacing */
+  border: 1px solid var(--border-color); /* Subtle border */
+  border-radius: var(--border-radius); /* Rounded corners */
+  font-size: 0.95rem; /* Consistent with labels */
+  transition: var(--transition); /* Smooth hover/focus effects */
+  height: 2.2rem; /* Consistent height for all inputs */
+  box-sizing: border-box; /* Ensures padding doesn't affect overall size */
 }
 
+/* Focus state for inputs and selects */
 .form-group input:focus,
 .form-group select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2);
+  outline: none; /* Removes default browser outline */
+  border-color: var(--primary-color); /* Teal border when focused */
+  box-shadow: 0 0 0 2px rgba(0, 128, 128, 0.2); /* Subtle glow effect */
 }
 
+/* Placeholder text styling */
 .form-group input::placeholder {
-  color: #999;
+  color: #999; /* Light gray for placeholder text */
 }
 
-/* Error messages */
+/* Error message - Styles individual field error messages */
 .error-message {
-  color: var(--error-color);
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-  font-weight: bold; /* Make error messages bold */
+  color: var(--error-color); /* Red text for errors */
+  font-size: 0.875rem; /* Smaller than regular text */
+  margin-top: 0.5rem; /* Space between input and error */
+  font-weight: bold; /* Bold for emphasis */
 }
 
+/* Form-level error - Styles the error banner at the top of the form */
 .form-error {
-  background-color: rgba(211, 47, 47, 0.1);
-  border-left: 4px solid var(--error-color);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: var(--border-radius);
-  font-weight: bold; /* Make form error messages bold */
+  background-color: rgba(211, 47, 47, 0.1); /* Light red background */
+  border-left: 4px solid var(--error-color); /* Red left border for emphasis */
+  padding: 1rem; /* Internal spacing */
+  margin-bottom: 1.5rem; /* Space below the error */
+  border-radius: var(--border-radius); /* Rounded corners */
+  font-weight: bold; /* Bold for emphasis */
 }
 
-/* Form with errors */
+/* Invalid form fields - Styles inputs that have validation errors */
 input:invalid,
 select:invalid,
 input[aria-invalid="true"],
 select[aria-invalid="true"] {
-  border-color: var(--error-color);
+  border-color: var(--error-color); /* Red border for invalid fields */
 }
 
-/* Submit button */
+/* Submit button container - Positions the submit button */
 .form-actions {
-  margin-top: 3rem; /* Increased from 2rem */
-  text-align: center;
+  margin-top: 3rem; /* Significant space above the button */
+  text-align: center; /* Centers the button */
 }
 
+/* Submit button - Styles the main form submission button */
 .submit-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  transition: var(--transition);
+  background-color: var(--primary-color); /* Teal background */
+  color: white; /* White text for contrast */
+  border: none; /* No border */
+  padding: 0.75rem 2rem; /* Generous padding for clickable area */
+  font-size: 1rem; /* Standard text size */
+  font-weight: 600; /* Semi-bold for emphasis */
+  border-radius: var(--border-radius); /* Rounded corners */
+  cursor: pointer; /* Hand cursor on hover */
+  transition: var(--transition); /* Smooth hover effect */
 }
 
+/* Submit button hover state */
 .submit-button:hover {
-  background-color: var(--primary-dark);
+  background-color: var(--primary-dark); /* Darker teal on hover */
 }
 
+/* Disabled submit button - For when form is submitting or invalid */
 .submit-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
+  background-color: #cccccc; /* Gray when disabled */
+  cursor: not-allowed; /* "Not allowed" cursor when disabled */
 }
 
-/* Success message */
+/* Success message - Shown after successful form submission */
 .enrollment-success {
-  max-width: 800px;
-  margin: 4rem auto;
-  padding: 2rem;
-  background-color: var(--secondary-color);
-  border-radius: 8px;
-  box-shadow: var(--box-shadow);
-  text-align: center;
+  max-width: 800px; /* Narrower than the form */
+  margin: 4rem auto; /* Centered with space above and below */
+  padding: 2rem; /* Generous internal spacing */
+  background-color: var(--secondary-color); /* Light background */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: var(--box-shadow); /* Subtle shadow */
+  text-align: center; /* Centered text */
 }
 
+/* Success message header */
 .enrollment-success h2 {
-  color: var(--success-color);
-  margin-bottom: 1rem;
+  color: var(--success-color); /* Green text for success */
+  margin-bottom: 1rem; /* Space below header */
 }
 
+/* Success message text */
 .enrollment-success p {
-  margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  margin-bottom: 0.5rem; /* Space between paragraphs */
+  font-size: 1.1rem; /* Slightly larger than body text */
 }
 
-/* Privacy notice */
+/* Privacy notice - Legal text at bottom of form */
 .privacy-notice {
-  margin-top: 3rem; /* Increased from 2rem */
-  padding: 1rem;
-  background-color: rgba(0, 128, 128, 0.05);
-  border-radius: var(--border-radius);
-  font-size: 0.9rem;
+  margin-top: 3rem; /* Significant space above the notice */
+  padding: 1rem; /* Internal spacing */
+  background-color: rgba(0, 128, 128, 0.05); /* Very light teal background */
+  border-radius: var(--border-radius); /* Rounded corners */
+  font-size: 0.9rem; /* Slightly smaller than body text */
 }
 
-/* Responsive adjustments */
+/* Section separator - Creates visual division between form sections */
+.section-separator {
+  display: block; /* Ensures visibility */
+  border-top: 1px solid #acacac; /* Light gray horizontal line */
+  margin: 0.5rem 0; /* Compact vertical spacing */
+  width: 100%; /* Full width */
+  opacity: 0.7; /* Slightly transparent for subtlety */
+}
+
+/* Responsive adjustments for tablets */
 @media (max-width: 768px) {
   .enrollment-container {
-    padding: 1.5rem;
-    margin: 1rem;
+    padding: 1.5rem; /* Reduced padding on smaller screens */
+    margin: 1rem; /* Reduced margin on smaller screens */
   }
   
   .form-group {
-    flex: 1 1 100%;
+    flex: 1 1 100%; /* Full width on smaller screens */
   }
   
   .enrollment-layout {
-    flex-direction: column;
+    flex-direction: column; /* Stack form and cart vertically */
   }
   
   .shopping-cart {
-    position: static;
+    position: static; /* Remove sticky positioning */
     order: -1; /* Show cart at the top on mobile */
-    margin-bottom: 2rem;
+    margin-bottom: 2rem; /* Space below cart */
   }
   
   .form-row {
-    flex-direction: column;
-    gap: 1rem;
+    flex-direction: column; /* Stack form fields vertically */
+    gap: 1rem; /* Increased gap for touch targets */
   }
   
   /* Keep name fields on the same line even on tablet */
   .name-row {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: row; /* Horizontal layout */
+    flex-wrap: wrap; /* Allow wrapping if needed */
   }
   
   .name-row .form-group:first-child,
   .name-row .form-group:last-child {
-    flex: 1 1 calc(50% - 90px); /* Account for middle initial width */
-    min-width: 120px;
+    flex: 1 1 calc(50% - 90px); /* Allocate space accounting for middle initial */
+    min-width: 120px; /* Minimum width to prevent squishing */
   }
   
   /* Keep phone fields on the same line even on tablet */
   .phone-row {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: row; /* Horizontal layout */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    gap: 1rem; /* Space between phone fields */
   }
   
   .phone-row .form-group {
-    flex: 1 1 calc(33% - 1rem);
-    min-width: 150px;
-  }
-  
-  .middle-initial, .state-select, .zip-field, .dob-field, .gender-field {
-    flex: 1 1 100%;
-    min-width: 100%;
-  }
-  
-  .address-row {
-    flex-direction: column;
-  }
-  
-  .address-field, .address2-field {
-    flex: 1 1 100%;
-  }
-  
-  /* Tab adjustments for tablet */
-  .tab-list {
-    flex-wrap: wrap;
-  }
-  
-  .tab {
-    flex: 1 1 calc(50% - 1px);
-    min-width: 0;
-    font-size: 0.9rem;
-    padding: 0.6rem 0.5rem;
+    flex: 1 1 calc(33% - 1rem); /* Equal width for three phone fields */
+    min-width: 150px; /* Minimum width to prevent squishing */
   }
 }
 
@@ -413,15 +416,6 @@ button:focus-visible {
   margin-top: 0; /* Removed top margin */
   padding-top: 0; /* Removed top padding */
   margin-bottom: 0.5rem; /* Increased from 0.25rem */
-}
-
-/* Remove the boxed sections and replace with line separators */
-.section-separator {
-  display: block; /* Show separators again */
-  border-top: 1px solid #e0e0e0;
-  margin: 0.5rem 0; /* Reduced from 1.5rem 0 */
-  width: 100%;
-  opacity: 0.7;
 }
 
 /* Adjust spacing between sections */

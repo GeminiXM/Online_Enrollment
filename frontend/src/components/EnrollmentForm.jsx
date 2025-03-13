@@ -699,7 +699,7 @@ function EnrollmentForm() {
                   name="zipCode"
                   value={formData.zipCode}
                   onChange={handleChange}
-                  placeholder="12345 or 12345-6789"
+                  placeholder="12345"
                   aria-required="true"
                   aria-invalid={!!errors.zipCode}
                   aria-describedby={errors.zipCode ? "zipCode-error" : undefined}

@@ -1,88 +1,97 @@
 /* frontend/src/App.css */
 /* Main application styles with teal and off-white color scheme */
 
+/* CSS Variables for consistent theming across the application */
 :root {
-  --primary-color: #008080; /* Teal */
-  --primary-dark: #006666;
-  --primary-light: #00a3a3;
-  --secondary-color: #f5f5f5; /* Off-white */
-  --text-color: #333333;
-  --border-color: #e0e0e0;
+  --primary-color: #008080; /* Teal - Main brand color used for headers and interactive elements */
+  --primary-dark: #006666; /* Darker teal - Used for hover states and emphasis */
+  --primary-light: #00a3a3; /* Lighter teal - Used for accents and subtle elements */
+  --secondary-color: #f5f5f5; /* Off-white - Used for backgrounds and containers */
+  --text-color: #333333; /* Dark gray - Used for main text content */
+  --border-color: #e0e0e0; /* Light gray - Used for borders and separators */
 }
 
+/* Main app container - Wraps the entire application */
 .App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--text-color);
-  background-color: var(--secondary-color);
+  min-height: 100vh; /* Ensures the app fills the entire viewport height */
+  display: flex; /* Uses flexbox for layout */
+  flex-direction: column; /* Stacks header, main content, and footer vertically */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, readable font stack */
+  color: var(--text-color); /* Default text color */
+  background-color: var(--secondary-color); /* Light background color */
 }
 
+/* App header - Contains the main site title */
 .App-header {
-  background-color: var(--primary-color);
-  padding: 1.5rem 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--primary-color); /* Teal background for the header */
+  padding: 1.5rem 0; /* Vertical padding only */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
+/* App header title - Main site title */
 .App-header h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  color: white;
-  text-align: center;
+  margin: 0; /* Removes default margins */
+  font-size: 1.8rem; /* Large font size for emphasis */
+  color: white; /* White text for contrast against teal */
+  text-align: center; /* Centers the title */
 }
 
+/* Main content area - Contains the page content */
 main {
-  flex: 1;
-  padding: 1rem 1rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
+  flex: 1; /* Allows the main content to expand and fill available space */
+  padding: 1rem 1rem 2rem; /* Compact top padding with more space at bottom */
+  max-width: 1200px; /* Limits width on larger screens */
+  margin: 0 auto; /* Centers the content horizontally */
+  width: 100%; /* Full width within constraints */
 }
 
+/* Footer - Contains copyright and other footer information */
 footer {
-  background-color: var(--primary-dark);
-  color: white;
-  text-align: center;
-  padding: 1.5rem;
-  margin-top: auto;
+  background-color: var(--primary-dark); /* Darker teal for the footer */
+  color: white; /* White text for contrast */
+  text-align: center; /* Centers the footer content */
+  padding: 1.5rem; /* Even padding all around */
+  margin-top: auto; /* Pushes the footer to the bottom */
 }
 
+/* Footer text */
 footer p {
-  margin: 0;
-  font-size: 0.9rem;
+  margin: 0; /* Removes default margins */
+  font-size: 0.9rem; /* Slightly smaller text for footer */
 }
 
-/* Responsive adjustments */
+/* Responsive adjustments for smaller screens */
 @media (max-width: 768px) {
   .App-header h1 {
-    font-size: 1.5rem;
+    font-size: 1.5rem; /* Smaller font size on mobile */
   }
   
   main {
-    padding: 1rem 0.5rem;
+    padding: 1rem 0.5rem; /* Reduced padding on smaller screens */
   }
 }
 
-/* Utility classes */
+/* Utility classes for common text alignments */
 .text-center {
-  text-align: center;
+  text-align: center; /* Centers text content */
 }
 
+/* Container class for consistent content width */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  max-width: 1200px; /* Limits width on larger screens */
+  margin: 0 auto; /* Centers the container */
+  padding: 0 1rem; /* Horizontal padding */
 }
 
-/* Link styles */
+/* Link styles for consistent appearance */
 a {
-  color: var(--primary-color);
-  text-decoration: none;
-  transition: color 0.3s ease;
+  color: var(--primary-color); /* Teal color for links */
+  text-decoration: none; /* Removes underline */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
 }
 
+/* Link hover state */
 a:hover {
-  color: var(--primary-dark);
-  text-decoration: underline;
+  color: var(--primary-dark); /* Darker teal on hover */
+  text-decoration: underline; /* Adds underline on hover */
 } 
