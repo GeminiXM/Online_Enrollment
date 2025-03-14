@@ -957,4 +957,123 @@ button:focus-visible {
 .tab-panel input:not(:placeholder-shown),
 .tab-panel select:not([value=""]):not(:invalid) {
   background-color: rgba(232, 240, 254, 0.5) !important;
+}
+
+/* Selected membership type section */
+.selected-membership-type {
+  background-color: rgba(0, 128, 128, 0.05);
+  border-left: 4px solid var(--primary-color);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 4px 4px 0;
+}
+
+.membership-type-badge {
+  display: inline-block;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.membership-type-description {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+/* Change membership type button */
+.change-type-button {
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 4px;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: all 0.2s ease;
+}
+
+.change-type-button:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* Legal Guardian Tab Styles */
+.guardian-notice {
+  background-color: rgba(0, 128, 128, 0.1);
+  border-left: 4px solid var(--primary-color);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0 4px 4px 0;
+  font-weight: 500;
+}
+
+.consent-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  background-color: rgba(0, 128, 128, 0.05);
+  padding: 1rem;
+  border-radius: 4px;
+}
+
+.consent-checkbox input[type="checkbox"] {
+  width: auto;
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.checkbox-label {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Restricted Membership Message Styles */
+.restricted-membership-message {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.message-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: rgba(0, 128, 128, 0.05);
+  border: 1px solid rgba(0, 128, 128, 0.2);
+  border-radius: 8px;
+  padding: 2rem;
+}
+
+.restricted-membership-message h3 {
+  color: var(--primary-color);
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+.restricted-membership-message p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.change-membership-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 1rem;
+}
+
+.change-membership-button:hover {
+  background-color: var(--primary-dark);
 } 

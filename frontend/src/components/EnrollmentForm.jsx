@@ -2,13 +2,31 @@
 // This component displays a form to collect user information for a gym membership enrollment.
 // It includes form validation, secure data handling, and follows accessibility best practices.
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
 import "./EnrollmentForm.css";
+import { useClub } from "../context/ClubContext";
+import { useMembership } from "../context/MembershipContext";
+import MembershipTypeModal from "./MembershipTypeModal";
+import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 
 function EnrollmentForm() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedClub } = useClub();
+  const { membershipType, selectMembershipType } = useMembership();
+  
+  // State for membership type modal
+  const [showMembershipTypeModal, setShowMembershipTypeModal] = useState(!membershipType);
+  
+  // Check if membership type is passed in location state
+  useEffect(() => {
+    if (location.state && location.state.membershipType) {
+      selectMembershipType(location.state.membershipType);
+      setShowMembershipTypeModal(false);
+    }
+  }, [location, selectMembershipType]);
   
   // Get today's date in YYYY-MM-DD format for the min attribute of date inputs
   const today = new Date().toISOString().split('T')[0];
@@ -47,9 +65,15 @@ function EnrollmentForm() {
       locker: false
     },
     
-    // Emergency Contact Information
-    emergencyContactName: "",
-    emergencyContactPhone: ""
+    // Legal Guardian Information (for Junior membership)
+    guardianFirstName: "",
+    guardianMiddleInitial: "",
+    guardianLastName: "",
+    guardianDateOfBirth: "",
+    guardianGender: "",
+    guardianEmail: "",
+    guardianRelationship: "",
+    guardianConsent: false
   });
 
   // State for form validation errors
@@ -85,6 +109,15 @@ function EnrollmentForm() {
     { value: "female", label: "Female" },
     { value: "", label: "Prefer not to say" }
   ];
+
+  // Check if membership type is Junior
+  const isJuniorMembership = membershipType && membershipType.id === "junior";
+  
+  // Check if membership type is Student/Young Professional
+  const isYoungProfessionalMembership = membershipType && membershipType.id === "young-professional";
+  
+  // Check if membership type allows family members
+  const allowsFamilyMembers = !isJuniorMembership && !isYoungProfessionalMembership;
 
   // Handle input changes for the main form
   const handleChange = (e) => {
@@ -238,8 +271,8 @@ function EnrollmentForm() {
       newErrors.email = "Email is not valid";
     }
     
-    // Validate that at least one phone number is provided
-    if (!formData.cellPhone.trim() && !formData.homePhone.trim() && !formData.workPhone.trim()) {
+    // Validate that at least one phone number is provided for non-Junior memberships
+    if (!isJuniorMembership && !formData.cellPhone.trim() && !formData.homePhone.trim() && !formData.workPhone.trim()) {
       newErrors.cellPhone = "At least one phone number is required";
     }
     
@@ -258,8 +291,8 @@ function EnrollmentForm() {
     
     if (!formData.dateOfBirth) {
       newErrors.dateOfBirth = "Date of birth is required";
-    } else {
-      // Check if the person is at least 18 years old
+    } else if (!isJuniorMembership) {
+      // Check if the person is at least 18 years old (only for non-Junior memberships)
       const dob = new Date(formData.dateOfBirth);
       const today = new Date();
       const age = today.getFullYear() - dob.getFullYear();
@@ -268,25 +301,24 @@ function EnrollmentForm() {
       if (age < 18 || (age === 18 && monthDiff < 0) || (age === 18 && monthDiff === 0 && today.getDate() < dob.getDate())) {
         newErrors.dateOfBirth = "You must be at least 18 years old to enroll";
       }
+    } else {
+      // For Junior memberships, check that the member is under 18
+      const dob = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      
+      if (age > 18 || (age === 18 && monthDiff > 0) || (age === 18 && monthDiff === 0 && today.getDate() >= dob.getDate())) {
+        newErrors.dateOfBirth = "Junior membership is only for those under 18 years old";
+      }
     }
     
     if (!formData.gender) {
       newErrors.gender = "Gender is required";
     }
     
-    // Validate emergency contact information
-    if (!formData.emergencyContactName.trim()) {
-      newErrors.emergencyContactName = "Emergency contact name is required";
-    }
-    
-    if (!formData.emergencyContactPhone.trim()) {
-      newErrors.emergencyContactPhone = "Emergency contact phone is required";
-    } else if (!/^\d{10}$/.test(formData.emergencyContactPhone.replace(/\D/g, ''))) {
-      newErrors.emergencyContactPhone = "Phone number must contain 10 digits";
-    }
-    
-    // Validate family members if any
-    if (formData.familyMembers.length > 0) {
+    // Validate family members if any (only for non-Junior memberships)
+    if (!isJuniorMembership && formData.familyMembers.length > 0) {
       formData.familyMembers.forEach((member, index) => {
         // Age validation for different member types
         if (member.dateOfBirth) {
@@ -308,6 +340,55 @@ function EnrollmentForm() {
           }
         }
       });
+    }
+    
+    // Validate legal guardian information for Junior membership
+    if (isJuniorMembership) {
+      if (!formData.guardianFirstName?.trim()) {
+        newErrors.guardianFirstName = "Guardian's first name is required";
+      }
+      
+      if (!formData.guardianLastName?.trim()) {
+        newErrors.guardianLastName = "Guardian's last name is required";
+      }
+      
+      if (!formData.guardianDateOfBirth) {
+        newErrors.guardianDateOfBirth = "Guardian's date of birth is required";
+      } else {
+        // Check if the guardian is at least 18 years old
+        const dob = new Date(formData.guardianDateOfBirth);
+        const today = new Date();
+        const age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        
+        if (age < 18 || (age === 18 && monthDiff < 0) || (age === 18 && monthDiff === 0 && today.getDate() < dob.getDate())) {
+          newErrors.guardianDateOfBirth = "Guardian must be at least 18 years old";
+        }
+      }
+      
+      if (!formData.guardianGender) {
+        newErrors.guardianGender = "Guardian's gender is required";
+      }
+      
+      if (!formData.guardianEmail?.trim()) {
+        newErrors.guardianEmail = "Guardian's email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.guardianEmail.trim())) {
+        newErrors.guardianEmail = "Email is not valid";
+      }
+      
+      if (!formData.guardianRelationship) {
+        newErrors.guardianRelationship = "Relationship to junior member is required";
+      }
+      
+      if (!formData.cellPhone?.trim()) {
+        newErrors.cellPhone = "Guardian's phone number is required";
+      } else if (!/^\d{10}$/.test(formData.cellPhone.replace(/\D/g, ''))) {
+        newErrors.cellPhone = "Phone number must contain 10 digits";
+      }
+      
+      if (!formData.guardianConsent) {
+        newErrors.guardianConsent = "You must confirm that you are the legal guardian and accept the terms";
+      }
     }
     
     setErrors(newErrors);
@@ -360,13 +441,36 @@ function EnrollmentForm() {
             work: formData.workPhone
           }
         },
-        emergencyContact: {
-          name: formData.emergencyContactName,
-          phone: formData.emergencyContactPhone
-        },
-        familyMembers: formData.familyMembers,
-        services: formData.services
+        membershipType: membershipType ? membershipType.id : 'standard'
       };
+      
+      // Add family members and services for non-Junior memberships
+      if (!isJuniorMembership) {
+        // Add family members for non-Junior memberships
+        submissionData.familyMembers = formData.familyMembers;
+        
+        // Add services for non-Junior memberships
+        submissionData.services = formData.services;
+      }
+      
+      // Add guardian information for Junior memberships
+      if (isJuniorMembership) {
+        submissionData.guardian = {
+          firstName: formData.guardianFirstName,
+          middleInitial: formData.guardianMiddleInitial,
+          lastName: formData.guardianLastName,
+          dateOfBirth: formData.guardianDateOfBirth,
+          gender: formData.guardianGender,
+          email: formData.guardianEmail,
+          relationship: formData.guardianRelationship,
+          phoneNumbers: {
+            cell: formData.cellPhone,
+            home: formData.homePhone,
+            work: formData.workPhone
+          },
+          consent: formData.guardianConsent
+        };
+      }
       
       // Submit the form data to the server
       const response = await api.post('/enrollment', submissionData);
@@ -401,6 +505,601 @@ function EnrollmentForm() {
     }
   };
 
+  // Handle membership type selection
+  const handleMembershipTypeSelect = (type) => {
+    setShowMembershipTypeModal(false);
+  };
+
+  // Render the tabs based on membership type
+  const renderTabs = () => {
+    // Define the tabs that are always shown
+    const commonTabs = [
+      <button
+        key="members"
+        className={`tab ${activeTab === 'members' ? 'active' : ''}`}
+        onClick={(e) => {e.preventDefault(); setActiveTab('members');}}
+        role="tab"
+        aria-selected={activeTab === 'members'}
+      >
+        Members
+      </button>,
+      <button
+        key="services"
+        className={`tab ${activeTab === 'services' ? 'active' : ''}`}
+        onClick={(e) => {e.preventDefault(); setActiveTab('services');}}
+        role="tab"
+        aria-selected={activeTab === 'services'}
+      >
+        Additional Services
+      </button>
+    ];
+    
+    // For Junior membership, only show Members and Services tabs
+    if (isJuniorMembership) {
+      return commonTabs;
+    }
+    
+    // For memberships that allow family members, show all tabs
+    if (allowsFamilyMembers) {
+      return [
+        commonTabs[0], // Members tab
+        <button
+          key="new_adult"
+          className={`tab ${activeTab === 'new_adult' ? 'active' : ''}`}
+          onClick={(e) => {e.preventDefault(); setActiveTab('new_adult');}}
+          role="tab"
+          aria-selected={activeTab === 'new_adult'}
+        >
+          Add Adult
+        </button>,
+        <button
+          key="child"
+          className={`tab ${activeTab === 'child' ? 'active' : ''}`}
+          onClick={(e) => {e.preventDefault(); setActiveTab('child');}}
+          role="tab"
+          aria-selected={activeTab === 'child'}
+        >
+          Add Child
+        </button>,
+        <button
+          key="youth"
+          className={`tab ${activeTab === 'youth' ? 'active' : ''}`}
+          onClick={(e) => {e.preventDefault(); setActiveTab('youth');}}
+          role="tab"
+          aria-selected={activeTab === 'youth'}
+        >
+          Add Youth
+        </button>,
+        commonTabs[1] // Services tab
+      ];
+    }
+    
+    // For Student/Young Professional, show all tabs but with restricted functionality
+    return [
+      commonTabs[0], // Members tab
+      <button
+        key="new_adult"
+        className={`tab ${activeTab === 'new_adult' ? 'active' : ''}`}
+        onClick={(e) => {e.preventDefault(); setActiveTab('new_adult');}}
+        role="tab"
+        aria-selected={activeTab === 'new_adult'}
+      >
+        Add Adult
+      </button>,
+      <button
+        key="child"
+        className={`tab ${activeTab === 'child' ? 'active' : ''}`}
+        onClick={(e) => {e.preventDefault(); setActiveTab('child');}}
+        role="tab"
+        aria-selected={activeTab === 'child'}
+      >
+        Add Child
+      </button>,
+      <button
+        key="youth"
+        className={`tab ${activeTab === 'youth' ? 'active' : ''}`}
+        onClick={(e) => {e.preventDefault(); setActiveTab('youth');}}
+        role="tab"
+        aria-selected={activeTab === 'youth'}
+      >
+        Add Youth
+      </button>,
+      commonTabs[1] // Services tab
+    ];
+  };
+  
+  // Render the tab content based on membership type and active tab
+  const renderTabContent = () => {
+    // For Student/Young Professional membership
+    if (isYoungProfessionalMembership && ['new_adult', 'child', 'youth'].includes(activeTab)) {
+      return (
+        <RestrictedMembershipMessage 
+          membershipType={membershipType} 
+          onChangeMembershipType={() => setShowMembershipTypeModal(true)} 
+        />
+      );
+    }
+    
+    // For all membership types
+    switch (activeTab) {
+      case 'members':
+        return (
+          <div className="tab-panel">
+            <h3>Current Members</h3>
+            <p>You are the primary member. {allowsFamilyMembers ? 'Add family members using the tabs above.' : ''}</p>
+            <div className="member-card">
+              <div className="member-info">
+                <h4>Primary Member</h4>
+                <p>Your membership includes access to all basic facilities.</p>
+              </div>
+            </div>
+            
+            {formData.familyMembers.length > 0 ? (
+              formData.familyMembers.map(member => (
+                <div className="member-card" key={member.id}>
+                  <div className="member-info">
+                    <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
+                    <p>{member.type === 'adult' ? 'Adult' : member.type === 'child' ? 'Child' : 'Youth'} Member</p>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="remove-member-button"
+                    onClick={() => removeFamilyMember(member.id)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="no-members-message">No additional family members added yet.</p>
+            )}
+          </div>
+        );
+      
+      case 'services':
+        return (
+          <div className="tab-panel">
+            <h3>Additional Services</h3>
+            <div className="service-options">
+              <div className="service-option">
+                <input 
+                  type="checkbox" 
+                  id="personalTraining" 
+                  name="personalTraining" 
+                  checked={formData.services.personalTraining}
+                  onChange={handleServiceChange}
+                />
+                <label htmlFor="personalTraining">Personal Training ($50/session)</label>
+              </div>
+              <div className="service-option">
+                <input 
+                  type="checkbox" 
+                  id="groupClasses" 
+                  name="groupClasses" 
+                  checked={formData.services.groupClasses}
+                  onChange={handleServiceChange}
+                />
+                <label htmlFor="groupClasses">Group Fitness Classes ($25/month)</label>
+              </div>
+              <div className="service-option">
+                <input 
+                  type="checkbox" 
+                  id="childcare" 
+                  name="childcare" 
+                  checked={formData.services.childcare}
+                  onChange={handleServiceChange}
+                />
+                <label htmlFor="childcare">Childcare Services ($15/month)</label>
+              </div>
+              <div className="service-option">
+                <input 
+                  type="checkbox" 
+                  id="locker" 
+                  name="locker" 
+                  checked={formData.services.locker}
+                  onChange={handleServiceChange}
+                />
+                <label htmlFor="locker">Locker Rental ($10/month)</label>
+              </div>
+            </div>
+          </div>
+        );
+      
+      case 'new_adult':
+        return (
+          <div className="tab-panel">
+            <h3>Add Adult Family Member</h3>
+            <p>Add an adult family member (18+ years) to your membership.</p>
+            
+            <div className="form-row name-row">
+              <div className="form-group">
+                <label htmlFor="tempFirstName">
+                  First Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempFirstName"
+                  name="firstName"
+                  value={tempMember.firstName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter first name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempFirstName}
+                  aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
+                />
+                {errors.tempFirstName && (
+                  <div id="tempFirstName-error" className="error-message">
+                    {errors.tempFirstName}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group middle-initial">
+                <label htmlFor="tempMiddleInitial">
+                  Initial
+                </label>
+                <input
+                  type="text"
+                  id="tempMiddleInitial"
+                  name="middleInitial"
+                  value={tempMember.middleInitial}
+                  onChange={handleTempMemberChange}
+                  placeholder="M.I."
+                  maxLength="1"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempLastName">
+                  Last Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempLastName"
+                  name="lastName"
+                  value={tempMember.lastName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter last name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempLastName}
+                  aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
+                />
+                {errors.tempLastName && (
+                  <div id="tempLastName-error" className="error-message">
+                    {errors.tempLastName}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group dob-field">
+                <label htmlFor="tempDateOfBirth">
+                  Date of Birth <span className="required">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="tempDateOfBirth"
+                  name="dateOfBirth"
+                  value={tempMember.dateOfBirth}
+                  onChange={handleTempMemberChange}
+                  placeholder="MM/DD/YYYY"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempDateOfBirth}
+                  aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
+                />
+                {errors.tempDateOfBirth && (
+                  <div id="tempDateOfBirth-error" className="error-message">
+                    {errors.tempDateOfBirth}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group gender-field">
+                <label htmlFor="tempGender">
+                  Gender <span className="required">*</span>
+                </label>
+                <select
+                  id="tempGender"
+                  name="gender"
+                  value={tempMember.gender}
+                  onChange={handleTempMemberChange}
+                  aria-required="true"
+                  aria-invalid={!!errors.tempGender}
+                  aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
+                >
+                  <option value="">Select gender</option>
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.tempGender && (
+                  <div id="tempGender-error" className="error-message">
+                    {errors.tempGender}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-actions">
+              <button 
+                type="button" 
+                className="add-member-button"
+                onClick={() => addFamilyMember('adult')}
+              >
+                Add Adult Member
+              </button>
+            </div>
+          </div>
+        );
+      
+      case 'child':
+        return (
+          <div className="tab-panel">
+            <h3>Add Child Family Member</h3>
+            <p>Add a child family member (0-11 years) to your membership.</p>
+            
+            <div className="form-row name-row">
+              <div className="form-group">
+                <label htmlFor="tempFirstName">
+                  First Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempFirstName"
+                  name="firstName"
+                  value={tempMember.firstName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter first name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempFirstName}
+                  aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
+                />
+                {errors.tempFirstName && (
+                  <div id="tempFirstName-error" className="error-message">
+                    {errors.tempFirstName}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group middle-initial">
+                <label htmlFor="tempMiddleInitial">
+                  Initial
+                </label>
+                <input
+                  type="text"
+                  id="tempMiddleInitial"
+                  name="middleInitial"
+                  value={tempMember.middleInitial}
+                  onChange={handleTempMemberChange}
+                  placeholder="M.I."
+                  maxLength="1"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempLastName">
+                  Last Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempLastName"
+                  name="lastName"
+                  value={tempMember.lastName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter last name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempLastName}
+                  aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
+                />
+                {errors.tempLastName && (
+                  <div id="tempLastName-error" className="error-message">
+                    {errors.tempLastName}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group dob-field">
+                <label htmlFor="tempDateOfBirth">
+                  Date of Birth <span className="required">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="tempDateOfBirth"
+                  name="dateOfBirth"
+                  value={tempMember.dateOfBirth}
+                  onChange={handleTempMemberChange}
+                  placeholder="MM/DD/YYYY"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempDateOfBirth}
+                  aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
+                />
+                {errors.tempDateOfBirth && (
+                  <div id="tempDateOfBirth-error" className="error-message">
+                    {errors.tempDateOfBirth}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group gender-field">
+                <label htmlFor="tempGender">
+                  Gender <span className="required">*</span>
+                </label>
+                <select
+                  id="tempGender"
+                  name="gender"
+                  value={tempMember.gender}
+                  onChange={handleTempMemberChange}
+                  aria-required="true"
+                  aria-invalid={!!errors.tempGender}
+                  aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
+                >
+                  <option value="">Select gender</option>
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.tempGender && (
+                  <div id="tempGender-error" className="error-message">
+                    {errors.tempGender}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-actions">
+              <button 
+                type="button" 
+                className="add-member-button"
+                onClick={() => addFamilyMember('child')}
+              >
+                Add Child Member
+              </button>
+            </div>
+          </div>
+        );
+      
+      case 'youth':
+        return (
+          <div className="tab-panel">
+            <h3>Add Youth Family Member</h3>
+            <p>Add a youth family member (12-20 years) to your membership.</p>
+            
+            <div className="form-row name-row">
+              <div className="form-group">
+                <label htmlFor="tempFirstName">
+                  First Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempFirstName"
+                  name="firstName"
+                  value={tempMember.firstName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter first name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempFirstName}
+                  aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
+                />
+                {errors.tempFirstName && (
+                  <div id="tempFirstName-error" className="error-message">
+                    {errors.tempFirstName}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group middle-initial">
+                <label htmlFor="tempMiddleInitial">
+                  Initial
+                </label>
+                <input
+                  type="text"
+                  id="tempMiddleInitial"
+                  name="middleInitial"
+                  value={tempMember.middleInitial}
+                  onChange={handleTempMemberChange}
+                  placeholder="M.I."
+                  maxLength="1"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempLastName">
+                  Last Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempLastName"
+                  name="lastName"
+                  value={tempMember.lastName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter last name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempLastName}
+                  aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
+                />
+                {errors.tempLastName && (
+                  <div id="tempLastName-error" className="error-message">
+                    {errors.tempLastName}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group dob-field">
+                <label htmlFor="tempDateOfBirth">
+                  Date of Birth <span className="required">*</span>
+                </label>
+                <input
+                  type="date"
+                  id="tempDateOfBirth"
+                  name="dateOfBirth"
+                  value={tempMember.dateOfBirth}
+                  onChange={handleTempMemberChange}
+                  placeholder="MM/DD/YYYY"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempDateOfBirth}
+                  aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
+                />
+                {errors.tempDateOfBirth && (
+                  <div id="tempDateOfBirth-error" className="error-message">
+                    {errors.tempDateOfBirth}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group gender-field">
+                <label htmlFor="tempGender">
+                  Gender <span className="required">*</span>
+                </label>
+                <select
+                  id="tempGender"
+                  name="gender"
+                  value={tempMember.gender}
+                  onChange={handleTempMemberChange}
+                  aria-required="true"
+                  aria-invalid={!!errors.tempGender}
+                  aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
+                >
+                  <option value="">Select gender</option>
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {errors.tempGender && (
+                  <div id="tempGender-error" className="error-message">
+                    {errors.tempGender}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-actions">
+              <button 
+                type="button" 
+                className="add-member-button"
+                onClick={() => addFamilyMember('youth')}
+              >
+                Add Youth Member
+              </button>
+            </div>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   // If form was submitted successfully, show success message
   if (submitSuccess) {
     return (
@@ -414,7 +1113,33 @@ function EnrollmentForm() {
 
   return (
     <div className="enrollment-container">
-      <h1>Membership Enrollment Form</h1>
+      {/* Membership Type Modal */}
+      <MembershipTypeModal 
+        isOpen={showMembershipTypeModal} 
+        onClose={() => setShowMembershipTypeModal(false)}
+        onSelectMembershipType={handleMembershipTypeSelect}
+      />
+
+      <h1>{selectedClub.name} Membership Enrollment Form</h1>
+      
+      {/* Display selected membership type if available */}
+      {membershipType && (
+        <div className="selected-membership-type">
+          <span className="membership-type-badge">
+            {membershipType.title} Membership
+          </span>
+          <p className="membership-type-description">
+            You've selected the {membershipType.title} membership type. {membershipType.description}
+            <button 
+              onClick={() => setShowMembershipTypeModal(true)} 
+              className="change-type-button"
+            >
+              Change Type
+            </button>
+          </p>
+        </div>
+      )}
+      
       <p className="form-instructions">
         Please fill out the form below to enroll in our fitness facility. 
         Fields marked with an asterisk (*) are required.
@@ -429,7 +1154,7 @@ function EnrollmentForm() {
       
       <div className="enrollment-layout">
         <form className="enrollment-form" onSubmit={handleSubmit} noValidate>
-          <h2>Primary Member Information</h2>
+         
           
           <div className="form-row start-date-row">
             <div className="form-group date-field">
@@ -454,6 +1179,17 @@ function EnrollmentForm() {
               )}
             </div>
           </div>
+          
+          {isJuniorMembership ? (
+            <>
+              <h2>Youth Information</h2>
+              <p className="guardian-notice">
+                As this is a Junior membership (under 18), please provide information about the youth member.
+              </p>
+            </>
+          ) : (
+            <h2>Primary Member Information</h2>
+          )}
           
           <div className="personal-info-section">
             <div className="form-row name-row">
@@ -713,504 +1449,352 @@ function EnrollmentForm() {
             </div>
           </div>
           
-          <div className="section-separator"></div>
-          
-          <div className="contact-info-section">
-            <div className="form-row phone-row">
-              <div className="form-group">
-                <label htmlFor="cellPhone">
-                  Cell Phone 
-                </label>
-                <input
-                  type="tel"
-                  id="cellPhone"
-                  name="cellPhone"
-                  value={formData.cellPhone}
-                  onChange={handleChange}
-                  placeholder="Enter 10-digit phone number"
-                  aria-invalid={!!errors.cellPhone}
-                  aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
-                />
-                {errors.cellPhone && (
-                  <div id="cellPhone-error" className="error-message">
-                    {errors.cellPhone}
-                  </div>
-                )}
-              </div>
+          {isJuniorMembership && (
+            <>
+              <div className="section-separator"></div>
               
-              <div className="form-group">
-                <label htmlFor="homePhone">Home Phone</label>
-                <input
-                  type="tel"
-                  id="homePhone"
-                  name="homePhone"
-                  value={formData.homePhone}
-                  onChange={handleChange}
-                  placeholder="Enter 10-digit phone number"
-                  aria-invalid={!!errors.homePhone}
-                  aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
-                />
-                {errors.homePhone && (
-                  <div id="homePhone-error" className="error-message">
-                    {errors.homePhone}
-                  </div>
-                )}
-              </div>
+              <h2>Legal Guardian Information</h2>
+              <p className="guardian-notice">
+                As this is a Junior membership (under 18), please provide information about the legal guardian.
+              </p>
               
-              <div className="form-group">
-                <label htmlFor="workPhone">Work Phone</label>
-                <input
-                  type="tel"
-                  id="workPhone"
-                  name="workPhone"
-                  value={formData.workPhone}
-                  onChange={handleChange}
-                  placeholder="Enter 10-digit phone number"
-                  aria-invalid={!!errors.workPhone}
-                  aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
-                />
-                {errors.workPhone && (
-                  <div id="workPhone-error" className="error-message">
-                    {errors.workPhone}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-         
-
-          <h2>Family Members & Additional Services</h2>
-          
-          <div className="tabs-container">
-            <div className="tab-list" role="tablist">
-              <button
-                className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-                onClick={(e) => {e.preventDefault(); setActiveTab('members');}}
-                role="tab"
-                aria-selected={activeTab === 'members'}
-              >
-                Members
-              </button>
-              <button
-                className={`tab ${activeTab === 'new_adult' ? 'active' : ''}`}
-                onClick={(e) => {e.preventDefault(); setActiveTab('new_adult');}}
-                role="tab"
-                aria-selected={activeTab === 'new_adult'}
-              >
-                Add Adult
-              </button>
-              <button
-                className={`tab ${activeTab === 'child' ? 'active' : ''}`}
-                onClick={(e) => {e.preventDefault(); setActiveTab('child');}}
-                role="tab"
-                aria-selected={activeTab === 'child'}
-              >
-                Add Child
-              </button>
-              <button
-                className={`tab ${activeTab === 'youth' ? 'active' : ''}`}
-                onClick={(e) => {e.preventDefault(); setActiveTab('youth');}}
-                role="tab"
-                aria-selected={activeTab === 'youth'}
-              >
-                Add Youth
-              </button>
-              <button
-                className={`tab ${activeTab === 'services' ? 'active' : ''}`}
-                onClick={(e) => {e.preventDefault(); setActiveTab('services');}}
-                role="tab"
-                aria-selected={activeTab === 'services'}
-              >
-                Additional Services
-              </button>
-            </div>
-            
-            <div className="tab-content">
-              {activeTab === 'members' && (
-                <div className="tab-panel">
-                  <h3>Current Members</h3>
-                  <p>You are the primary member. Add family members using the tabs above.</p>
-                  <div className="member-card">
-                    <div className="member-info">
-                      <h4>Primary Member</h4>
-                      <p>Your membership includes access to all basic facilities.</p>
-                    </div>
+              <div className="guardian-info-section">
+                <div className="form-row name-row">
+                  <div className="form-group">
+                    <label htmlFor="guardianFirstName">
+                      First Name <span className="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="guardianFirstName"
+                      name="guardianFirstName"
+                      value={formData.guardianFirstName || ""}
+                      onChange={handleChange}
+                      placeholder="Enter guardian's first name"
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianFirstName}
+                      aria-describedby={errors.guardianFirstName ? "guardianFirstName-error" : undefined}
+                    />
+                    {errors.guardianFirstName && (
+                      <div id="guardianFirstName-error" className="error-message">
+                        {errors.guardianFirstName}
+                      </div>
+                    )}
                   </div>
                   
-                  {formData.familyMembers.length > 0 ? (
-                    formData.familyMembers.map(member => (
-                      <div className="member-card" key={member.id}>
-                        <div className="member-info">
-                          <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
-                          <p>{member.type === 'adult' ? 'Adult' : member.type === 'child' ? 'Child' : 'Youth'} Member</p>
-                        </div>
-                        <button 
-                          type="button" 
-                          className="remove-member-button"
-                          onClick={() => removeFamilyMember(member.id)}
-                        >
-                          Remove
-                        </button>
+                  <div className="form-group middle-initial">
+                    <label htmlFor="guardianMiddleInitial">
+                      Initial
+                    </label>
+                    <input
+                      type="text"
+                      id="guardianMiddleInitial"
+                      name="guardianMiddleInitial"
+                      value={formData.guardianMiddleInitial || ""}
+                      onChange={handleChange}
+                      placeholder="M.I."
+                      maxLength="1"
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="guardianLastName">
+                      Last Name <span className="required">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="guardianLastName"
+                      name="guardianLastName"
+                      value={formData.guardianLastName || ""}
+                      onChange={handleChange}
+                      placeholder="Enter guardian's last name"
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianLastName}
+                      aria-describedby={errors.guardianLastName ? "guardianLastName-error" : undefined}
+                    />
+                    {errors.guardianLastName && (
+                      <div id="guardianLastName-error" className="error-message">
+                        {errors.guardianLastName}
                       </div>
-                    ))
-                  ) : (
-                    <p className="no-members-message">No additional family members added yet.</p>
-                  )}
+                    )}
+                  </div>
                 </div>
-              )}
+                
+                <div className="form-row">
+                  <div className="form-group dob-field">
+                    <label htmlFor="guardianDateOfBirth">
+                      Date of Birth <span className="required">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      id="guardianDateOfBirth"
+                      name="guardianDateOfBirth"
+                      value={formData.guardianDateOfBirth || ""}
+                      onChange={handleChange}
+                      placeholder="MM/DD/YYYY"
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianDateOfBirth}
+                      aria-describedby={errors.guardianDateOfBirth ? "guardianDateOfBirth-error" : undefined}
+                    />
+                    {errors.guardianDateOfBirth && (
+                      <div id="guardianDateOfBirth-error" className="error-message">
+                        {errors.guardianDateOfBirth}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group gender-field">
+                    <label htmlFor="guardianGender">
+                      Gender <span className="required">*</span>
+                    </label>
+                    <select
+                      id="guardianGender"
+                      name="guardianGender"
+                      value={formData.guardianGender || ""}
+                      onChange={handleChange}
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianGender}
+                      aria-describedby={errors.guardianGender ? "guardianGender-error" : undefined}
+                    >
+                      <option value="">Select gender</option>
+                      {genderOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.guardianGender && (
+                      <div id="guardianGender-error" className="error-message">
+                        {errors.guardianGender}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group email-field">
+                    <label htmlFor="guardianEmail">
+                      Email <span className="required">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="guardianEmail"
+                      name="guardianEmail"
+                      value={formData.guardianEmail || ""}
+                      onChange={handleChange}
+                      placeholder="Enter guardian's email"
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianEmail}
+                      aria-describedby={errors.guardianEmail ? "guardianEmail-error" : undefined}
+                    />
+                    {errors.guardianEmail && (
+                      <div id="guardianEmail-error" className="error-message">
+                        {errors.guardianEmail}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="guardianRelationship">
+                      Relationship to Junior Member <span className="required">*</span>
+                    </label>
+                    <select
+                      id="guardianRelationship"
+                      name="guardianRelationship"
+                      value={formData.guardianRelationship || ""}
+                      onChange={handleChange}
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianRelationship}
+                      aria-describedby={errors.guardianRelationship ? "guardianRelationship-error" : undefined}
+                    >
+                      <option value="">Select relationship</option>
+                      <option value="parent">Parent</option>
+                      <option value="grandparent">Grandparent</option>
+                      <option value="legal_guardian">Legal Guardian</option>
+                      <option value="other">Other</option>
+                    </select>
+                    {errors.guardianRelationship && (
+                      <div id="guardianRelationship-error" className="error-message">
+                        {errors.guardianRelationship}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="form-row phone-row">
+                  <div className="form-group">
+                    <label htmlFor="cellPhone">
+                      Cell Phone <span className="required">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="cellPhone"
+                      name="cellPhone"
+                      value={formData.cellPhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-required="true"
+                      aria-invalid={!!errors.cellPhone}
+                      aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
+                    />
+                    {errors.cellPhone && (
+                      <div id="cellPhone-error" className="error-message">
+                        {errors.cellPhone}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="homePhone">Home Phone</label>
+                    <input
+                      type="tel"
+                      id="homePhone"
+                      name="homePhone"
+                      value={formData.homePhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-invalid={!!errors.homePhone}
+                      aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
+                    />
+                    {errors.homePhone && (
+                      <div id="homePhone-error" className="error-message">
+                        {errors.homePhone}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="workPhone">Work Phone</label>
+                    <input
+                      type="tel"
+                      id="workPhone"
+                      name="workPhone"
+                      value={formData.workPhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-invalid={!!errors.workPhone}
+                      aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
+                    />
+                    {errors.workPhone && (
+                      <div id="workPhone-error" className="error-message">
+                        {errors.workPhone}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group consent-checkbox">
+                    <input
+                      type="checkbox"
+                      id="guardianConsent"
+                      name="guardianConsent"
+                      checked={formData.guardianConsent || false}
+                      onChange={(e) => handleChange({
+                        target: {
+                          name: e.target.name,
+                          value: e.target.checked
+                        }
+                      })}
+                      aria-required="true"
+                      aria-invalid={!!errors.guardianConsent}
+                      aria-describedby={errors.guardianConsent ? "guardianConsent-error" : undefined}
+                    />
+                    <label htmlFor="guardianConsent" className="checkbox-label">
+                      I confirm that I am the legal guardian of the junior member and I accept all legal responsibilities associated with this membership. I have read and agree to the terms and conditions.
+                    </label>
+                    {errors.guardianConsent && (
+                      <div id="guardianConsent-error" className="error-message">
+                        {errors.guardianConsent}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+          
+          {!isJuniorMembership && (
+            <>
               
-              {activeTab === 'new_adult' && (
-                <div className="tab-panel">
-                  <h3>Add New Adult Member (18+ years)</h3>
-                  <div className="form-row name-row">
-                    <div className="form-group">
-                      <label htmlFor="adultFirstName">First Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="adultFirstName" 
-                        name="firstName" 
-                        value={tempMember.firstName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempFirstName}
-                        aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
-                      />
-                      {errors.tempFirstName && (
-                        <div id="tempFirstName-error" className="error-message">
-                          {errors.tempFirstName}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group middle-initial">
-                      <label htmlFor="adultMiddleInitial">M.I.</label>
-                      <input 
-                        type="text" 
-                        id="adultMiddleInitial" 
-                        name="middleInitial" 
-                        maxLength="1" 
-                        value={tempMember.middleInitial}
-                        onChange={handleTempMemberChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="adultLastName">Last Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="adultLastName" 
-                        name="lastName" 
-                        value={tempMember.lastName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempLastName}
-                        aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
-                      />
-                      {errors.tempLastName && (
-                        <div id="tempLastName-error" className="error-message">
-                          {errors.tempLastName}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="form-row dob-gender-row">
-                    <div className="form-group dob-field">
-                      <label htmlFor="adultDob">Date of Birth <span className="required">*</span></label>
-                      <input 
-                        type="date" 
-                        id="adultDob" 
-                        name="dateOfBirth" 
-                        max={today}
-                        value={tempMember.dateOfBirth}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempDateOfBirth}
-                        aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
-                      />
-                      {errors.tempDateOfBirth && (
-                        <div id="tempDateOfBirth-error" className="error-message">
-                          {errors.tempDateOfBirth}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group gender-field">
-                      <label htmlFor="adultGender">Gender <span className="required">*</span></label>
-                      <select 
-                        id="adultGender" 
-                        name="gender"
-                        value={tempMember.gender}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempGender}
-                        aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                      {errors.tempGender && (
-                        <div id="tempGender-error" className="error-message">
-                          {errors.tempGender}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="add-member-button"
-                    onClick={() => addFamilyMember('adult')}
-                  >
-                    Add Adult Member
-                  </button>
-                </div>
-              )}
               
-              {activeTab === 'child' && (
-                <div className="tab-panel">
-                  <h3>Add Child (3 weeks - 11 years)</h3>
-                  <div className="form-row name-row">
-                    <div className="form-group">
-                      <label htmlFor="childFirstName">First Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="childFirstName" 
-                        name="firstName" 
-                        value={tempMember.firstName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempFirstName}
-                        aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
-                      />
-                      {errors.tempFirstName && (
-                        <div id="tempFirstName-error" className="error-message">
-                          {errors.tempFirstName}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group middle-initial">
-                      <label htmlFor="childMiddleInitial">M.I.</label>
-                      <input 
-                        type="text" 
-                        id="childMiddleInitial" 
-                        name="middleInitial" 
-                        maxLength="1" 
-                        value={tempMember.middleInitial}
-                        onChange={handleTempMemberChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="childLastName">Last Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="childLastName" 
-                        name="lastName" 
-                        value={tempMember.lastName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempLastName}
-                        aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
-                      />
-                      {errors.tempLastName && (
-                        <div id="tempLastName-error" className="error-message">
-                          {errors.tempLastName}
-                        </div>
-                      )}
-                    </div>
+              <div className="contact-info-section">
+             
+                <div className="form-row phone-row">
+                  <div className="form-group">
+                    <label htmlFor="cellPhone">
+                      Cell Phone
+                    </label>
+                    <input
+                      type="tel"
+                      id="cellPhone"
+                      name="cellPhone"
+                      value={formData.cellPhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-invalid={!!errors.cellPhone}
+                      aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
+                    />
+                    {errors.cellPhone && (
+                      <div id="cellPhone-error" className="error-message">
+                        {errors.cellPhone}
+                      </div>
+                    )}
                   </div>
-                  <div className="form-row dob-gender-row">
-                    <div className="form-group dob-field">
-                      <label htmlFor="childDob">Date of Birth <span className="required">*</span></label>
-                      <input 
-                        type="date" 
-                        id="childDob" 
-                        name="dateOfBirth" 
-                        max={today}
-                        value={tempMember.dateOfBirth}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempDateOfBirth}
-                        aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
-                      />
-                      {errors.tempDateOfBirth && (
-                        <div id="tempDateOfBirth-error" className="error-message">
-                          {errors.tempDateOfBirth}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group gender-field">
-                      <label htmlFor="childGender">Gender <span className="required">*</span></label>
-                      <select 
-                        id="childGender" 
-                        name="gender"
-                        value={tempMember.gender}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempGender}
-                        aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                      {errors.tempGender && (
-                        <div id="tempGender-error" className="error-message">
-                          {errors.tempGender}
-                        </div>
-                      )}
-                    </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="homePhone">Home Phone</label>
+                    <input
+                      type="tel"
+                      id="homePhone"
+                      name="homePhone"
+                      value={formData.homePhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-invalid={!!errors.homePhone}
+                      aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
+                    />
+                    {errors.homePhone && (
+                      <div id="homePhone-error" className="error-message">
+                        {errors.homePhone}
+                      </div>
+                    )}
                   </div>
-                  <button 
-                    type="button" 
-                    className="add-member-button"
-                    onClick={() => addFamilyMember('child')}
-                  >
-                    Add Child
-                  </button>
+                  
+                  <div className="form-group">
+                    <label htmlFor="workPhone">Work Phone</label>
+                    <input
+                      type="tel"
+                      id="workPhone"
+                      name="workPhone"
+                      value={formData.workPhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-invalid={!!errors.workPhone}
+                      aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
+                    />
+                    {errors.workPhone && (
+                      <div id="workPhone-error" className="error-message">
+                        {errors.workPhone}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <h2>Family Members & Additional Services</h2>
               
-              {activeTab === 'youth' && (
-                <div className="tab-panel">
-                  <h3>Add Youth (12 - 20 years)</h3>
-                  <div className="form-row name-row">
-                    <div className="form-group">
-                      <label htmlFor="youthFirstName">First Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="youthFirstName" 
-                        name="firstName" 
-                        value={tempMember.firstName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempFirstName}
-                        aria-describedby={errors.tempFirstName ? "tempFirstName-error" : undefined}
-                      />
-                      {errors.tempFirstName && (
-                        <div id="tempFirstName-error" className="error-message">
-                          {errors.tempFirstName}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group middle-initial">
-                      <label htmlFor="youthMiddleInitial">M.I.</label>
-                      <input 
-                        type="text" 
-                        id="youthMiddleInitial" 
-                        name="middleInitial" 
-                        maxLength="1" 
-                        value={tempMember.middleInitial}
-                        onChange={handleTempMemberChange}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="youthLastName">Last Name <span className="required">*</span></label>
-                      <input 
-                        type="text" 
-                        id="youthLastName" 
-                        name="lastName" 
-                        value={tempMember.lastName}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempLastName}
-                        aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
-                      />
-                      {errors.tempLastName && (
-                        <div id="tempLastName-error" className="error-message">
-                          {errors.tempLastName}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="form-row dob-gender-row">
-                    <div className="form-group dob-field">
-                      <label htmlFor="youthDob">Date of Birth <span className="required">*</span></label>
-                      <input 
-                        type="date" 
-                        id="youthDob" 
-                        name="dateOfBirth" 
-                        max={today}
-                        value={tempMember.dateOfBirth}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempDateOfBirth}
-                        aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
-                      />
-                      {errors.tempDateOfBirth && (
-                        <div id="tempDateOfBirth-error" className="error-message">
-                          {errors.tempDateOfBirth}
-                        </div>
-                      )}
-                    </div>
-                    <div className="form-group gender-field">
-                      <label htmlFor="youthGender">Gender <span className="required">*</span></label>
-                      <select 
-                        id="youthGender" 
-                        name="gender"
-                        value={tempMember.gender}
-                        onChange={handleTempMemberChange}
-                        aria-invalid={!!errors.tempGender}
-                        aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
-                      >
-                        <option value="">Select</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                      {errors.tempGender && (
-                        <div id="tempGender-error" className="error-message">
-                          {errors.tempGender}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <button 
-                    type="button" 
-                    className="add-member-button"
-                    onClick={() => addFamilyMember('youth')}
-                  >
-                    Add Youth
-                  </button>
+              <div className="tabs-container">
+                <div className="tab-list" role="tablist">
+                  {renderTabs()}
                 </div>
-              )}
-              
-              {activeTab === 'services' && (
-                <div className="tab-panel">
-                  <h3>Additional Services</h3>
-                  <div className="service-options">
-                    <div className="service-option">
-                      <input 
-                        type="checkbox" 
-                        id="personalTraining" 
-                        name="personalTraining" 
-                        checked={formData.services.personalTraining}
-                        onChange={handleServiceChange}
-                      />
-                      <label htmlFor="personalTraining">Personal Training ($50/session)</label>
-                    </div>
-                    <div className="service-option">
-                      <input 
-                        type="checkbox" 
-                        id="groupClasses" 
-                        name="groupClasses" 
-                        checked={formData.services.groupClasses}
-                        onChange={handleServiceChange}
-                      />
-                      <label htmlFor="groupClasses">Group Fitness Classes ($25/month)</label>
-                    </div>
-                    <div className="service-option">
-                      <input 
-                        type="checkbox" 
-                        id="childcare" 
-                        name="childcare" 
-                        checked={formData.services.childcare}
-                        onChange={handleServiceChange}
-                      />
-                      <label htmlFor="childcare">Childcare Services ($15/month)</label>
-                    </div>
-                    <div className="service-option">
-                      <input 
-                        type="checkbox" 
-                        id="locker" 
-                        name="locker" 
-                        checked={formData.services.locker}
-                        onChange={handleServiceChange}
-                      />
-                      <label htmlFor="locker">Locker Rental ($10/month)</label>
-                    </div>
-                  </div>
+                
+                <div className="tab-content">
+                  {renderTabContent()}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
           
           <div className="form-actions">
             <button 
@@ -1236,7 +1820,9 @@ function EnrollmentForm() {
           <div className="cart-items">
             <div className="cart-item">
               <div className="item-details">
-                <h3>Standard Membership</h3>
+                <h3>
+                  {membershipType ? `${membershipType.title} Membership` : 'Standard Membership'}
+                </h3>
                 <p>Monthly access to all gym facilities</p>
                 <ul>
                   <li>Unlimited gym access</li>

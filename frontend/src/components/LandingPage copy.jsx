@@ -2,44 +2,20 @@
 // This component serves as the landing page before users access the enrollment form
 // It provides information about membership options and benefits
 
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useClub } from "../context/ClubContext";
-import { useMembership } from "../context/MembershipContext";
-import MembershipTypeModal from "./MembershipTypeModal";
+import React from "react";
+import { Link } from "react-router-dom";
 import "./LandingPage.css";
 
 function LandingPage() {
-  const { selectedClub } = useClub();
-  const navigate = useNavigate();
-  const [showMembershipTypeModal, setShowMembershipTypeModal] = useState(false);
-  
-  // Handle membership type selection
-  const handleMembershipTypeSelect = (type) => {
-    setShowMembershipTypeModal(false);
-    // Navigate to enrollment form - no need to pass state as it's in context
-    navigate("/enrollment");
-  };
-  
   return (
     <div className="landing-container">
-      {/* Membership Type Modal */}
-      <MembershipTypeModal 
-        isOpen={showMembershipTypeModal} 
-        onClose={() => setShowMembershipTypeModal(false)}
-        onSelectMembershipType={handleMembershipTypeSelect}
-      />
-      
       <section className="hero-section">
         <div className="hero-content">
-          <h1>Welcome to {selectedClub.name}</h1>
+          <h1>Welcome to Tabor Center</h1>
           <p className="tagline">Your journey to fitness and wellness starts here</p>
-          <button 
-            onClick={() => setShowMembershipTypeModal(true)} 
-            className="cta-button"
-          >
+          <Link to="/enrollment" className="cta-button">
             Become a Member
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -58,12 +34,9 @@ function LandingPage() {
                 <li>Free fitness assessment</li>
                 <li>Access to all basic facilities</li>
               </ul>
-              <button 
-                onClick={() => setShowMembershipTypeModal(true)} 
-                className="select-button"
-              >
+              <Link to="/enrollment" className="select-button">
                 Select Plan
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -79,12 +52,9 @@ function LandingPage() {
                 <li>Discounted rates for additional members</li>
                 <li>Family fitness activities</li>
               </ul>
-              <button 
-                onClick={() => setShowMembershipTypeModal(true)} 
-                className="select-button"
-              >
+              <Link to="/enrollment" className="select-button">
                 Select Plan
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -100,19 +70,16 @@ function LandingPage() {
                 <li>Access to premium classes</li>
                 <li>Nutrition consultation</li>
               </ul>
-              <button 
-                onClick={() => setShowMembershipTypeModal(true)} 
-                className="select-button"
-              >
+              <Link to="/enrollment" className="select-button">
                 Select Plan
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       <section className="features-section">
-        <h2>Why Choose {selectedClub.name}?</h2>
+        <h2>Why Choose Tabor Center?</h2>
         <div className="features-container">
           <div className="feature">
             <div className="feature-icon">🏋️</div>
@@ -141,7 +108,7 @@ function LandingPage() {
         <h2>What Our Members Say</h2>
         <div className="testimonials-container">
           <div className="testimonial">
-            <p>"Joining {selectedClub.name} was one of the best decisions I've made. The facilities are excellent and the staff is incredibly supportive."</p>
+            <p>"Joining Tabor Center was one of the best decisions I've made. The facilities are excellent and the staff is incredibly supportive."</p>
             <p className="testimonial-author">- Sarah J.</p>
           </div>
           <div className="testimonial">
@@ -157,13 +124,10 @@ function LandingPage() {
 
       <section className="cta-section">
         <h2>Ready to Start Your Fitness Journey?</h2>
-        <p>Join {selectedClub.name} today and take the first step toward a healthier lifestyle.</p>
-        <button 
-          onClick={() => setShowMembershipTypeModal(true)} 
-          className="cta-button"
-        >
+        <p>Join Tabor Center today and take the first step toward a healthier lifestyle.</p>
+        <Link to="/enrollment" className="cta-button">
           Enroll Now
-        </button>
+        </Link>
       </section>
     </div>
   );
