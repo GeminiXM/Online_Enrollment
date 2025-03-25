@@ -1,14 +1,89 @@
 # Online Enrollment System
 
-A web application for managing online enrollment processes, built with React frontend and Node.js backend connecting to Informix databases.
+A web application for managing online enrollment processes for Wellbridge fitness centers, built with React frontend and Node.js backend connecting to Informix databases.
+
+## Project Overview
+
+The Online Enrollment System is designed to streamline the membership enrollment process for Wellbridge fitness centers. It provides a user-friendly interface for prospective members to select membership types, enter personal information, add family members, and select additional services.
 
 ## Project Structure
 
-This project is organized as a monorepo containing both frontend and backend code:
+```
+Online_Enrollment/
+├── .env                     # Root environment variables (shared between frontend/backend)
+├── .gitignore               # Git ignore file
+├── README.md                # Project documentation
+├── package.json             # Root package.json for project-wide scripts and dependencies
+├── frontend/                # React frontend application
+│   ├── public/              # Static files
+│   ├── src/                 # Frontend source code
+│   │   ├── assets/          # Images, fonts, etc.
+│   │   ├── components/      # Reusable React components
+│   │   ├── contexts/        # React context providers
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── pages/           # Page components for routing
+│   │   ├── services/        # API service layer to communicate with backend
+│   │   ├── utils/           # Utility functions
+│   │   ├── App.js           # Main App component
+│   │   ├── index.js         # Entry point
+│   │   └── config.js        # Frontend configuration (pulls from env vars)
+│   ├── .env.development     # Frontend-specific dev environment variables
+│   ├── .env.production      # Frontend-specific prod environment variables
+│   └── package.json         # Frontend dependencies
+├── backend/                 # API server
+│   ├── src/                 # Backend source code
+│   │   ├── config/          # Configuration files
+│   │   │   └── db.js        # Database connection setup
+│   │   ├── controllers/     # Request handlers
+│   │   ├── middlewares/     # Express middlewares
+│   │   ├── models/          # Data models
+│   │   ├── routes/          # API route definitions
+│   │   ├── services/        # Business logic and data access
+│   │   ├── utils/           # Utility functions
+│   │   └── app.js           # Express app setup
+│   ├── .env                 # Backend-specific environment variables
+│   └── package.json         # Backend dependencies
+└── docker/                  # Docker configuration (if needed)
+    ├── frontend/            # Frontend Docker configuration
+    ├── backend/             # Backend Docker configuration
+    └── docker-compose.yml   # Docker Compose file for local development
+```
 
-- `frontend/`: React application for the user interface
-- `backend/`: Node.js API server connecting to Informix databases
-- `docker/`: Docker configuration for development and deployment
+## Implemented Features
+
+### Landing Page
+- Created a modern, responsive landing page that introduces the fitness center
+- Implemented membership type selection with detailed information about each option
+- Added testimonials and facility highlights to engage potential members
+
+### Membership Types
+- Implemented different membership types with specific rules and UI adaptations:
+  - **Junior Membership (under 18)**: Requires legal guardian information
+  - **Student/Young Professional (18-29)**: Individual membership with restricted family additions
+  - **Standard Adult**: Full access with family member additions
+  - **Senior**: Full access with family member additions
+
+### Enrollment Form
+- Developed a comprehensive enrollment form with the following features:
+  - Dynamic form fields that adapt based on membership type
+  - Validation for all required fields with helpful error messages
+  - Address information with state selection
+  - Phone number formatting and validation
+  - Special handling for Junior memberships with guardian information
+  - Family member addition for eligible membership types
+
+### UI/UX Improvements
+- Implemented a shopping cart sidebar that displays selected membership and services
+- Added real-time cost calculation based on selections
+- Created a responsive design that works on various screen sizes
+- Implemented form field highlighting for completed fields
+- Added clear section separators and instructions
+
+### Context Management
+- Created context providers for:
+  - Club selection
+  - Membership type management
+  - Form data persistence
 
 ## Getting Started
 
@@ -54,16 +129,17 @@ This project is organized as a monorepo containing both frontend and backend cod
 
 3. Access the application at `http://localhost:5000`
 
-## Features
+## Future Enhancements
 
-- User authentication and authorization
-- Enrollment form submission and processing
+- Payment processing integration
+- Email confirmation system
 - Admin dashboard for enrollment management
-- Integration with Informix databases
+- Member portal for existing members
+- Integration with fitness tracking systems
 
 ## Technologies
 
-- **Frontend**: React, React Router, Axios
+- **Frontend**: React, React Router, Context API, CSS3
 - **Backend**: Node.js, Express, IBM DB2/Informix drivers (ibm_db)
 - **Authentication**: JWT
 - **Deployment**: Docker
@@ -74,4 +150,6 @@ This project is organized as a monorepo containing both frontend and backend cod
 
 ## Contact
 
-[Your Contact Information] 
+Mark Moore
+Senior Engineer
+Wellbridge

@@ -1121,12 +1121,7 @@ function EnrollmentForm() {
       />
 
       <h1>{selectedClub.name} Membership Enrollment Form</h1>
-
-         <p className="form-instructions">
-        Please fill out the form below to enroll in our fitness facility. 
-        Fields marked with an asterisk (*) are required.
-      </p>
-
+      
       {/* Display selected membership type if available */}
       {membershipType && (
         <div className="selected-membership-type">
@@ -1145,7 +1140,10 @@ function EnrollmentForm() {
         </div>
       )}
       
-
+      <p className="form-instructions">
+        Please fill out the form below to enroll in our fitness facility. 
+        Fields marked with an asterisk (*) are required.
+      </p>
       
       {/* Display submission error if any */}
       {submitError && (
