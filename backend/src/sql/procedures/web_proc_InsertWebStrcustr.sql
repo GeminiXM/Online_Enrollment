@@ -26,5 +26,3 @@ execute procedure web_proc_InsertWebStrcustr (parCustCode,
                   parSpecialtyMembership,
                   parNewPt
          );
-)
-                  (

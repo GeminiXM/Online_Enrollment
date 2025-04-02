@@ -60,4 +60,8 @@ Thumbs.db
 # Misc
 .cache/
 .temp/
-.tmp/ 
+.tmp/
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls 
