@@ -6,6 +6,16 @@ import logger from "../utils/logger.js";
  * @route POST /api/enrollment
  * @access Public
  */
+/**
+ * Converts placeholder gender values back to empty strings
+ * @param {string} gender - The gender value to convert
+ * @returns {string} - The converted gender value
+ */
+const convertGenderValue = (gender) => {
+  // Convert "N" (used as placeholder) back to empty string
+  return gender === "N" ? "" : gender;
+};
+
 export const submitEnrollment = async (req, res) => {
   try {
     // Log initial request
@@ -318,7 +328,7 @@ export const submitEnrollment = async (req, res) => {
         firstName, // parFname
         middleInitial || "", // parMname
         lastName, // parLname
-        gender, // parSex
+        convertGenderValue(gender), // parSex - Apply conversion here
         dateOfBirth, // parBdate
         homePhone || "", // parHomePhone
         workPhone || "", // parWorkPhone
@@ -358,7 +368,7 @@ export const submitEnrollment = async (req, res) => {
             member.firstName, // parFname
             member.middleInitial || "", // parMname
             member.lastName, // parLname
-            member.gender, // parSex
+            convertGenderValue(member.gender), // parSex - Apply conversion here
             member.dateOfBirth, // parBdate
             member.homePhone || "", // parHomePhone
             member.workPhone || "", // parWorkPhone
@@ -394,7 +404,7 @@ export const submitEnrollment = async (req, res) => {
             member.firstName, // parFname
             member.middleInitial || "", // parMname
             member.lastName, // parLname
-            member.gender, // parSex
+            convertGenderValue(member.gender), // parSex - Apply conversion here
             member.dateOfBirth, // parBdate
             member.homePhone || "", // parHomePhone
             member.workPhone || "", // parWorkPhone
@@ -425,7 +435,7 @@ export const submitEnrollment = async (req, res) => {
           guardian.firstName, // parFname
           guardian.middleInitial || "", // parMname
           guardian.lastName, // parLname
-          guardian.gender, // parSex
+          convertGenderValue(guardian.gender), // parSex - Apply conversion here
           guardian.dateOfBirth, // parBdate
           guardian.homePhone || "", // parHomePhone
           guardian.workPhone || "", // parWorkPhone

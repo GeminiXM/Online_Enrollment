@@ -72,3 +72,34 @@
 2025-04-05 04:24:05:245 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-05 04:25:22:2522 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-05 04:25:50:2550 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-05 04:46:20:4620 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-05 04:46:20:4620 [32minfo[39m: [32mFamily members data:[39m
+2025-04-05 04:46:20:4620 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-05 04:46:20:4620 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:21:4621 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mPrimary membership record inserted successfully[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mGenerated customer code:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mInserting primary member record[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mPrimary member record inserted successfully[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mProcessing family members:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mInserting adult family member:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAdult family member inserted successfully[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mInserting dependent family member:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mDependent family member inserted successfully[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mInserting dependent family member:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mDependent family member inserted successfully[39m
+2025-04-05 04:46:22:4622 [32minfo[39m: [32mEnrollment submission completed successfully[39m
+2025-04-05 04:51:32:5132 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-05 04:52:28:5228 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-05 04:53:02:532 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-05 04:53:33:5333 [32minfo[39m: [32mServer running on port 5001[39m
