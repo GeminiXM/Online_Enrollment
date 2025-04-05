@@ -93,9 +93,9 @@ const validateEnrollmentData = [
     .trim()
     .notEmpty()
     .withMessage("Family member role is required")
-    .isIn(["S", "D"])
+    .isIn(["P", "S", "D"])
     .withMessage(
-      "Family member role must be either 'S' (secondary) or 'D' (dependent)"
+      "Family member role must be either 'P' (primary), 'S' (secondary) or 'D' (dependent)"
     ),
 ];
 

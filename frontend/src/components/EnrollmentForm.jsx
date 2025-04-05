@@ -118,8 +118,8 @@ function EnrollmentForm() {
 
   // Gender options for the dropdown
   const genderOptions = [
-    { value: "male", label: "Male" },
-    { value: "female", label: "Female" },
+    { value: "M", label: "Male" },
+    { value: "F", label: "Female" },
     { value: "", label: "Prefer not to say" }
   ];
 
@@ -178,10 +178,20 @@ function EnrollmentForm() {
         [name]: value
       });
     }
+    
+    // Clear the error for this field when user starts typing
+    if (errors[`temp${name.charAt(0).toUpperCase() + name.slice(1)}`]) {
+      setErrors({
+        ...errors,
+        [`temp${name.charAt(0).toUpperCase() + name.slice(1)}`]: null
+      });
+    }
   };
   
   // Add a new family member
   const addFamilyMember = (type) => {
+    console.log("Adding family member:", type, tempMember);
+    
     // Validate required fields
     const newErrors = {};
     
@@ -201,25 +211,58 @@ function EnrollmentForm() {
       newErrors.tempGender = "Gender is required";
     }
     
+    // Validate email format if provided
+    if (tempMember.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempMember.email.trim())) {
+      newErrors.tempEmail = "Email is not valid";
+    }
+    
+    // Validate phone number formats if provided
+    if (tempMember.cellPhone && !/^\d{10}$/.test(tempMember.cellPhone.replace(/\D/g, ''))) {
+      newErrors.tempCellPhone = "Phone number must contain 10 digits";
+    }
+    
+    if (tempMember.homePhone && !/^\d{10}$/.test(tempMember.homePhone.replace(/\D/g, ''))) {
+      newErrors.tempHomePhone = "Phone number must contain 10 digits";
+    }
+    
+    if (tempMember.workPhone && !/^\d{10}$/.test(tempMember.workPhone.replace(/\D/g, ''))) {
+      newErrors.tempWorkPhone = "Phone number must contain 10 digits";
+    }
+    
     // If there are validation errors, display them and don't add the member
     if (Object.keys(newErrors).length > 0) {
-      setErrors({
-        ...errors,
+      console.log("Validation errors:", newErrors);
+      setErrors(prevErrors => ({
+        ...prevErrors,
         ...newErrors
-      });
+      }));
       return;
+    }
+    
+    // Set the role based on member type
+    let role = 'S'; // Default to secondary (adult)
+    if (type === 'child' || type === 'youth') {
+      role = 'D'; // Dependent for children and youth
     }
     
     // Add the new member to the family members array
     const newMember = {
       ...tempMember,
       type,
+      role, // Set the role explicitly
       id: Date.now() // Use timestamp as a simple unique ID
     };
     
-    setFormData({
-      ...formData,
-      familyMembers: [...formData.familyMembers, newMember]
+    console.log("Adding new member:", newMember);
+    
+    setFormData(prevData => {
+      console.log("Previous form data:", prevData);
+      const updatedData = {
+        ...prevData,
+        familyMembers: [...prevData.familyMembers, newMember]
+      };
+      console.log("Updated form data:", updatedData);
+      return updatedData;
     });
     
     // Reset the temporary member data
@@ -235,6 +278,17 @@ function EnrollmentForm() {
       homePhone: "",
       workPhone: "",
       role: "S" // Default to secondary member
+    });
+    
+    // Clear all temporary member errors
+    setErrors(prevErrors => {
+      const clearedErrors = { ...prevErrors };
+      Object.keys(clearedErrors).forEach(key => {
+        if (key.startsWith('temp')) {
+          clearedErrors[key] = null;
+        }
+      });
+      return clearedErrors;
     });
     
     // Switch back to the members tab to show the updated list
@@ -452,58 +506,65 @@ function EnrollmentForm() {
         mbrCode: '0', // Primary member code
         firstName: formData.firstName,
         lastName: formData.lastName,
-        middleInitial: formData.middleInitial,
+        middleInitial: formData.middleInitial || '',
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender.toUpperCase(), // Ensure gender is uppercase
         email: formData.email,
         address: formData.address1,
-        address2: formData.address2,
+        address2: formData.address2 || '',
         city: formData.city,
         state: formData.state,
         zipCode: formData.zipCode,
-        cellPhone: formData.mobilePhone,
-        homePhone: formData.homePhone,
-        workPhone: formData.workPhone,
+        cellPhone: formData.mobilePhone.replace(/\D/g, ''), // Remove non-digits
+        homePhone: formData.homePhone.replace(/\D/g, ''), // Remove non-digits
+        workPhone: formData.workPhone.replace(/\D/g, ''), // Remove non-digits
         membershipType: membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : '',
         requestedStartDate: formData.requestedStartDate,
         club: selectedClub.id,
         createdBy: 'ONLINE',
         salesPersonCode: 'ONLINE',
-        // Add primary member to family members array with role 'P'
+        // Initialize familyMembers array with the primary member
         familyMembers: [
           {
-            mbrCode: '0',
+            mbrCode: '0', // Primary member code
             role: 'P', // P=primary
             firstName: formData.firstName,
             lastName: formData.lastName,
-            middleInitial: formData.middleInitial,
+            middleInitial: formData.middleInitial || '',
             dateOfBirth: formData.dateOfBirth,
             gender: formData.gender.toUpperCase(),
             email: formData.email,
-            cellPhone: formData.mobilePhone,
-            homePhone: formData.homePhone,
-            workPhone: formData.workPhone
+            cellPhone: formData.mobilePhone.replace(/\D/g, ''), // Remove non-digits
+            homePhone: formData.homePhone.replace(/\D/g, ''), // Remove non-digits
+            workPhone: formData.workPhone.replace(/\D/g, '') // Remove non-digits
           }
         ]
       };
       
       // Add family members for non-Junior memberships
       if (!isJuniorMembership && formData.familyMembers.length > 0) {
-        submissionData.familyMembers = [
-          ...submissionData.familyMembers,
-          ...formData.familyMembers.map((member, index) => ({
-            mbrCode: (index + 1).toString(), // Incremental member code
-            role: member.type === 'adult' ? 'S' : 'D', // S=secondary, D=dependent
+        // Map family members to the correct format with auto-incrementing mbrCode
+        const formattedFamilyMembers = formData.familyMembers.map((member, index) => {
+          // Use the existing role from the member
+          return {
+            mbrCode: (index + 1).toString(), // Auto-increment mbrCode starting from 1
+            role: member.role, // Use the role that was set in addFamilyMember
             firstName: member.firstName,
             lastName: member.lastName,
-            middleInitial: member.middleInitial,
+            middleInitial: member.middleInitial || '',
             dateOfBirth: member.dateOfBirth,
             gender: member.gender.toUpperCase(),
             email: member.email || '',
-            cellPhone: member.cellPhone || '',
-            homePhone: member.homePhone || '',
-            workPhone: member.workPhone || ''
-          }))
+            cellPhone: member.cellPhone.replace(/\D/g, ''), // Remove non-digits
+            homePhone: member.homePhone.replace(/\D/g, ''), // Remove non-digits
+            workPhone: member.workPhone.replace(/\D/g, '') // Remove non-digits
+          };
+        });
+        
+        // Add the formatted family members to the submission data
+        submissionData.familyMembers = [
+          ...submissionData.familyMembers, // Keep the primary member
+          ...formattedFamilyMembers // Add additional members
         ];
       }
       
@@ -512,17 +573,19 @@ function EnrollmentForm() {
         submissionData.guardian = {
           firstName: formData.guardianFirstName,
           lastName: formData.guardianLastName,
-          middleInitial: formData.guardianMiddleInitial,
+          middleInitial: formData.guardianMiddleInitial || '',
           dateOfBirth: formData.guardianDateOfBirth,
           gender: formData.guardianGender.toUpperCase(),
           email: formData.guardianEmail,
           relationship: formData.guardianRelationship,
-          cellPhone: formData.mobilePhone,
-          homePhone: formData.homePhone,
-          workPhone: formData.workPhone,
+          cellPhone: formData.mobilePhone.replace(/\D/g, ''), // Remove non-digits
+          homePhone: formData.homePhone.replace(/\D/g, ''), // Remove non-digits
+          workPhone: formData.workPhone.replace(/\D/g, ''), // Remove non-digits
           consent: formData.guardianConsent
         };
       }
+      
+      console.log('Submitting enrollment data:', submissionData);
       
       // Submit the form data to the server
       const response = await api.post('/enrollment', submissionData);
@@ -545,10 +608,31 @@ function EnrollmentForm() {
     } catch (error) {
       // Handle submission error
       console.error('Enrollment submission error:', error);
-      setSubmitError(
-        error.response?.data?.message || 
-        "An error occurred while submitting your enrollment. Please try again later."
-      );
+      
+      // Display more detailed error message if available
+      if (error.response && error.response.data) {
+        console.log('Server error response:', error.response.data);
+        
+        if (error.response.data.errors) {
+          // Format validation errors
+          const errorMessages = error.response.data.errors.map(err => 
+            `${err.param}: ${err.msg}`
+          ).join(', ');
+          setSubmitError(`Validation errors: ${errorMessages}`);
+        } else if (error.response.data.message) {
+          setSubmitError(error.response.data.message);
+        } else {
+          setSubmitError("An error occurred while submitting your enrollment. Please try again later.");
+        }
+      } else {
+        setSubmitError("An error occurred while submitting your enrollment. Please try again later.");
+      }
+      
+      // Scroll to the error message
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+    } finally {
+      // Reset submitting state
       setIsSubmitting(false);
     }
   };
@@ -782,7 +866,46 @@ function EnrollmentForm() {
                 )}
               </div>
               
+              <div className="form-group middle-initial">
+                <label htmlFor="tempMiddleInitial">
+                  Initial
+                </label>
+                <input
+                  type="text"
+                  id="tempMiddleInitial"
+                  name="middleInitial"
+                  value={tempMember.middleInitial}
+                  onChange={handleTempMemberChange}
+                  placeholder="M.I."
+                  maxLength="1"
+                />
+              </div>
+              
               <div className="form-group">
+                <label htmlFor="tempLastName">
+                  Last Name <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="tempLastName"
+                  name="lastName"
+                  value={tempMember.lastName}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter last name"
+                  aria-required="true"
+                  aria-invalid={!!errors.tempLastName}
+                  aria-describedby={errors.tempLastName ? "tempLastName-error" : undefined}
+                />
+                {errors.tempLastName && (
+                  <div id="tempLastName-error" className="error-message">
+                    {errors.tempLastName}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group dob-field">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
                 </label>
@@ -818,8 +941,11 @@ function EnrollmentForm() {
                   aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
                 >
                   <option value="">Select gender</option>
-                  <option value="M">Male</option>
-                  <option value="F">Female</option>
+                  {genderOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
                 </select>
                 {errors.tempGender && (
                   <div id="tempGender-error" className="error-message">
@@ -841,7 +967,14 @@ function EnrollmentForm() {
                   value={tempMember.email}
                   onChange={handleTempMemberChange}
                   placeholder="Enter email address"
+                  aria-invalid={!!errors.tempEmail}
+                  aria-describedby={errors.tempEmail ? "tempEmail-error" : undefined}
                 />
+                {errors.tempEmail && (
+                  <div id="tempEmail-error" className="error-message">
+                    {errors.tempEmail}
+                  </div>
+                )}
               </div>
             </div>
             
@@ -857,7 +990,14 @@ function EnrollmentForm() {
                   value={tempMember.cellPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter mobile phone"
+                  aria-invalid={!!errors.tempCellPhone}
+                  aria-describedby={errors.tempCellPhone ? "tempCellPhone-error" : undefined}
                 />
+                {errors.tempCellPhone && (
+                  <div id="tempCellPhone-error" className="error-message">
+                    {errors.tempCellPhone}
+                  </div>
+                )}
               </div>
               
               <div className="form-group">
@@ -871,7 +1011,14 @@ function EnrollmentForm() {
                   value={tempMember.homePhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter home phone"
+                  aria-invalid={!!errors.tempHomePhone}
+                  aria-describedby={errors.tempHomePhone ? "tempHomePhone-error" : undefined}
                 />
+                {errors.tempHomePhone && (
+                  <div id="tempHomePhone-error" className="error-message">
+                    {errors.tempHomePhone}
+                  </div>
+                )}
               </div>
               
               <div className="form-group">
@@ -885,7 +1032,14 @@ function EnrollmentForm() {
                   value={tempMember.workPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter work phone"
+                  aria-invalid={!!errors.tempWorkPhone}
+                  aria-describedby={errors.tempWorkPhone ? "tempWorkPhone-error" : undefined}
                 />
+                {errors.tempWorkPhone && (
+                  <div id="tempWorkPhone-error" className="error-message">
+                    {errors.tempWorkPhone}
+                  </div>
+                )}
               </div>
             </div>
             
@@ -1019,6 +1173,94 @@ function EnrollmentForm() {
               </div>
             </div>
             
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tempEmail">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="tempEmail"
+                  name="email"
+                  value={tempMember.email}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter email address"
+                  aria-invalid={!!errors.tempEmail}
+                  aria-describedby={errors.tempEmail ? "tempEmail-error" : undefined}
+                />
+                {errors.tempEmail && (
+                  <div id="tempEmail-error" className="error-message">
+                    {errors.tempEmail}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tempCellPhone">
+                  Mobile Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempCellPhone"
+                  name="cellPhone"
+                  value={tempMember.cellPhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter mobile phone"
+                  aria-invalid={!!errors.tempCellPhone}
+                  aria-describedby={errors.tempCellPhone ? "tempCellPhone-error" : undefined}
+                />
+                {errors.tempCellPhone && (
+                  <div id="tempCellPhone-error" className="error-message">
+                    {errors.tempCellPhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempHomePhone">
+                  Home Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempHomePhone"
+                  name="homePhone"
+                  value={tempMember.homePhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter home phone"
+                  aria-invalid={!!errors.tempHomePhone}
+                  aria-describedby={errors.tempHomePhone ? "tempHomePhone-error" : undefined}
+                />
+                {errors.tempHomePhone && (
+                  <div id="tempHomePhone-error" className="error-message">
+                    {errors.tempHomePhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempWorkPhone">
+                  Work Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempWorkPhone"
+                  name="workPhone"
+                  value={tempMember.workPhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter work phone"
+                  aria-invalid={!!errors.tempWorkPhone}
+                  aria-describedby={errors.tempWorkPhone ? "tempWorkPhone-error" : undefined}
+                />
+                {errors.tempWorkPhone && (
+                  <div id="tempWorkPhone-error" className="error-message">
+                    {errors.tempWorkPhone}
+                  </div>
+                )}
+              </div>
+            </div>
+            
             <div className="form-actions">
               <button 
                 type="button" 
@@ -1144,6 +1386,94 @@ function EnrollmentForm() {
                 {errors.tempGender && (
                   <div id="tempGender-error" className="error-message">
                     {errors.tempGender}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tempEmail">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="tempEmail"
+                  name="email"
+                  value={tempMember.email}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter email address"
+                  aria-invalid={!!errors.tempEmail}
+                  aria-describedby={errors.tempEmail ? "tempEmail-error" : undefined}
+                />
+                {errors.tempEmail && (
+                  <div id="tempEmail-error" className="error-message">
+                    {errors.tempEmail}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="tempCellPhone">
+                  Mobile Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempCellPhone"
+                  name="cellPhone"
+                  value={tempMember.cellPhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter mobile phone"
+                  aria-invalid={!!errors.tempCellPhone}
+                  aria-describedby={errors.tempCellPhone ? "tempCellPhone-error" : undefined}
+                />
+                {errors.tempCellPhone && (
+                  <div id="tempCellPhone-error" className="error-message">
+                    {errors.tempCellPhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempHomePhone">
+                  Home Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempHomePhone"
+                  name="homePhone"
+                  value={tempMember.homePhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter home phone"
+                  aria-invalid={!!errors.tempHomePhone}
+                  aria-describedby={errors.tempHomePhone ? "tempHomePhone-error" : undefined}
+                />
+                {errors.tempHomePhone && (
+                  <div id="tempHomePhone-error" className="error-message">
+                    {errors.tempHomePhone}
+                  </div>
+                )}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="tempWorkPhone">
+                  Work Phone
+                </label>
+                <input
+                  type="tel"
+                  id="tempWorkPhone"
+                  name="workPhone"
+                  value={tempMember.workPhone}
+                  onChange={handleTempMemberChange}
+                  placeholder="Enter work phone"
+                  aria-invalid={!!errors.tempWorkPhone}
+                  aria-describedby={errors.tempWorkPhone ? "tempWorkPhone-error" : undefined}
+                />
+                {errors.tempWorkPhone && (
+                  <div id="tempWorkPhone-error" className="error-message">
+                    {errors.tempWorkPhone}
                   </div>
                 )}
               </div>
