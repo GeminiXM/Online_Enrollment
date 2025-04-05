@@ -19,6 +19,71 @@ const SPECIALTY_MEMBERSHIP_MAP = {
   student: 'Y'  // For student/young professional
 };
 
+// Add these helper functions after the constants and before the EnrollmentForm function
+const calculateAge = (dateOfBirth) => {
+  if (!dateOfBirth) return null;
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+
+const validateAgeForMembershipType = (dateOfBirth, membershipType) => {
+  const age = calculateAge(dateOfBirth);
+  if (age === null) return "Date of birth is required";
+
+  // Get the membership type value from the SPECIALTY_MEMBERSHIP_MAP
+  const membershipTypeValue = membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : "";
+
+  switch (membershipTypeValue) {
+    case "": // Standard
+      if (age < 30) return `You are ${age} years old. Standard membership requires you to be between 30-64 years old.`;
+      if (age > 64) return `You are ${age} years old. Standard membership requires you to be between 30-64 years old.`;
+      break;
+    case "Y": // Student/Young Professional
+      if (age < 18) return `You are ${age} years old. Student/Young Professional membership requires you to be between 18-29 years old.`;
+      if (age > 29) return `You are ${age} years old. Student/Young Professional membership requires you to be between 18-29 years old.`;
+      break;
+    case "J": // Junior
+      if (age >= 18) return `You are ${age} years old. Junior membership is only for those under 18 years old.`;
+      break;
+    case "S": // Senior
+      if (age < 65) return `You are ${age} years old. Senior membership requires you to be 65 years or older.`;
+      break;
+    default:
+      return "Please select a membership type";
+  }
+  return null;
+};
+
+const validateAdultAge = (dateOfBirth) => {
+  const age = calculateAge(dateOfBirth);
+  if (age === null) return "Date of birth is required";
+  if (age < 18) return `You are ${age} years old. Adult members must be 18 or older.`;
+  return null;
+};
+
+const validateChildAge = (dateOfBirth) => {
+  const age = calculateAge(dateOfBirth);
+  if (age === null) return "Date of birth is required";
+  if (age < 0) return "Invalid date of birth";
+  if (age > 11) return `You are ${age} years old. Child members must be 11 or younger.`;
+  return null;
+};
+
+const validateYouthAge = (dateOfBirth) => {
+  const age = calculateAge(dateOfBirth);
+  if (age === null) return "Date of birth is required";
+  if (age < 12) return `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+  if (age > 20) return `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+  return null;
+};
+
 function EnrollmentForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -94,17 +159,22 @@ function EnrollmentForm() {
 
   // State for temporary family member data
   const [tempMember, setTempMember] = useState({
-    type: "",
     firstName: "",
     middleInitial: "",
     lastName: "",
     dateOfBirth: "",
-    gender: "",
+    gender: "default", // Set default value here
     email: "",
     cellPhone: "",
     homePhone: "",
     workPhone: "",
-    role: "S" // Default to secondary member
+    relationship: "",
+    isGuardian: false,
+    guardianFirstName: "",
+    guardianLastName: "",
+    guardianEmail: "",
+    guardianPhone: "",
+    guardianRelationship: ""
   });
 
   // An array of states in the US for the dropdown
@@ -118,6 +188,7 @@ function EnrollmentForm() {
 
   // Gender options for the dropdown
   const genderOptions = [
+    { value: "default", label: "Select gender" },
     { value: "M", label: "Male" },
     { value: "F", label: "Female" },
     { value: "", label: "Prefer not to say" }
@@ -151,10 +222,32 @@ function EnrollmentForm() {
         ...formData,
         [name]: value
       });
+      
+      // Validate age immediately when date of birth is entered
+      if (name === 'dateOfBirth' && value) {
+        const ageError = validateAgeForMembershipType(value, membershipType);
+        if (ageError) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: ageError
+          }));
+          
+          // Only show membership type modal if we have a complete date and membership type
+          if (value && membershipType) {
+            setShowMembershipTypeModal(true);
+          }
+        } else {
+          // Clear the error if validation passes
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: null
+          }));
+        }
+      }
     }
     
-    // Clear the error for this field when user starts typing
-    if (errors[name]) {
+    // Only clear errors for fields other than dateOfBirth
+    if (errors[name] && name !== 'dateOfBirth') {
       setErrors({
         ...errors,
         [name]: null
@@ -179,12 +272,67 @@ function EnrollmentForm() {
       });
     }
     
-    // Clear the error for this field when user starts typing
-    if (errors[`temp${name.charAt(0).toUpperCase() + name.slice(1)}`]) {
-      setErrors({
-        ...errors,
+    // For date of birth, only validate when we have a complete date
+    if (name === "dateOfBirth") {
+      // Only validate if we have a complete date (YYYY-MM-DD)
+      // Check if the date is in the correct format and all parts are present and valid
+      const dateParts = value.split('-');
+      
+      // Check if we have all parts and they're the right length
+      const hasAllParts = dateParts.length === 3 && 
+                         dateParts[0].length === 4 && 
+                         dateParts[1].length === 2 && 
+                         dateParts[2].length === 2;
+                         
+      if (hasAllParts) {
+        // Convert to numbers and validate ranges
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]);
+        const day = parseInt(dateParts[2]);
+        
+        // Only validate if we have a valid date (real year, valid month and day)
+        const isValidDate = year > 1900 && year <= new Date().getFullYear() &&
+                           month >= 1 && month <= 12 &&
+                           day >= 1 && day <= 31;
+
+        if (value && isValidDate) {
+          let ageError = null;
+          
+          // Determine which validation function to use based on the active tab
+          switch (activeTab) {
+            case 'new_adult':
+              ageError = validateAdultAge(value);
+              break;
+            case 'child':
+              ageError = validateChildAge(value);
+              break;
+            case 'youth':
+              ageError = validateYouthAge(value);
+              break;
+            default:
+              break;
+          }
+          
+          if (ageError) {
+            setErrors(prevErrors => ({
+              ...prevErrors,
+              tempDateOfBirth: ageError
+            }));
+          } else {
+            // Only clear the date of birth error if validation passes
+            setErrors(prevErrors => ({
+              ...prevErrors,
+              tempDateOfBirth: null
+            }));
+          }
+        }
+      }
+    } else if (name !== 'dateOfBirth') {
+      // For non-date fields, clear their specific errors when changed
+      setErrors(prevErrors => ({
+        ...prevErrors,
         [`temp${name.charAt(0).toUpperCase() + name.slice(1)}`]: null
-      });
+      }));
     }
   };
   
@@ -207,7 +355,7 @@ function EnrollmentForm() {
       newErrors.tempDateOfBirth = "Date of birth is required";
     }
     
-    if (!tempMember.gender) {
+    if (!tempMember.gender || tempMember.gender === "default") {
       newErrors.tempGender = "Gender is required";
     }
     
@@ -227,6 +375,25 @@ function EnrollmentForm() {
     
     if (tempMember.workPhone && !/^\d{10}$/.test(tempMember.workPhone.replace(/\D/g, ''))) {
       newErrors.tempWorkPhone = "Phone number must contain 10 digits";
+    }
+    
+    // Add age validation based on member type
+    if (tempMember.dateOfBirth) {
+      let ageError = null;
+      switch (type) {
+        case 'adult':
+          ageError = validateAdultAge(tempMember.dateOfBirth);
+          break;
+        case 'child':
+          ageError = validateChildAge(tempMember.dateOfBirth);
+          break;
+        case 'youth':
+          ageError = validateYouthAge(tempMember.dateOfBirth);
+          break;
+      }
+      if (ageError) {
+        newErrors.tempDateOfBirth = ageError;
+      }
     }
     
     // If there are validation errors, display them and don't add the member
@@ -267,17 +434,22 @@ function EnrollmentForm() {
     
     // Reset the temporary member data
     setTempMember({
-      type: "",
       firstName: "",
       middleInitial: "",
       lastName: "",
       dateOfBirth: "",
-      gender: "",
+      gender: "default", // Set default value here
       email: "",
       cellPhone: "",
       homePhone: "",
       workPhone: "",
-      role: "S" // Default to secondary member
+      relationship: "",
+      isGuardian: false,
+      guardianFirstName: "",
+      guardianLastName: "",
+      guardianEmail: "",
+      guardianPhone: "",
+      guardianRelationship: ""
     });
     
     // Clear all temporary member errors
@@ -370,31 +542,15 @@ function EnrollmentForm() {
       newErrors.workPhone = "Phone number must contain 10 digits";
     }
     
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = "Date of birth is required";
-    } else if (!isJuniorMembership) {
-      // Check if the person is at least 18 years old (only for non-Junior memberships)
-      const dob = new Date(formData.dateOfBirth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const monthDiff = today.getMonth() - dob.getMonth();
-      
-      if (age < 18 || (age === 18 && monthDiff < 0) || (age === 18 && monthDiff === 0 && today.getDate() < dob.getDate())) {
-        newErrors.dateOfBirth = "You must be at least 18 years old to enroll";
-      }
-    } else {
-      // For Junior memberships, check that the member is under 18
-      const dob = new Date(formData.dateOfBirth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const monthDiff = today.getMonth() - dob.getMonth();
-      
-      if (age > 18 || (age === 18 && monthDiff > 0) || (age === 18 && monthDiff === 0 && today.getDate() >= dob.getDate())) {
-        newErrors.dateOfBirth = "Junior membership is only for those under 18 years old";
+    // Add age validation for primary member
+    if (formData.dateOfBirth) {
+      const ageError = validateAgeForMembershipType(formData.dateOfBirth, formData.membershipType);
+      if (ageError) {
+        newErrors.dateOfBirth = ageError;
       }
     }
     
-    if (!formData.gender) {
+    if (!formData.gender || formData.gender === "default") {
       newErrors.gender = "Gender is required";
     }
     
@@ -447,7 +603,7 @@ function EnrollmentForm() {
         }
       }
       
-      if (!formData.guardianGender) {
+      if (!formData.guardianGender || formData.guardianGender === "default") {
         newErrors.guardianGender = "Guardian's gender is required";
       }
       
@@ -940,7 +1096,6 @@ function EnrollmentForm() {
                   aria-invalid={!!errors.tempGender}
                   aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
                 >
-                  <option value="">Select gender</option>
                   {genderOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -1156,7 +1311,6 @@ function EnrollmentForm() {
                   aria-invalid={!!errors.tempGender}
                   aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
                 >
-                  <option value="">Select gender</option>
                   {genderOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -1372,7 +1526,6 @@ function EnrollmentForm() {
                   aria-invalid={!!errors.tempGender}
                   aria-describedby={errors.tempGender ? "tempGender-error" : undefined}
                 >
-                  <option value="">Select gender</option>
                   {genderOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -1688,7 +1841,6 @@ function EnrollmentForm() {
                   aria-invalid={!!errors.gender}
                   aria-describedby={errors.gender ? "gender-error" : undefined}
                 >
-                  <option value="">Select gender</option>
                   {genderOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
@@ -1948,7 +2100,6 @@ function EnrollmentForm() {
                       aria-invalid={!!errors.guardianGender}
                       aria-describedby={errors.guardianGender ? "guardianGender-error" : undefined}
                     >
-                      <option value="">Select gender</option>
                       {genderOptions.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
