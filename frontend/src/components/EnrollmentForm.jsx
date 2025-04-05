@@ -157,8 +157,46 @@ function EnrollmentForm() {
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // State for temporary family member data
-  const [tempMember, setTempMember] = useState({
+  // Create separate state variables for each member type
+  const [adultMember, setAdultMember] = useState({
+    firstName: "",
+    middleInitial: "",
+    lastName: "",
+    dateOfBirth: "",
+    gender: "default", // Set default value here
+    email: "",
+    cellPhone: "",
+    homePhone: "",
+    workPhone: "",
+    relationship: "",
+    isGuardian: false,
+    guardianFirstName: "",
+    guardianLastName: "",
+    guardianEmail: "",
+    guardianPhone: "",
+    guardianRelationship: ""
+  });
+
+  const [childMember, setChildMember] = useState({
+    firstName: "",
+    middleInitial: "",
+    lastName: "",
+    dateOfBirth: "",
+    gender: "default", // Set default value here
+    email: "",
+    cellPhone: "",
+    homePhone: "",
+    workPhone: "",
+    relationship: "",
+    isGuardian: false,
+    guardianFirstName: "",
+    guardianLastName: "",
+    guardianEmail: "",
+    guardianPhone: "",
+    guardianRelationship: ""
+  });
+
+  const [youthMember, setYouthMember] = useState({
     firstName: "",
     middleInitial: "",
     lastName: "",
@@ -255,19 +293,39 @@ function EnrollmentForm() {
     }
   };
   
-  // Handle input changes for temporary member data
+  // Handle input changes for temporary member data based on the active tab
   const handleTempMemberChange = (e) => {
     const { name, value } = e.target;
     
+    // Determine which state to update based on the active tab
+    let currentMember, setCurrentMember;
+    
+    switch (activeTab) {
+      case 'new_adult':
+        currentMember = adultMember;
+        setCurrentMember = setAdultMember;
+        break;
+      case 'child':
+        currentMember = childMember;
+        setCurrentMember = setChildMember;
+        break;
+      case 'youth':
+        currentMember = youthMember;
+        setCurrentMember = setYouthMember;
+        break;
+      default:
+        return;
+    }
+    
     // Convert gender to uppercase
     if (name === "gender") {
-      setTempMember({
-        ...tempMember,
+      setCurrentMember({
+        ...currentMember,
         [name]: value.toUpperCase()
       });
     } else {
-      setTempMember({
-        ...tempMember,
+      setCurrentMember({
+        ...currentMember,
         [name]: value
       });
     }
@@ -338,57 +396,75 @@ function EnrollmentForm() {
   
   // Add a new family member
   const addFamilyMember = (type) => {
-    console.log("Adding family member:", type, tempMember);
+    console.log("Adding family member:", type);
+    
+    // Get the appropriate member data based on type
+    let memberData;
+    switch (type) {
+      case 'adult':
+        memberData = adultMember;
+        break;
+      case 'child':
+        memberData = childMember;
+        break;
+      case 'youth':
+        memberData = youthMember;
+        break;
+      default:
+        return;
+    }
+    
+    console.log("Member data:", memberData);
     
     // Validate required fields
     const newErrors = {};
     
-    if (!tempMember.firstName) {
+    if (!memberData.firstName) {
       newErrors.tempFirstName = "First name is required";
     }
     
-    if (!tempMember.lastName) {
+    if (!memberData.lastName) {
       newErrors.tempLastName = "Last name is required";
     }
     
-    if (!tempMember.dateOfBirth) {
+    if (!memberData.dateOfBirth) {
       newErrors.tempDateOfBirth = "Date of birth is required";
     }
     
-    if (!tempMember.gender || tempMember.gender === "default") {
+    if (!memberData.gender || memberData.gender === "default") {
       newErrors.tempGender = "Gender is required";
     }
     
     // Validate email format if provided
-    if (tempMember.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(tempMember.email.trim())) {
+    if (memberData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(memberData.email.trim())) {
       newErrors.tempEmail = "Email is not valid";
     }
     
     // Validate phone number formats if provided
-    if (tempMember.cellPhone && !/^\d{10}$/.test(tempMember.cellPhone.replace(/\D/g, ''))) {
+    if (memberData.cellPhone && !/^\d{10}$/.test(memberData.cellPhone.replace(/\D/g, ''))) {
       newErrors.tempCellPhone = "Phone number must contain 10 digits";
     }
     
-    if (tempMember.homePhone && !/^\d{10}$/.test(tempMember.homePhone.replace(/\D/g, ''))) {
+    if (memberData.homePhone && !/^\d{10}$/.test(memberData.homePhone.replace(/\D/g, ''))) {
       newErrors.tempHomePhone = "Phone number must contain 10 digits";
     }
     
-    if (tempMember.workPhone && !/^\d{10}$/.test(tempMember.workPhone.replace(/\D/g, ''))) {
+    if (memberData.workPhone && !/^\d{10}$/.test(memberData.workPhone.replace(/\D/g, ''))) {
       newErrors.tempWorkPhone = "Phone number must contain 10 digits";
     }
     
     // Add age validation based on member type
-    if (tempMember.dateOfBirth) {
+    if (memberData.dateOfBirth) {
       let ageError = null;
       switch (type) {
         case 'adult':
-          ageError = validateAdultAge(tempMember.dateOfBirth);
+          ageError = validateAdultAge(memberData.dateOfBirth);
           break;
         case 'child':
-          ageError = validateChildAge(tempMember.dateOfBirth);
+          ageError = validateChildAge(memberData.dateOfBirth);
           break;
         case 'youth':
-          ageError = validateYouthAge(tempMember.dateOfBirth);
+          ageError = validateYouthAge(memberData.dateOfBirth);
           break;
       }
       if (ageError) {
@@ -414,7 +490,7 @@ function EnrollmentForm() {
     
     // Add the new member to the family members array
     const newMember = {
-      ...tempMember,
+      ...memberData,
       type,
       role, // Set the role explicitly
       id: Date.now() // Use timestamp as a simple unique ID
@@ -432,8 +508,8 @@ function EnrollmentForm() {
       return updatedData;
     });
     
-    // Reset the temporary member data
-    setTempMember({
+    // Reset the appropriate member data based on type
+    const resetMember = {
       firstName: "",
       middleInitial: "",
       lastName: "",
@@ -450,7 +526,19 @@ function EnrollmentForm() {
       guardianEmail: "",
       guardianPhone: "",
       guardianRelationship: ""
-    });
+    };
+    
+    switch (type) {
+      case 'adult':
+        setAdultMember(resetMember);
+        break;
+      case 'child':
+        setChildMember(resetMember);
+        break;
+      case 'youth':
+        setYouthMember(resetMember);
+        break;
+    }
     
     // Clear all temporary member errors
     setErrors(prevErrors => {
@@ -1008,7 +1096,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempFirstName"
                   name="firstName"
-                  value={tempMember.firstName}
+                  value={adultMember.firstName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter first name"
                   aria-required="true"
@@ -1030,7 +1118,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempMiddleInitial"
                   name="middleInitial"
-                  value={tempMember.middleInitial}
+                  value={adultMember.middleInitial}
                   onChange={handleTempMemberChange}
                   placeholder="M.I."
                   maxLength="1"
@@ -1045,7 +1133,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempLastName"
                   name="lastName"
-                  value={tempMember.lastName}
+                  value={adultMember.lastName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter last name"
                   aria-required="true"
@@ -1069,7 +1157,7 @@ function EnrollmentForm() {
                   type="date"
                   id="tempDateOfBirth"
                   name="dateOfBirth"
-                  value={tempMember.dateOfBirth}
+                  value={adultMember.dateOfBirth}
                   onChange={handleTempMemberChange}
                   max={today}
                   aria-required="true"
@@ -1090,7 +1178,7 @@ function EnrollmentForm() {
                 <select
                   id="tempGender"
                   name="gender"
-                  value={tempMember.gender}
+                  value={adultMember.gender}
                   onChange={handleTempMemberChange}
                   aria-required="true"
                   aria-invalid={!!errors.tempGender}
@@ -1117,7 +1205,7 @@ function EnrollmentForm() {
                   type="email"
                   id="tempEmail"
                   name="email"
-                  value={tempMember.email}
+                  value={adultMember.email}
                   onChange={handleTempMemberChange}
                   placeholder="Enter email address"
                   aria-invalid={!!errors.tempEmail}
@@ -1140,7 +1228,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempCellPhone"
                   name="cellPhone"
-                  value={tempMember.cellPhone}
+                  value={adultMember.cellPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter mobile phone"
                   aria-invalid={!!errors.tempCellPhone}
@@ -1161,7 +1249,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempHomePhone"
                   name="homePhone"
-                  value={tempMember.homePhone}
+                  value={adultMember.homePhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter home phone"
                   aria-invalid={!!errors.tempHomePhone}
@@ -1182,7 +1270,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempWorkPhone"
                   name="workPhone"
-                  value={tempMember.workPhone}
+                  value={adultMember.workPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter work phone"
                   aria-invalid={!!errors.tempWorkPhone}
@@ -1223,7 +1311,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempFirstName"
                   name="firstName"
-                  value={tempMember.firstName}
+                  value={childMember.firstName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter first name"
                   aria-required="true"
@@ -1245,7 +1333,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempMiddleInitial"
                   name="middleInitial"
-                  value={tempMember.middleInitial}
+                  value={childMember.middleInitial}
                   onChange={handleTempMemberChange}
                   placeholder="M.I."
                   maxLength="1"
@@ -1260,7 +1348,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempLastName"
                   name="lastName"
-                  value={tempMember.lastName}
+                  value={childMember.lastName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter last name"
                   aria-required="true"
@@ -1284,7 +1372,7 @@ function EnrollmentForm() {
                   type="date"
                   id="tempDateOfBirth"
                   name="dateOfBirth"
-                  value={tempMember.dateOfBirth}
+                  value={childMember.dateOfBirth}
                   onChange={handleTempMemberChange}
                   placeholder="MM/DD/YYYY"
                   aria-required="true"
@@ -1305,7 +1393,7 @@ function EnrollmentForm() {
                 <select
                   id="tempGender"
                   name="gender"
-                  value={tempMember.gender}
+                  value={childMember.gender}
                   onChange={handleTempMemberChange}
                   aria-required="true"
                   aria-invalid={!!errors.tempGender}
@@ -1332,7 +1420,7 @@ function EnrollmentForm() {
                   type="email"
                   id="tempEmail"
                   name="email"
-                  value={tempMember.email}
+                  value={childMember.email}
                   onChange={handleTempMemberChange}
                   placeholder="Enter email address"
                   aria-invalid={!!errors.tempEmail}
@@ -1355,7 +1443,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempCellPhone"
                   name="cellPhone"
-                  value={tempMember.cellPhone}
+                  value={childMember.cellPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter mobile phone"
                   aria-invalid={!!errors.tempCellPhone}
@@ -1376,7 +1464,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempHomePhone"
                   name="homePhone"
-                  value={tempMember.homePhone}
+                  value={childMember.homePhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter home phone"
                   aria-invalid={!!errors.tempHomePhone}
@@ -1397,7 +1485,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempWorkPhone"
                   name="workPhone"
-                  value={tempMember.workPhone}
+                  value={childMember.workPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter work phone"
                   aria-invalid={!!errors.tempWorkPhone}
@@ -1438,7 +1526,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempFirstName"
                   name="firstName"
-                  value={tempMember.firstName}
+                  value={youthMember.firstName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter first name"
                   aria-required="true"
@@ -1460,7 +1548,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempMiddleInitial"
                   name="middleInitial"
-                  value={tempMember.middleInitial}
+                  value={youthMember.middleInitial}
                   onChange={handleTempMemberChange}
                   placeholder="M.I."
                   maxLength="1"
@@ -1475,7 +1563,7 @@ function EnrollmentForm() {
                   type="text"
                   id="tempLastName"
                   name="lastName"
-                  value={tempMember.lastName}
+                  value={youthMember.lastName}
                   onChange={handleTempMemberChange}
                   placeholder="Enter last name"
                   aria-required="true"
@@ -1499,7 +1587,7 @@ function EnrollmentForm() {
                   type="date"
                   id="tempDateOfBirth"
                   name="dateOfBirth"
-                  value={tempMember.dateOfBirth}
+                  value={youthMember.dateOfBirth}
                   onChange={handleTempMemberChange}
                   placeholder="MM/DD/YYYY"
                   aria-required="true"
@@ -1520,7 +1608,7 @@ function EnrollmentForm() {
                 <select
                   id="tempGender"
                   name="gender"
-                  value={tempMember.gender}
+                  value={youthMember.gender}
                   onChange={handleTempMemberChange}
                   aria-required="true"
                   aria-invalid={!!errors.tempGender}
@@ -1547,7 +1635,7 @@ function EnrollmentForm() {
                   type="email"
                   id="tempEmail"
                   name="email"
-                  value={tempMember.email}
+                  value={youthMember.email}
                   onChange={handleTempMemberChange}
                   placeholder="Enter email address"
                   aria-invalid={!!errors.tempEmail}
@@ -1570,7 +1658,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempCellPhone"
                   name="cellPhone"
-                  value={tempMember.cellPhone}
+                  value={youthMember.cellPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter mobile phone"
                   aria-invalid={!!errors.tempCellPhone}
@@ -1591,7 +1679,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempHomePhone"
                   name="homePhone"
-                  value={tempMember.homePhone}
+                  value={youthMember.homePhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter home phone"
                   aria-invalid={!!errors.tempHomePhone}
@@ -1612,7 +1700,7 @@ function EnrollmentForm() {
                   type="tel"
                   id="tempWorkPhone"
                   name="workPhone"
-                  value={tempMember.workPhone}
+                  value={youthMember.workPhone}
                   onChange={handleTempMemberChange}
                   placeholder="Enter work phone"
                   aria-invalid={!!errors.tempWorkPhone}
