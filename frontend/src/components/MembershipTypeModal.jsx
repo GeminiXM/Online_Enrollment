@@ -4,10 +4,10 @@ import "./MembershipTypeModal.css";
 
 const membershipTypes = [
   {
-    id: "senior",
-    title: "Senior",
-    description: "For adults 65 years and older",
-    icon: "👵🏼"
+    id: "standard",
+    title: "Standard Adult",
+    description: "30-64 years old",
+    icon: "🏋️‍♀️"
   },
   {
     id: "young-professional",
@@ -21,11 +21,12 @@ const membershipTypes = [
     description: "Under 18 years old (requires Legal Guardian)",
     icon: "👦🏽"
   },
-  {
-    id: "standard",
-    title: "Standard Adult",
-    description: "30-64 years old",
-    icon: "🏋️‍♀️"
+
+    {
+    id: "senior",
+    title: "Senior",
+    description: "For adults 65 years and older",
+    icon: "👵🏼"
   }
 ];
 

@@ -904,7 +904,7 @@ function EnrollmentForm() {
               </div>
             </div>
             
-            <div className="form-row">
+            <div className="form-row birthdate-gender-email">
               <div className="form-group dob-field">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
@@ -953,9 +953,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-            </div>
-            
-            <div className="form-row">
+
               <div className="form-group">
                 <label htmlFor="tempEmail">
                   Email
@@ -977,11 +975,11 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-            
-            <div className="form-row">
+
+            <div className="form-row phone-numbers">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
-                  Mobile Phone
+                  Cell Phone
                 </label>
                 <input
                   type="tel"
@@ -1122,7 +1120,7 @@ function EnrollmentForm() {
               </div>
             </div>
             
-            <div className="form-row">
+            <div className="form-row birthdate-gender-email">
               <div className="form-group dob-field">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
@@ -1171,9 +1169,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-            </div>
-            
-            <div className="form-row">
+
               <div className="form-group">
                 <label htmlFor="tempEmail">
                   Email
@@ -1195,11 +1191,11 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-            
-            <div className="form-row">
+
+            <div className="form-row phone-numbers">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
-                  Mobile Phone
+                  Cell Phone
                 </label>
                 <input
                   type="tel"
@@ -1340,7 +1336,7 @@ function EnrollmentForm() {
               </div>
             </div>
             
-            <div className="form-row">
+            <div className="form-row birthdate-gender-email">
               <div className="form-group dob-field">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
@@ -1389,9 +1385,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-            </div>
-            
-            <div className="form-row">
+
               <div className="form-group">
                 <label htmlFor="tempEmail">
                   Email
@@ -1413,11 +1407,11 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-            
-            <div className="form-row">
+
+            <div className="form-row phone-numbers">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
-                  Mobile Phone
+                  Cell Phone
                 </label>
                 <input
                   type="tel"

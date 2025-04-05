@@ -1076,4 +1076,38 @@ button:focus-visible {
 
 .change-membership-button:hover {
   background-color: var(--primary-dark);
+}
+
+/* Form row for birthdate, gender, and email */
+.form-row.birthdate-gender-email {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row.birthdate-gender-email .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-row.birthdate-gender-email .form-group.dob-field {
+  flex: 1.2;
+}
+
+.form-row.birthdate-gender-email .form-group.gender-field {
+  flex: 0.8;
+}
+
+/* Form row for phone numbers */
+.form-row.phone-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.form-row.phone-numbers .form-group {
+  flex: 1;
+  min-width: 200px;
 } 
