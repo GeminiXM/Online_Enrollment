@@ -1,0 +1,10 @@
+2025-04-02 18:01:36:136 [31merror[39m: [31mError connecting to database: [IBM][CLI Driver] SQL1024N  A database connection does not exist.  SQLSTATE=08003[39m
+[31m[39m
+2025-04-02 18:01:36:136 [31merror[39m: [31mError processing enrollment submission[39m
+2025-04-02 18:10:36:1036 [31merror[39m: [31mError connecting to database:[39m
+2025-04-02 18:10:36:1036 [31merror[39m: [31mError testing database connection[39m
+2025-04-02 18:13:11:1311 [31merror[39m: [31mError connecting to database:[39m
+2025-04-02 18:13:11:1311 [31merror[39m: [31mError testing database connection[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError executing query:[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError generating customer code[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError processing enrollment submission[39m

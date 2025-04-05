@@ -6,3 +6,38 @@
 2025-03-14 07:50:30:5030 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-02 16:23:24:2324 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-02 17:18:53:1853 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 17:41:13:4113 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 17:47:31:4731 [32minfo[39m: [32mNew enrollment submission[39m
+2025-04-02 17:50:27:5027 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 17:53:35:5335 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 17:53:49:5349 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 17:59:42:5942 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 18:00:05:05 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 18:01:36:136 [31merror[39m: [31mError connecting to database: [IBM][CLI Driver] SQL1024N  A database connection does not exist.  SQLSTATE=08003[39m
+[31m[39m
+2025-04-02 18:01:36:136 [31merror[39m: [31mError processing enrollment submission[39m
+2025-04-02 18:05:23:523 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 18:08:49:849 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 18:09:35:935 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-02 18:10:36:1036 [31merror[39m: [31mError connecting to database:[39m
+2025-04-02 18:10:36:1036 [31merror[39m: [31mError testing database connection[39m
+2025-04-02 18:11:15:1115 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-02 18:12:11:1211 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-02 18:13:11:1311 [31merror[39m: [31mError connecting to database:[39m
+2025-04-02 18:13:11:1311 [31merror[39m: [31mError testing database connection[39m
+2025-04-02 18:13:30:1330 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-04 20:42:52:4252 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-04 20:44:41:4441 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-04 20:44:41:4441 [32minfo[39m: [32mConnected to database for club 201[39m
+2025-04-04 20:46:21:4621 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-04 20:47:54:4754 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-04 20:50:29:5029 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-04 20:50:29:5029 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError executing query:[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError generating customer code[39m
+2025-04-04 20:50:29:5029 [31merror[39m: [31mError processing enrollment submission[39m
+2025-04-04 20:53:15:5315 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-04 20:53:31:5331 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-04 20:53:31:5331 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-04-04 20:53:31:5331 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-04 20:53:31:5331 [32minfo[39m: [32mConnected to database for club 254[39m

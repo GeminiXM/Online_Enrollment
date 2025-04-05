@@ -5,6 +5,8 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import logger from "../utils/logger.js";
+import { submitEnrollment } from "../controllers/enrollmentController.js";
+import { pool } from "../config/database.js";
 
 const router = express.Router();
 
@@ -30,6 +32,20 @@ const validateEnrollmentData = [
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format"),
+  body("dateOfBirth")
+    .trim()
+    .notEmpty()
+    .withMessage("Date of birth is required")
+    .isDate()
+    .withMessage("Invalid date format"),
+  body("gender").trim().notEmpty().withMessage("Gender is required"),
+  body("requestedStartDate")
+    .trim()
+    .notEmpty()
+    .withMessage("Requested start date is required")
+    .isDate()
+    .withMessage("Invalid date format"),
+  body("club").trim().notEmpty().withMessage("Club is required"),
 
   // Optional fields with validation if provided
   body("cellPhone")
@@ -44,38 +60,43 @@ const validateEnrollmentData = [
     .optional({ checkFalsy: true })
     .matches(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)
     .withMessage("Invalid work phone format"),
-  body("dateOfBirth")
-    .optional({ checkFalsy: true })
-    .isDate()
-    .withMessage("Invalid date format"),
 
-  // Emergency contact validation - if one is provided, both are required
-  body("emergencyContactPhone")
-    .optional({ checkFalsy: true })
-    .custom((value, { req }) => {
-      if (value && !req.body.emergencyContactName) {
-        throw new Error(
-          "Emergency contact name is required if phone is provided"
-        );
-      }
-      if (value) {
-        const phoneRegex = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-        if (!phoneRegex.test(value)) {
-          throw new Error("Invalid emergency contact phone format");
-        }
-      }
-      return true;
-    }),
-  body("emergencyContactName")
-    .optional({ checkFalsy: true })
-    .custom((value, { req }) => {
-      if (value && !req.body.emergencyContactPhone) {
-        throw new Error(
-          "Emergency contact phone is required if name is provided"
-        );
-      }
-      return true;
-    }),
+  // Family members validation
+  body("familyMembers")
+    .optional()
+    .isArray()
+    .withMessage("Family members must be an array"),
+  body("familyMembers.*.firstName")
+    .if(body("familyMembers").exists())
+    .trim()
+    .notEmpty()
+    .withMessage("Family member first name is required"),
+  body("familyMembers.*.lastName")
+    .if(body("familyMembers").exists())
+    .trim()
+    .notEmpty()
+    .withMessage("Family member last name is required"),
+  body("familyMembers.*.dateOfBirth")
+    .if(body("familyMembers").exists())
+    .trim()
+    .notEmpty()
+    .withMessage("Family member date of birth is required")
+    .isDate()
+    .withMessage("Invalid family member date format"),
+  body("familyMembers.*.gender")
+    .if(body("familyMembers").exists())
+    .trim()
+    .notEmpty()
+    .withMessage("Family member gender is required"),
+  body("familyMembers.*.role")
+    .if(body("familyMembers").exists())
+    .trim()
+    .notEmpty()
+    .withMessage("Family member role is required")
+    .isIn(["S", "D"])
+    .withMessage(
+      "Family member role must be either 'S' (secondary) or 'D' (dependent)"
+    ),
 ];
 
 /**
@@ -94,52 +115,12 @@ router.post("/", validateEnrollmentData, async (req, res) => {
       });
     }
 
-    // Extract enrollment data from request body
-    const enrollmentData = {
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
-      address: req.body.address,
-      city: req.body.city,
-      state: req.body.state,
-      zipCode: req.body.zipCode,
-      email: req.body.email,
-      cellPhone: req.body.cellPhone,
-      homePhone: req.body.homePhone,
-      workPhone: req.body.workPhone,
-      dateOfBirth: req.body.dateOfBirth,
-      gender: req.body.gender,
-      emergencyContactName: req.body.emergencyContactName,
-      emergencyContactPhone: req.body.emergencyContactPhone,
-      // Add timestamp for when the enrollment was submitted
-      submittedAt: new Date(),
-    };
-
-    // TODO: In a real application, you would:
-    // 1. Connect to your Informix database
-    // 2. Call the appropriate stored procedure to insert the enrollment data
-    // 3. Handle any database errors
-
-    // For now, we'll just log the data and return a success response
-    logger.info("New enrollment submission", {
-      email: enrollmentData.email,
-      name: `${enrollmentData.firstName} ${enrollmentData.lastName}`,
-    });
-
-    // Simulate database processing delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Return success response with enrollment ID (simulated)
-    return res.status(201).json({
-      success: true,
-      message: "Enrollment submitted successfully",
-      data: {
-        enrollmentId: `ENR-${Date.now()}`, // Generate a unique ID
-        submittedAt: enrollmentData.submittedAt,
-      },
-    });
+    // Call the controller to handle the submission
+    return await submitEnrollment(req, res);
   } catch (error) {
-    logger.error("Error processing enrollment submission", {
+    logger.error("Error in enrollment route", {
       error: error.message,
+      stack: error.stack,
     });
     return res.status(500).json({
       success: false,
@@ -180,6 +161,38 @@ router.get("/status/:id", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while retrieving the enrollment status.",
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/test-connection/:clubId
+ * @desc Test database connection for a specific club
+ * @access Public
+ */
+router.get("/test-connection/:clubId", async (req, res) => {
+  try {
+    const { clubId } = req.params;
+
+    // Try to get a connection
+    const conn = await pool.getConnection(clubId);
+
+    // If we get here, connection was successful
+    conn.close();
+
+    return res.status(200).json({
+      success: true,
+      message: `Successfully connected to database for club ${clubId}`,
+    });
+  } catch (error) {
+    logger.error("Error testing database connection", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 });
