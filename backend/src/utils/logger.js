@@ -2,9 +2,9 @@
 // This file contains a logging utility for the backend application.
 // It provides consistent logging with appropriate formatting and levels.
 
-import winston from 'winston';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import winston from "winston";
+import path from "path";
+import { fileURLToPath } from "url";
 
 // Get the directory name in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -21,45 +21,57 @@ const levels = {
 
 // Define colors for each level
 const colors = {
-  error: 'red',
-  warn: 'yellow',
-  info: 'green',
-  http: 'magenta',
-  debug: 'blue',
+  error: "red",
+  warn: "yellow",
+  info: "green",
+  http: "magenta",
+  debug: "blue",
 };
 
 // Add colors to winston
 winston.addColors(colors);
 
 // Determine the log level based on environment
-const level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+const level = process.env.NODE_ENV === "production" ? "info" : "debug";
 
 // Define the format for logs
 const format = winston.format.combine(
   // Add timestamp
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
   // Add colors
   winston.format.colorize({ all: true }),
   // Define the format of the message showing the timestamp, the level and the message
-  winston.format.printf(
-    (info) => `${info.timestamp} ${info.level}: ${info.message}`,
-  ),
+  winston.format.printf((info) => {
+    if (typeof info.message === "object") {
+      return `${info.timestamp} ${info.level}: ${JSON.stringify(
+        info.message,
+        null,
+        2
+      )}`;
+    }
+    return `${info.timestamp} ${info.level}: ${info.message}`;
+  })
 );
 
 // Define which transports the logger must use
 const transports = [
-  // Console transport
-  new winston.transports.Console(),
-  
+  // Console transport with more detailed output
+  new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    ),
+  }),
+
   // File transport for all logs
   new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/all.log'),
+    filename: path.join(__dirname, "../../logs/all.log"),
   }),
-  
+
   // File transport for error logs
   new winston.transports.File({
-    filename: path.join(__dirname, '../../logs/error.log'),
-    level: 'error',
+    filename: path.join(__dirname, "../../logs/error.log"),
+    level: "error",
   }),
 ];
 
@@ -72,4 +84,4 @@ const logger = winston.createLogger({
 });
 
 // Export the logger
-export default logger; 
+export default logger;
