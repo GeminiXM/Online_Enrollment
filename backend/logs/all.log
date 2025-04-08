@@ -144,3 +144,38 @@
 2025-04-08 15:02:15:215 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-08 15:40:05:405 [32minfo[39m: [32mServer running on port 5001[39m
 2025-04-08 16:23:28:2328 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-08 16:30:25:3025 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mFamily members data:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mPrimary membership record inserted successfully[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mGenerated customer code:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mInserting primary member record[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mPrimary member record inserted successfully[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mProcessing family members:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mInserting dependent family member:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mDependent family member inserted successfully[39m
+2025-04-08 16:34:25:3425 [32minfo[39m: [32mEnrollment submission completed successfully[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mFamily members data:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mPrimary membership record inserted successfully[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mGenerated customer code:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mInserting primary member record[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mPrimary member record inserted successfully[39m
+2025-04-08 16:41:01:411 [32minfo[39m: [32mEnrollment submission completed successfully[39m
+2025-04-08 17:33:22:3322 [32minfo[39m: [32mServer running on port 5001[39m

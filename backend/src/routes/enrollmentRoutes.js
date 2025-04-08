@@ -5,7 +5,7 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import logger from "../utils/logger.js";
-import { submitEnrollment } from "../controllers/enrollmentController.js";
+import { submitEnrollment, getAddons } from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
 
 const router = express.Router();
@@ -193,6 +193,26 @@ router.get("/test-connection/:clubId", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/addons
+ * @desc Get addons from the database
+ * @access Public
+ */
+router.get("/addons", async (req, res) => {
+  try {
+    return await getAddons(req, res);
+  } catch (error) {
+    logger.error("Error in addons route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving addons. Please try again later.",
     });
   }
 });

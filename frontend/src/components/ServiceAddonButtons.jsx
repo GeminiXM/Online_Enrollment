@@ -26,6 +26,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
       {serviceAddons.map((addon, index) => (
         <button
           key={index}
+          type="button"
           className={`addon-button ${
             selectedAddons.some(
               (item) => item.invtr_desc === addon.invtr_desc
@@ -48,4 +49,4 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
   );
 };
 
-export default ServiceAddonButtons; 
+export default ServiceAddonButtons;

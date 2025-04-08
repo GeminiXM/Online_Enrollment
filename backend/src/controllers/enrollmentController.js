@@ -467,3 +467,47 @@ export const submitEnrollment = async (req, res) => {
     });
   }
 };
+
+
+/**
+ * @desc Get addons from the database
+ * @route GET /api/enrollment/addons
+ * @access Public
+ */
+export const getAddons = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for addons");
+
+    // Get the club ID from the query parameters
+    const clubId = req.query.clubId || "001"; // Default to "001" if not provided
+
+    logger.info(`Fetching addons for club ID: ${clubId}`);
+
+    // Execute the stored procedure on the specific database for this club
+    const addons = await pool.query(
+      clubId,
+      `EXECUTE PROCEDURE web_proc_GetAddons()`
+    );
+
+    logger.info("Addons retrieved successfully", {
+      count: addons.length,
+      clubId,
+    });
+
+    res.status(200).json({
+      success: true,
+      addons,
+    });
+  } catch (error) {
+    logger.error("Error in getAddons:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving addons",
+      error: error.message,
+    });
+  }
+};

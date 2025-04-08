@@ -24,6 +24,7 @@ const AddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
       {childAddons.map((addon, index) => (
         <button
           key={index}
+          type="button"
           className={`addon-button ${
             selectedAddons.some(
               (item) => item.invtr_desc === addon.invtr_desc
@@ -46,4 +47,4 @@ const AddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
   );
 };
 
-export default AddonButtons; 
+export default AddonButtons;
