@@ -371,51 +371,22 @@ function EnrollmentForm() {
         [name]: value
       });
       
-      // Validate age only when date of birth is complete
+      // Validate age immediately when date of birth is entered
       if (name === 'dateOfBirth' && value) {
-        // Only validate if we have a complete date (YYYY-MM-DD)
-        const dateParts = value.split('-');
-        
-        // Check if we have all parts and they're the right length
-        const hasAllParts = dateParts.length === 3 && 
-                           dateParts[0].length === 4 && 
-                           dateParts[1].length === 2 && 
-                           dateParts[2].length === 2;
-        
-        if (hasAllParts) {
-          // Convert to numbers and validate ranges
-          const year = parseInt(dateParts[0]);
-          const month = parseInt(dateParts[1]);
-          const day = parseInt(dateParts[2]);
+        // Use the membershipType from context, not from formData
+        const ageError = validateAgeForMembershipType(value, membershipType);
+        if (ageError) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: ageError
+          }));
           
-          // Only validate if we have a valid date (real year, valid month and day)
-          const isValidDate = year > 1900 && year <= new Date().getFullYear() &&
-                             month >= 1 && month <= 12 &&
-                             day >= 1 && day <= 31;
-          
-          if (isValidDate) {
-            // Use the membershipType from context, not from formData
-            const ageError = validateAgeForMembershipType(value, membershipType);
-            if (ageError) {
-              setErrors(prevErrors => ({
-                ...prevErrors,
-                dateOfBirth: ageError
-              }));
-              
-              // Only show membership type modal if we have a complete date and membership type
-              if (membershipType) {
-                setShowMembershipTypeModal(true);
-              }
-            } else {
-              // Clear the error if validation passes
-              setErrors(prevErrors => ({
-                ...prevErrors,
-                dateOfBirth: null
-              }));
-            }
+          // Only show membership type modal if we have a complete date and membership type
+          if (value && membershipType) {
+            setShowMembershipTypeModal(true);
           }
         } else {
-          // Clear any existing errors while the user is still typing
+          // Clear the error if validation passes
           setErrors(prevErrors => ({
             ...prevErrors,
             dateOfBirth: null
@@ -424,7 +395,7 @@ function EnrollmentForm() {
       }
     }
     
-    // Clear errors for fields other than dateOfBirth
+    // Only clear errors for fields other than dateOfBirth
     if (errors[name] && name !== 'dateOfBirth') {
       setErrors({
         ...errors,
@@ -681,18 +652,124 @@ function EnrollmentForm() {
     });
   };
   
-  // Handle service selection
-  const handleServiceChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData({
-      ...formData,
-      services: {
-        ...formData.services,
-        [name]: checked
-      }
-    });
+const handleChildAddonClick = (addon) => {
+  setSelectedChildAddons(prev => {
+    // If the clicked addon is already selected, clear the selection
+    if (prev.some(item => item.invtr_desc === addon.invtr_desc)) {
+      setChildForms([]); // Clear child forms when deselecting
+      return [];
+    }
+    // Otherwise, select only this addon
+    const childCount = extractChildCount(addon.invtr_desc);
+    
+    // Initialize child forms based on the count
+    const newChildForms = Array(childCount).fill().map(() => ({
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      gender: "",
+      mobile: "",
+      home: "",
+      email: "",
+      emergencyContactName: "",
+      emergencyContactPhone: "",
+    }));
+    
+    setChildForms(newChildForms);
+    return [addon];
+  });
   };
+  
+  const extractChildCount = (description) => {
+  if (!description) return 0;
+  
+  // Check for Denver format (CAC prefix)
+  const denverRegex = /CAC\s+(\d+)\s+(?:child|children)/i;
+  const denverMatch = description.match(denverRegex);
+  
+  if (denverMatch && denverMatch[1]) {
+    return parseInt(denverMatch[1], 10);
+  }
+  
+  // Check for NMSW format (2020 prefix)
+  const nmswRegex = /2020\s+(\d+)\s+(?:child|children)/i;
+  const nmswMatch = description.match(nmswRegex);
+  
+  if (nmswMatch && nmswMatch[1]) {
+    return parseInt(nmswMatch[1], 10);
+  }
+  
+  // Default to 1 if no number is found
+  return 1;
+};
 
+
+
+const handleServiceAddonClick = (addon) => {
+  setSelectedServiceAddons((prev) => {
+    const isSelected = prev.some(
+      (item) => item.invtr_desc === addon.invtr_desc
+    );
+    if (isSelected) {
+      return prev.filter((item) => item.invtr_desc !== addon.invtr_desc);
+    } else {
+      return [...prev, addon];
+    }
+  });
+};
+
+  
+  const handleChildFormChange = (index, field, value) => {
+  setChildForms(prev => {
+    const updated = [...prev];
+    updated[index] = {
+      ...updated[index],
+      [field]: value
+    };
+    return updated;
+  });
+  };
+  
+
+  const handleAddChildMember = () => {
+  // Validate all child forms
+  const newErrors = {};
+  
+  childForms.forEach((child, index) => {
+    // Validate required fields
+    if (!child.firstName) newErrors[`child${index}FirstName`] = "First name is required";
+    if (!child.lastName) newErrors[`child${index}LastName`] = "Last name is required";
+    if (!child.dateOfBirth) newErrors[`child${index}DateOfBirth`] = "Date of birth is required";
+    if (!child.gender) newErrors[`child${index}Gender`] = "Gender is required";
+    if (!child.mobile) newErrors[`child${index}Mobile`] = "Mobile phone is required";
+    
+    // Validate phone numbers if provided
+    const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+    if (child.mobile && !phoneRegex.test(child.mobile)) {
+      newErrors[`child${index}Mobile`] = "Invalid mobile phone format";
+    }
+    if (child.home && !phoneRegex.test(child.home)) {
+      newErrors[`child${index}Home`] = "Invalid home phone format";
+    }
+    
+    // Validate age
+    if (child.dateOfBirth) {
+      const ageError = validateChildAge(child.dateOfBirth);
+      if (ageError) {
+        newErrors[`child${index}DateOfBirth`] = ageError;
+      }
+    }
+  });
+  
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+    }
+    
+
+    
+  
+  
   // Validate the form before submission
   const validateForm = () => {
     const newErrors = {};
@@ -717,8 +794,7 @@ function EnrollmentForm() {
       newErrors.gender = "Please select a gender or choose 'Prefer not to say'";
     }
     
-    if (!formData.email) {
-      newErrors.email = "Email is required";
+    if (!formData.email) {   newErrors.email = "Email is required";
     } else if (!isValidEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
     }

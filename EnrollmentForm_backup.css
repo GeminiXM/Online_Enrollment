@@ -70,114 +70,118 @@
 
 /* Shopping cart - Controls the sidebar cart display */
 .shopping-cart {
-  flex: 1 1 300px;
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 2rem;
-  max-width: 30%;
-  min-width: 300px;
-  align-self: flex-start;
+  flex: 1 1 300px; /* Allows the cart to grow and shrink with a base width */
+  background-color: #f8f9fa; /* Slightly different background for visual separation */
+  border: 1px solid #e0e0e0; /* Subtle border for definition */
+  border-radius: 8px; /* Rounded corners matching the main container */
+  padding: 1.5rem; /* Internal spacing for content */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Lighter shadow than main container */
+  position: sticky; /* Makes the cart stick when scrolling */
+  top: 2rem; /* Distance from top when sticky */
+  max-width: 32%; /* Width allocation in the layout */
+  min-width: 300px; /* Ensures cart doesn't get too narrow */
+  align-self: flex-start; /* Aligns to the top when in flex container */
 }
 
+/* Shopping cart header - Styles the cart title */
 .shopping-cart h2 {
-  color: #333;
-  font-size: 1.5rem;
-  margin: 0 0 1.5rem 0;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--primary-color);
+  margin-top: 0; /* Removes default top margin */
+  margin-bottom: 1.25rem; /* Spacing after the header */
+  color: #333; /* Slightly different than the form headers for distinction */
+  font-size: 1.5rem; /* Slightly larger than form section headers */
+  border-bottom: 1px solid #e0e0e0; /* Lighter border than form headers */
+  padding-bottom: 0.75rem; /* Space before the border */
 }
 
-.cart-details {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+/* Cart items container - Wraps all items in the cart */
+.cart-items {
+  margin-bottom: 1.5rem; /* Space before the summary section */
 }
 
+/* Individual cart item - Styles each product in the cart */
 .cart-item {
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  padding: 1.25rem;
-  border: 1px solid #e0e0e0;
+  display: flex; /* Uses flexbox for horizontal layout */
+  justify-content: space-between; /* Places item details and price on opposite sides */
+  align-items: flex-start; /* Aligns items to the top */
+  padding: 1rem 0; /* Vertical padding only */
+  border-bottom: 1px solid #e0e0e0; /* Separator between items */
 }
 
-.cart-item h3 {
-  color: var(--primary-color);
-  margin: 0 0 0.75rem 0;
-  font-size: 1.2rem;
+/* Removes border from last item */
+.cart-item:last-child {
+  border-bottom: none;
 }
 
-.cart-item .price {
-  font-size: 1.5rem;
+/* Item details container - Holds the product information */
+.item-details {
+  flex: 1; /* Takes up available space */
+}
+
+/* Item title - Styles the product name */
+.item-details h3 {
+  margin: 0 0 0.5rem 0; /* Compact margins with space below */
+  font-size: 1.1rem; /* Slightly larger than body text */
+  color: #333; /* Dark text for readability */
+}
+
+/* Item description - Styles the product description */
+.item-details p {
+  margin: 0 0 0.5rem 0; /* Compact margins with space below */
+  color: #666; /* Lighter text for secondary information */
+  font-size: 0.9rem; /* Slightly smaller than body text */
+}
+
+.item-details ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.item-details li {
+  margin-bottom: 0.25rem;
+}
+
+.item-price {
   font-weight: 600;
   color: #333;
-  margin: 0.5rem 0;
+  text-align: right;
+  min-width: 100px;
 }
 
-.cart-item .description {
-  color: #666;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.family-members-summary,
-.additional-services {
-  background-color: #f8f9fa;
+.cart-summary {
+  background-color: #f0f0f0;
   border-radius: 6px;
-  padding: 1.25rem;
-  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  margin-top: 1rem;
 }
 
-.family-members-summary h3,
-.additional-services h3 {
-  color: var(--primary-color);
-  margin: 0 0 0.75rem 0;
-  font-size: 1.1rem;
-}
-
-.family-members-summary ul,
-.additional-services ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.family-members-summary li,
-.additional-services li {
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #e0e0e0;
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
   color: #555;
-  font-size: 0.95rem;
 }
 
-.family-members-summary li:last-child,
-.additional-services li:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.cart-total {
-  background-color: var(--primary-color);
-  color: white;
-  border-radius: 6px;
-  padding: 1.25rem;
-  margin-top: 0.5rem;
-}
-
-.cart-total h3 {
-  margin: 0 0 0.5rem 0;
+.summary-row.total {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #ddd;
+  font-weight: 700;
   font-size: 1.1rem;
-  color: white;
+  color: #333;
 }
 
-.cart-total .total-price {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin: 0;
+.cart-note {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
+}
+
+.cart-note p {
+  margin: 0.5rem 0;
 }
 
 /* Form section for grouping related fields */
@@ -1191,27 +1195,4 @@ button:focus-visible {
 .no-addons-message p {
   margin: 0;
   font-size: 1rem;
-}
-
-/* Responsive adjustments for shopping cart */
-@media (max-width: 1200px) {
-  .shopping-cart {
-    max-width: 100%;
-    position: static;
-    margin-top: 2rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .shopping-cart {
-    padding: 1rem;
-  }
-  
-  .cart-item .price {
-    font-size: 1.25rem;
-  }
-  
-  .cart-total .total-price {
-    font-size: 1.5rem;
-  }
 } 
