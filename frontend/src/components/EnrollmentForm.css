@@ -250,6 +250,15 @@
   font-weight: bold; /* Bold for emphasis */
 }
 
+/* Styles individual field messages */
+.message {
+  color: var(--error-color); /* Red text for errors */
+  font-size: 0.75rem; /* Smaller than regular text */
+  margin-top: 0.25rem; /* Space between input and error */
+  font-weight: bold; /* Bold for emphasis */
+  font-style: italic;
+}
+
 /* Form-level error - Styles the error banner at the top of the form */
 .form-error {
   background-color: rgba(211, 47, 47, 0.1); /* Light red background */
@@ -825,7 +834,7 @@ button:focus-visible {
   min-width: 110px; /* Reduced from 120px */
 }
 
-/* Make date of birth field narrower */
+/* Make date of birth field narrower Primary*/
 .dob-field {
   flex: 0 0 170px; /* Reduced from 180px */
   min-width: 170px; /* Reduced from 180px */
@@ -1077,22 +1086,26 @@ button:focus-visible {
 /* Form row for birthdate, gender, and email */
 .form-row.birthdate-gender-email {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;  /* Prevent wrapping to a new line */
   gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
 .form-row.birthdate-gender-email .form-group {
-  flex: 1;
-  min-width: 200px;
+  flex: 1;  /* All fields share equal space by default */
+  /* Remove min-width if it's causing the items to wrap */
 }
 
 .form-row.birthdate-gender-email .form-group.dob-field {
-  flex: 1.2;
+  flex: 0 0 110px; /* Prevents growing and sets a flex-basis of 150px */
 }
 
 .form-row.birthdate-gender-email .form-group.gender-field {
-  flex: 0.8;
+  flex: 0 0 150px; /* Prevents growing and sets a flex-basis of 150px */
+}
+
+.email-field {
+  flex: 2;  /* Give email more space if needed */
 }
 
 /* Form row for phone numbers */

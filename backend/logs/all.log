@@ -179,3 +179,169 @@
 2025-04-08 16:41:01:411 [32minfo[39m: [32mPrimary member record inserted successfully[39m
 2025-04-08 16:41:01:411 [32minfo[39m: [32mEnrollment submission completed successfully[39m
 2025-04-08 17:33:22:3322 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-09 15:23:50:2350 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-09 15:24:22:2422 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:24:22:2422 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:24:22:2422 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:24:22:2422 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:24:23:2423 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:32:44:3244 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:32:44:3244 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:32:44:3244 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:32:44:3244 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:32:44:3244 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:01:331 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:01:331 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:01:331 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:01:331 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:01:331 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:09:339 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:09:339 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:09:339 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:09:339 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:09:339 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:14:3314 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:14:3314 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:14:3314 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:14:3314 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:14:3314 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:19:3319 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:19:3319 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:19:3319 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:19:3319 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:19:3319 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:20:3320 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:20:3320 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:20:3320 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:20:3320 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:20:3320 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:21:3321 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:21:3321 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:21:3321 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:21:3321 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:21:3321 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:32:3332 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:33:52:3352 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:33:52:3352 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:33:52:3352 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:33:52:3352 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:33:52:3352 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:34:07:347 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:34:07:347 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:34:07:347 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:34:07:347 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:34:07:347 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:34:11:3411 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:34:11:3411 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:34:11:3411 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:34:11:3411 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:34:11:3411 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:43:19:4319 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:43:19:4319 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:43:19:4319 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:43:19:4319 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:43:19:4319 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:43:21:4321 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:43:21:4321 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:43:21:4321 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:43:21:4321 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:43:21:4321 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:44:53:4453 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:44:53:4453 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:44:53:4453 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:44:53:4453 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:44:53:4453 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:45:38:4538 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:45:38:4538 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:45:38:4538 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:45:38:4538 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:45:38:4538 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:46:41:4641 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:46:41:4641 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:46:41:4641 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:46:41:4641 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:46:41:4641 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:47:52:4752 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:47:52:4752 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:47:52:4752 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:47:52:4752 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:47:52:4752 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:53:57:5357 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:53:57:5357 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:53:57:5357 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:53:57:5357 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:53:57:5357 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 15:54:55:5455 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:14:24:1424 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:14:24:1424 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:14:24:1424 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:14:24:1424 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:14:24:1424 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:15:21:1521 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:15:21:1521 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:15:21:1521 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:15:21:1521 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:15:21:1521 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:15:31:1531 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:15:31:1531 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:15:31:1531 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:15:31:1531 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:15:31:1531 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:15:50:1550 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:15:50:1550 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:15:50:1550 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:15:50:1550 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:15:50:1550 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:24:02:242 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:24:02:242 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:24:02:242 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:24:02:242 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:24:02:242 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:24:15:2415 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:24:15:2415 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:24:15:2415 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:24:15:2415 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:24:15:2415 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:24:51:2451 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:24:51:2451 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:24:51:2451 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:24:51:2451 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:24:51:2451 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:25:36:2536 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:25:36:2536 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:25:36:2536 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:25:36:2536 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:25:36:2536 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:26:20:2620 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:26:20:2620 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:26:20:2620 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:26:20:2620 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:26:20:2620 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:26:21:2621 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:26:21:2621 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:26:21:2621 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:26:21:2621 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:26:21:2621 [32minfo[39m: [32mAddons retrieved successfully[39m

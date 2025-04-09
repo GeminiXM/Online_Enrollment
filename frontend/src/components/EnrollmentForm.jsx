@@ -1025,15 +1025,14 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       if (!child.lastName) newErrors[`child${index}LastName`] = "Last name is required";
       if (!child.dateOfBirth) newErrors[`child${index}DateOfBirth`] = "Date of birth is required";
       if (!child.gender) newErrors[`child${index}Gender`] = "Gender is required";
-      if (!child.mobile) newErrors[`child${index}Mobile`] = "Mobile phone is required";
+      // Phone is optional for child members
       
-      // Validate phone numbers if provided
-      const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
-      if (child.mobile && !phoneRegex.test(child.mobile)) {
-        newErrors[`child${index}Mobile`] = "Invalid mobile phone format";
+      // Validate phone numbers if provided (only check for 10 digits)
+      if (child.mobile && !/^\d{10}$/.test(child.mobile.replace(/\D/g, ''))) {
+        newErrors[`child${index}Mobile`] = "Please enter 10 digits for phone number";
       }
-      if (child.home && !phoneRegex.test(child.home)) {
-        newErrors[`child${index}Home`] = "Invalid home phone format";
+      if (child.home && !/^\d{10}$/.test(child.home.replace(/\D/g, ''))) {
+        newErrors[`child${index}Home`] = "Please enter 10 digits for phone number";
       }
       
       // Validate age
@@ -1081,7 +1080,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     if (!youthMember.lastName) newErrors.tempLastName = "Last name is required";
     if (!youthMember.dateOfBirth) newErrors.tempDateOfBirth = "Date of birth is required";
     if (!youthMember.gender) newErrors.tempGender = "Gender is required";
-    if (!youthMember.cellPhone) newErrors.tempCellPhone = "Cell phone is required";
+    // Phone is optional for youth members
 
     // Validate phone numbers if provided
     if (youthMember.cellPhone && !/^\d{10}$/.test(youthMember.cellPhone.replace(/\D/g, ''))) {
@@ -1827,19 +1826,33 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                           <span className="error-message">{errors[`child${index}Gender`]}</span>
                         )}
                       </div>
+                                          
+                      <div className="form-group email-field">
+                        <label htmlFor={`child${index}Email`}>
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          id={`child${index}Email`}
+                          value={child.email}
+                          onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
+                          placeholder="Enter email address"
+                        />
+                      
+                    </div>
                     </div>
 
                     <div className="form-row">
                       <div className="form-group">
                         <label htmlFor={`child${index}Mobile`}>
-                          Cell Phone <span className="required">*</span>
+                          Cell Phone
                         </label>
                         <input
                           type="tel"
                           id={`child${index}Mobile`}
                           value={child.mobile}
                           onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
-                          placeholder="(___) ___-____"
+                          placeholder="Enter 10-digit phone number"
                           required
                         />
                         {errors[`child${index}Mobile`] && (
@@ -1855,7 +1868,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                           id={`child${index}Home`}
                           value={child.home}
                           onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
-                          placeholder="(___) ___-____"
+                          placeholder="Enter 10-digit phone number"
                         />
                         {errors[`child${index}Home`] && (
                           <span className="error-message">{errors[`child${index}Home`]}</span>
@@ -1863,20 +1876,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                       </div>
                     </div>
 
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor={`child${index}Email`}>
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          id={`child${index}Email`}
-                          value={child.email}
-                          onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
-                          placeholder="Enter email address"
-                        />
-                      </div>
-                    </div>
+
                   </div>
                 ))}
                 
@@ -2030,9 +2030,9 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
 
             <div className="form-row phone-numbers">
               <div className="form-group">
-                <label htmlFor="cellPhone">
-                  Cell Phone <span className="required">*</span>
-                </label>
+                  <label htmlFor="cellPhone">
+                    Cell Phone
+                  </label>
                 <input
                   type="tel"
                   id="cellPhone"
@@ -2641,7 +2641,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                 <div className="form-row phone-row">
                   <div className="form-group">
                     <label htmlFor="mobilePhone">
-                      Cell Phone <span className="required">*</span>
+                      Cell Phone 
                     </label>
                     <input
                       type="tel"
@@ -2654,6 +2654,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                       aria-invalid={!!errors.mobilePhone}
                       aria-describedby={errors.mobilePhone ? "mobilePhone-error" : undefined}
                     />
+                    
                     {errors.mobilePhone && (
                       <div id="mobilePhone-error" className="error-message">
                         {errors.mobilePhone}
@@ -2737,7 +2738,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                 <div className="form-row phone-row">
                   <div className="form-group">
                     <label htmlFor="mobilePhone">
-                      Cell Phone <span className="required">*</span>
+                      Cell Phone 
                     </label>
                     <input
                       type="tel"
@@ -2750,6 +2751,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                       aria-invalid={!!errors.mobilePhone}
                       aria-describedby={errors.mobilePhone ? "mobilePhone-error" : undefined}
                     />
+                    <span className="message">*(one phone is required)</span>
                     {errors.mobilePhone && (
                       <div id="mobilePhone-error" className="error-message">
                         {errors.mobilePhone}
