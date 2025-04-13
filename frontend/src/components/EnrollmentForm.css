@@ -31,7 +31,7 @@
 .enrollment-layout {
   display: flex; /* Uses flexbox for responsive layout */
   flex-wrap: wrap; /* Allows columns to stack on smaller screens */
-  gap: 2rem; /* Provides spacing between the form and cart */
+  gap: 0.5rem; /* Minimal spacing between the form and cart */
   justify-content: space-between; /* Distributes space evenly */
 }
 
@@ -70,41 +70,41 @@
 
 /* Shopping cart - Controls the sidebar cart display */
 .shopping-cart {
-  flex: 1 1 300px;
+  flex: 1 1 250px;
   background-color: #ffffff;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 0.75rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 2rem;
-  max-width: 30%;
-  min-width: 300px;
+  max-width: 25%;
+  min-width: 250px;
   align-self: flex-start;
 }
 
-.shopping-cart h2 {
+.shopping-cart h2 { /*Top Header text */
   color: #333;
-  font-size: 1.5rem;
-  margin: 0 0 1.5rem 0;
-  padding-bottom: 1rem;
+  font-size: 1.3rem;
+  margin: 0 0 0.75rem 0;
+  padding-bottom: 0.5rem;
   border-bottom: 2px solid var(--primary-color);
 }
 
 .cart-details {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.75rem;
 }
 
 .cart-item {
   background-color: #f8f9fa;
   border-radius: 6px;
-  padding: 1.25rem;
+  padding: 0.75rem;
   border: 1px solid #e0e0e0;
 }
 
-.cart-item h3 {
+.cart-item h3 { /* Membership type text */
   color: var(--primary-color);
   margin: 0 0 0.75rem 0;
   font-size: 1.2rem;
@@ -128,7 +128,7 @@
 .additional-services {
   background-color: #f8f9fa;
   border-radius: 6px;
-  padding: 1.25rem;
+  padding: 0.75rem;
   border: 1px solid #e0e0e0;
 }
 
@@ -168,13 +168,13 @@
   margin-top: 0.5rem;
 }
 
-.cart-total h3 {
+.cart-total h3 { /* Total Monthly charge text */
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   color: white;
 }
 
-.cart-total .total-price {
+.cart-total .total-price { /* bottom total price */
   font-size: 1.75rem;
   font-weight: 600;
   margin: 0;
@@ -699,7 +699,7 @@ button:focus-visible {
   .enrollment-layout {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 2.5rem; /* Increased from 2rem for better separation */
+    gap: 0.5rem; /* Reduced gap to match the main layout */
   }
   
   .enrollment-form {
@@ -710,7 +710,7 @@ button:focus-visible {
   .shopping-cart {
     flex: 1 1 100%;
     position: static;
-    margin-top: 2rem;
+    margin-top: 1rem; /* Reduced from 2rem */
     max-width: 100%;
   }
 }
@@ -1227,4 +1227,4 @@ button:focus-visible {
   .cart-total .total-price {
     font-size: 1.5rem;
   }
-} 
+}

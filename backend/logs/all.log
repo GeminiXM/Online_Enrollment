@@ -345,3 +345,87 @@
 2025-04-09 16:26:21:2621 [32minfo[39m: [32mAttempting database connection:[39m
 2025-04-09 16:26:21:2621 [32minfo[39m: [32mConnected to database for club 252[39m
 2025-04-09 16:26:21:2621 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:56:28:5628 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-09 16:56:52:5652 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:56:52:5652 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:56:52:5652 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 16:56:53:5653 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 17:32:35:3235 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 17:32:35:3235 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 17:32:35:3235 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 17:32:35:3235 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 17:32:35:3235 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 17:36:01:361 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 17:36:01:361 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 17:36:01:361 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 17:36:01:361 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 17:36:01:361 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-09 17:38:20:3820 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-09 17:38:20:3820 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-09 17:38:20:3820 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-09 17:38:20:3820 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-09 17:38:20:3820 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-12 09:49:54:4954 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-12 09:50:02:502 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-12 09:50:02:502 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-12 09:50:02:502 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-12 09:50:03:503 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mReceived request for addons[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mFetching addons for club ID: 252[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-12 09:50:04:504 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-13 14:07:27:727 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-13 14:26:28:2628 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-13 14:30:06:306 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-13 14:30:06:306 [32minfo[39m: [32mFamily members data:[39m
+2025-04-13 14:30:06:306 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 14:30:07:307 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 14:30:07:307 [32minfo[39m: [32mGenerated customer code from procedure:[39m
+2025-04-13 14:30:07:307 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-13 14:30:07:307 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 14:30:07:307 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 14:30:07:307 [31merror[39m: [31mError executing query:[39m
+2025-04-13 14:30:07:307 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mFamily members data:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mGenerated customer code from procedure:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 14:33:07:337 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 14:33:07:337 [31merror[39m: [31mError executing query:[39m
+2025-04-13 14:33:07:337 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-04-13 14:40:15:4015 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-13 14:47:36:4736 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-13 14:55:09:559 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mFamily members data:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mPreparing membership record:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mRaw result from procNextMembershipId:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mFound ID using key 'next_id'[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mUsing customer code:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mPrimary membership record inserted successfully[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mInserting primary member record[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mPrimary member record inserted successfully[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mProcessing family members:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mInserting adult family member:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mConnected to database for club 252[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mAdult family member inserted successfully[39m
+2025-04-13 15:03:14:314 [32minfo[39m: [32mEnrollment submission completed successfully[39m

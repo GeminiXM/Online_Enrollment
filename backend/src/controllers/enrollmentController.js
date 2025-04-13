@@ -261,22 +261,119 @@ export const submitEnrollment = async (req, res) => {
       });
     }
 
-    // 1. Insert primary membership record using web_proc_InsertWebStrcustr
+    // Prepare common data
     const busName = `${firstName} ${
       middleInitial ? middleInitial + ". " : ""
     }${lastName}`;
 
-    logger.info("Inserting primary membership record:", { busName, club });
-
     // First, determine which phone number to use (priority: cellPhone > homePhone > workPhone)
     const phone = cellPhone || homePhone || workPhone || "";
+
+    logger.info("Preparing membership record:", { busName, club });
+
+    // 1. Generate a customer code
+    let custCode;
+    
+    try {
+      // Attempt to use the new procedure
+      const nextIdResult = await pool.query(
+        club,
+        `EXECUTE PROCEDURE procNextMembershipId()`
+      );
+      
+      // Log the entire result to see its structure
+      logger.info("Raw result from procNextMembershipId:", 
+        JSON.stringify(nextIdResult, null, 2)
+      );
+      
+      // Access the result properly based on the procedure's output
+      if (nextIdResult && nextIdResult.length > 0) {
+        // Try different possible property names or get first column value
+        const firstRow = nextIdResult[0];
+        if (firstRow) {
+          // Extract the first value from the result object
+          const firstKey = Object.keys(firstRow)[0];
+          if (firstKey) {
+            custCode = firstRow[firstKey];
+            logger.info(`Found ID using key '${firstKey}'`);
+          }
+        }
+      }
+    } catch (procedureError) {
+      logger.error("Error calling procNextMembershipId:", {
+        error: procedureError.message,
+        stack: procedureError.stack
+      });
+      // We'll fall back to the original method below
+    }
+    
+    // If we couldn't get a valid customer code from the procedure, fall back to the original method
+    if (!custCode) {
+      logger.warn("Couldn't get valid customer code from procedure, using fallback method");
+      
+      // First insert with blank code
+      await pool.query(
+        club,
+        `EXECUTE PROCEDURE web_proc_InsertWebStrcustr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          "", // parCustCode - leaving blank for now
+          "", // parBridgeCode
+          busName, // parBusName
+          "", // parCreditRep
+          phone, // parPhone
+          address, // parAddress1
+          address2 || "", // parAddress2
+          city, // parCity
+          state, // parState
+          zipCode, // parPostCode
+          requestedStartDate, // parObtainedDate
+          "", // parCcExpDate
+          "", // parCardNo
+          "", // parExpDate
+          "", // parCardHolder
+          "", // parCcMethod
+          "ONLINE", // parCreatedBy
+          "ONLINE", // parSalesPersnCode
+          email, // parEmail
+          club, // parClub
+          "", // parOrigPosTrans
+          "", // parPin
+          "", // parToken
+          membershipType || "", // parSpecialtyMembership
+          "", // parNewPt
+        ]
+      );
+      
+      // Then retrieve the generated code
+      const custCodeResult = await pool.query(
+        club,
+        `SELECT MAX(cust_code) AS cust_code FROM web_strcustr WHERE bus_name = ? AND email = ?`,
+        [busName, email]
+      );
+      
+      custCode = custCodeResult[0].cust_code;
+      logger.info("Generated customer code using fallback method:", { custCode });
+      
+      return res.status(200).json({
+        success: true,
+        message: "Enrollment submitted successfully using fallback method",
+        custCode: custCode
+      });
+    }
+    
+    // Ensure the cust code is properly formatted as a string
+    custCode = String(custCode).trim();
+    logger.info("Using customer code:", { custCode });
+
+    // 2. Insert primary membership record using web_proc_InsertWebStrcustr
+    logger.info("Inserting primary membership record:", { busName, club, custCode });
 
     await pool.query(
       club,
       `EXECUTE PROCEDURE web_proc_InsertWebStrcustr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        "", // parCustCode - leaving blank for now
-        "", // parBridgeCode
+        custCode, // parCustCode - using generated ID
+        custCode, // parBridgeCode - using same ID for bridge code
         busName, // parBusName
         "", // parCreditRep
         phone, // parPhone
@@ -304,17 +401,6 @@ export const submitEnrollment = async (req, res) => {
     );
 
     logger.info("Primary membership record inserted successfully");
-
-    // Get the generated customer code
-    const custCodeResult = await pool.query(
-      club,
-      `SELECT MAX(cust_code) AS cust_code FROM web_strcustr WHERE bus_name = ? AND email = ?`,
-      [busName, email]
-    );
-
-    const custCode = custCodeResult[0].cust_code;
-
-    logger.info("Generated customer code:", { custCode });
 
     // 2. Insert primary member record using web_proc_InsertWebAsamembr
     logger.info("Inserting primary member record");

@@ -1761,6 +1761,21 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                           <span className="error-message">{errors[`child${index}FirstName`]}</span>
                         )}
                       </div>
+                      
+                      <div className="form-group middle-initial">
+                        <label htmlFor={`child${index}MiddleInitial`}>
+                          Initial
+                        </label>
+                        <input
+                          type="text"
+                          id={`child${index}MiddleInitial`}
+                          value={child.middleInitial || ""}
+                          onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
+                          placeholder="M.I."
+                          maxLength="1"
+                        />
+                      </div>
+                      
                       <div className="form-group">
                         <label htmlFor={`child${index}LastName`}>
                           Last Name <span className="required">*</span>
@@ -1921,6 +1936,21 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                     {errors.firstName}
                   </div>
                 )}
+              </div>
+              
+              <div className="form-group middle-initial">
+                <label htmlFor="middleInitial">
+                  Initial
+                </label>
+                <input
+                  type="text"
+                  id="middleInitial"
+                  name="middleInitial"
+                  value={youthMember.middleInitial}
+                  onChange={handleTempMemberChange}
+                  placeholder="M.I."
+                  maxLength="1"
+                />
               </div>
               
               <div className="form-group">

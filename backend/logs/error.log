@@ -8,3 +8,7 @@
 2025-04-04 20:50:29:5029 [31merror[39m: [31mError executing query:[39m
 2025-04-04 20:50:29:5029 [31merror[39m: [31mError generating customer code[39m
 2025-04-04 20:50:29:5029 [31merror[39m: [31mError processing enrollment submission[39m
+2025-04-13 14:30:07:307 [31merror[39m: [31mError executing query:[39m
+2025-04-13 14:30:07:307 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-04-13 14:33:07:337 [31merror[39m: [31mError executing query:[39m
+2025-04-13 14:33:07:337 [31merror[39m: [31mError in submitEnrollment:[39m
