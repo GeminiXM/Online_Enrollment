@@ -1453,48 +1453,11 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
         return (
           <div className="tab-panel">
             <h3>Additional Services</h3>
-            <div className="service-options">
-              <div className="service-option">
-                <input 
-                  type="checkbox" 
-                  id="personalTraining" 
-                  name="personalTraining" 
-                  checked={formData.services.personalTraining}
-                  onChange={handleServiceChange}
-                />
-                <label htmlFor="personalTraining">Personal Training ($50/session)</label>
-              </div>
-              <div className="service-option">
-                <input 
-                  type="checkbox" 
-                  id="groupClasses" 
-                  name="groupClasses" 
-                  checked={formData.services.groupClasses}
-                  onChange={handleServiceChange}
-                />
-                <label htmlFor="groupClasses">Group Fitness Classes ($25/month)</label>
-              </div>
-              <div className="service-option">
-                <input 
-                  type="checkbox" 
-                  id="childcare" 
-                  name="childcare" 
-                  checked={formData.services.childcare}
-                  onChange={handleServiceChange}
-                />
-                <label htmlFor="childcare">Childcare Services ($15/month)</label>
-              </div>
-              <div className="service-option">
-                <input 
-                  type="checkbox" 
-                  id="locker" 
-                  name="locker" 
-                  checked={formData.services.locker}
-                  onChange={handleServiceChange}
-                />
-                <label htmlFor="locker">Locker Rental ($10/month)</label>
-              </div>
-            </div>
+            <ServiceAddonButtons
+              addons={addons}
+              selectedAddons={selectedServiceAddons}
+              onAddonClick={handleServiceAddonClick}
+            />
           </div>
         );
       
@@ -2139,24 +2102,26 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
   // Calculate total cost of membership and services
   const calculateTotalCost = () => {
     let total = 0;
+    
+    // Add membership cost
     if (membershipType) {
       total += membershipType.price;
     }
+    
+    // Add cost for family members
     if (formData.familyMembers.length > 0) {
       total += formData.familyMembers.length * 10; // Assuming $10 per family member
     }
-    if (formData.services.personalTraining) {
-      total += 50; // Assuming $50 per session
+    
+    // Add cost for selected service addons
+    if (selectedServiceAddons.length > 0) {
+      selectedServiceAddons.forEach(addon => {
+        if (addon.invtr_price) {
+          total += parseFloat(addon.invtr_price);
+        }
+      });
     }
-    if (formData.services.groupClasses) {
-      total += 25; // Assuming $25 per month
-    }
-    if (formData.services.childcare) {
-      total += 15; // Assuming $15 per month
-    }
-    if (formData.services.locker) {
-      total += 10; // Assuming $10 per month
-    }
+    
     return total;
   };
 
@@ -2930,14 +2895,15 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
               </div>
             )}
             
-            {formData.services && (
+            {selectedServiceAddons.length > 0 && (
               <div className="additional-services">
                 <h3>Additional Services</h3>
                 <ul>
-                  {formData.services.personalTraining && <li>Personal Training</li>}
-                  {formData.services.groupClasses && <li>Group Classes</li>}
-                  {formData.services.childcare && <li>Childcare</li>}
-                  {formData.services.locker && <li>Locker Rental</li>}
+                  {selectedServiceAddons.map((addon, index) => (
+                    <li key={index}>
+                      {addon.invtr_desc} - ${addon.invtr_price ? parseFloat(addon.invtr_price).toFixed(2) : '0.00'}/month
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
