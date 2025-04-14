@@ -121,6 +121,8 @@ function EnrollmentForm() {
   const [membershipUpcCode, setMembershipUpcCode] = useState("");
   const [membershipTaxCode, setMembershipTaxCode] = useState("");
   const [proratedDuesInfo, setProratedDuesInfo] = useState({ upcCode: "", taxable: "" });
+  // Prorated price state
+  const [proratedPrice, setProratedPrice] = useState(0);
 
   // Check if membership type is passed in location state
   useEffect(() => {
@@ -164,87 +166,50 @@ function EnrollmentForm() {
     fetchBridgeCode();
   }, [membershipType, selectedClub]);
   
-  // Fetch price when bridge code or membership type changes
-  useEffect(() => {
-    const fetchPrice = async () => {
-      if (!membershipType || !selectedClub) return;
-      
-      // Don't fetch price if we're still loading the bridge code
-      if (membershipType && bridgeCode === "" && SPECIALTY_MEMBERSHIP_MAP[membershipType.id]) {
-        return;
-      }
-      
-      setIsLoadingPrice(true);
-      
-      try {
-        // Get the specialty membership code from the map
-        const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
-        
-        // Determine the membership type (I/D/F) based on the selected membership
-        let membershipTypeParam = "I"; // Default to Individual
-        
-        if (membershipType.id === "dual" || membershipType.id === "couple") {
-          membershipTypeParam = "D"; // Dual
-        } else if (membershipType.id === "family") {
-          membershipTypeParam = "F"; // Family
-        }
-        
-        console.log("Fetching price for:", {
-          clubId: selectedClub.id,
-          membershipType: membershipTypeParam,
-          agreementType: "M", // Always Monthly as per requirements
-          specialtyMembership,
-          bridgeCode
-        });
-        
-        // Call the API to get the price
-        const response = await api.getMembershipPrice(
-          selectedClub.id,
-          membershipTypeParam,
-          "M", // Always Monthly as per requirements
-          specialtyMembership,
-          bridgeCode
-        );
-        
-        if (response.success) {
-          console.log("Price fetched:", response.price);
-          setMembershipPrice(response.price);
-          setMembershipDescription(response.description || membershipType.title);
-          
-          // Store additional price data
-          setMembershipUpcCode(response.upcCode || "");
-          setMembershipTaxCode(response.taxCode || "");
-          if (response.proratedDuesInfo) {
-            setProratedDuesInfo({
-              upcCode: response.proratedDuesInfo.upcCode || "",
-              taxable: response.proratedDuesInfo.taxable || ""
-            });
-          }
-          
-          // Add price data to submission data for the cart
-          const priceData = {
-            price: response.price,
-            description: response.description,
-            upcCode: response.upcCode,
-            taxCode: response.taxCode,
-            proratedDuesInfo: response.proratedDuesInfo,
-            bridgeCode: bridgeCode,
-            specialtyMembership: SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || ""
-          };
-          
-          console.log("Membership price data for cart:", priceData);
-        } else {
-          console.error("Failed to fetch price:", response.message);
-        }
-      } catch (error) {
-        console.error("Error fetching price:", error);
-      } finally {
-        setIsLoadingPrice(false);
-      }
-    };
+  // Calculate prorated price based on start date and full price
+  const calculateProratedPrice = (startDate, fullPrice) => {
+    if (!startDate || !fullPrice) return 0;
     
-    fetchPrice();
-  }, [bridgeCode, membershipType, selectedClub]);
+    const start = new Date(startDate);
+    const today = new Date();
+    
+    // Use requested start date if it's in the future, otherwise use today
+    const effectiveDate = start > today ? start : today;
+    
+    // Get the last day of the month
+    const lastDay = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Calculate days remaining in the month (including the start date)
+    const daysRemaining = lastDay.getDate() - effectiveDate.getDate() + 1;
+    
+    // Calculate prorated price: (full price / days in month) * days remaining
+    const prorated = (fullPrice / daysInMonth) * daysRemaining;
+    
+    // Round to 2 decimal places
+    return Math.round(prorated * 100) / 100;
+  };
+  
+  // Calculate prorated factor (percentage of month remaining)
+  const calculateProratedFactor = (startDate) => {
+    if (!startDate) return 1; // Default to full price if no start date
+    
+    const start = new Date(startDate);
+    const today = new Date();
+    
+    // Use requested start date if it's in the future, otherwise use today
+    const effectiveDate = start > today ? start : today;
+    
+    // Get the last day of the month
+    const lastDay = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Calculate days remaining in the month (including the start date)
+    const daysRemaining = lastDay.getDate() - effectiveDate.getDate() + 1;
+    
+    // Calculate prorated factor (percentage of month remaining)
+    return daysRemaining / daysInMonth;
+  };
 
  // Fetch addons from the API
   useEffect(() => {
@@ -315,9 +280,107 @@ function EnrollmentForm() {
     guardianRelationship: "",
     guardianConsent: false
   });
+  
 
   // State for form validation errors
   const [errors, setErrors] = useState({});
+  
+  // Fetch price when bridge code or membership type changes
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!membershipType || !selectedClub) return;
+      
+      // Don't fetch price if we're still loading the bridge code
+      if (membershipType && bridgeCode === "" && SPECIALTY_MEMBERSHIP_MAP[membershipType.id]) {
+        return;
+      }
+      
+      setIsLoadingPrice(true);
+      
+      try {
+        // Get the specialty membership code from the map
+        const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
+        
+        // Determine the membership type (I/D/F) based on the selected membership
+        let membershipTypeParam = "I"; // Default to Individual
+        
+        if (membershipType.id === "dual" || membershipType.id === "couple") {
+          membershipTypeParam = "D"; // Dual
+        } else if (membershipType.id === "family") {
+          membershipTypeParam = "F"; // Family
+        }
+        
+        console.log("Fetching price for:", {
+          clubId: selectedClub.id,
+          membershipType: membershipTypeParam,
+          agreementType: "M", // Always Monthly as per requirements
+          specialtyMembership,
+          bridgeCode
+        });
+        
+        // Call the API to get the price
+        const response = await api.getMembershipPrice(
+          selectedClub.id,
+          membershipTypeParam,
+          "M", // Always Monthly as per requirements
+          specialtyMembership,
+          bridgeCode
+        );
+        
+        if (response.success) {
+          console.log("Price fetched:", response.price);
+          setMembershipPrice(response.price);
+          setMembershipDescription(response.description || membershipType.title);
+          
+          // Store additional price data
+          setMembershipUpcCode(response.upcCode || "");
+          setMembershipTaxCode(response.taxCode || "");
+          if (response.proratedDuesInfo) {
+            setProratedDuesInfo({
+              upcCode: response.proratedDuesInfo.upcCode || "",
+              taxable: response.proratedDuesInfo.taxable || ""
+            });
+          }
+          
+          // Calculate prorated price based on start date
+          if (formData.requestedStartDate) {
+            const prorated = calculateProratedPrice(formData.requestedStartDate, response.price);
+            setProratedPrice(prorated);
+          }
+          
+          // Add price data to submission data for the cart
+          const priceData = {
+            price: response.price,
+            description: response.description,
+            upcCode: response.upcCode,
+            taxCode: response.taxCode,
+            proratedDuesInfo: response.proratedDuesInfo,
+            bridgeCode: bridgeCode,
+            specialtyMembership: SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "",
+            proratedPrice: proratedPrice
+          };
+          
+          console.log("Membership price data for cart:", priceData);
+        } else {
+          console.error("Failed to fetch price:", response.message);
+        }
+      } catch (error) {
+        console.error("Error fetching price:", error);
+      } finally {
+        setIsLoadingPrice(false);
+      }
+    };
+    
+    fetchPrice();
+  }, [bridgeCode, membershipType, selectedClub, formData?.requestedStartDate]);
+  
+  // Update prorated price when start date or full price changes
+  useEffect(() => {
+    if (formData.requestedStartDate && membershipPrice) {
+      const prorated = calculateProratedPrice(formData.requestedStartDate, membershipPrice);
+      setProratedPrice(prorated);
+    }
+  }, [formData.requestedStartDate, membershipPrice]);
   
   // State for form submission status
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -453,7 +516,8 @@ function EnrollmentForm() {
         bridgeCode: bridgeCode,
         upcCode: membershipUpcCode,
         taxCode: membershipTaxCode,
-        proratedDuesInfo: proratedDuesInfo
+        proratedDuesInfo: proratedDuesInfo,
+        proratedPrice: proratedPrice
       },
       // Additional information for tracking
       agreementType: 'M', // Always monthly as per requirements
@@ -2241,7 +2305,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
 
   
 
-  // Calculate total cost of membership and services
+  // Calculate total monthly cost (ongoing)
   const calculateTotalCost = () => {
     let total = 0;
     
@@ -2267,6 +2331,34 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     }
     
     return total;
+  };
+  
+  // Calculate total prorated cost (due now)
+  const calculateTotalProratedCost = () => {
+    if (!formData.requestedStartDate) return 0;
+    
+    // Get prorated factor (percentage of month remaining)
+    const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+    
+    // Start with prorated membership price
+    let total = proratedPrice;
+    
+    // Add prorated cost for family members
+    if (formData.familyMembers.length > 0) {
+      total += (formData.familyMembers.length * 10 * proratedFactor); // Prorate family member fees
+    }
+    
+    // Add prorated cost for selected service addons
+    if (selectedServiceAddons.length > 0) {
+      selectedServiceAddons.forEach(addon => {
+        if (addon.invtr_price) {
+          total += parseFloat(addon.invtr_price) * proratedFactor; // Prorate addon fees
+        }
+      });
+    }
+    
+    // Round to 2 decimal places
+    return Math.round(total * 100) / 100;
   };
 
   return (
@@ -3022,13 +3114,34 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
           <div className="cart-details">
             <div className="cart-item">
               <h3>{membershipType ? membershipType.title : 'Standard'} Membership</h3>
-              <p className="price">
-                {isLoadingPrice ? (
-                  <span>Loading price...</span>
-                ) : (
-                  `$${membershipPrice ? membershipPrice.toFixed(2) : (membershipType ? membershipType.price : '49.99')}/month`
-                )}
-              </p>
+              
+              {/* Due Now (Prorated) */}
+              <div className="price-section prorated-price">
+                <h4>Due Now (Prorated):</h4>
+                <p className="price">
+                  {isLoadingPrice ? (
+                    <span>Loading price...</span>
+                  ) : (
+                    `$${proratedPrice.toFixed(2)}`
+                  )}
+                </p>
+                <p className="price-detail">
+                  Prorated for {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected start date'} to end of month
+                </p>
+              </div>
+              
+              {/* Monthly Price Going Forward */}
+              <div className="price-section monthly-price">
+                <h4>Monthly Fee Going Forward:</h4>
+                <p className="price">
+                  {isLoadingPrice ? (
+                    <span>Loading price...</span>
+                  ) : (
+                    `$${membershipPrice ? membershipPrice.toFixed(2) : (membershipType ? membershipType.price : '49.99')}/month`
+                  )}
+                </p>
+              </div>
+              
               <p className="description">
                 {membershipDescription || (membershipType ? membershipType.description : 'Standard membership includes access to all basic facilities.')}
               </p>
@@ -3064,8 +3177,19 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
             )}
             
             <div className="cart-total">
-              <h3>Total Monthly Cost</h3>
-              <p className="total-price">${calculateTotalCost()}/month</p>
+              <div className="due-now-total">
+                <h3>Total Due Now</h3>
+                <p className="total-price">
+                  ${calculateTotalProratedCost().toFixed(2)}
+                </p>
+                <p className="price-detail">
+                  All charges prorated from {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected start date'}
+                </p>
+              </div>
+              <div className="monthly-total">
+                <h3>Total Monthly Cost Going Forward</h3>
+                <p className="total-price">${calculateTotalCost().toFixed(2)}/month</p>
+              </div>
             </div>
           </div>
         </div>

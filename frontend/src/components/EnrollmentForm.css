@@ -117,6 +117,45 @@
   margin: 0.5rem 0;
 }
 
+/* Price sections styling */
+.price-section {
+  margin-bottom: 1.25rem;
+  background-color: #f9f9f9;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.price-section h4 {
+  color: var(--primary-color);
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+}
+
+.price-section .price {
+  font-size: 1.3rem;
+  margin: 0.5rem 0;
+}
+
+.price-section .price-detail {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.25rem 0 0;
+  font-style: italic;
+}
+
+/* Specific styles for prorated price */
+.prorated-price {
+  border-left: 3px solid var(--primary-color);
+}
+
+/* Specific styles for monthly price */
+.monthly-price {
+  border-left: 3px solid #28a745;
+}
+
 .cart-item .description {
   color: #666;
   font-size: 0.95rem;
@@ -161,11 +200,20 @@
 }
 
 .cart-total {
+  margin-top: 0.5rem;
+}
+
+.due-now-total,
+.monthly-total {
   background-color: var(--primary-color);
   color: white;
   border-radius: 6px;
-  padding: 1.25rem;
-  margin-top: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.due-now-total {
+  background-color: #28a745; /* Green for due now */
 }
 
 .cart-total h3 { /* Total Monthly charge text */
