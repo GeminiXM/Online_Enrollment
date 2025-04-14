@@ -35,4 +35,61 @@ api.interceptors.response.use(
   }
 );
 
-export default api;
+// API methods for enrollment
+const apiService = {
+  // Base axios instance
+  ...api,
+
+  // Submit enrollment form
+  post: (url, data) => api.post(url, data),
+
+  // Get specialty membership bridge code
+  getSpecialtyMembershipBridgeCode: async (clubId, specialtyMembership) => {
+    try {
+      const response = await api.get('/enrollment/bridge-code', {
+        params: {
+          clubId,
+          specialtyMembership
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching bridge code:', error);
+      throw error;
+    }
+  },
+
+  // Get membership price
+  getMembershipPrice: async (clubId, membershipType, agreementType, specialtyMembership, bridgeCode) => {
+    try {
+      const response = await api.get('/enrollment/price', {
+        params: {
+          clubId,
+          membershipType,
+          agreementType,
+          specialtyMembership,
+          bridgeCode
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching membership price:', error);
+      throw error;
+    }
+  },
+
+  // Get addons
+  getAddons: async (clubId) => {
+    try {
+      const response = await api.get('/enrollment/addons', {
+        params: { clubId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching addons:', error);
+      throw error;
+    }
+  }
+};
+
+export default apiService;

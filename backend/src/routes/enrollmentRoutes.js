@@ -5,7 +5,7 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import logger from "../utils/logger.js";
-import { submitEnrollment, getAddons } from "../controllers/enrollmentController.js";
+import { submitEnrollment, getAddons, getSpecialtyMembershipBridgeCode, getMembershipPrice } from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
 
 const router = express.Router();
@@ -217,5 +217,44 @@ router.get("/addons", async (req, res) => {
   }
 });
 
+/**
+ * @route GET /api/enrollment/bridge-code
+ * @desc Get specialty membership bridge code
+ * @access Public
+ */
+router.get("/bridge-code", async (req, res) => {
+  try {
+    return await getSpecialtyMembershipBridgeCode(req, res);
+  } catch (error) {
+    logger.error("Error in bridge-code route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the bridge code. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/price
+ * @desc Get membership price
+ * @access Public
+ */
+router.get("/price", async (req, res) => {
+  try {
+    return await getMembershipPrice(req, res);
+  } catch (error) {
+    logger.error("Error in price route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the membership price. Please try again later.",
+    });
+  }
+});
 
 export default router;

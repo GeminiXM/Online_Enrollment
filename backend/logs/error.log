@@ -12,3 +12,21 @@
 2025-04-13 14:30:07:307 [31merror[39m: [31mError in submitEnrollment:[39m
 2025-04-13 14:33:07:337 [31merror[39m: [31mError executing query:[39m
 2025-04-13 14:33:07:337 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-04-14 10:08:41:841 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 10:08:41:841 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 10:08:42:842 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 10:08:42:842 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 10:55:33:5533 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 11:01:47:147 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 11:01:47:147 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 11:09:46:946 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 11:09:46:946 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 11:09:52:952 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 11:09:52:952 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-04-14 11:09:52:952 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-14 11:09:52:952 [31merror[39m: [31mError in getMembershipPrice:[39m

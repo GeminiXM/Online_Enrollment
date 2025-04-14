@@ -54,6 +54,174 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
 };
 
 /**
+ * @desc Get specialty membership bridge code
+ * @route GET /api/enrollment/bridge-code
+ * @access Public
+ */
+export const getSpecialtyMembershipBridgeCode = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for specialty membership bridge code");
+
+    // Get parameters from the query
+    const clubId = req.query.clubId || "001"; // Default to "001" if not provided
+    const specialtyMembership = req.query.specialtyMembership || ""; // Default to empty string if not provided
+
+    logger.info(`Fetching bridge code for club ID: ${clubId}, specialty membership: ${specialtyMembership}`);
+
+    // Execute the stored procedure
+    const result = await executeSqlProcedure(
+      "web_proc_GetSpecialtyMembershipBridgeCode", 
+      clubId, 
+      [clubId, specialtyMembership]
+    );
+
+    // Extract the bridge code from the result
+    let bridgeCode = "";
+    if (result && result.length > 0) {
+      const firstRow = result[0];
+      if (firstRow) {
+        // Check for the specialty_bridge_code field
+        if (firstRow.specialty_bridge_code !== undefined) {
+          bridgeCode = firstRow.specialty_bridge_code;
+        } else {
+          // Fallback to first property
+          const firstKey = Object.keys(firstRow)[0];
+          if (firstKey) {
+            bridgeCode = firstRow[firstKey];
+          }
+        }
+      }
+    }
+
+    logger.info("Bridge code retrieved successfully", {
+      clubId,
+      specialtyMembership,
+      bridgeCode
+    });
+
+    res.status(200).json({
+      success: true,
+      bridgeCode
+    });
+  } catch (error) {
+    logger.error("Error in getSpecialtyMembershipBridgeCode:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving bridge code",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc Get membership price
+ * @route GET /api/enrollment/price
+ * @access Public
+ */
+export const getMembershipPrice = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for membership price");
+
+    // Get parameters from the query
+    const clubId = req.query.clubId || "001"; // Default to "001" if not provided
+    const membershipType = req.query.membershipType || "I"; // Default to Individual if not provided
+    const agreementType = req.query.agreementType || "M"; // Default to Monthly if not provided
+    const specialtyMembership = req.query.specialtyMembership || ""; // Default to empty string if not provided
+    const bridgeCode = req.query.bridgeCode || ""; // Default to empty string if not provided
+
+    logger.info(`Fetching price for club ID: ${clubId}, membership type: ${membershipType}, agreement type: ${agreementType}, specialty membership: ${specialtyMembership}, bridge code: ${bridgeCode}`);
+
+    // Execute the stored procedure
+    const result = await executeSqlProcedure(
+      "procInventoryDuesPriceListSelect1", 
+      clubId, 
+      [clubId, membershipType, agreementType, specialtyMembership, bridgeCode]
+    );
+
+    // Extract the price from the result
+    let price = 0;
+    let description = "";
+    let upcCode = "";
+    let taxCode = "";
+    let proratedDuesUpcCode = "";
+    let proratedDuesTaxable = "";
+
+    if (result && result.length > 0) {
+      const firstRow = result[0];
+      if (firstRow) {
+        // Extract the specific fields based on the procedure's return values
+        if (firstRow.invtr_price !== undefined) {
+          price = parseFloat(firstRow.invtr_price) || 0;
+        }
+        
+        if (firstRow.invtr_desc !== undefined) {
+          description = firstRow.invtr_desc.trim() || "";
+        }
+        
+        if (firstRow.invtr_upccode !== undefined) {
+          upcCode = firstRow.invtr_upccode.trim() || "";
+        }
+        
+        if (firstRow.classr_tax_code !== undefined) {
+          taxCode = firstRow.classr_tax_code.trim() || "";
+        }
+        
+        if (firstRow.prorated_dues_upccode !== undefined) {
+          proratedDuesUpcCode = firstRow.prorated_dues_upccode.trim() || "";
+        }
+        
+        if (firstRow.prorated_dues_taxable !== undefined) {
+          proratedDuesTaxable = firstRow.prorated_dues_taxable.trim() || "";
+        }
+      }
+    }
+
+    logger.info("Price retrieved successfully", {
+      clubId,
+      membershipType,
+      agreementType,
+      specialtyMembership,
+      bridgeCode,
+      price,
+      description,
+      upcCode,
+      taxCode,
+      proratedDuesInfo: {
+        upcCode: proratedDuesUpcCode,
+        taxable: proratedDuesTaxable
+      }
+    });
+
+    res.status(200).json({
+      success: true,
+      price,
+      description,
+      upcCode,
+      taxCode,
+      proratedDuesInfo: {
+        upcCode: proratedDuesUpcCode,
+        taxable: proratedDuesTaxable
+      }
+    });
+  } catch (error) {
+    logger.error("Error in getMembershipPrice:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving price",
+      error: error.message,
+    });
+  }
+};
+
+/**
  * @desc Submit a new enrollment form
  * @route POST /api/enrollment
  * @access Public

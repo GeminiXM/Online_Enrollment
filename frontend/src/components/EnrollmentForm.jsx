@@ -18,7 +18,7 @@ const SPECIALTY_MEMBERSHIP_MAP = {
   junior: 'J',
   standard: '',
   senior: 'S',
-  student: 'Y'  // For student/young professional
+  'young-professional': 'Y'  // For student/young professional
 };
 
 // Add these helper functions after the constants and before the EnrollmentForm function
@@ -111,6 +111,16 @@ function EnrollmentForm() {
   const [selectedChildAddons, setSelectedChildAddons] = useState([]);
   const [childForms, setChildForms] = useState([]);
   const [selectedServiceAddons, setSelectedServiceAddons] = useState([]);
+  
+  // State for membership price
+  const [bridgeCode, setBridgeCode] = useState("");
+  const [membershipPrice, setMembershipPrice] = useState(0);
+  const [membershipDescription, setMembershipDescription] = useState("");
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
+  // Additional price data
+  const [membershipUpcCode, setMembershipUpcCode] = useState("");
+  const [membershipTaxCode, setMembershipTaxCode] = useState("");
+  const [proratedDuesInfo, setProratedDuesInfo] = useState({ upcCode: "", taxable: "" });
 
   // Check if membership type is passed in location state
   useEffect(() => {
@@ -120,6 +130,121 @@ function EnrollmentForm() {
     }
   }, [location, selectMembershipType]);
   
+  // Fetch bridge code when membership type changes
+  useEffect(() => {
+    const fetchBridgeCode = async () => {
+      if (!membershipType || !selectedClub) return;
+      
+      try {
+        // Get the specialty membership code from the map
+        const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
+        
+        console.log("Fetching bridge code for:", {
+          clubId: selectedClub.id,
+          specialtyMembership
+        });
+        
+        // Call the API to get the bridge code
+        const response = await api.getSpecialtyMembershipBridgeCode(
+          selectedClub.id, 
+          specialtyMembership
+        );
+        
+        if (response.success) {
+          console.log("Bridge code fetched:", response.bridgeCode);
+          setBridgeCode(response.bridgeCode);
+        } else {
+          console.error("Failed to fetch bridge code:", response.message);
+        }
+      } catch (error) {
+        console.error("Error fetching bridge code:", error);
+      }
+    };
+    
+    fetchBridgeCode();
+  }, [membershipType, selectedClub]);
+  
+  // Fetch price when bridge code or membership type changes
+  useEffect(() => {
+    const fetchPrice = async () => {
+      if (!membershipType || !selectedClub) return;
+      
+      // Don't fetch price if we're still loading the bridge code
+      if (membershipType && bridgeCode === "" && SPECIALTY_MEMBERSHIP_MAP[membershipType.id]) {
+        return;
+      }
+      
+      setIsLoadingPrice(true);
+      
+      try {
+        // Get the specialty membership code from the map
+        const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
+        
+        // Determine the membership type (I/D/F) based on the selected membership
+        let membershipTypeParam = "I"; // Default to Individual
+        
+        if (membershipType.id === "dual" || membershipType.id === "couple") {
+          membershipTypeParam = "D"; // Dual
+        } else if (membershipType.id === "family") {
+          membershipTypeParam = "F"; // Family
+        }
+        
+        console.log("Fetching price for:", {
+          clubId: selectedClub.id,
+          membershipType: membershipTypeParam,
+          agreementType: "M", // Always Monthly as per requirements
+          specialtyMembership,
+          bridgeCode
+        });
+        
+        // Call the API to get the price
+        const response = await api.getMembershipPrice(
+          selectedClub.id,
+          membershipTypeParam,
+          "M", // Always Monthly as per requirements
+          specialtyMembership,
+          bridgeCode
+        );
+        
+        if (response.success) {
+          console.log("Price fetched:", response.price);
+          setMembershipPrice(response.price);
+          setMembershipDescription(response.description || membershipType.title);
+          
+          // Store additional price data
+          setMembershipUpcCode(response.upcCode || "");
+          setMembershipTaxCode(response.taxCode || "");
+          if (response.proratedDuesInfo) {
+            setProratedDuesInfo({
+              upcCode: response.proratedDuesInfo.upcCode || "",
+              taxable: response.proratedDuesInfo.taxable || ""
+            });
+          }
+          
+          // Add price data to submission data for the cart
+          const priceData = {
+            price: response.price,
+            description: response.description,
+            upcCode: response.upcCode,
+            taxCode: response.taxCode,
+            proratedDuesInfo: response.proratedDuesInfo,
+            bridgeCode: bridgeCode,
+            specialtyMembership: SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || ""
+          };
+          
+          console.log("Membership price data for cart:", priceData);
+        } else {
+          console.error("Failed to fetch price:", response.message);
+        }
+      } catch (error) {
+        console.error("Error fetching price:", error);
+      } finally {
+        setIsLoadingPrice(false);
+      }
+    };
+    
+    fetchPrice();
+  }, [bridgeCode, membershipType, selectedClub]);
 
  // Fetch addons from the API
   useEffect(() => {
@@ -311,16 +436,33 @@ function EnrollmentForm() {
       state: formData.state,
       zipCode: formData.zipCode,
       // IMPORTANT: Backend expects 'cellPhone', not 'mobilePhone'
-    // Phone number priority: cellPhone > homePhone > workPhone
-    cellPhone: formData.mobilePhone ? formData.mobilePhone.replace(/\D/g, '') : '',
-    homePhone: formData.homePhone ? formData.homePhone.replace(/\D/g, '') : '',
-    workPhone: formData.workPhone ? formData.workPhone.replace(/\D/g, '') : '',
+      // Phone number priority: cellPhone > homePhone > workPhone
+      cellPhone: formData.mobilePhone ? formData.mobilePhone.replace(/\D/g, '') : '',
+      homePhone: formData.homePhone ? formData.homePhone.replace(/\D/g, '') : '',
+      workPhone: formData.workPhone ? formData.workPhone.replace(/\D/g, '') : '',
       // Get the correct membership code
       membershipType: membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : '',
       requestedStartDate: formData.requestedStartDate,
       // Ensure club ID is a 3-digit string
       club: selectedClub?.id ? String(selectedClub.id).padStart(3, '0') : '',
-      familyMembers: []
+      familyMembers: [],
+      // Add membership price and details
+      membershipDetails: {
+        price: membershipPrice,
+        description: membershipDescription,
+        bridgeCode: bridgeCode,
+        upcCode: membershipUpcCode,
+        taxCode: membershipTaxCode,
+        proratedDuesInfo: proratedDuesInfo
+      },
+      // Additional information for tracking
+      agreementType: 'M', // Always monthly as per requirements
+      serviceAddons: selectedServiceAddons.map(addon => ({
+        id: addon.invtr_id || '',
+        description: addon.invtr_desc || '',
+        price: addon.invtr_price ? parseFloat(addon.invtr_price) : 0,
+        upcCode: addon.invtr_upccode || ''
+      }))
     };
    
       // ADD THIS SECTION to create a prioritized phone field
@@ -2103,9 +2245,11 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
   const calculateTotalCost = () => {
     let total = 0;
     
-    // Add membership cost
-    if (membershipType) {
-      total += membershipType.price;
+    // Add membership cost from the API
+    if (isLoadingPrice) {
+      total += membershipType?.price || 0; // Use default price while loading
+    } else {
+      total += membershipPrice || (membershipType?.price || 0);
     }
     
     // Add cost for family members
@@ -2878,8 +3022,19 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
           <div className="cart-details">
             <div className="cart-item">
               <h3>{membershipType ? membershipType.title : 'Standard'} Membership</h3>
-              <p className="price">${membershipType ? membershipType.price : '49.99'}/month</p>
-              <p className="description">{membershipType ? membershipType.description : 'Standard membership includes access to all basic facilities.'}</p>
+              <p className="price">
+                {isLoadingPrice ? (
+                  <span>Loading price...</span>
+                ) : (
+                  `$${membershipPrice ? membershipPrice.toFixed(2) : (membershipType ? membershipType.price : '49.99')}/month`
+                )}
+              </p>
+              <p className="description">
+                {membershipDescription || (membershipType ? membershipType.description : 'Standard membership includes access to all basic facilities.')}
+              </p>
+              {bridgeCode && (
+                <p className="membership-detail">Membership Code: {bridgeCode}</p>
+              )}
             </div>
             
             {formData.familyMembers.length > 0 && (
