@@ -3167,11 +3167,22 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
               <div className="additional-services">
                 <h3>Additional Services</h3>
                 <ul>
-                  {selectedServiceAddons.map((addon, index) => (
-                    <li key={index}>
-                      {addon.invtr_desc} - ${addon.invtr_price ? parseFloat(addon.invtr_price).toFixed(2) : '0.00'}/month
-                    </li>
-                  ))}
+                  {selectedServiceAddons.map((addon, index) => {
+                    // Calculate prorated price for this addon
+                    const fullPrice = addon.invtr_price ? parseFloat(addon.invtr_price) : 0;
+                    const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                    const proratedPrice = Math.round(fullPrice * proratedFactor * 100) / 100;
+                    
+                    return (
+                      <li key={index}>
+                        <div>{addon.invtr_desc}</div>
+                        <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
+                          <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
+                          <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -3183,11 +3194,11 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   ${calculateTotalProratedCost().toFixed(2)}
                 </p>
                 <p className="price-detail">
-                  All charges prorated from {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected start date'}
+                  Prorated from {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected date'} to end of month
                 </p>
               </div>
               <div className="monthly-total">
-                <h3>Total Monthly Cost Going Forward</h3>
+                <h3>Monthly Cost Going Forward</h3>
                 <p className="total-price">${calculateTotalCost().toFixed(2)}/month</p>
               </div>
             </div>
