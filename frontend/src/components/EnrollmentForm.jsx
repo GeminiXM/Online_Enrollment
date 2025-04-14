@@ -2330,6 +2330,15 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       });
     }
     
+    // Add cost for selected child addons
+    if (selectedChildAddons.length > 0) {
+      selectedChildAddons.forEach(addon => {
+        if (addon.invtr_price) {
+          total += parseFloat(addon.invtr_price);
+        }
+      });
+    }
+    
     return total;
   };
   
@@ -2353,6 +2362,15 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       selectedServiceAddons.forEach(addon => {
         if (addon.invtr_price) {
           total += parseFloat(addon.invtr_price) * proratedFactor; // Prorate addon fees
+        }
+      });
+    }
+    
+    // Add prorated cost for selected child addons
+    if (selectedChildAddons.length > 0) {
+      selectedChildAddons.forEach(addon => {
+        if (addon.invtr_price) {
+          total += parseFloat(addon.invtr_price) * proratedFactor; // Prorate child addon fees
         }
       });
     }
@@ -3159,6 +3177,30 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                       {member.firstName} {member.lastName} - {member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'}
                     </li>
                   ))}
+                </ul>
+              </div>
+            )}
+            
+            {selectedChildAddons.length > 0 && (
+              <div className="additional-services">
+                <h3>Child Programs</h3>
+                <ul>
+                  {selectedChildAddons.map((addon, index) => {
+                    // Calculate prorated price for this addon
+                    const fullPrice = addon.invtr_price ? parseFloat(addon.invtr_price) : 0;
+                    const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                    const proratedPrice = Math.round(fullPrice * proratedFactor * 100) / 100;
+                    
+                    return (
+                      <li key={index}>
+                        <div>{addon.invtr_desc}</div>
+                        <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
+                          <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
+                          <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}

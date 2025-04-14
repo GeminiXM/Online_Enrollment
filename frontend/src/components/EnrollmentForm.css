@@ -3,7 +3,7 @@
 
 /* CSS Variables for consistent theming */
 :root {
-  --primary-color: #008080; /* Teal - Used for headers, buttons, and accents */
+  --primary-color: #00637C; /* #008080; /* Teal - Used for headers, buttons, and accents */
   --primary-dark: #006666; /* Darker teal - Used for hover states and emphasis */
   --primary-light: #00a3a3; /* Lighter teal - Used for borders and subtle elements */
   --secondary-color: #f5f5f5; /* Off-white - Used for backgrounds and containers */
@@ -316,7 +316,7 @@ select[aria-invalid="true"] {
 
 /* Submit button - Styles the main form submission button */
 .submit-button {
-  background-color: var(--primary-color); /* Teal background */
+  background-color: var(--primary-color); /* Changed from var(--primary-color) to a more blue color */
   color: white; /* White text for contrast */
   border: none; /* No border */
   padding: 0.75rem 2rem; /* Generous padding for clickable area */
@@ -557,7 +557,7 @@ button:focus-visible {
   }
   
   .tab.active {
-    border-bottom: 2px solid #0056b3;
+    border-bottom: 2px solid var(--primary-color);
     border-right: none;
   }
   
@@ -608,8 +608,8 @@ button:focus-visible {
 
 .tab.active {
   background-color: #fff;
-  color: #0056b3;
-  border-bottom: 2px solid #0056b3;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
   margin-bottom: -1px;
 }
 
@@ -820,7 +820,7 @@ button:focus-visible {
   }
   
   .tab.active {
-    border-bottom: 2px solid #0056b3;
+    border-bottom: 2px solid var(--primary-color);
     border-right: none;
   }
   
@@ -997,7 +997,7 @@ button:focus-visible {
 
 /* Selected membership type section */
 .selected-membership-type {
-  background-color: rgba(0, 128, 128, 0.05);
+  background-color: rgba(0, 99, 124, 0.05); /* Match primary-color with transparency */
   border-left: 4px solid var(--primary-color);
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -1006,7 +1006,7 @@ button:focus-visible {
 
 .membership-type-badge {
   display: inline-block;
-  background-color: var(--primary-color);
+  background-color: #00637C !important; /* Force Crystal Teal with !important to override any conflicts */
   color: white;
   padding: 0.4rem 0.8rem;
   border-radius: 4px;
