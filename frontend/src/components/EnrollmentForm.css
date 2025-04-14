@@ -31,32 +31,8 @@
 .enrollment-layout {
   display: flex; /* Uses flexbox for responsive layout */
   flex-wrap: wrap; /* Allows columns to stack on smaller screens */
-  gap: 0.5rem; /* Minimal spacing between the form and cart */
+  gap: 0.5rem; /* Small gap (approximately 1/4 inch) between the form and cart */
   justify-content: space-between; /* Distributes space evenly */
-}
-
-/* Form title - Main heading for the enrollment form */
-.enrollment-container h1 {
-  color: var(--primary-color); /* Teal color for visual hierarchy */
-  margin-bottom: 1rem; /* Compact spacing below the title */
-  text-align: center; /* Centers the title for symmetry */
-  font-size: 2rem; /* Large font size for emphasis */
-}
-
-/* Form instructions - Provides guidance text below the main title */
-.form-instructions {
-  margin-bottom: 2rem; /* Compact spacing between instructions and form */
-  text-align: center; /* Centers the text for alignment with title */
-  color: var(--text-color); /* Standard text color for readability */
-}
-
-/* Section headers - Subheadings for form sections and shopping cart */
-.enrollment-form h2, .shopping-cart h2 {
-  color: var(--primary-color); /* Teal color for visual hierarchy */
-  margin: 0.5rem 0 0.75rem; /* Compact spacing around section headers */
-  padding-bottom: 0.5rem; /* Space before the border */
-  border-bottom: 2px solid var(--primary-light); /* Underline for visual separation */
-  font-size: 1.4rem; /* Smaller than main title but larger than body text */
 }
 
 /* Form layout - Controls the main form column */
@@ -65,7 +41,7 @@
   display: flex; /* Uses flexbox for vertical layout */
   flex-direction: column; /* Stacks form elements vertically */
   gap: 0.75rem; /* Provides compact spacing between form sections */
-  max-width: 62%; /* Limits width to prevent overlap with shopping cart */
+  max-width: 70%; /* Increased width to reduce space between form and cart */
 }
 
 /* Shopping cart - Controls the sidebar cart display */
@@ -78,7 +54,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 2rem;
-  max-width: 25%;
+  max-width: 28%; /* Adjusted to match the increased form width */
   min-width: 250px;
   align-self: flex-start;
 }

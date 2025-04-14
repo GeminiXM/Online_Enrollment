@@ -3126,7 +3126,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   )}
                 </p>
                 <p className="price-detail">
-                  Prorated for {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected start date'} to end of month
+                  Prorated for {formData.requestedStartDate ? formData.requestedStartDate.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1') : 'selected start date'} to end of month
                 </p>
               </div>
               
@@ -3194,7 +3194,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   ${calculateTotalProratedCost().toFixed(2)}
                 </p>
                 <p className="price-detail">
-                  Prorated from {formData.requestedStartDate ? new Date(formData.requestedStartDate).toLocaleDateString() : 'selected date'} to end of month
+                  Prorated from {formData.requestedStartDate ? formData.requestedStartDate.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1') : 'selected date'} to end of month
                 </p>
               </div>
               <div className="monthly-total">
