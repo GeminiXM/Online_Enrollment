@@ -1,5 +1,57 @@
 import { pool } from "../config/database.js";
 import logger from "../utils/logger.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Get the current file's directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Path to SQL procedures
+const SQL_PROCEDURES_DIR = path.resolve(__dirname, "../sql/procedures");
+
+/**
+ * Reads a SQL procedure file and executes it
+ * @param {string} procedureName - The name of the procedure file (without .sql extension)
+ * @param {string} clubId - The club ID to execute the procedure on
+ * @param {Array} params - The parameters to pass to the procedure
+ * @returns {Promise<any>} - The result of the procedure execution
+ */
+const executeSqlProcedure = async (procedureName, clubId, params = []) => {
+  try {
+    // Construct the file path
+    const filePath = path.join(SQL_PROCEDURES_DIR, `${procedureName}.sql`);
+    
+    // Read the file content
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    
+    // Extract procedure name from the file (assumes format "execute procedure NAME(params)")
+    const procedureNameMatch = fileContent.match(/execute\s+procedure\s+([^\s(]+)/i);
+    
+    if (!procedureNameMatch) {
+      throw new Error(`Could not parse procedure name from file: ${procedureName}.sql`);
+    }
+    
+    const actualProcedureName = procedureNameMatch[1];
+    
+    // Log the procedure execution
+    logger.info(`Executing SQL procedure: ${actualProcedureName}`, {
+      club: clubId,
+      params: params.map(p => typeof p === 'string' ? p.substring(0, 20) : p)
+    });
+    
+    // Execute the procedure
+    const query = `EXECUTE PROCEDURE ${actualProcedureName}(${Array(params.length).fill('?').join(', ')})`;
+    return await pool.query(clubId, query, params);
+  } catch (error) {
+    logger.error(`Error executing SQL procedure: ${procedureName}`, {
+      error: error.message,
+      stack: error.stack
+    });
+    throw error;
+  }
+};
 
 /**
  * @desc Submit a new enrollment form
@@ -276,10 +328,7 @@ export const submitEnrollment = async (req, res) => {
     
     try {
       // Attempt to use the new procedure
-      const nextIdResult = await pool.query(
-        club,
-        `EXECUTE PROCEDURE procNextMembershipId()`
-      );
+      const nextIdResult = await executeSqlProcedure("procNextMembershipId", club);
       
       // Log the entire result to see its structure
       logger.info("Raw result from procNextMembershipId:", 
@@ -312,10 +361,7 @@ export const submitEnrollment = async (req, res) => {
       logger.warn("Couldn't get valid customer code from procedure, using fallback method");
       
       // First insert with blank code
-      await pool.query(
-        club,
-        `EXECUTE PROCEDURE web_proc_InsertWebStrcustr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
+      await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
           "", // parCustCode - leaving blank for now
           "", // parBridgeCode
           busName, // parBusName
@@ -341,8 +387,7 @@ export const submitEnrollment = async (req, res) => {
           "", // parToken
           membershipType || "", // parSpecialtyMembership
           "", // parNewPt
-        ]
-      );
+      ]);
       
       // Then retrieve the generated code
       const custCodeResult = await pool.query(
@@ -368,10 +413,7 @@ export const submitEnrollment = async (req, res) => {
     // 2. Insert primary membership record using web_proc_InsertWebStrcustr
     logger.info("Inserting primary membership record:", { busName, club, custCode });
 
-    await pool.query(
-      club,
-      `EXECUTE PROCEDURE web_proc_InsertWebStrcustr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
+    await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
         custCode, // parCustCode - using generated ID
         custCode, // parBridgeCode - using same ID for bridge code
         busName, // parBusName
@@ -397,18 +439,14 @@ export const submitEnrollment = async (req, res) => {
         "", // parToken
         membershipType || "", // parSpecialtyMembership
         "", // parNewPt
-      ]
-    );
+    ]);
 
     logger.info("Primary membership record inserted successfully");
 
     // 2. Insert primary member record using web_proc_InsertWebAsamembr
     logger.info("Inserting primary member record");
 
-    await pool.query(
-      club,
-      `EXECUTE PROCEDURE web_proc_InsertWebAsamembr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
+    await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
         custCode, // parCustCode
         0, // parMbrCode (0 for primary)
         firstName, // parFname
@@ -422,8 +460,7 @@ export const submitEnrollment = async (req, res) => {
         cellPhone || "", // parMobilePhone
         email, // parEmail
         "P", // parRole (P for primary)
-      ]
-    );
+    ]);
 
     logger.info("Primary member record inserted successfully");
 
@@ -445,10 +482,7 @@ export const submitEnrollment = async (req, res) => {
           name: `${member.firstName} ${member.lastName}`,
         });
 
-        await pool.query(
-          club,
-          `EXECUTE PROCEDURE web_proc_InsertWebAsamembr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
+        await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
             custCode, // parCustCode
             nextMbrCode, // parMbrCode (Sequential)
             member.firstName, // parFname
@@ -462,8 +496,7 @@ export const submitEnrollment = async (req, res) => {
             member.cellPhone || "", // parMobilePhone
             member.email || "", // parEmail
             "S", // parRole (S for secondary adult)
-          ]
-        );
+        ]);
 
         nextMbrCode++;
         logger.info("Adult family member inserted successfully");
@@ -481,10 +514,7 @@ export const submitEnrollment = async (req, res) => {
           type: member.memberType,
         });
 
-        await pool.query(
-          club,
-          `EXECUTE PROCEDURE web_proc_InsertWebAsamembr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
+        await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
             custCode, // parCustCode
             nextMbrCode, // parMbrCode (Sequential)
             member.firstName, // parFname
@@ -498,8 +528,7 @@ export const submitEnrollment = async (req, res) => {
             member.cellPhone || "", // parMobilePhone
             member.email || "", // parEmail
             "D", // parRole (D for dependent)
-          ]
-        );
+        ]);
 
         nextMbrCode++;
         logger.info("Dependent family member inserted successfully");
@@ -512,10 +541,7 @@ export const submitEnrollment = async (req, res) => {
         name: `${guardian.firstName} ${guardian.lastName}`,
       });
 
-      await pool.query(
-        club,
-        `EXECUTE PROCEDURE web_proc_InsertWebAsamembr(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
+      await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
           custCode, // parCustCode
           1, // parMbrCode (1 for guardian)
           guardian.firstName, // parFname
@@ -529,8 +555,7 @@ export const submitEnrollment = async (req, res) => {
           guardian.cellPhone || "", // parMobilePhone
           guardian.email || "", // parEmail
           "G", // parRole (G for guardian)
-        ]
-      );
+      ]);
 
       logger.info("Guardian inserted successfully");
     }
@@ -570,11 +595,8 @@ export const getAddons = async (req, res) => {
 
     logger.info(`Fetching addons for club ID: ${clubId}`);
 
-    // Execute the stored procedure on the specific database for this club
-    const addons = await pool.query(
-      clubId,
-      `EXECUTE PROCEDURE web_proc_GetAddons()`
-    );
+    // Execute the stored procedure from SQL file
+    const addons = await executeSqlProcedure("web_proc_GetAddons", clubId);
 
     logger.info("Addons retrieved successfully", {
       count: addons.length,
