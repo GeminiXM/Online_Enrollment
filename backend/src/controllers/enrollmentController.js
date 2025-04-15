@@ -728,6 +728,37 @@ export const submitEnrollment = async (req, res) => {
       logger.info("Guardian inserted successfully");
     }
 
+    // 5. Insert message information using web_proc_InsertWebAsamessag
+    logger.info("Inserting message information");
+    
+    // Format the date from YYYY-MM-DD to MM/DD/YYYY
+    const dateParts = requestedStartDate.split('-');
+    const formattedDate = dateParts.length === 3 ? 
+        `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}` : 
+        requestedStartDate;
+    
+    // Get the monthly dues amount from the request body
+    // It might be in different locations depending on the frontend implementation
+    let monthlyDues = "0.00";
+    if (req.body.membershipDetails && req.body.membershipDetails.price) {
+        monthlyDues = req.body.membershipDetails.price.toFixed(2);
+    } else if (req.body.membershipPrice) {
+        monthlyDues = req.body.membershipPrice.toFixed(2);
+    } else if (req.body.monthlyDues) {
+        monthlyDues = req.body.monthlyDues;
+    }
+    
+    // Format the message text as specified: 'Join: [requested start date] Net: [monthly dues only no additional services]'
+    const messageText = `Join: ${formattedDate} Net: $${monthlyDues}`;
+    
+    await executeSqlProcedure("web_proc_InsertWebAsamessag", club, [
+        custCode, // parCustCode
+        messageText, // parMessageText
+        requestedStartDate // parCreateDate
+    ]);
+
+    logger.info("Message information inserted successfully");
+
     logger.info("Enrollment submission completed successfully");
     res.status(200).json({
       success: true,

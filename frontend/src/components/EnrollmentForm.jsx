@@ -3118,8 +3118,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
           
           <div className="privacy-notice">
             <p>
-              <strong>Privacy Notice:</strong> The information collected on this form is used solely
-    <strong>Privacy Notice:</strong> The information collected on this form is used solely for the purpose of 
+                 <strong>Privacy Notice:</strong> The information collected on this form is used solely for the purpose of 
               processing your gym membership enrollment. We adhere to all applicable data protection laws and will not 
               share your personal information with third parties without your consent, except as required by law.
             </p>
