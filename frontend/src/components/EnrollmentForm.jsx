@@ -2,7 +2,7 @@
 // This component displays a form to collect user information for a gym membership enrollment.
 // It includes form validation, secure data handling, and follows accessibility best practices.
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
 import "./EnrollmentForm.css";
@@ -123,6 +123,8 @@ function EnrollmentForm() {
   const [proratedDuesInfo, setProratedDuesInfo] = useState({ upcCode: "", taxable: "" });
   // Prorated price state
   const [proratedPrice, setProratedPrice] = useState(0);
+  // Store the determined membership type (I/D/F)
+  const [determinedMembershipType, setDeterminedMembershipType] = useState("I");
 
   // Check if membership type is passed in location state
   useEffect(() => {
@@ -285,6 +287,117 @@ function EnrollmentForm() {
   // State for form validation errors
   const [errors, setErrors] = useState({});
   
+  // Determine membership type (I/D/F) based on member composition
+  const determineMembershipType = useCallback(() => {
+    // Count adults (primary and family members who are adults)
+    const adultsCount = 1 + formData.familyMembers.filter(member => 
+      member.memberType === 'adult').length;
+    
+    // Count children under 12
+    const childrenUnder12Count = formData.familyMembers.filter(member => 
+      member.memberType === 'child').length;
+    
+    // Count youth (12+ years old)
+    const youthCount = formData.familyMembers.filter(member => 
+      member.memberType === 'youth').length;
+    
+    // Check if club is in New Mexico (club IDs with NM prefix or codes specified by business)
+    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
+                            selectedClub?.state === 'NM';
+    
+    // Apply membership type rules
+    if (adultsCount === 1 && childrenUnder12Count > 0 && youthCount === 0) {
+      // One adult with children under 12 = Individual (I)
+      return "I";
+    } else if (adultsCount === 1 && youthCount > 0) {
+      // One adult with youth 12+ = Dual (D)
+      return "D";
+    } else if (adultsCount === 2 && !isNewMexicoClub) {
+      // Two adults (with or without children) in Denver = Dual (D)
+      return "D";
+    } else if (adultsCount >= 2 && isNewMexicoClub) {
+      // Two adults with children in New Mexico = Family (F)
+      return "F";
+    } else if (adultsCount === 2) {
+      // Two adults = Dual (D)
+      return "D";
+    } else if (adultsCount === 1) {
+      // One adult = Individual (I)
+      return "I";
+    } else {
+      // Default fallback
+      return "I";
+    }
+  }, [formData.familyMembers, selectedClub]);
+
+  // Update membership type when family composition changes
+  useEffect(() => {
+    const newMembershipTypeValue = determineMembershipType();
+    console.log(`Determined membership type: ${newMembershipTypeValue} based on family composition`);
+    // Store the determined membership type in state
+    setDeterminedMembershipType(newMembershipTypeValue);
+  }, [formData.familyMembers, determineMembershipType]);
+
+  // Trigger price refresh when membership type changes due to family composition changes
+  useEffect(() => {
+    // Skip on initial render
+    if (membershipType && selectedClub && bridgeCode) {
+      console.log(`Refreshing price based on new membership type: ${determinedMembershipType}`);
+      
+      // Force an explicit price refresh by calling the API directly
+      const fetchUpdatedPrice = async () => {
+        try {
+          const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
+          
+          console.log("Fetching updated price for:", {
+            clubId: selectedClub.id,
+            membershipType: determinedMembershipType, // Use determined type (I/D/F)
+            agreementType: "M",
+            specialtyMembership,
+            bridgeCode
+          });
+          
+          const response = await api.getMembershipPrice(
+            selectedClub.id,
+            determinedMembershipType, // Use determined type (I/D/F)
+            "M",
+            specialtyMembership,
+            bridgeCode
+          );
+          
+          if (response.success) {
+            console.log("Updated price fetched:", response.price);
+            setMembershipPrice(response.price);
+            setMembershipDescription(response.description || membershipType.title);
+            
+            // Store additional price data
+            setMembershipUpcCode(response.upcCode || "");
+            setMembershipTaxCode(response.taxCode || "");
+            if (response.proratedDuesInfo) {
+              setProratedDuesInfo({
+                upcCode: response.proratedDuesInfo.upcCode || "",
+                taxable: response.proratedDuesInfo.taxable || ""
+              });
+            }
+            
+            // Update prorated price based on start date
+            if (formData.requestedStartDate) {
+              const prorated = calculateProratedPrice(formData.requestedStartDate, response.price);
+              setProratedPrice(prorated);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching updated price:", error);
+        }
+      };
+      
+      // Only fetch updated price if family composition has changed from individual
+      if (determinedMembershipType !== "I") {
+        fetchUpdatedPrice();
+      }
+    }
+  }, [determinedMembershipType, membershipType, selectedClub, bridgeCode, formData.requestedStartDate]);
+
   // Fetch price when bridge code or membership type changes
   useEffect(() => {
     const fetchPrice = async () => {
@@ -301,14 +414,8 @@ function EnrollmentForm() {
         // Get the specialty membership code from the map
         const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
         
-        // Determine the membership type (I/D/F) based on the selected membership
-        let membershipTypeParam = "I"; // Default to Individual
-        
-        if (membershipType.id === "dual" || membershipType.id === "couple") {
-          membershipTypeParam = "D"; // Dual
-        } else if (membershipType.id === "family") {
-          membershipTypeParam = "F"; // Family
-        }
+        // Determine the membership type (I/D/F) based on family composition
+        let membershipTypeParam = determineMembershipType();
         
         console.log("Fetching price for:", {
           clubId: selectedClub.id,
@@ -372,7 +479,7 @@ function EnrollmentForm() {
     };
     
     fetchPrice();
-  }, [bridgeCode, membershipType, selectedClub, formData?.requestedStartDate]);
+  }, [bridgeCode, membershipType, selectedClub, formData?.requestedStartDate, determinedMembershipType]);
   
   // Update prorated price when start date or full price changes
   useEffect(() => {
@@ -504,8 +611,10 @@ function EnrollmentForm() {
       cellPhone: formData.mobilePhone ? formData.mobilePhone.replace(/\D/g, '') : '',
       homePhone: formData.homePhone ? formData.homePhone.replace(/\D/g, '') : '',
       workPhone: formData.workPhone ? formData.workPhone.replace(/\D/g, '') : '',
-      // Get the correct membership code
-      membershipType: membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : '',
+      // Get the correct membership type code based on family composition
+      membershipType: determineMembershipType(),  // This will return "I", "D", or "F" based on family members
+      // Keep specialty membership separate
+      specialtyMembership: membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : '',
       requestedStartDate: formData.requestedStartDate,
       // Ensure club ID is a 3-digit string
       club: selectedClub?.id ? String(selectedClub.id).padStart(3, '0') : '',
@@ -2317,10 +2426,8 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       total += membershipPrice || (membershipType?.price || 0);
     }
     
-    // Add cost for family members
-    if (formData.familyMembers.length > 0) {
-      total += formData.familyMembers.length * 10; // Assuming $10 per family member
-    }
+    // Do NOT add extra costs for family members that are already included in the membership price
+    // The membership price (I/D/F) already accounts for the correct number of people
     
     // Add cost for selected service addons
     if (selectedServiceAddons.length > 0) {
@@ -2350,13 +2457,10 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     // Get prorated factor (percentage of month remaining)
     const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
     
-    // Start with prorated membership price
+    // Start with prorated membership price - this already includes family members in the I/D/F type
     let total = proratedPrice;
     
-    // Add prorated cost for family members
-    if (formData.familyMembers.length > 0) {
-      total += (formData.familyMembers.length * 10 * proratedFactor); // Prorate family member fees
-    }
+    // Do NOT add extra family member costs - the membership price already includes this based on type
     
     // Add prorated cost for selected service addons
     if (selectedServiceAddons.length > 0) {

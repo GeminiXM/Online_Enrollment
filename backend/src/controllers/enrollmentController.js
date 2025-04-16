@@ -762,12 +762,13 @@ export const submitEnrollment = async (req, res) => {
     // 6. Insert contract information using web_proc_InsertWebAsacontr
     logger.info("Inserting contract information");
     
-    // Determine membership type code (I, D, or F)
-    let membershipTypeCode = "I"; // Default to Individual
-    if (membershipType === "F") {
-      membershipTypeCode = "F"; // Family
-    } else if (membershipType === "D") {
-      membershipTypeCode = "D"; // Dual
+    // Use membership type from the request (I, D, or F)
+    // This already comes properly determined from the frontend
+    const membershipTypeCode = membershipType || "I"; // Default to Individual if not provided
+    
+    // Log the specialty membership type if present
+    if (req.body.specialtyMembership) {
+      logger.info(`Using specialty membership type: ${req.body.specialtyMembership}`);
     }
     
     // Calculate gross dues (total monthly payment including addons)
