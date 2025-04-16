@@ -759,6 +759,53 @@ export const submitEnrollment = async (req, res) => {
 
     logger.info("Message information inserted successfully");
 
+    // 6. Insert contract information using web_proc_InsertWebAsacontr
+    logger.info("Inserting contract information");
+    
+    // Determine membership type code (I, D, or F)
+    let membershipTypeCode = "I"; // Default to Individual
+    if (membershipType === "F") {
+      membershipTypeCode = "F"; // Family
+    } else if (membershipType === "D") {
+      membershipTypeCode = "D"; // Dual
+    }
+    
+    // Calculate gross dues (total monthly payment including addons)
+    let grossDues = 0;
+    // Use membership price from request if available
+    if (req.body.membershipDetails && req.body.membershipDetails.price) {
+      grossDues = parseFloat(req.body.membershipDetails.price);
+    } else if (req.body.membershipPrice) {
+      grossDues = parseFloat(req.body.membershipPrice);
+    } else if (req.body.monthlyDues) {
+      grossDues = parseFloat(req.body.monthlyDues);
+    }
+    
+    // Add service addon prices if any
+    if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons)) {
+      req.body.serviceAddons.forEach(addon => {
+        if (addon.price) {
+          grossDues += parseFloat(addon.price);
+        }
+      });
+    }
+    
+    // Calculate net dues (just the monthly dues for the membership, no addons)
+    const netDues = req.body.membershipDetails && req.body.membershipDetails.price 
+      ? parseFloat(req.body.membershipDetails.price) 
+      : grossDues; // Default to gross dues if no specific membership price
+    
+    await executeSqlProcedure("web_proc_InsertWebAsacontr", club, [
+      custCode,                // parCustCode
+      membershipTypeCode,      // parMbrshipType
+      requestedStartDate,      // parBeginDate
+      grossDues.toFixed(2),    // parGrossDues
+      netDues.toFixed(2),      // parNetDues
+      requestedStartDate       // parContractEffDate
+    ]);
+    
+    logger.info("Contract information inserted successfully");
+
     logger.info("Enrollment submission completed successfully");
     res.status(200).json({
       success: true,

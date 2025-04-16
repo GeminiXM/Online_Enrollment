@@ -490,7 +490,8 @@ function EnrollmentForm() {
       middleInitial: formData.middleInitial || '',
       dateOfBirth: formData.dateOfBirth,
       // Convert "default" to empty string for gender
-      gender: formData.gender === "default" ? "" : formData.gender,
+      // Then convert empty string to "N" for validation (will be converted back to "" in backend)
+      gender: formData.gender === "default" ? "N" : (formData.gender === "" ? "N" : formData.gender),
       email: formData.email,
       // IMPORTANT: Backend expects 'address', not 'address1'
       address: formData.address1,
