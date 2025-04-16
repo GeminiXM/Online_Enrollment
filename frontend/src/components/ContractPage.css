@@ -48,7 +48,7 @@
   margin-bottom: 15px;
   font-size: 0.9rem;
   line-height: 1.5;
-  white-space: pre-line;
+  text-align: left;
 }
 
 .signature-section {
@@ -157,4 +157,68 @@
   padding: 30px;
   font-size: 1.2rem;
   color: #6c757d;
+}
+
+/* Contract specific styling */
+.contract-section {
+  margin-bottom: 20px;
+}
+
+.section-header {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.section-content {
+  margin-left: 5px;
+  text-align: left;
+}
+
+.section-content p {
+  margin-bottom: 10px;
+}
+
+.cancellation-text {
+  font-weight: bold;
+}
+
+.acknowledgment {
+  font-weight: bold;
+  margin: 15px 0;
+}
+
+.initial-line {
+  margin: 15px 0;
+  font-weight: normal;
+}
+
+.initials {
+  display: inline-block;
+  margin-left: 20px;
+  font-weight: normal;
+}
+
+.signature-line {
+  margin-top: 20px;
+  font-style: italic;
+}
+
+.date-line {
+  margin: 5px 0;
+}
+
+.signature-description {
+  font-size: 0.8rem;
+  color: #6c757d;
+  border-top: 1px solid #dee2e6;
+  padding-top: 5px;
+  margin-top: 0;
+}
+
+.tab {
+  display: inline-block;
+  width: 200px;
 }

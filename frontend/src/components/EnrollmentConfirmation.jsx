@@ -1,10 +1,12 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useClub } from '../context/ClubContext';
 import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
   const { enrollmentData, memberName, successMessage } = location.state || {};
+  const { selectedClub } = useClub();
 
   return (
     <div className="enrollment-confirmation">
@@ -20,7 +22,7 @@ function EnrollmentConfirmation() {
 
         <div className="confirmation-message">
           <h2>{successMessage || `Thank you for enrolling, ${memberName || 'new member'}!`}</h2>
-          <p>Your enrollment has been successfully submitted to Wellbridge.</p>
+          <p>Your enrollment has been successfully submitted to {selectedClub.name}.</p>
         </div>
 
         <div className="confirmation-details">
@@ -45,4 +47,4 @@ function EnrollmentConfirmation() {
   );
 }
 
-export default EnrollmentConfirmation; 
+export default EnrollmentConfirmation;

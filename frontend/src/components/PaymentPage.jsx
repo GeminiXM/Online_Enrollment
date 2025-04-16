@@ -214,7 +214,7 @@ const PaymentPage = () => {
         state: { 
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: `Welcome to Wellbridge, ${formData.firstName}! Your enrollment has been successfully submitted.`
+          successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`
         } 
       });
       
@@ -256,7 +256,7 @@ const PaymentPage = () => {
           <div className="membership-summary">
             <h3>Membership Details</h3>
             <p className="membership-type">{formData.membershipDetails?.description || 'Standard Membership'}</p>
-            <p className="membership-club">{selectedClub?.name || 'Wellbridge Club'}</p>
+            <p className="membership-club">{selectedClub?.name || 'Club'}</p>
             
             <div className="price-details">
               <div className="price-row">
