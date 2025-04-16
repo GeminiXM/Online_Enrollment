@@ -26,14 +26,16 @@ const ContractPage = () => {
   const handleSignatureChange = (type, value, fontInfo) => {
     console.log(`Signature change for ${type}:`, value);
     
-    // If this is a signature update, store the font info for initials
-    if (type === 'signature' && value) {
+    if (type === 'signature') {
+      // For signature, update the value and store the font info
       setSignatureData(prev => ({
         ...prev,
         [type]: value,
-        selectedFont: fontInfo
+        // Only update the selectedFont if we have fontInfo (which means it's confirmed)
+        ...(fontInfo ? { selectedFont: fontInfo } : {})
       }));
-    } else {
+    } else if (type === 'initials') {
+      // For initials, just update the value but keep using the font from signature
       setSignatureData(prev => ({
         ...prev,
         [type]: value
@@ -93,24 +95,7 @@ const ContractPage = () => {
 
   return (
     <div className="contract-container">
-      <h1>Membership Agreement</h1>
-      
-      <div className="member-info-summary">
-        <h2>Membership Information</h2>
-        <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
-        <p><strong>Email:</strong> {formData.email}</p>
-        <p><strong>Club:</strong> {selectedClub?.name || 'Unknown'}</p>
-        <p><strong>Start Date:</strong> {formData.requestedStartDate}</p>
-      </div>
-      
-      <div className="contract-text">
-        <h2>Terms and Conditions</h2>
-        <div className="scrollable-text">
-          {getContractText()}
-        </div>
-      </div>
-      
-      <div className="signature-section">
+            <div className="signature-section">
         <h2>Signature</h2>
         <div className="signature-fields">
           <div className="signature-field">
@@ -135,6 +120,25 @@ const ContractPage = () => {
             {errors.initials && <div className="error-message">{errors.initials}</div>}
           </div>
         </div>
+        
+      <h1>Membership Agreement</h1>
+      
+      <div className="member-info-summary">
+        <h2>Membership Information</h2>
+        <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
+        <p><strong>Email:</strong> {formData.email}</p>
+        <p><strong>Club:</strong> {selectedClub?.name || 'Unknown'}</p>
+        <p><strong>Start Date:</strong> {formData.requestedStartDate}</p>
+      </div>
+      
+      <div className="contract-text">
+        <h2>Terms and Conditions</h2>
+        <div className="scrollable-text">
+          {getContractText()}
+        </div>
+      </div>
+      
+
         
         <div className="terms-agreement">
           <input
