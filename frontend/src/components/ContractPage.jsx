@@ -9,7 +9,7 @@ const ContractPage = () => {
   const location = useLocation();
   const { selectedClub } = useClub();
   const [formData, setFormData] = useState(null);
-  const [signatureData, setSignatureData] = useState({ signature: '', initials: '' });
+  const [signatureData, setSignatureData] = useState({ signature: '', initials: '', selectedFont: null });
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -23,11 +23,22 @@ const ContractPage = () => {
     }
   }, [location, navigate]);
 
-  const handleSignatureChange = (type, value) => {
-    setSignatureData(prev => ({
-      ...prev,
-      [type]: value
-    }));
+  const handleSignatureChange = (type, value, fontInfo) => {
+    console.log(`Signature change for ${type}:`, value);
+    
+    // If this is a signature update, store the font info for initials
+    if (type === 'signature' && value) {
+      setSignatureData(prev => ({
+        ...prev,
+        [type]: value,
+        selectedFont: fontInfo
+      }));
+    } else {
+      setSignatureData(prev => ({
+        ...prev,
+        [type]: value
+      }));
+    }
   };
 
   const validateForm = () => {
@@ -105,7 +116,7 @@ const ContractPage = () => {
           <div className="signature-field">
             <label>Signature: <span className="required">*</span></label>
             <SignatureSelector 
-              onChange={(value) => handleSignatureChange('signature', value)}
+              onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
               name={`${formData.firstName} ${formData.lastName}`}
               type="signature"
             />
@@ -116,8 +127,10 @@ const ContractPage = () => {
             <label>Initials: <span className="required">*</span></label>
             <SignatureSelector 
               onChange={(value) => handleSignatureChange('initials', value)}
-              name={`${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`}
+              name={`${formData.firstName} ${formData.lastName}`}
               type="initials"
+              forcedFont={signatureData.selectedFont}
+              showFontControls={false}
             />
             {errors.initials && <div className="error-message">{errors.initials}</div>}
           </div>

@@ -2,21 +2,37 @@
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+/* Special styling for the initials selector - make it smaller */
+.initials-selector {
+  max-width: 220px;
 }
 
 .signature-preview-container {
   background-color: white;
   border: 1px solid #ced4da;
   border-radius: 3px;
-  min-height: 100px;
+  min-height: 80px; /* Reduced from 100px */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 15px;
-  padding: 10px;
+  margin-bottom: 12px;
+  padding: 8px;
   position: relative;
+}
+
+.font-name {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 10px;
+  font-style: italic;
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
 }
 
 .signature-preview-container::after {
@@ -30,17 +46,17 @@
 }
 
 .signature-preview {
-  font-size: 2.5rem;
+  font-size: 2rem; /* Reduced from 2.5rem */
   color: #212529;
   text-align: center;
   transition: all 0.3s ease;
   width: 100%;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 /* Make initials a bit larger */
 .signature-preview[data-type="initials"] {
-  font-size: 3rem;
+  font-size: 2.5rem; /* Reduced from 3rem */
 }
 
 .signature-preview.confirmed {
@@ -50,8 +66,14 @@
 .signature-controls {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 15px;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* Centered button for initials selector */
+.centered-button {
+  margin: 0 auto;
+  min-width: 120px;
 }
 
 .font-selector-btn {
@@ -59,8 +81,8 @@
   color: #495057;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 0.9rem;
+  padding: 6px 10px;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s;
   flex: 1;
@@ -80,11 +102,11 @@
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 8px 15px;
+  padding: 6px 12px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-width: 100px;
+  min-width: 80px;
 }
 
 .confirm-btn:hover {
@@ -100,12 +122,43 @@
 }
 
 .signature-notice {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #6c757d;
   text-align: center;
   margin: 0;
   font-style: italic;
 }
 
-/* Add some font imports for the cursive styles */
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Great+Vibes&family=Pacifico&family=Sacramento&family=Tangerine&display=swap');
+/* For smaller screens, make everything more compact */
+@media (max-width: 576px) {
+  .signature-selector {
+    padding: 8px;
+  }
+  
+  .signature-preview {
+    font-size: 1.8rem;
+  }
+  
+  .signature-preview[data-type="initials"] {
+    font-size: 2.2rem;
+  }
+  
+  .font-selector-btn, .confirm-btn {
+    padding: 5px 8px;
+    font-size: 0.8rem;
+  }
+}
+
+/* Add specific font imports with font-display:swap for better loading */
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
+
+/* Add font classes for debugging */
+.font-great-vibes { font-family: 'Great Vibes', cursive !important; }
+.font-dancing-script { font-family: 'Dancing Script', cursive !important; }
+.font-tangerine { font-family: 'Tangerine', cursive !important; }
+.font-pacifico { font-family: 'Pacifico', cursive !important; }
+.font-sacramento { font-family: 'Sacramento', cursive !important; }

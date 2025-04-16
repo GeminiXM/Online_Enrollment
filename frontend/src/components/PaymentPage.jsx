@@ -274,7 +274,11 @@ const PaymentPage = () => {
             <h3>Agreement</h3>
             <p>You have agreed to the membership terms and conditions with your electronic signature.</p>
             {signatureData?.signature && (
-              <div className="signature-preview" style={{ fontFamily: signatureData.signature.font }}>
+              <div className="signature-preview" style={{ 
+                fontFamily: signatureData.signature.font,
+                fontSize: '2rem',
+                lineHeight: '1.2'
+              }}>
                 {signatureData.signature.text}
               </div>
             )}
