@@ -807,6 +807,49 @@ export const submitEnrollment = async (req, res) => {
     
     logger.info("Contract information inserted successfully");
 
+    // 7. Insert receipt documents for membership dues and addons
+    logger.info("Inserting receipt document for membership dues");
+    
+    // Insert receipt document for membership dues
+    await executeSqlProcedure("web_proc_InsertWebAsprecdoc", club, [
+      custCode,                // parCustCode
+      custCode,                // parDocNo (use custCode for dues)
+      custCode,                // parBillTo
+      netDues.toFixed(2),      // parAmt (dues price)
+      'D',                     // parBillable ('D' for dues)
+      req.body.membershipDetails?.upcCode || "", // parUpcCode
+      requestedStartDate,      // parBeginDate
+      req.body.membershipDetails?.description || "MONTHLY DUES", // parStmtText
+      club,                    // parStore
+      null                     // parEndDate
+    ]);
+    
+    logger.info("Membership dues receipt document inserted successfully");
+    
+    // Insert receipt documents for each service addon
+    if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons) && req.body.serviceAddons.length > 0) {
+      logger.info(`Processing ${req.body.serviceAddons.length} service addons for receipt documents`);
+      
+      for (const addon of req.body.serviceAddons) {
+        logger.info(`Inserting receipt document for addon: ${addon.description}`);
+        
+        await executeSqlProcedure("web_proc_InsertWebAsprecdoc", club, [
+          custCode,                // parCustCode
+          'ADDON',                 // parDocNo (use 'ADDON' for addons)
+          custCode,                // parBillTo
+          parseFloat(addon.price).toFixed(2), // parAmt (addon price)
+          'B',                     // parBillable ('B' for billable addon)
+          addon.upcCode || "",     // parUpcCode
+          requestedStartDate,      // parBeginDate
+          addon.description || "", // parStmtText
+          club,                    // parStore
+          null                     // parEndDate
+        ]);
+        
+        logger.info(`Receipt document for addon ${addon.description} inserted successfully`);
+      }
+    }
+
     logger.info("Enrollment submission completed successfully");
     res.status(200).json({
       success: true,
