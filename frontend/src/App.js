@@ -4,6 +4,8 @@ import "./App.css";
 import EnrollmentForm from "./components/EnrollmentForm.jsx";
 import LandingPage from "./components/LandingPage.jsx";
 import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
+import ContractPage from "./components/ContractPage.jsx";
+import PaymentPage from "./components/PaymentPage.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 
@@ -85,6 +87,8 @@ function AppContent() {
           {/* Define your routes here */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/enrollment" element={<EnrollmentForm />} />
+          <Route path="/contract" element={<ContractPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           <Route
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}

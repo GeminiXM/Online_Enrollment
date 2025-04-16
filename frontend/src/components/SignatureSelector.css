@@ -1,0 +1,111 @@
+.signature-selector {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.signature-preview-container {
+  background-color: white;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  position: relative;
+}
+
+.signature-preview-container::after {
+  content: "";
+  position: absolute;
+  bottom: 20px;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background-color: #adb5bd;
+}
+
+.signature-preview {
+  font-size: 2.5rem;
+  color: #212529;
+  text-align: center;
+  transition: all 0.3s ease;
+  width: 100%;
+  padding: 10px 0;
+}
+
+/* Make initials a bit larger */
+.signature-preview[data-type="initials"] {
+  font-size: 3rem;
+}
+
+.signature-preview.confirmed {
+  color: #0056b3;
+}
+
+.signature-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.font-selector-btn {
+  background-color: #e9ecef;
+  color: #495057;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+
+.font-selector-btn:hover:not(:disabled) {
+  background-color: #dee2e6;
+}
+
+.font-selector-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.confirm-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  min-width: 100px;
+}
+
+.confirm-btn:hover {
+  background-color: #5a6268;
+}
+
+.confirm-btn.confirmed {
+  background-color: #28a745;
+}
+
+.confirm-btn.confirmed:hover {
+  background-color: #218838;
+}
+
+.signature-notice {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Add some font imports for the cursive styles */
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&family=Great+Vibes&family=Pacifico&family=Sacramento&family=Tangerine&display=swap');

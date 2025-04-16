@@ -897,44 +897,49 @@ button:focus-visible {
 /* Special styling for name fields */
 .name-row .form-group:first-child, /* First name */
 .name-row .form-group:last-child { /* Last name */
-  flex: 1 1 170px; /* Reduced from 180px */
-  max-width: 240px; /* Reduced from 250px */
+  flex: 1 1 180px;
+  max-width: 250px;
 }
 
 /* Special styling for middle initial field */
 .middle-initial {
-  flex: 0 0 65px; /* Reduced from 70px */
-  min-width: 65px; /* Reduced from 70px */
+  flex: 0 0 60px;
+  min-width: 60px;
+  max-width: 60px;
 }
 
 /* Make phone fields narrower so they fit on one line */
 .phone-row .form-group {
-  flex: 1 1 130px; /* Reduced from 140px */
-  max-width: 200px; /* Reduced from 220px */
+  flex: 1 1 140px;
+  max-width: 220px;
 }
 
 /* Make state dropdown narrower */
 .state-select {
-  flex: 0 0 90px; /* Reduced from 100px */
-  min-width: 90px; /* Reduced from 100px */
+  flex: 0 0 80px;
+  min-width: 80px;
+  max-width: 80px;
 }
 
 /* Make ZIP code field narrower */
 .zip-field {
-  flex: 0 0 110px; /* Reduced from 120px */
-  min-width: 110px; /* Reduced from 120px */
+  flex: 0 0 100px;
+  min-width: 100px;
+  max-width: 100px;
 }
 
-/* Make date of birth field narrower Primary*/
+/* Make date of birth field size appropriate for content with calendar icon */
 .dob-field {
-  flex: 0 0 170px; /* Reduced from 180px */
-  min-width: 170px; /* Reduced from 180px */
+  flex: 0 0 150px;
+  min-width: 150px;
+  max-width: 150px;
 }
 
-/* Make gender field narrower */
+/* Make gender field wide enough to fit "Prefer not to say" */
 .gender-field {
-  flex: 0 0 120px; /* Reduced from 130px */
-  min-width: 120px; /* Reduced from 130px */
+  flex: 0 0 170px;
+  min-width: 170px;
+  max-width: 170px;
 }
 
 /* Email field styling */
@@ -944,17 +949,29 @@ button:focus-visible {
 
 /* Date field styling */
 .date-field {
-  flex: 0 0 170px; /* Reduced from 180px */
-  min-width: 170px; /* Reduced from 180px */
+  flex: 0 0 170px;
+  min-width: 170px;
+  max-width: 170px;
+}
+
+/* Specifically target the start date field */
+.start-date-row .date-field {
+  width: 170px;
+  flex: 0 0 170px;
+  min-width: 170px;
+  max-width: 170px;
 }
 
 /* Special handling for address fields */
 .address-field {
-  flex: 2; /* Takes up more space than address2 */
+  flex: 4; /* Takes up much more space than address2 */
+  min-width: 300px;
 }
 
 .address2-field {
-  flex: 1; /* Takes up less space than address1 */
+  flex: 1; /* Takes up much less space than address1 */
+  min-width: 120px;
+  max-width: 150px;
 }
 
 /* Tab panel form styles to match primary form */

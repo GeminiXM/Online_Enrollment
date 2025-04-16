@@ -1164,12 +1164,11 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
   };
   
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     
     // Reset submission states
     setSubmitError("");
-    setSubmitSuccess(false);
     
     // Validate the form
     if (!validateForm()) {
@@ -1203,83 +1202,15 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       return;
     }
     
-    // Set submitting state
-    setIsSubmitting(true);
+    // Transform form data for submission
+    const submissionData = transformFormDataForSubmission();
     
-    try {
-      // Transform form data to match backend expectations
-      const submissionData = transformFormDataForSubmission();
- 
-// DETAILED DEBUG LOGGING
-    console.log('Full submission data:', submissionData);
-    
-    if (submissionData.familyMembers && submissionData.familyMembers.length > 0) {
-      console.log('Family members detail:');
-      submissionData.familyMembers.forEach((member, index) => {
-        console.log(`Family member ${index + 1}:`, {
-          name: `${member.firstName} ${member.lastName}`,
-          gender: member.gender,
-          genderType: typeof member.gender,
-          genderLength: member.gender?.length,
-          genderIsEmpty: member.gender === '',
-          genderIsEmptyString: member.gender === ""
-        });
-      });
-    }
-
-        console.log('Submitting enrollment data:', submissionData);
-      
-      // Submit the form data to the server
-      const response = await api.post('/enrollment', submissionData);
-      
-      // Handle successful submission
-      setSubmitSuccess(true);
-      
-      // Show success message
-      const successMessage = `Welcome to Wellbridge, ${formData.firstName}! Your enrollment has been successfully submitted.`;
-      
-      // Redirect to confirmation page
-      navigate('/enrollment-confirmation', { 
-        state: { 
-          enrollmentData: response.data,
-          memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: successMessage
-        } 
-      });
-      
-    } catch (error) {
-      // Enhanced error handling
-      console.error('Enrollment submission error:', error);
-      
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-       
-              // Handle specific validation error for gender
-      if (error.response.data?.errors) {
-        const genderErrors = error.response.data.errors.filter(err => 
-          err.path && err.path.includes('gender')
-        );
-        
-        if (genderErrors.length > 0) {
-          console.error('Gender-specific errors:', genderErrors);
-        }
-      }
-
-        // Format user-friendly error message based on server response
-        if (error.response.data?.missingFields) {
-          setSubmitError(`Missing required fields: ${error.response.data.missingFields.join(', ')}`);
-        } else if (error.response.data?.error) {
-          setSubmitError(error.response.data.error);
-        } else {
-          setSubmitError(error.response.data?.message || 'An error occurred while submitting your enrollment. Please try again.');
-        }
-      } else {
-        setSubmitError('Network error. Please check your internet connection and try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Instead of submitting directly, navigate to the contract page
+    navigate('/contract', { 
+      state: { 
+        formData: submissionData
+      } 
+    });
   };
 
   // Handle membership type selection
@@ -3215,9 +3146,8 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
             <button 
               type="submit" 
               className="submit-button"
-              disabled={isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : "Submit Enrollment"}
+              Continue to Agreement
             </button>
           </div>
           
