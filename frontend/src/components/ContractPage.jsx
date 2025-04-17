@@ -4,6 +4,53 @@ import { useClub } from '../context/ClubContext';
 import SignatureSelector from './SignatureSelector';
 import './ContractPage.css';
 
+// Component for clickable initial boxes
+const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref) => {
+  // Base style for the initial box
+  const boxStyle = {
+    display: 'inline-block',
+    border: '1px solid #aaa',
+    borderRadius: '3px',
+    padding: '2px 8px',
+    margin: '0 10px',
+    minWidth: '30px',
+    height: '20px',
+    backgroundColor: isInitialed ? '#f0f8ff' : '#f8f9fa', // Light blue background if initialed
+    cursor: 'pointer',
+    textAlign: 'center',
+    fontFamily: font?.font || 'inherit',
+    fontSize: 'inherit', // Use the font size of surrounding text
+    lineHeight: 'normal',
+    verticalAlign: 'middle',
+    transition: 'all 0.2s ease-in-out', // Smooth transition for hover effects
+    boxShadow: isInitialed ? '0 0 3px rgba(0,123,255,0.5)' : 'none' // Subtle highlight if initialed
+  };
+
+  // Add hover styles with React's onMouseEnter/onMouseLeave
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Apply hover effect styles
+  if (isHovered) {
+    boxStyle.backgroundColor = isInitialed ? '#e6f0ff' : '#e9ecef';
+    boxStyle.boxShadow = '0 0 5px rgba(0,0,0,0.2)';
+    boxStyle.border = '1px solid #007bff';
+  }
+
+  return (
+    <span 
+      ref={ref}
+      className="initial-box" 
+      style={boxStyle}
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      title={isInitialed ? "Click to remove initials" : "Click to add your initials"}
+    >
+      {isInitialed ? value : ''}
+    </span>
+  );
+});
+
 const ContractPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -12,6 +59,38 @@ const ContractPage = () => {
   const [signatureData, setSignatureData] = useState({ signature: '', initials: '', selectedFont: null });
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [errors, setErrors] = useState({});
+  // Track which initial boxes have been clicked
+  const [initialedBoxes, setInitialedBoxes] = useState({
+    'monthToMonth': false,
+    'extendedPlan': false,
+    'resignation': false,
+    'corporate': false,
+    'syp': false,
+    'corporateProof': false
+  });
+
+  // Toggle the initialed state of a specific box
+  const toggleInitialBox = (boxId) => {
+    if (!signatureData.initials) {
+      // If user hasn't provided initials yet, don't allow clicking on boxes
+      setErrors(prev => ({
+        ...prev,
+        initials: "Please provide your initials first"
+      }));
+      return;
+    }
+
+    setInitialedBoxes(prev => ({
+      ...prev,
+      [boxId]: !prev[boxId]
+    }));
+  };
+
+  // Get the initials text value from signature data
+  const getInitialsText = () => {
+    // If initials are set, return them, otherwise return empty string
+    return signatureData.initials?.text || '';
+  };
 
   // Get enrollment data passed from previous page
   useEffect(() => {
@@ -43,6 +122,16 @@ const ContractPage = () => {
     }
   };
 
+  // Reference to scroll to empty initial boxes
+  const initialBoxRefs = {
+    monthToMonth: React.useRef(null),
+    extendedPlan: React.useRef(null),
+    resignation: React.useRef(null),
+    corporate: React.useRef(null),
+    syp: React.useRef(null),
+    corporateProof: React.useRef(null)
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -56,6 +145,23 @@ const ContractPage = () => {
     
     if (!agreeToTerms) {
       newErrors.terms = "You must agree to the terms and conditions";
+    }
+    
+    // Verify that ALL initial boxes have been checked
+    const emptyBoxes = Object.entries(initialedBoxes)
+      .filter(([_, value]) => value === false)
+      .map(([key]) => key);
+    
+    if (emptyBoxes.length > 0) {
+      newErrors.initialBoxes = emptyBoxes;
+      
+      // Scroll to the first empty box
+      if (emptyBoxes.length > 0 && initialBoxRefs[emptyBoxes[0]]?.current) {
+        initialBoxRefs[emptyBoxes[0]].current.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
     }
     
     setErrors(newErrors);
@@ -73,6 +179,9 @@ const ContractPage = () => {
           signatureData: signatureData
         }
       });
+    } else if (errors.initialBoxes && errors.initialBoxes.length > 0) {
+      // Show error message for missing initials
+      alert("Please initial all required sections before continuing.");
     }
   };
 
@@ -82,10 +191,19 @@ const ContractPage = () => {
     const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
                            selectedClub?.state === 'NM';
     
+    // Pass props needed for initial boxes
+    const contractProps = {
+      toggleInitialBox,
+      initialedBoxes,
+      initialsText: getInitialsText(),
+      selectedFont: signatureData.selectedFont,
+      initialBoxRefs  // Pass refs to the contract components
+    };
+    
     if (isNewMexicoClub) {
-      return <NewMexicoContract />;
+      return <NewMexicoContract {...contractProps} />;
     } else {
-      return <DenverContract />;
+      return <DenverContract {...contractProps} />;
     }
   };
 
@@ -175,7 +293,7 @@ const ContractPage = () => {
 };
 
 // Denver Contract Component
-const DenverContract = () => {
+const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, selectedFont, initialBoxRefs }) => {
   return (
     <>
       <div className="contract-section">
@@ -195,10 +313,28 @@ const DenverContract = () => {
           <p>A. The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
           <p>B. The Member elects to purchase a membership and to pay to Colorado Athletic Club (CAC) the required total monthly dues as indicated on this agreement under one of the following scenarios:</p>
           <p><strong>MONTH-TO-MONTH</strong> - I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. After fulfilling my minimum three (3) month membership commitment, I understand that the membership may be cancelled at any time with written notice pursuant to the Resignation Policy (Item 4A) and the total dues owing for the membership as well as all discounts and initiation fees are not refundable. As such, any failure to use the membership indicated above and/or the facilities and programs associated therewith does not relieve applicant of any liability for payment of the total dues or other charges owing as indicated above, regardless of circumstances. Dues may increase at any time, with a one (1) month notice.</p>
-          <p className="initial-line"><strong>INITIAL</strong> <span className="initials">SM</span></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong> 
+            <InitialBox
+              ref={initialBoxRefs.monthToMonth}
+              onClick={() => toggleInitialBox('monthToMonth')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.monthToMonth}
+            />
+          </p>
           
           <p><strong>EXTENDED PLAN</strong> - I elect to pay for the number of selected months on this agreement for consecutive months of member dues plus any club charges (if applicable) made by myself or any other persons included in my membership. I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. Member acknowledges that in order to be relieved of the agreement terms, the balance of the dues owed for the remaining months of the agreement must be paid in full. Special consideration can be made if cause for cancellation is based on a medical contingency and written authorization from a doctor is received; or if a member moves 50 miles or more away from the nearest Colorado Athletic Club with proof of new residency. Any Leave of Absence taken during the initial term of this agreement will extend the commitment by the number of months the member's account is on Leave of Absence. Rate for Student/Young Professional memberships will only be honored through the current maximum age for this type of membership regardless of whether the number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation Policy (Item 4A) applies. I authorize CAC to collect payment under the method of payment indicated on the agreement and the balance of the remaining dues owed should I not satisfy the terms of the agreement.</p>
-          <p className="initial-line"><strong>INITIAL</strong></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.extendedPlan}
+              onClick={() => toggleInitialBox('extendedPlan')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.extendedPlan}
+            />
+          </p>
           
           <p>Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.</p>
           
@@ -219,7 +355,16 @@ const DenverContract = () => {
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
           <p>A. RESIGNATION POLICY: A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and facsimile transmission of cancelation form to 303-813-4197. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
-          <p className="initial-line"><strong>INITIAL</strong> <span className="initials">SM</span></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.resignation}
+              onClick={() => toggleInitialBox('resignation')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.resignation}
+            />
+          </p>
           
           <p>B. DEATH OR DISABILITY: The contract may be cancelled in the event of member's death or total disability during the membership term. Total disability means a condition which has existed or will exist for more than six (6) months and which will prevent Member from using the club. In order to establish death, the member's estate must furnish to the club a death certificate. In order to establish disability, Member must furnish the club certification of the disability by a licensed physician whose diagnosis or treatment is within his scope of practice. Cancellation will be effective upon establishment of death or disability according to these provisions. In the event that Member has paid membership fees in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing the total cost of the membership by the total number of months under the membership and multiplying the result by the number of months expired under the membership term. As to membership fees paid monthly, dues will be refunded for the month in which written notification is received of the death or disability and the proper documentation outlined above has been provided.</p>
           
@@ -260,21 +405,48 @@ const DenverContract = () => {
           <p>3. It is the member's responsibility to notify CAC of any change in employment status. I understand that I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.</p>
           
           <p>4. Proof of employment must be provided to obtain the corporate discount.</p>
-          <p className="initial-line"><strong>INITIAL</strong> <span className="initials">SM</span></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.corporate}
+              onClick={() => toggleInitialBox('corporate')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.corporate}
+            />
+          </p>
           
           <p><strong>18. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS</strong></p>
           
           <p>Student/Young Professional (SYP) discounted memberships are offered exclusively to members between the ages of 19-29. This special discounted rate will be honored through the age of 29. I understand that beginning the month after my 30th birthday my monthly dues rate will increase by $10. Each year thereafter my monthly rate will increase by an additional $10 until my rate reaches the then current rate. I also understand that my rate may also change for any other upgrades or downgrades of the membership that I may initiate.</p>
           
           <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/29/2025, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
-          <p className="initial-line"><strong>INITIAL</strong></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.syp}
+              onClick={() => toggleInitialBox('syp')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.syp}
+            />
+          </p>
           
           <p><strong>19. CORPORATE PROOF</strong></p>
           
           <p>Although you were unable to provide corporate proof when beginning your membership, we would like to offer you the opportunity to immediately take advantage of your membership.</p>
           
           <p>If this proof is not received within 14 days, your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/29/2025, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
-          <p className="initial-line"><strong>INITIAL</strong> <span className="initials">SM</span></p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.corporateProof}
+              onClick={() => toggleInitialBox('corporateProof')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.corporateProof}
+            />
+          </p>
           
           <p>The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between CAC and the Member, and no oral promises are made a part of it.</p>
           
@@ -288,7 +460,7 @@ const DenverContract = () => {
 };
 
 // New Mexico Contract Component (same structure but with NM text)
-const NewMexicoContract = () => {
+const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, selectedFont, initialBoxRefs }) => {
   return (
     <>
       <div className="contract-section">
@@ -308,10 +480,33 @@ const NewMexicoContract = () => {
           {/* Same content as Denver with New Mexico specifications */}
           <p><strong>1. MEMBERSHIP FEE STRUCTURES</strong></p>
           <p>A. The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
-          {/* Continue with the rest of the contract similar to Denver's format but with NM-specific content */}
+          
+          <p><strong>MONTH-TO-MONTH</strong> - I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. After fulfilling my minimum three (3) month membership commitment, I understand that the membership may be cancelled at any time with written notice pursuant to the Resignation Policy (Item 4A) and the total dues owing for the membership as well as all discounts and initiation fees are not refundable.</p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.monthToMonth}
+              onClick={() => toggleInitialBox('monthToMonth')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.monthToMonth}
+            />
+          </p>
           
           {/* Additional sections specific to New Mexico would go here */}
           <p><strong>10. CONSUMER RIGHTS</strong> - New Mexico residents have certain rights under the New Mexico Health Spa Act. Member may cancel this Agreement within 3 business days of signing for a full refund.</p>
+          
+          <p><strong>RESIGNATION POLICY</strong>: A month-to-month membership may be cancelled by providing at least one (1) month's written notice.</p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.resignation}
+              onClick={() => toggleInitialBox('resignation')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.resignation}
+            />
+          </p>
           
           {/* End with the same signature section */}
           <p className="signature-line">signed electronically</p>
