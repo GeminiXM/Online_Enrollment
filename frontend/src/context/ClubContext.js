@@ -2,16 +2,16 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 
 // Club data
 const clubList = [
-  { id: "201", name: "Highpoint" },
-  { id: "202", name: "Midtown" },
-  { id: "203", name: "Downtown" },
-  { id: "204", name: "Del Norte" },
-  { id: "205", name: "Riverpoint" },
-  { id: "252", name: "DTC" },
-  { id: "254", name: "Tabor Center" },
-  { id: "257", name: "Flatirons" },
-  { id: "292", name: "Monaco" },
-  { id: "375", name: "MAC" },
+  { id: "201", name: "Highpoint", state: "NM" },
+  { id: "202", name: "Midtown", state: "NM" },
+  { id: "203", name: "Downtown", state: "NM" },
+  { id: "204", name: "Del Norte", state: "NM" },
+  { id: "205", name: "Riverpoint", state: "NM" },
+  { id: "252", name: "DTC", state: "CO" },
+  { id: "254", name: "Tabor Center", state: "CO" },
+  { id: "257", name: "Flatirons", state: "CO" },
+  { id: "292", name: "Monaco", state: "CO" },
+  { id: "375", name: "MAC", state: "CO" },
 ];
 
 // Create the context

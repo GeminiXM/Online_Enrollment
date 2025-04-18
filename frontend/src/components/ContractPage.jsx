@@ -147,10 +147,19 @@ const ContractPage = () => {
       newErrors.terms = "You must agree to the terms and conditions";
     }
     
-    // Verify that ALL initial boxes have been checked
-    const emptyBoxes = Object.entries(initialedBoxes)
-      .filter(([_, value]) => value === false)
-      .map(([key]) => key);
+    // Check if club is in New Mexico
+    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
+                           selectedClub?.state === 'NM';
+    
+    // Define which initial boxes are required based on contract type
+    const requiredBoxes = isNewMexicoClub 
+      ? ['monthToMonth', 'extendedPlan', 'resignation', 'corporate', 'syp'] // New Mexico required boxes
+      : ['monthToMonth', 'extendedPlan', 'resignation', 'corporate', 'syp', 'corporateProof']; // Colorado required boxes
+    
+    // Verify that all REQUIRED initial boxes have been checked
+    const emptyBoxes = requiredBoxes
+      .filter(key => !initialedBoxes[key])
+      .filter(key => initialBoxRefs[key]?.current); // Only include boxes that actually exist in DOM
     
     if (emptyBoxes.length > 0) {
       newErrors.initialBoxes = emptyBoxes;
@@ -310,8 +319,8 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
         <div className="section-header">MEMBERSHIP AGREEMENT</div>
         <div className="section-content">
           <p><strong>1. MEMBERSHIP FEE STRUCTURES</strong></p>
-          <p>A. The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
-          <p>B. The Member elects to purchase a membership and to pay to Colorado Athletic Club (CAC) the required total monthly dues as indicated on this agreement under one of the following scenarios:</p>
+          <p><strong>A.</strong> The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
+          <p><strong>B.</strong> The Member elects to purchase a membership and to pay to Colorado Athletic Club (CAC) the required total monthly dues as indicated on this agreement under one of the following scenarios:</p>
           <p><strong>MONTH-TO-MONTH</strong> - I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. After fulfilling my minimum three (3) month membership commitment, I understand that the membership may be cancelled at any time with written notice pursuant to the Resignation Policy (Item 4A) and the total dues owing for the membership as well as all discounts and initiation fees are not refundable. As such, any failure to use the membership indicated above and/or the facilities and programs associated therewith does not relieve applicant of any liability for payment of the total dues or other charges owing as indicated above, regardless of circumstances. Dues may increase at any time, with a one (1) month notice.</p>
           <p className="initial-line">
             <strong>INITIAL</strong> 
@@ -338,15 +347,15 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
           
           <p>Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.</p>
           
-          <p>C. PAID-IN-FULL - I elect to pay my total dues, as indicated on this agreement, in advance in consideration of a discount on yearly dues. At the completion of the prepaid period, my membership will automatically revert to month-to-month billing unless I prepay another year in advance or terminate with a written notice pursuant to the Resignation Policy (Item 4A.). If terminating prior to the completion of the prepaid agreement, a refund will be granted minus the discount percent indicated on this document. If a renewal of membership is requested by the applicant and approved at the conclusion of the term indicated, I understand that the renewal monthly dues to be charged will be those dues rates in effect at the time of renewal.</p>
+          <p><strong>C. PAID-IN-FULL</strong> - I elect to pay my total dues, as indicated on this agreement, in advance in consideration of a discount on yearly dues. At the completion of the prepaid period, my membership will automatically revert to month-to-month billing unless I prepay another year in advance or terminate with a written notice pursuant to the Resignation Policy (Item 4A.). If terminating prior to the completion of the prepaid agreement, a refund will be granted minus the discount percent indicated on this document. If a renewal of membership is requested by the applicant and approved at the conclusion of the term indicated, I understand that the renewal monthly dues to be charged will be those dues rates in effect at the time of renewal.</p>
           
-          <p>D. EFT - All dues and Member charges will be payable monthly (with the exception of annual dues prepayments) and collected by Electronic Funds Transfer (EFT) from either the Member's bank account or charged to an approved credit card. Please notify Colorado Athletic Club (CAC) at the time you change bank accounts or credit cards and provide the appropriate information to avoid having your old account charged for your monthly dues.</p>
+          <p><strong>D. EFT</strong> - All dues and Member charges will be payable monthly (with the exception of annual dues prepayments) and collected by Electronic Funds Transfer (EFT) from either the Member's bank account or charged to an approved credit card. Please notify Colorado Athletic Club (CAC) at the time you change bank accounts or credit cards and provide the appropriate information to avoid having your old account charged for your monthly dues.</p>
           
-          <p>E. DELINQUENT ACCOUNTS - In the event a bank account or credit card is unable to be charged at the designated date, the membership is subject to a late fee. A charge will be issued for checks returned due to insufficient funds and credit cards that are declined when a balance is due. The Primary Member is responsible for all charges incurred.</p>
+          <p><strong>E. DELINQUENT ACCOUNTS</strong> - In the event a bank account or credit card is unable to be charged at the designated date, the membership is subject to a late fee. A charge will be issued for checks returned due to insufficient funds and credit cards that are declined when a balance is due. The Primary Member is responsible for all charges incurred.</p>
           
-          <p>F. REFERRALS - If a dues referral program is in effect, it will not extend or modify the terms of the membership agreement. Any Member in default of payment due may NOT cure the default by way of credit for "referral" members to Colorado Athletic Club.</p>
+          <p><strong>F. REFERRALS</strong> - If a dues referral program is in effect, it will not extend or modify the terms of the membership agreement. Any Member in default of payment due may NOT cure the default by way of credit for "referral" members to Colorado Athletic Club.</p>
           
-          <p>G. EMAIL - By providing my email address, I am consenting to receive information via email from Colorado Athletic Club, The Wellbridge Company and their affiliated companies. Any further distribution of my email address is unauthorized.</p>
+          <p><strong>G. EMAIL </strong>- By providing my email address, I am consenting to receive information via email from Colorado Athletic Club, The Wellbridge Company and their affiliated companies. Any further distribution of my email address is unauthorized.</p>
           
           <p><strong>2. UPGRADES/DOWNGRADES</strong> - Requests for upgrades/downgrades of membership must be made in writing. Upgrades will be effective immediately unless otherwise requested. Requests for downgrades must be submitted by the last day of the month for the downgrade to be effective for the following month. Primary Member's signature is required for all changes. Proof of eligibility/residency to upgrade/add members is required.</p>
           
@@ -354,7 +363,7 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
           
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
-          <p>A. RESIGNATION POLICY: A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and facsimile transmission of cancelation form to 303-813-4197. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
+          <p><strong>A. RESIGNATION POLICY: </strong>A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and facsimile transmission of cancelation form to 303-813-4197. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -366,7 +375,7 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
             />
           </p>
           
-          <p>B. DEATH OR DISABILITY: The contract may be cancelled in the event of member's death or total disability during the membership term. Total disability means a condition which has existed or will exist for more than six (6) months and which will prevent Member from using the club. In order to establish death, the member's estate must furnish to the club a death certificate. In order to establish disability, Member must furnish the club certification of the disability by a licensed physician whose diagnosis or treatment is within his scope of practice. Cancellation will be effective upon establishment of death or disability according to these provisions. In the event that Member has paid membership fees in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing the total cost of the membership by the total number of months under the membership and multiplying the result by the number of months expired under the membership term. As to membership fees paid monthly, dues will be refunded for the month in which written notification is received of the death or disability and the proper documentation outlined above has been provided.</p>
+          <p><strong>B. DEATH OR DISABILITY: </strong>The contract may be cancelled in the event of member's death or total disability during the membership term. Total disability means a condition which has existed or will exist for more than six (6) months and which will prevent Member from using the club. In order to establish death, the member's estate must furnish to the club a death certificate. In order to establish disability, Member must furnish the club certification of the disability by a licensed physician whose diagnosis or treatment is within his scope of practice. Cancellation will be effective upon establishment of death or disability according to these provisions. In the event that Member has paid membership fees in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing the total cost of the membership by the total number of months under the membership and multiplying the result by the number of months expired under the membership term. As to membership fees paid monthly, dues will be refunded for the month in which written notification is received of the death or disability and the proper documentation outlined above has been provided.</p>
           
           <p><strong>5. MEMBERSHIP CARDS</strong> - I understand cards are mandatory and must be presented prior to entering CAC. Cards are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
           
@@ -398,13 +407,13 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
           
           <p><strong>17. CORPORATE MEMBERS REGULATIONS</strong></p>
           
-          <p>1. Corporate members must be a W-2 paid employee or associate of a firm or approved organization that has a corporate membership with CAC, unless otherwise agreed to in writing. CAC must be notified immediately of any change in employment status.</p>
+          <p><strong>1.</strong> Corporate members must be a W-2 paid employee or associate of a firm or approved organization that has a corporate membership with CAC, unless otherwise agreed to in writing. CAC must be notified immediately of any change in employment status.</p>
           
-          <p>2. Discounts on monthly dues may change in accordance with the number or employees of the corporate firm who belong to CAC. I understand I will lose my corporate discount and will be readjusted to regular rates if my employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.</p>
+          <p><strong>2.</strong> Discounts on monthly dues may change in accordance with the number or employees of the corporate firm who belong to CAC. I understand I will lose my corporate discount and will be readjusted to regular rates if my employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.</p>
           
-          <p>3. It is the member's responsibility to notify CAC of any change in employment status. I understand that I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.</p>
+          <p><strong>3.</strong> It is the member's responsibility to notify CAC of any change in employment status. I understand that I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.</p>
           
-          <p>4. Proof of employment must be provided to obtain the corporate discount.</p>
+          <p><strong>4.</strong> Proof of employment must be provided to obtain the corporate discount.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -459,29 +468,28 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
   );
 };
 
-// New Mexico Contract Component (same structure but with NM text)
+// New Mexico Contract Component
 const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, selectedFont, initialBoxRefs }) => {
   return (
     <>
       <div className="contract-section">
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
-          <p className="cancellation-text">COLORADO ATHLETIC CLUB (CAC) MONEY BACK GUARANTEE:</p>
-          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF 04/28/2025, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p className="cancellation-text">NEW MEXICO SPORTS AND WELLNESS (NMSW) MONEY BACK GUARANTEE:</p>
+          <p>NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF 04/29/2025, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
-          <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of Colorado Athletic Club. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
+          <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of New Mexico Sports & Wellness. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>
       </div>
 
-      {/* Include the same sections as Denver contract but with New Mexico specific language where needed */}
       <div className="contract-section">
         <div className="section-header">MEMBERSHIP AGREEMENT</div>
         <div className="section-content">
-          {/* Same content as Denver with New Mexico specifications */}
           <p><strong>1. MEMBERSHIP FEE STRUCTURES</strong></p>
-          <p>A. The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
+          <p><strong>A.</strong> The Member is required to immediately pay an Initiation Fee which is due and owing separate and apart from the monthly dues stated on this membership agreement.</p>
+          <p><strong>B. </strong>The Member elects to purchase a membership and to pay to New Mexico Sports and Wellness (NMSW) the required total monthly dues as indicated on this agreement under one of the following scenarios:</p>
           
-          <p><strong>MONTH-TO-MONTH</strong> - I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. After fulfilling my minimum three (3) month membership commitment, I understand that the membership may be cancelled at any time with written notice pursuant to the Resignation Policy (Item 4A) and the total dues owing for the membership as well as all discounts and initiation fees are not refundable.</p>
+          <p><strong>MONTH-TO-MONTH</strong> - I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. After fulfilling my minimum three (3) month membership commitment, I understand that the membership may be cancelled at any time with written notice pursuant to the Resignation Policy (Item 4A) and the total dues owing for the membership as well as all discounts and initiation fees are not refundable. As such, any failure to use the membership indicated above and/or the facilities and programs associated therewith does not relieve applicant of any liability for payment of the total dues or other charges owing as indicated above, regardless of circumstances. Dues may increase at any time, with a one (1) month notice.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -493,10 +501,37 @@ const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, sel
             />
           </p>
           
-          {/* Additional sections specific to New Mexico would go here */}
-          <p><strong>10. CONSUMER RIGHTS</strong> - New Mexico residents have certain rights under the New Mexico Health Spa Act. Member may cancel this Agreement within 3 business days of signing for a full refund.</p>
+          <p><strong>EXTENDED PLAN</strong> - I elect to pay for the number of selected months on this agreement for consecutive months of member dues plus any club charges (if applicable) made by myself or any other persons included in my membership. I understand that I am committing to a minimum three (3) month membership. The three (3) month period commences on the 1st of the month following the date the membership begins. Member acknowledges that in order to be relieved of the agreement terms, the balance of the dues owed for the remaining months of the agreement must be paid in full. Special consideration can be made if cause for cancellation is based on a medical contingency and written authorization from a doctor is received; or if a member moves 50 miles or more away from the nearest New Mexico Sports and Wellness with proof of new residency. Any Leave of Absence taken during the initial term of this agreement will extend the commitment by the number of months the member's account is on Leave of Absence. Rate for Student/Young Professional memberships will only be honored through the current maximum age for this type of membership regardless of whether the number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation Policy (Item 4A) applies. I authorize NMSW to collect payment under the method of payment indicated on the agreement and the balance of the remaining dues owed should I not satisfy the terms of the agreement.</p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.extendedPlan}
+              onClick={() => toggleInitialBox('extendedPlan')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.extendedPlan}
+            />
+          </p>
           
-          <p><strong>RESIGNATION POLICY</strong>: A month-to-month membership may be cancelled by providing at least one (1) month's written notice.</p>
+          <p>Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.</p>
+          
+          <p><strong>C. PAID-IN-FULL </strong>- I elect to pay my total dues, as indicated on this agreement, in advance in consideration of a discount on yearly dues. At the completion of the prepaid period, my membership will automatically revert to month-to-month billing unless I prepay another year in advance or terminate with a written notice pursuant to the Resignation Policy (Item 4A.). If terminating prior to the completion of the prepaid agreement, a refund will be granted minus the discount percent indicated above. If a renewal of membership is requested by the applicant and approved at the conclusion of the term indicated, I understand that the renewal monthly dues to be charged will be those dues rates in effect at the time of renewal.</p>
+          
+          <p><strong>D. EFT </strong>- All dues and Member charges will be payable monthly (with the exception of annual dues prepayments) and collected by Electronic Funds Transfer (EFT) from either the Member's bank account or charged to an approved credit card. Please notify New Mexico Sports and Wellness (NMSW) at the time you change bank accounts or credit cards and provide the appropriate information to avoid having your old account charged for your monthly dues.</p>
+          
+          <p><strong>E. DELINQUENT ACCOUNTS </strong>- In the event a bank account or credit card is unable to be charged at the designated date, the membership is subject to a late fee. A charge will be issued for checks returned due to insufficient funds and credit cards that are declined when a balance is due. The Primary Member is responsible for all charges incurred.</p>
+          
+          <p><strong>F. REFERRALS </strong>- If a dues referral program is in effect, it will not extend or modify the terms of the membership agreement. Any Member in default of payment due may NOT cure the default by way of credit for "referral" members to New Mexico Sports and Wellness.</p>
+          
+          <p><strong>G. EMAIL </strong>- By providing my email address, I am consenting to receive information via email from New Mexico Sports and Wellness, The Wellbridge Company and their affiliated companies. Any further distribution of my email address is unauthorized.</p>
+          
+          <p><strong>2. UPGRADES/DOWNGRADES</strong> - Requests for upgrades/downgrades of membership must be made in writing. Upgrades will be effective immediately unless otherwise requested. Requests for downgrades must be submitted by the last day of the month for the downgrade to be effective for the following month. Primary Member's signature is required for all changes. Proof of eligibility/residency to upgrade/add members is required.</p>
+          
+          <p><strong>3. CLUB'S RIGHT OF CANCELLATION</strong> - Management of NMSW may suspend or cancel the rights, privileges or membership of any Member whose actions are detrimental to the facility or do not comply with the rules and regulations of the facility or upon any failure of a Member to make payment to NMSW of all amounts due from the Member within sixty (60) days after billed. NMSW has the option of declaring any other indebtedness of the Member to NMSW immediately due and payable, without notice or demand. The Member agrees to pay NMSW a reasonable attorney's fee, court costs and all other expenses incurred by NMSW in making the collection. All outstanding amounts not paid when due shall accumulate interest at the rate of 1.5% per month.</p>
+          
+          <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
+          
+          <p><strong>A. RESIGNATION POLICY:</strong> A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and facsimile transmission of cancelation form to 303-813-4197. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -508,7 +543,69 @@ const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, sel
             />
           </p>
           
-          {/* End with the same signature section */}
+          <p><strong>B. DEATH OR DISABILITY: </strong>The contract may be cancelled in the event of member's death or total disability during the membership term. Total disability means a condition which has existed or will exist for more than six (6) months and which will prevent Member from using the club. In order to establish death, the member's estate must furnish to the club a death certificate. In order to establish disability, Member must furnish the club certification of the disability by a licensed physician whose diagnosis or treatment is within his scope of practice. Cancellation will be effective upon establishment of death or disability according to these provisions. In the event that Member has paid membership fees in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing the total cost of the membership by the total number of months under the membership and multiplying the result by the number of months expired under the membership term. As to membership fees paid monthly, dues will be refunded for the month in which written notification is received of the death or disability and the proper documentation outlined above has been provided.</p>
+          
+          <p><strong>5. MEMBERSHIP POLICY</strong> - This membership contract is in force monthly upon payment of dues and other account charges. By submitting this application, the member acknowledges that NMSW reserves the right to refuse membership, or to terminate this agreement at any time without notice. Member agrees to abide by the Corporate Member Regulations and by NMSW Membership Policies as they exist or may be amended from time-to-time.</p>
+          <p>Furthermore, member understands that should member's account balance become more than 60-days past due, NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred. Member recognizes the inherent risks of participating in an exercise program and hereby hold NMSW harmless from any and all injuries member, and/or member's family might incur in connection with member's membership activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions. Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.</p>
+          
+          <p><strong>6. MEMBERSHIP CARDS</strong> - I understand cards are mandatory and must be presented prior to entering NMSW. Cards are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
+          
+          <p><strong>7. HOURS OF OPERATION</strong> - Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in NMSW.</p>
+          
+          <p><strong>8. LEAVE OF ABSENCE POLICY</strong> - This Membership may be put on a Leave of Absence (LOA). LOA requests must be in writing and submitted by the last day of the month for the LOA to be effective the following month. LOA must state the leave and return date. There is a monthly charge for accounts in LOA (exceptions for medical LOAs may be approved for no charge with proper medical documentation). There will be no retroaction or partial month adjustments. A medical LOA must be accompanied by a doctor's note. If member chooses to cancel their membership while on a LOA, the membership is reinstated, full dues will be charged for the final month of membership and the cancellation policy takes effect. An LOA extends any memberships in an Extended Plan by the number of months the membership is in a LOA status.</p>
+          
+          <p><strong>9. PERSONAL TRAINING</strong> - Personal trainers not employed by NMSW are not allowed to train or consult in any part of the clubs due to NMSW's interest in ensuring the accuracy of information relayed, as well as to reduce the potential for injury.</p>
+          
+          <p><strong>10. EMERGENCY MEDICAL AID</strong> - NMSW reserves the right to call emergency medical aid for an injured Member or guest and said Member or guest accepts responsibility for any financial obligations arising from such emergency medical aid or transportation to a medical facility.</p>
+          
+          <p><strong>11. AMENDING OF RULES</strong> - I understand NMSW reserves the right to amend or add to these conditions and to adopt new conditions as it may deem necessary for the proper management of the clubs and the business.</p>
+          
+          <p><strong>12. UNAVAILABILITY OF FACILITY OR SERVICES</strong> - I agree to accept the fact that a particular facility or service in the premises may be unavailable at any particular time due to mechanical breakdown, fire, act of God, condemnation, loss of lease, catastrophe or any other reason. Further, I agree not to hold NMSW responsible or liable for such occurrences.</p>
+          
+          <p><strong>13. HEALTH WARRANTY</strong> - I warrant and represent that I, any family member, ward or guest (each, a "Guest") who uses any NMSW facility has no disability, impairment or illness preventing such person from engaging in active or passive exercise or that will be detrimental or inimical to such person's health, safety or physical condition. I acknowledge and agree that: (1) NMSW will rely on the foregoing warranty in issuing my membership, (2) NMSW may perform a fitness assessment or similar testing to establish my or my Guests' initial physical statistics, (3) if any fitness or similar testing is performed by NMSW, it is solely for the purpose of providing comparative data with which I or my Guests may chart progress in a program and is not for any diagnostic purposes whatsoever, and (4) NMSW shall not be subject to any claim or demand whatsoever on account of NMSW's evaluation or interpretation of such fitness assessment or similar testing. I and my Guests are responsible for understanding our respective medical history and should consult with a physician prior to engaging in exercise or continuation of exercise if a medical condition appears to be developing.</p>
+          
+          <p><strong>14. DAMAGE TO FACILITIES</strong> - I agree to pay for any damage that I, my family or my Guests may cause this club's facilities through careless or negligent use thereof.</p>
+          
+          <p><strong>15. THEFT OR DAMAGE TO PERSONAL PROPERTY</strong> - I acknowledge that NMSW will not accept responsibility for theft, loss or damage to personal property left in a locker or in NMSW or for theft, loss or damage to automobiles or personal property left in NMSW parking lot. NMSW suggests that members do not bring valuables on NMSW premises. Signs are posted throughout the club and are strictly enforced.</p>
+          
+          <p><strong>16. RELEASE FROM LIABILITY</strong> - I agree, in attending and using the facilities and equipment therein, that I do so at my own risk. NMSW shall not be liable for any damages arising from personal injuries sustained by me and/or my guest(s) in, or about the premises. I assume full responsibility for any injuries or damages which may occur to me in, on or about the premises, and I do hereby fully and forever release and discharge NMSW and all associated owners, employees, and agents from any and all claims, demands, damages, rights of action or causes of action present or future, whether the same be known or unknown, anticipated or unanticipated, resulting from or arising out of my use or intended use of the said facilities and equipment there of.</p>
+          
+          <p><strong>17. WAIVER AND RELEASE OF ELECTRONIC MEDIA</strong> - I recognize, acknowledge and grant permission for Starmark Holdings, LLC, its affiliates, subsidiaries, employees, successors and/or anyone acting with its authority, to take and use still photographs, motion picture, video, sound recordings and/or testimonials of me and/or any family member, ward or guest.</p>
+          <p>I hereby waive any right to inspect or approve the photographs, electronic matter, and/or finished products that may be used in conjunction with them now or in the future. I hereby grant all right, title and interest I may now have in the photographs, electronic matter, and/or finished products to Starmark Holdings, LLC and/or anyone acting with its authority, and hereby waive any right to royalties or other compensation arising from or related to the use of the photographs, electronic matter, and/or finished matter.</p>
+          <p>I hereby consent to receive future calls, text messages, and/or short message service ("SMS") calls (collectively, "Calls") that deliver prerecorded or prewritten messages by or on behalf of Wellbridge to me. Providing consent to receive such Calls is not a condition of purchasing any goods or services from Wellbridge. I understand that I may revoke this consent by following the 'opt-out' procedures presented upon receiving a Call.</p>
+          
+          <p><strong>18. CORPORATE MEMBERS REGULATIONS</strong></p>
+          <p><strong>1.</strong> Corporate members must be a W-2 paid employee or associate of a firm or approved organization that has a corporate membership with NMSW, unless otherwise agreed to in writing. NMSW must be notified immediately of any change in employment status.</p>
+          <p><strong>2.</strong> Discounts on monthly dues may change in accordance with the number or employees of the corporate firm who belong to NMSW. I understand I will lose my corporate discount and will be readjusted to regular rates if my employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.</p>
+          <p><strong>3.</strong> It is the member's responsibility to notify NMSW of any change in employment status. I understand that I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.</p>
+          <p><strong>4.</strong> Proof of employment must be provided to obtain the corporate discount.</p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.corporate}
+              onClick={() => toggleInitialBox('corporate')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.corporate}
+            />
+          </p>
+          
+          <p><strong>19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS</strong></p>
+          <p>Student/Young Professional (SYP) discounted memberships are offered exclusively to members between the ages of 19-29. This special discounted rate will be honored through the age of 29. I understand that beginning the month after my 30th birthday my monthly dues rate will increase by $10. Each year thereafter my monthly rate will increase by an additional $10 until my rate reaches the then current rate. I also understand that my rate may also change for any other upgrades or downgrades of the membership that I may initiate.</p>
+          <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/30/2025, your rate will go to $115.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
+          <p className="initial-line">
+            <strong>INITIAL</strong>
+            <InitialBox
+              ref={initialBoxRefs.syp}
+              onClick={() => toggleInitialBox('syp')}
+              value={initialsText}
+              font={selectedFont}
+              isInitialed={initialedBoxes.syp}
+            />
+          </p>
+          
+          <p>As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships and other entities with which it is or may in the future become affiliated. The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW and the member, and no oral promises are made a part of it.</p>
+          
           <p className="signature-line">signed electronically</p>
           <p className="date-line">04/16/2025</p>
           <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
