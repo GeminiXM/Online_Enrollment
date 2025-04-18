@@ -55,6 +55,30 @@
   margin-bottom: 1px;
 }
 
+.primary-member-label-container {
+  background-color: #e9ecef;
+  padding: 15px 8px;
+  border-radius: 3px;
+  margin-bottom: 3px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e67700;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.primary-member-label {
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #343a40;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  text-align: center;
+}
+
 .info-value {
   font-size: 0.8rem;
   min-height: 18px;

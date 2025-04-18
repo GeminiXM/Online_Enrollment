@@ -473,8 +473,9 @@ const ContractPage = () => {
         <div className="info-section primary-member-section">
           <div className="info-row">
             <div className="info-column">
-              <div className="info-label">Primary Member</div>
-              <div className="info-value"></div>
+              <div className="primary-member-label-container">
+                <div className="primary-member-label">PRIMARY MEMBER</div>
+              </div>
             </div>
             <div className="info-column">
               <div className="info-label">Last Name</div>
@@ -499,8 +500,8 @@ const ContractPage = () => {
           </div>
         </div>
         
-        {/* Contact Information Section */}
-        <div className="info-section contact-section">
+        {/* Contact Information Section (no extra space) */}
+        <div className="info-section contact-section" style={{ marginTop: '-8px' }}>
           <div className="info-row">
             <div className="info-column">
               <div className="info-label">E-mail</div>
