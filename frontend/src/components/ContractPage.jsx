@@ -68,6 +68,8 @@ const ContractPage = () => {
     'syp': false,
     'corporateProof': false
   });
+  const [isSigned, setIsSigned] = useState(false);
+  const [signatureDate, setSignatureDate] = useState('');
 
   // Toggle the initialed state of a specific box
   const toggleInitialBox = (boxId) => {
@@ -132,6 +134,41 @@ const ContractPage = () => {
     corporateProof: React.useRef(null)
   };
 
+  // Effect to initialize the signature date when signature is confirmed
+  useEffect(() => {
+    if (signatureData.signature && !signatureDate) {
+      // Set current date when signature is first confirmed
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+      setSignatureDate(formattedDate);
+    }
+  }, [signatureData.signature, signatureDate]);
+
+  const handleSignatureClick = () => {
+    if (signatureData.signature) {
+      setIsSigned(!isSigned);
+      // If signing, set the date to today
+      if (!isSigned) {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('en-US', {
+          month: '2-digit',
+          day: '2-digit',
+          year: 'numeric'
+        });
+        setSignatureDate(formattedDate);
+      }
+    } else {
+      setErrors(prev => ({
+        ...prev,
+        signature: "Please provide your signature first"
+      }));
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
     
@@ -145,6 +182,10 @@ const ContractPage = () => {
     
     if (!agreeToTerms) {
       newErrors.terms = "You must agree to the terms and conditions";
+    }
+    
+    if (!isSigned) {
+      newErrors.contractSignature = "Please sign the contract at the bottom of the agreement";
     }
     
     // Check if club is in New Mexico
@@ -200,13 +241,19 @@ const ContractPage = () => {
     const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
                            selectedClub?.state === 'NM';
     
-    // Pass props needed for initial boxes
+    // Pass props needed for initial boxes and signature
     const contractProps = {
       toggleInitialBox,
       initialedBoxes,
       initialsText: getInitialsText(),
       selectedFont: signatureData.selectedFont,
-      initialBoxRefs  // Pass refs to the contract components
+      initialBoxRefs,  // Pass refs to the contract components
+      signature: signatureData.signature,
+      isSigned,
+      signatureDate,
+      handleSignatureClick,
+      errors,  // Pass errors to handle error display
+      signatureData  // Pass the full signature data object
     };
     
     if (isNewMexicoClub) {
@@ -302,7 +349,19 @@ const ContractPage = () => {
 };
 
 // Denver Contract Component
-const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, selectedFont, initialBoxRefs }) => {
+const DenverContract = ({ 
+  toggleInitialBox, 
+  initialedBoxes, 
+  initialsText, 
+  selectedFont, 
+  initialBoxRefs,
+  signature,
+  isSigned,
+  signatureDate,
+  handleSignatureClick,
+  errors,
+  signatureData
+}) => {
   return (
     <>
       <div className="contract-section">
@@ -459,9 +518,23 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
           
           <p>The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between CAC and the Member, and no oral promises are made a part of it.</p>
           
-          <p className="signature-line">signed electronically</p>
-          <p className="date-line">04/16/2025</p>
-          <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+          <div className="contract-signature-container">
+            <div 
+              className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+              onClick={handleSignatureClick}
+              style={{ 
+                fontFamily: selectedFont?.font || 'inherit',
+                cursor: 'pointer'
+              }}
+            >
+              {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
+            </div>
+            <div className="contract-date-box">
+              {isSigned ? signatureDate : 'Date'}
+            </div>
+            <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+          </div>
+          {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
       </div>
     </>
@@ -469,7 +542,19 @@ const DenverContract = ({ toggleInitialBox, initialedBoxes, initialsText, select
 };
 
 // New Mexico Contract Component
-const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, selectedFont, initialBoxRefs }) => {
+const NewMexicoContract = ({ 
+  toggleInitialBox, 
+  initialedBoxes, 
+  initialsText, 
+  selectedFont, 
+  initialBoxRefs,
+  signature,
+  isSigned,
+  signatureDate,
+  handleSignatureClick,
+  errors,
+  signatureData
+}) => {
   return (
     <>
       <div className="contract-section">
@@ -606,9 +691,23 @@ const NewMexicoContract = ({ toggleInitialBox, initialedBoxes, initialsText, sel
           
           <p>As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships and other entities with which it is or may in the future become affiliated. The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW and the member, and no oral promises are made a part of it.</p>
           
-          <p className="signature-line">signed electronically</p>
-          <p className="date-line">04/16/2025</p>
-          <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+          <div className="contract-signature-container">
+            <div 
+              className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+              onClick={handleSignatureClick}
+              style={{ 
+                fontFamily: selectedFont?.font || 'inherit', 
+                cursor: 'pointer'
+              }}
+            >
+              {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
+            </div>
+            <div className="contract-date-box">
+              {isSigned ? signatureDate : 'Date'}
+            </div>
+            <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+          </div>
+          {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
       </div>
     </>

@@ -222,3 +222,47 @@
   display: inline-block;
   width: 200px;
 }
+
+/* Contract signature styles */
+.contract-signature-container {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.contract-signature-box {
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  padding: 10px 15px;
+  min-height: 30px;
+  width: 300px;
+  text-align: center;
+  background-color: #f8f9fa;
+  margin-bottom: 10px;
+  transition: all 0.2s ease-in-out;
+  font-size: 1.2rem;
+}
+
+.contract-signature-box:hover {
+  background-color: #e9ecef;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  border: 1px solid #007bff;
+}
+
+.contract-signature-box.signed {
+  background-color: #f0f8ff;
+  box-shadow: 0 0 3px rgba(0,123,255,0.5);
+}
+
+.contract-date-box {
+  border: 1px solid #aaa;
+  border-radius: 3px;
+  padding: 5px 10px;
+  width: 150px;
+  text-align: center;
+  background-color: #f8f9fa;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
