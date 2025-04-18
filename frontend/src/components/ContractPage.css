@@ -15,14 +15,164 @@
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 20px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
 }
 
 .member-info-summary h2 {
-  font-size: 1.3rem;
-  margin-bottom: 10px;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
   color: #343a40;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* New info section styles */
+.info-section {
+  margin-bottom: 10px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 5px;
+}
+
+.info-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 3px;
+}
+
+.info-column {
+  flex: 1;
+  min-width: 120px;
+  padding: 3px;
+  position: relative;
+}
+
+.info-label {
+  font-weight: bold;
+  font-size: 0.75rem;
+  color: #495057;
+  margin-bottom: 1px;
+}
+
+.info-value {
+  font-size: 0.8rem;
+  min-height: 18px;
+  border-bottom: 1px solid #ced4da;
+  padding-bottom: 1px;
+}
+
+.info-header {
+  font-weight: bold;
+  font-size: 0.8rem;
+  background-color: #343a40;
+  color: white;
+  padding: 3px 8px;
+  margin-bottom: 3px;
+}
+
+/* Membership type section */
+.membership-types-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.membership-type-column,
+.addon-options-column,
+.specialty-membership-column,
+.agreement-type-column {
+  flex: 1 1 150px;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  border: 1px solid #dee2e6;
+}
+
+/* Family members section */
+.family-members-section,
+.child-programs-section,
+.additional-services-section,
+.membership-code-section {
+  margin-bottom: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.family-member-item,
+.service-item {
+  padding: 3px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.8rem;
+}
+
+.family-member-item:last-child,
+.service-item:last-child {
+  border-bottom: none;
+}
+
+.info-content {
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+/* Financial details section */
+.financial-details-section,
+.payment-summary-section {
+  display: inline-block;
+  vertical-align: top;
+  width: 49%;
+}
+
+.financial-details-section .info-column,
+.payment-summary-section .info-column {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #dee2e6;
+  padding: 4px 3px;
+}
+
+.financial-item {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 0.8rem;
+}
+
+.total-collected {
+  font-weight: bold;
+}
+
+/* Payment authorization section */
+.payment-auth-section {
+  margin-top: 10px;
+  border: 1px solid #dee2e6;
+  padding: 8px;
+}
+
+.auth-text {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.payment-method-column {
+  display: flex;
+  margin: 10px 0;
+}
+
+.payment-method-column .option-item {
+  margin-right: 15px;
+}
+
+.credit-card-info-row {
+  margin-top: 5px;
+  border-top: 1px solid #dee2e6;
+  padding-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.credit-card-info-row .info-column {
+  flex: 1 1 120px;
 }
 
 .member-info-summary p {

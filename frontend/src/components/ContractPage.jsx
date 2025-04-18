@@ -61,6 +61,33 @@ const ContractPage = () => {
   const [signatureData, setSignatureData] = useState({ signature: '', initials: '', selectedFont: null });
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [errors, setErrors] = useState({});
+  
+  // Utility function to format dates without timezone shifts
+  const formatDateWithoutTimezoneShift = (dateString) => {
+    if (!dateString) return '';
+    
+    // Parse the date string - avoid timezone shifts by handling parts manually
+    const parts = dateString.split(/[-T]/);
+    if (parts.length >= 3) {
+      const year = parseInt(parts[0], 10);
+      // JavaScript months are 0-based, so subtract 1 from the month
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      
+      // Create date with specific year, month, day in local timezone
+      const date = new Date(year, month, day);
+      
+      // Format to mm/dd/yyyy
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    }
+    
+    // Fallback for unexpected format
+    return dateString;
+  };
   // Track which initial boxes have been clicked
   const [initialedBoxes, setInitialedBoxes] = useState({
     'monthToMonth': false,
@@ -99,7 +126,149 @@ const ContractPage = () => {
   // Get enrollment data passed from previous page
   useEffect(() => {
     if (location.state && location.state.formData) {
-      setFormData(location.state.formData);
+      // Log formData to understand structure
+      console.log("FormData received:", location.state.formData);
+      
+      // Process formData to extract and map data
+      const data = location.state.formData;
+      
+      // Map membership type codes to full names
+      const membershipTypeMap = {
+        'I': 'Individual',
+        'F': 'Family',
+        'C': 'Couple',
+        'D': 'Dual',
+        'S': 'Student'
+      };
+      
+      // Map agreement type codes to full names
+      const agreementTypeMap = {
+        'M': 'Month-to-month',
+        '12': '12-Month',
+        '24': '24-Month'
+      };
+      
+      // Map specialty membership codes to full names
+      const specialtyMembershipMap = {
+        'CORP': 'Corporate',
+        'SYP': 'Student/Young Professional',
+        'SR': 'Senior',
+        'S': 'Senior',
+        'Y': 'Young Professional',
+        'J': 'Junior'
+      };
+      
+      // Process family members
+      const familyMembers = data.familyMembers?.map(member => ({
+        name: `${member.firstName} ${member.lastName}`,
+        type: member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'
+      })) || [];
+      
+      // Extract add-ons from serviceAddons
+      const serviceAddOns = data.serviceAddons?.map(addon => addon.description) || [];
+      
+      // Process child programs and add-ons
+      let additionalServiceDetails = [];
+      let childPrograms = '';
+      let childProgramsMonthly = '';
+      let childProgramsDueNow = '';
+      
+      if (data.serviceAddons && data.serviceAddons.length > 0) {
+        additionalServiceDetails = data.serviceAddons.map(addon => ({
+          name: addon.description,
+          dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
+          monthly: addon.price ? addon.price.toFixed(2) : '0.00'
+        }));
+        
+        // Look for child programs
+        const childProgramAddon = data.serviceAddons.find(addon => 
+          addon.description && 
+          (addon.description.includes('Child') || 
+           addon.description.includes('2020') || 
+           addon.description.includes('Nanny'))
+        );
+        
+        if (childProgramAddon) {
+          childPrograms = childProgramAddon.description;
+          childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
+          childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * 0.5).toFixed(2) : '0.00';
+        }
+      }
+      
+      // Compile list of add-ons from multiple sources
+      let addOns = [...serviceAddOns];
+      
+      // If addOns property exists as an array
+      if (Array.isArray(data.addOns)) {
+        addOns = [...addOns, ...data.addOns];
+      }
+      
+      // Check for specific add-on properties that might be boolean flags
+      const possibleAddOns = [
+        {key: 'unlimitedChild', label: 'Unlimited Child'},
+        {key: 'nanny', label: 'Nanny'},
+        {key: 'racquetball', label: 'Racquetball'},
+        {key: 'squash', label: 'Squash'},
+        {key: 'tennis', label: 'Tennis'},
+        {key: 'childCare', label: 'Child Care'},
+        {key: 'promoAllInclusive', label: 'Promo All Inclusive'}
+      ];
+      
+      // Add each add-on that has a truthy value
+      possibleAddOns.forEach(addon => {
+        if (data[addon.key] === true || data[addon.key] === 'true' || data[addon.key] === 'yes') {
+          addOns.push(addon.label);
+        }
+      });
+      
+      // Remove any duplicates from addOns array
+      const uniqueAddOns = [...new Set(addOns)];
+      
+      // Get pricing information from membershipDetails
+      const initiationFee = data.initiationFee || '0.00';
+      const proratedDues = data.membershipDetails?.proratedPrice || '0.00';
+      const monthlyDues = data.membershipDetails?.price || '0.00';
+      // Use cust_code as Membership ID, not the specialty membership code (bridgeCode)
+      const membershipId = data.cust_code || '';
+      
+      // Calculate tax and totals
+      const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
+        total + (addon.price ? addon.price * 0.5 : 0), 0).toFixed(2) || '0.00';
+      
+      const taxAmount = ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * 0.08).toFixed(2);
+      const totalCollected = (
+        parseFloat(initiationFee) + 
+        parseFloat(proratedDues) + 
+        parseFloat(proratedAddOns) + 
+        parseFloat(taxAmount)
+      ).toFixed(2);
+      
+      const totalMonthlyRate = (
+        parseFloat(monthlyDues) + 
+        data.serviceAddons?.reduce((total, addon) => total + (addon.price || 0), 0) || 0
+      ).toFixed(2);
+      
+      // Update formData with processed data
+      setFormData({
+        ...data,
+        displayMembershipType: membershipTypeMap[data.membershipType] || data.membershipType || 'Individual',
+        displayAgreementType: agreementTypeMap[data.agreementType] || data.agreementType || 'Month-to-month',
+        displaySpecialtyMembership: specialtyMembershipMap[data.specialtyMembership] || data.specialtyMembership || 'None',
+        addOns: uniqueAddOns,
+        familyMembers,
+        additionalServicesDetails: additionalServiceDetails,
+        childPrograms,
+        childProgramsMonthly,
+        childProgramsDueNow,
+        initiationFee,
+        proratedDues,
+        proratedAddOns,
+        monthlyDues,
+        taxAmount,
+        totalCollected,
+        totalMonthlyRate,
+        membershipId
+      });
     } else {
       // If no data, go back to enrollment form
       navigate('/enrollment');
@@ -136,17 +305,21 @@ const ContractPage = () => {
     corporateProof: React.useRef(null)
   };
 
+  // Function to get today's date formatted as mm/dd/yyyy without timezone shifts
+  const getTodayFormatted = () => {
+    const today = new Date();
+    return today.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+
   // Effect to initialize the signature date when signature is confirmed
   useEffect(() => {
     if (signatureData.signature && !signatureDate) {
       // Set current date when signature is first confirmed
-      const today = new Date();
-      const formattedDate = today.toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      });
-      setSignatureDate(formattedDate);
+      setSignatureDate(getTodayFormatted());
     }
   }, [signatureData.signature, signatureDate]);
 
@@ -155,13 +328,7 @@ const ContractPage = () => {
       setIsSigned(!isSigned);
       // If signing, set the date to today
       if (!isSigned) {
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString('en-US', {
-          month: '2-digit',
-          day: '2-digit',
-          year: 'numeric'
-        });
-        setSignatureDate(formattedDate);
+        setSignatureDate(getTodayFormatted());
       }
     } else {
       setErrors(prev => ({
@@ -301,10 +468,284 @@ const ContractPage = () => {
       
       <div className="member-info-summary">
         <h2>Membership Information</h2>
-        <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
-        <p><strong>Email:</strong> {formData.email}</p>
-        <p><strong>Club:</strong> {selectedClub?.name || 'Unknown'}</p>
-        <p><strong>Start Date:</strong> {formData.requestedStartDate}</p>
+        
+        {/* Primary Member Information Section */}
+        <div className="info-section primary-member-section">
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Primary Member</div>
+              <div className="info-value"></div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Last Name</div>
+              <div className="info-value">{formData.lastName}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">First Name</div>
+              <div className="info-value">{formData.firstName}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">DOB</div>
+              <div className="info-value">
+                {formData.dob ? formatDateWithoutTimezoneShift(formData.dob) : 
+                 formData.dateOfBirth ? formatDateWithoutTimezoneShift(formData.dateOfBirth) : ''}
+              </div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Gender</div>
+              <div className="info-value">{formData.gender}</div>
+            </div>
+ 
+          </div>
+        </div>
+        
+        {/* Contact Information Section */}
+        <div className="info-section contact-section">
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">E-mail</div>
+              <div className="info-value">{formData.email}</div>
+            </div>
+          </div>
+          
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Home Address</div>
+              <div className="info-value">{formData.address}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">City</div>
+              <div className="info-value">{formData.city}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">State</div>
+              <div className="info-value">{formData.state}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">ZIP Code</div>
+              <div className="info-value">{formData.zipCode}</div>
+            </div>
+          </div>
+          
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Home Phone</div>
+              <div className="info-value">{formData.phoneNumber}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Work Phone</div>
+              <div className="info-value">{formData.workPhone || formData.phoneNumber}</div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Mobile Phone</div>
+              <div className="info-value">{formData.mobilePhone || formData.phoneNumber}</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Membership Details Section */}
+        <div className="info-section membership-details-section">
+          <div className="info-row membership-types-row">
+            <div className="info-column membership-type-column">
+              <div className="info-header">Membership Type</div>
+              <div className="info-content">
+                {formData.displayMembershipType || 'Individual'}
+              </div>
+            </div>
+            
+            <div className="info-column addon-options-column">
+              <div className="info-header">Add-on Options</div>
+              <div className="info-content">
+                {formData.addOns && formData.addOns.length > 0 ? (
+                  formData.addOns.join(', ')
+                ) : (
+                  'None'
+                )}
+              </div>
+            </div>
+            
+            <div className="info-column specialty-membership-column">
+              <div className="info-header">Specialty Membership</div>
+              <div className="info-content">
+                {formData.displaySpecialtyMembership || 'None'}
+              </div>
+            </div>
+            
+            <div className="info-column agreement-type-column">
+              <div className="info-header">Agreement Type</div>
+              <div className="info-content">
+                {formData.displayAgreementType || 'Month-to-month'}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Family Members Section */}
+        {formData.familyMembers && formData.familyMembers.length > 0 && (
+          <div className="info-section family-members-section">
+            <div className="info-header">Family Members ({formData.familyMembers.length})</div>
+            <div className="info-content">
+              {formData.familyMembers.map((member, index) => (
+                <div key={index} className="family-member-item">
+                  {member.name} - {member.type}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Child Programs Section */}
+        {formData.childPrograms && (
+          <div className="info-section child-programs-section">
+            <div className="info-header">Child Programs</div>
+            <div className="info-content">
+              {formData.childPrograms}
+              {formData.childProgramsMonthly && (
+                <div>Monthly: ${formData.childProgramsMonthly}</div>
+              )}
+              {formData.childProgramsDueNow && (
+                <div>Due now: ${formData.childProgramsDueNow}</div>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {/* Additional Services Detail Section */}
+        {formData.additionalServicesDetails && formData.additionalServicesDetails.length > 0 && (
+          <div className="info-section additional-services-section">
+            <div className="info-header">Additional Services</div>
+            <div className="info-content">
+              {formData.additionalServicesDetails.map((service, index) => (
+                <div key={index} className="service-item">
+                  <div>{service.name}</div>
+                  {service.dueNow && <div>Due now: ${service.dueNow}</div>}
+                  {service.monthly && <div>Monthly: ${service.monthly}</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Membership ID Section */}
+        {formData.membershipId && (
+          <div className="info-section membership-code-section">
+            <div className="info-row">
+              <div className="info-column">
+                <div className="info-label">Membership ID</div>
+                <div className="info-value">{formData.membershipId}</div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Financial Details Section */}
+        <div className="info-section financial-details-section">
+          <div className="info-header">Financial Details</div>
+          <div className="info-row">
+            <div className="info-column financial-item">
+              <div className="info-label">Initiation Fee</div>
+              <div className="info-value">${formData.initiationFee || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column financial-item">
+              <div className="info-label">Pro-rated Dues</div>
+              <div className="info-value">${formData.proratedDues || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column financial-item">
+              <div className="info-label">Pro-rated Add-Ons</div>
+              <div className="info-value">${formData.proratedAddOns || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column financial-item">
+              <div className="info-label">Packages</div>
+              <div className="info-value">${formData.packagesFee || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column financial-item">
+              <div className="info-label">Taxes</div>
+              <div className="info-value">${formData.taxAmount || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column financial-item total-collected">
+              <div className="info-label">Total Collected (Tax included)</div>
+              <div className="info-value">${formData.totalCollected || (
+                parseFloat(formData.initiationFee || 0) + 
+                parseFloat(formData.proratedDues || 0) + 
+                parseFloat(formData.proratedAddOns || 0) + 
+                parseFloat(formData.packagesFee || 0) + 
+                parseFloat(formData.taxAmount || 0)
+              ).toFixed(2) || '0.00'}</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Payment Summary Section */}
+        <div className="info-section payment-summary-section">
+          <div className="info-header">Monthly Cost Going Forward</div>
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">{formData.displayMembershipType || 'Individual'} Dues {formData.displayAgreementType || 'Month-to-month'}</div>
+              <div className="info-value">${formData.monthlyDues || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Total Monthly Membership Dues Rate</div>
+              <div className="info-value">${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}</div>
+            </div>
+          </div>
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Membership Start Date</div>
+              <div className="info-value">
+                {formData.requestedStartDate ? formatDateWithoutTimezoneShift(formData.requestedStartDate) : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Payment Authorization Section */}
+        <div className="info-section payment-auth-section">
+          <div className="info-row">
+            <div className="auth-text">
+              I hereby request and authorize {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData.requestedStartDate ? formatDateWithoutTimezoneShift(formData.requestedStartDate) : ''}.
+              <br /><br />
+              The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.
+            </div>
+          </div>
+          
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Payment Method</div>
+              <div className="info-value">{formData.paymentMethod || 'Credit Card'}</div>
+            </div>
+          </div>
+          
+          <div className="info-row credit-card-info-row">
+            <div className="info-column">
+              <div className="info-label">Credit Card Number</div>
+              <div className="info-value">
+                {formData.creditCardNumber ? `${formData.creditCardNumber.replace(/\d(?=\d{4})/g, '*')}` : ''}
+              </div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Expiration</div>
+              <div className="info-value">
+                {formData.expirationDate ? formatDateWithoutTimezoneShift(formData.expirationDate) : ''}
+              </div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Name on Account</div>
+              <div className="info-value">{formData.firstName} {formData.lastName}</div>
+            </div>
+          </div>
+        </div>
       </div>
       
       <div className="contract-text">
