@@ -1,62 +1,64 @@
 .signature-selector {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
-  border-radius: 5px;
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: 3px;
+  padding: 5px;
+  margin-bottom: 8px;
+  transform: scale(0.85);
+  transform-origin: top left;
 }
 
 /* Special styling for the initials selector - make it smaller */
 .initials-selector {
-  max-width: 220px;
+  max-width: 140px;
 }
 
 .signature-preview-container {
   background-color: white;
   border: 1px solid #ced4da;
   border-radius: 3px;
-  min-height: 80px; /* Reduced from 100px */
+  min-height: 40px; /* Significantly reduced from 60px */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
-  padding: 8px;
+  margin-bottom: 6px;
+  padding: 4px;
   position: relative;
 }
 
 .font-name {
-  font-size: 0.8rem;
+  font-size: 0.6rem;
   color: #6c757d;
-  margin-top: 10px;
+  margin-top: 3px;
   font-style: italic;
   position: absolute;
-  bottom: 5px;
-  right: 10px;
+  bottom: 2px;
+  right: 4px;
 }
 
 .signature-preview-container::after {
   content: "";
   position: absolute;
-  bottom: 20px;
-  left: 10px;
-  right: 10px;
+  bottom: 10px;
+  left: 6px;
+  right: 6px;
   height: 1px;
   background-color: #adb5bd;
 }
 
 .signature-preview {
-  font-size: 2rem; /* Reduced from 2.5rem */
+  font-size: 1.3rem; /* Further reduced from 1.6rem */
   color: #212529;
   text-align: center;
   transition: all 0.3s ease;
   width: 100%;
-  padding: 8px 0;
+  padding: 4px 0;
 }
 
-/* Make initials a bit larger */
+/* Match initials size to signature */
 .signature-preview[data-type="initials"] {
-  font-size: 2.5rem; /* Reduced from 3rem */
+  font-size: 1.3rem; /* Same as signature font size */
 }
 
 .signature-preview.confirmed {
@@ -66,8 +68,8 @@
 .signature-controls {
   display: flex;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 4px;
+  margin-bottom: 5px;
 }
 
 /* Centered button for initials selector */
@@ -80,9 +82,9 @@
   background-color: #e9ecef;
   color: #495057;
   border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 6px 10px;
-  font-size: 0.85rem;
+  border-radius: 2px;
+  padding: 2px 5px;
+  font-size: 0.65rem;
   cursor: pointer;
   transition: background-color 0.2s;
   flex: 1;
@@ -101,12 +103,12 @@
   background-color: #6c757d;
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+  border-radius: 2px;
+  padding: 2px 6px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-width: 80px;
+  min-width: 50px;
 }
 
 .confirm-btn:hover {
@@ -122,7 +124,7 @@
 }
 
 .signature-notice {
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: #6c757d;
   text-align: center;
   margin: 0;
@@ -132,20 +134,21 @@
 /* For smaller screens, make everything more compact */
 @media (max-width: 576px) {
   .signature-selector {
-    padding: 8px;
+    padding: 4px;
+    transform: scale(0.8);
   }
   
   .signature-preview {
-    font-size: 1.8rem;
+    font-size: 1.1rem;
   }
   
   .signature-preview[data-type="initials"] {
-    font-size: 2.2rem;
+    font-size: 1.1rem; /* Same as signature font size */
   }
   
   .font-selector-btn, .confirm-btn {
-    padding: 5px 8px;
-    font-size: 0.8rem;
+    padding: 2px 4px;
+    font-size: 0.6rem;
   }
 }
 

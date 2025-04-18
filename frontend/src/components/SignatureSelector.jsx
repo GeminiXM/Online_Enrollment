@@ -114,9 +114,6 @@ const SignatureSelector = ({
       <div className="signature-preview-container">
         <div 
           className={`signature-preview ${confirmed ? 'confirmed' : ''} ${SIGNATURE_FONTS[selectedFontIndex].class}`}
-          style={{ 
-            fontSize: type === 'initials' ? '2.5rem' : '2rem' 
-          }}
           data-type={type}
         >
           {displayText}

@@ -10,20 +10,22 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
   const boxStyle = {
     display: 'inline-block',
     border: '1px solid #aaa',
-    borderRadius: '3px',
-    padding: '2px 8px',
-    margin: '0 10px',
-    minWidth: '30px',
-    height: '20px',
+    borderRadius: '2px',
+    padding: '1px 5px',
+    margin: '0 5px',
+    minWidth: '20px',
+    height: '15px',
     backgroundColor: isInitialed ? '#f0f8ff' : '#f8f9fa', // Light blue background if initialed
     cursor: 'pointer',
     textAlign: 'center',
     fontFamily: font?.font || 'inherit',
-    fontSize: 'inherit', // Use the font size of surrounding text
+    fontSize: 'small', // Smaller font size
     lineHeight: 'normal',
     verticalAlign: 'middle',
     transition: 'all 0.2s ease-in-out', // Smooth transition for hover effects
-    boxShadow: isInitialed ? '0 0 3px rgba(0,123,255,0.5)' : 'none' // Subtle highlight if initialed
+    boxShadow: isInitialed ? '0 0 2px rgba(0,123,255,0.5)' : 'none', // Subtle highlight if initialed
+    transform: 'scale(0.85)',
+    transformOrigin: 'center'
   };
 
   // Add hover styles with React's onMouseEnter/onMouseLeave
@@ -270,10 +272,10 @@ const ContractPage = () => {
   return (
     <div className="contract-container">
             <div className="signature-section">
-        <h2>Signature</h2>
+        <h2>Signature Selector</h2>
         <div className="signature-fields">
           <div className="signature-field">
-            <label>Signature: <span className="required">*</span></label>
+            <label>please select a signature style to be used throughout this legal document <span className="required">*</span></label>
             <SignatureSelector 
               onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
               name={`${formData.firstName} ${formData.lastName}`}
