@@ -11,6 +11,26 @@
   margin-bottom: 30px;
 }
 
+.signature-section h1 {
+  color: #2c3e50;
+  text-align: center;
+  margin: 35px 0 25px;
+  padding-top: 25px;
+  border-top: 2px solid #dee2e6;
+  font-size: 1.8rem;
+  position: relative;
+}
+
+.signature-section h1::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: 30%;
+  right: 30%;
+  height: 2px;
+  background-color: #007bff;
+}
+
 .member-info-summary {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
@@ -227,30 +247,60 @@
 
 .signature-section {
   margin-bottom: 30px;
+  background-color: #f0f7ff;
+  border: 1px solid #cce5ff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.signature-section::after {
+  content: "";
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 95%;
+  height: 1px;
+  background-color: #dee2e6;
 }
 
 .signature-section h2 {
   font-size: 1.3rem;
   margin-bottom: 15px;
-  color: #343a40;
+  color: #0056b3;
+  border-bottom: 2px solid #0056b3;
+  padding-bottom: 8px;
+  display: inline-block;
 }
 
 .signature-fields {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 20px;
   margin-bottom: 15px;
   align-items: flex-start;
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid #d1e7ff;
+  box-shadow: inset 0 0 5px rgba(0, 123, 255, 0.1);
 }
 
 .signature-field {
   flex: 1;
+  padding: 10px;
+  background-color: #f8fbff;
+  border-radius: 5px;
+  border: 1px solid #e2eeff;
 }
 
 /* Make signature field wider than initials */
 .signature-field:first-child {
   flex: 3;
   min-width: 240px;
+  border-left: 3px solid #007bff;
 }
 
 /* Make initials field narrower */
@@ -258,12 +308,17 @@
   flex: 1;
   min-width: 120px;
   max-width: 150px;
+  border-left: 3px solid #007bff;
 }
 
 .signature-field label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
   font-weight: bold;
+  color: #0056b3;
+  font-size: 0.9rem;
+  padding-bottom: 5px;
+  border-bottom: 1px dashed #cce5ff;
 }
 
 .terms-agreement {
@@ -416,7 +471,7 @@
   background-color: #f8f9fa;
   margin-bottom: 10px;
   transition: all 0.2s ease-in-out;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
 }
 
 .contract-signature-box:hover {

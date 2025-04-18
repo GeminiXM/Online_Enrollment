@@ -438,31 +438,7 @@ const ContractPage = () => {
 
   return (
     <div className="contract-container">
-            <div className="signature-section">
-        <h2>Signature Selector</h2>
-        <div className="signature-fields">
-          <div className="signature-field">
-            <label>please select a signature style to be used throughout this legal document <span className="required">*</span></label>
-            <SignatureSelector 
-              onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
-              name={`${formData.firstName} ${formData.lastName}`}
-              type="signature"
-            />
-            {errors.signature && <div className="error-message">{errors.signature}</div>}
-          </div>
-          
-          <div className="signature-field">
-            <label>Initials: <span className="required">*</span></label>
-            <SignatureSelector 
-              onChange={(value) => handleSignatureChange('initials', value)}
-              name={`${formData.firstName} ${formData.lastName}`}
-              type="initials"
-              forcedFont={signatureData.selectedFont}
-              showFontControls={false}
-            />
-            {errors.initials && <div className="error-message">{errors.initials}</div>}
-          </div>
-        </div>
+
         
       <h1>Membership Agreement</h1>
       
@@ -530,16 +506,16 @@ const ContractPage = () => {
           
           <div className="info-row">
             <div className="info-column">
+              <div className="info-label">Cell Phone</div>
+              <div className="info-value">{formData.mobilePhone || formData.cellPhone || ''}</div>
+            </div>
+            <div className="info-column">
               <div className="info-label">Home Phone</div>
-              <div className="info-value">{formData.phoneNumber}</div>
+              <div className="info-value">{formData.homePhone || ''}</div>
             </div>
             <div className="info-column">
               <div className="info-label">Work Phone</div>
-              <div className="info-value">{formData.workPhone || formData.phoneNumber}</div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">Mobile Phone</div>
-              <div className="info-value">{formData.mobilePhone || formData.phoneNumber}</div>
+              <div className="info-value">{formData.workPhone || ''}</div>
             </div>
           </div>
         </div>
@@ -749,15 +725,47 @@ const ContractPage = () => {
         </div>
       </div>
       
+
+ {/* Signature Selector Section ----------------------------------------------*/}        
+
+                 <div className="signature-section">
+        <h2>Signature Selector</h2>
+        <div className="signature-fields">
+          <div className="signature-field">
+            <label>please select a signature style to be used throughout this legal document <span className="required">*</span></label>
+            <SignatureSelector 
+              onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
+              name={`${formData.firstName} ${formData.lastName}`}
+              type="signature"
+            />
+            {errors.signature && <div className="error-message">{errors.signature}</div>}
+          </div>
+          
+          <div className="signature-field">
+            <label>Initials: <span className="required">*</span></label>
+            <SignatureSelector 
+              onChange={(value) => handleSignatureChange('initials', value)}
+              name={`${formData.firstName} ${formData.lastName}`}
+              type="initials"
+              forcedFont={signatureData.selectedFont}
+              showFontControls={false}
+            />
+            {errors.initials && <div className="error-message">{errors.initials}</div>}
+          </div>
+        </div> 
+
+
+
+
+        {/* TERMS AND CONDITIONS Section ----------------------------------------------*/}     
+ 
       <div className="contract-text">
         <h2>Terms and Conditions</h2>
         <div className="scrollable-text">
           {getContractText()}
         </div>
       </div>
-      
-
-        
+       
         <div className="terms-agreement">
           <input
             type="checkbox"
@@ -976,7 +984,7 @@ const DenverContract = ({
             <div className="contract-date-box">
               {isSigned ? signatureDate : 'Date'}
             </div>
-            <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+           
           </div>
           {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
@@ -1149,7 +1157,7 @@ const NewMexicoContract = ({
             <div className="contract-date-box">
               {isSigned ? signatureDate : 'Date'}
             </div>
-            <p className="signature-description">Primary Member's Signature <span className="tab"></span> Date</p>
+           
           </div>
           {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
