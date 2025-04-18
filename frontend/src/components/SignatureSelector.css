@@ -1,42 +1,54 @@
+/**
+ * SignatureSelector.css
+ * 
+ * Styles for the signature and initials selection component, providing
+ * a clean interface for users to select a signature style and provide
+ * their initials for the contract.
+ */
+
+/* Base container for signature selector component */
 .signature-selector {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;  /* Light gray background */
+  border: 1px solid #dee2e6;  /* Light border */
   border-radius: 3px;
   padding: 5px;
   margin-bottom: 8px;
-  transform: scale(0.85);
-  transform-origin: top left;
+  transform: scale(0.85);  /* Slightly reduced size for compact display */
+  transform-origin: top left;  /* Scale from top left corner */
 }
 
 /* Special styling for the initials selector - make it smaller */
 .initials-selector {
-  max-width: 140px;
+  max-width: 140px;  /* Limit width for initials selection */
 }
 
+/* Container for the signature preview area */
 .signature-preview-container {
-  background-color: white;
-  border: 1px solid #ced4da;
+  background-color: white;  /* White background for contrast */
+  border: 1px solid #ced4da;  /* Light gray border */
   border-radius: 3px;
-  min-height: 40px; /* Significantly reduced from 60px */
+  min-height: 40px; /* Compact height for signature display */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: center;  /* Center signature horizontally */
+  justify-content: center;  /* Center signature vertically */
   margin-bottom: 6px;
   padding: 4px;
-  position: relative;
+  position: relative;  /* For absolute positioning of children */
 }
 
+/* Small font name display in the bottom right corner */
 .font-name {
-  font-size: 0.6rem;
-  color: #6c757d;
+  font-size: 0.6rem;  /* Very small font size */
+  color: #6c757d;  /* Medium gray text */
   margin-top: 3px;
   font-style: italic;
-  position: absolute;
+  position: absolute;  /* Position at bottom right */
   bottom: 2px;
   right: 4px;
 }
 
+/* Decorative line under the signature for visual guidance */
 .signature-preview-container::after {
   content: "";
   position: absolute;
@@ -44,63 +56,70 @@
   left: 6px;
   right: 6px;
   height: 1px;
-  background-color: #adb5bd;
+  background-color: #adb5bd;  /* Medium gray line */
 }
 
+/* Styling for the signature text itself */
 .signature-preview {
-  font-size: 1.3rem; /* Further reduced from 1.6rem */
-  color: #212529;
+  font-size: 1.3rem;  /* Size of the signature text */
+  color: #212529;  /* Dark gray/black text */
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s ease;  /* Smooth transition for state changes */
   width: 100%;
   padding: 4px 0;
 }
 
-/* Match initials size to signature */
+/* Match initials size to signature for visual consistency */
 .signature-preview[data-type="initials"] {
-  font-size: 1.3rem; /* Same as signature font size */
+  font-size: 1.3rem;  /* Same size as signature for consistency */
 }
 
+/* Special styling when signature is confirmed */
 .signature-preview.confirmed {
-  color: #0056b3;
+  color: #0056b3;  /* Blue text when confirmed */
 }
 
+/* Container for font selection and confirmation buttons */
 .signature-controls {
   display: flex;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: space-between;  /* Distribute buttons evenly */
+  gap: 4px;  /* Small gap between buttons */
   margin-bottom: 5px;
 }
 
 /* Centered button for initials selector */
 .centered-button {
-  margin: 0 auto;
-  min-width: 120px;
+  margin: 0 auto;  /* Center horizontally */
+  min-width: 120px;  /* Minimum width for button */
 }
 
+/* Previous/Next font style buttons */
 .font-selector-btn {
-  background-color: #e9ecef;
-  color: #495057;
+  background-color: #e9ecef;  /* Light gray background */
+  color: #495057;  /* Dark gray text */
   border: 1px solid #ced4da;
   border-radius: 2px;
   padding: 2px 5px;
-  font-size: 0.65rem;
+  font-size: 0.65rem;  /* Very small font for compact buttons */
   cursor: pointer;
-  transition: background-color 0.2s;
-  flex: 1;
+  transition: background-color 0.2s;  /* Smooth hover effect */
+  flex: 1;  /* Grow to fill available space */
 }
 
+/* Hover effect for font selector buttons */
 .font-selector-btn:hover:not(:disabled) {
-  background-color: #dee2e6;
+  background-color: #dee2e6;  /* Slightly darker on hover */
 }
 
+/* Disabled state for font selector buttons */
 .font-selector-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: not-allowed;  /* Show not-allowed cursor when disabled */
+  opacity: 0.6;  /* Reduce opacity for disabled state */
 }
 
+/* Confirm button for selecting signature style */
 .confirm-btn {
-  background-color: #6c757d;
+  background-color: #6c757d;  /* Medium gray (Bootstrap secondary) */
   color: white;
   border: none;
   border-radius: 2px;
@@ -108,65 +127,75 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-width: 50px;
+  min-width: 50px;  /* Minimum width for button */
 }
 
+/* Hover effect for confirm button */
 .confirm-btn:hover {
-  background-color: #5a6268;
+  background-color: #5a6268;  /* Slightly darker on hover */
 }
 
+/* Confirmed state styling - turns green when confirmed */
 .confirm-btn.confirmed {
-  background-color: #28a745;
+  background-color: #28a745;  /* Green background (Bootstrap success) */
 }
 
+/* Hover effect for confirmed state */
 .confirm-btn.confirmed:hover {
-  background-color: #218838;
+  background-color: #218838;  /* Slightly darker green on hover */
 }
 
+/* Legal notice about electronic signature */
 .signature-notice {
-  font-size: 0.85rem;
-  color: #495057;
+  font-size: 0.85rem;  /* Increased size for better readability */
+  color: #495057;  /* Dark gray text */
   text-align: center;
   margin: 5px 0;
   font-style: italic;
-  font-weight: 500;
+  font-weight: 500;  /* Medium weight for emphasis */
   padding: 5px;
-  background-color: #f0f7ff;
+  background-color: #f0f7ff;  /* Light blue background */
   border-radius: 3px;
-  border-left: 3px solid #007bff;
+  border-left: 3px solid #007bff;  /* Blue accent border on left */
 }
 
-/* For smaller screens, make everything more compact */
+/* Responsive design for smaller screens - mobile optimization */
 @media (max-width: 576px) {
+  /* Further scale down component on small screens */
   .signature-selector {
     padding: 4px;
-    transform: scale(0.8);
+    transform: scale(0.8);  /* Reduce size more on mobile */
   }
   
+  /* Smaller signature text on mobile */
   .signature-preview {
-    font-size: 1.1rem;
+    font-size: 1.1rem;  /* Reduced font size for mobile */
   }
   
+  /* Keep initials matching signature size */
   .signature-preview[data-type="initials"] {
-    font-size: 1.1rem; /* Same as signature font size */
+    font-size: 1.1rem;  /* Match signature font size */
   }
   
+  /* Smaller buttons on mobile devices */
   .font-selector-btn, .confirm-btn {
-    padding: 2px 4px;
-    font-size: 0.6rem;
+    padding: 2px 4px;  /* Less padding */
+    font-size: 0.6rem;  /* Smaller text */
   }
 }
 
-/* Add specific font imports with font-display:swap for better loading */
+/* Import Google Fonts for signature styles - using font-display:swap for performance */
+/* This ensures text remains visible during webfont load */
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
 
-/* Add font classes for debugging */
-.font-great-vibes { font-family: 'Great Vibes', cursive !important; }
-.font-dancing-script { font-family: 'Dancing Script', cursive !important; }
-.font-tangerine { font-family: 'Tangerine', cursive !important; }
-.font-pacifico { font-family: 'Pacifico', cursive !important; }
-.font-sacramento { font-family: 'Sacramento', cursive !important; }
+/* Font family class definitions for each signature style */
+/* !important ensures these styles override any inherited styles */
+.font-great-vibes { font-family: 'Great Vibes', cursive !important; }  /* Elegant flowing script */
+.font-dancing-script { font-family: 'Dancing Script', cursive !important; }  /* Casual handwritten style */
+.font-tangerine { font-family: 'Tangerine', cursive !important; }  /* Delicate calligraphy style */
+.font-pacifico { font-family: 'Pacifico', cursive !important; }  /* Bouncy, fun script */
+.font-sacramento { font-family: 'Sacramento', cursive !important; }  /* Thin, airy script */

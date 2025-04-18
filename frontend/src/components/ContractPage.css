@@ -1,3 +1,11 @@
+/* 
+ * ContractPage.css
+ * 
+ * This stylesheet handles all styling for the contract/membership agreement page
+ * which includes member details, signature selection, and terms and conditions.
+ */
+
+/* Main container styling - centers content and sets basic typography */
 .contract-container {
   max-width: 900px;
   margin: 0 auto;
@@ -5,22 +13,25 @@
   font-family: Arial, sans-serif;
 }
 
+/* Main page title styling */
 .contract-container h1 {
   color: #2c3e50;
   text-align: center;
   margin-bottom: 30px;
 }
 
+/* Signature section title styling with decorative elements */
 .signature-section h1 {
   color: #2c3e50;
   text-align: center;
   margin: 35px 0 25px;
   padding-top: 25px;
-  border-top: 2px solid #dee2e6;
+  border-top: 2px solid #dee2e6;  /* Gray border on top */
   font-size: 1.8rem;
-  position: relative;
+  position: relative;  /* For absolute positioning of the ::before element */
 }
 
+/* Blue accent line for the signature section title */
 .signature-section h1::before {
   content: "";
   position: absolute;
@@ -28,55 +39,61 @@
   left: 30%;
   right: 30%;
   height: 2px;
-  background-color: #007bff;
+  background-color: #007bff;  /* Blue accent line overlaying the gray border */
 }
 
+/* Member info summary panel styling - light gray background with subtle border */
 .member-info-summary {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 15px;
-  font-size: 0.85rem;
+  font-size: 0.85rem;  /* Slightly smaller text for detailed information */
 }
 
+/* Section title within the member info summary */
 .member-info-summary h2 {
   font-size: 1.1rem;
   margin-bottom: 8px;
   color: #343a40;
   padding-bottom: 5px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;  /* Subtle separator line */
 }
 
-/* New info section styles */
+/* Information section styling - each info section is a group of related membership details */
 .info-section {
   margin-bottom: 10px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;  /* Light border for section separation */
   padding-bottom: 5px;
 }
 
+/* Flex row layout for information items */
 .info-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;  /* Allow wrapping on smaller screens */
   margin-bottom: 3px;
 }
 
+/* Individual data columns within an info row */
 .info-column {
-  flex: 1;
-  min-width: 120px;
+  flex: 1;  /* Grow to fill available space */
+  min-width: 120px;  /* Ensures readable width on all devices */
   padding: 3px;
   position: relative;
 }
 
+/* Label styling for each info field */
 .info-label {
   font-weight: bold;
-  font-size: 0.75rem;
-  color: #495057;
+  font-size: 0.75rem;  /* Small text for field labels */
+  color: #495057;  /* Dark gray text */
   margin-bottom: 1px;
 }
 
+/* Highlighted container for the primary member label */
 .primary-member-label-container {
-  background-color: #e9ecef;
+  background-color: #e9ecef;  /* Light gray background */
   padding: 15px 8px;
   border-radius: 3px;
   margin-bottom: 3px;
@@ -84,96 +101,105 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e67700;
+  border: 1px solid #e67700;  /* Orange border for emphasis */
   width: 100%;
   box-sizing: border-box;
 }
 
+/* Primary member label text styling */
 .primary-member-label {
   font-weight: bold;
   font-size: 0.85rem;
   color: #343a40;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  text-transform: uppercase;  /* All caps for primary member label */
+  letter-spacing: 0.5px;  /* Slightly spaced letters for readability */
   display: block;
   text-align: center;
 }
 
+/* Value display for information fields */
 .info-value {
   font-size: 0.8rem;
   min-height: 18px;
-  border-bottom: 1px solid #ced4da;
+  border-bottom: 1px solid #ced4da;  /* Light underline for each value */
   padding-bottom: 1px;
 }
 
+/* Section headers in dark styling */
 .info-header {
   font-weight: bold;
   font-size: 0.8rem;
-  background-color: #343a40;
-  color: white;
+  background-color: #343a40;  /* Dark background for contrast */
+  color: white;  /* White text on dark background */
   padding: 3px 8px;
   margin-bottom: 3px;
 }
 
-/* Membership type section */
+/* Membership type section - flex row containing membership information */
 .membership-types-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;  /* Allows columns to wrap on smaller screens */
 }
 
+/* Individual columns in the membership type row */
 .membership-type-column,
 .addon-options-column,
 .specialty-membership-column,
 .agreement-type-column {
-  flex: 1 1 150px;
+  flex: 1 1 150px;  /* Grow and shrink with 150px as base size */
   margin-right: 5px;
   margin-bottom: 5px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #dee2e6;  /* Light border for each column */
 }
 
-/* Family members section */
+/* Family members and related information sections */
 .family-members-section,
 .child-programs-section,
 .additional-services-section,
 .membership-code-section {
   margin-bottom: 10px;
-  border: 1px solid #dee2e6;
+  border: 1px solid #dee2e6;  /* Consistent border styling with other sections */
 }
 
+/* Individual items within family members and service lists */
 .family-member-item,
 .service-item {
   padding: 3px 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.8rem;
+  border-bottom: 1px solid #f0f0f0;  /* Very light separator between items */
+  font-size: 0.8rem;  /* Small text size for list items */
 }
 
+/* Remove border from last items in lists to avoid double borders */
 .family-member-item:last-child,
 .service-item:last-child {
   border-bottom: none;
 }
 
+/* General content container within info sections */
 .info-content {
   padding: 5px 8px;
   font-size: 0.8rem;
-  line-height: 1.3;
+  line-height: 1.3;  /* Slightly increased line height for readability */
 }
 
-/* Financial details section */
+/* Financial details and payment summary sections - displayed side by side */
 .financial-details-section,
 .payment-summary-section {
   display: inline-block;
   vertical-align: top;
-  width: 49%;
+  width: 49%;  /* Almost half width to fit side by side with small gap */
 }
 
+/* Financial rows with label-value pairs */
 .financial-details-section .info-column,
 .payment-summary-section .info-column {
   display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid #dee2e6;
+  justify-content: space-between;  /* Place label on left, value on right */
+  border-bottom: 1px solid #dee2e6;  /* Separator line between financial items */
   padding: 4px 3px;
 }
 
+/* Individual financial items with label/value */
 .financial-item {
   display: flex;
   justify-content: space-between;
@@ -181,278 +207,317 @@
   font-size: 0.8rem;
 }
 
+/* Highlight the total amount collected */
 .total-collected {
-  font-weight: bold;
+  font-weight: bold;  /* Emphasize the total amount */
 }
 
-/* Payment authorization section */
+/* Payment authorization section - contains payment method and legal text */
 .payment-auth-section {
   margin-top: 10px;
   border: 1px solid #dee2e6;
   padding: 8px;
 }
 
+/* Legal text for payment authorization */
 .auth-text {
   font-size: 0.75rem;
   line-height: 1.2;
   margin-bottom: 8px;
 }
 
+/* Row for payment method options */
 .payment-method-column {
   display: flex;
   margin: 10px 0;
 }
 
+/* Individual payment method option item */
 .payment-method-column .option-item {
   margin-right: 15px;
 }
 
+/* Credit card information row */
 .credit-card-info-row {
   margin-top: 5px;
-  border-top: 1px solid #dee2e6;
+  border-top: 1px solid #dee2e6;  /* Separator above credit card details */
   padding-top: 5px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;  /* Allow wrapping on smaller screens */
 }
 
+/* Column sizing for credit card info fields */
 .credit-card-info-row .info-column {
-  flex: 1 1 120px;
+  flex: 1 1 120px;  /* Base width with flex grow/shrink */
 }
 
+/* Standard paragraph spacing in member info summary */
 .member-info-summary p {
   margin: 5px 0;
 }
 
+/* Contract text container */
 .contract-text {
   margin-bottom: 30px;
 }
 
+/* Contract terms and conditions title */
 .contract-text h2 {
   font-size: 1.3rem;
   margin-bottom: 10px;
   color: #343a40;
 }
 
+/* Scrollable container for the legal contract text */
 .scrollable-text {
-  height: 300px;
-  overflow-y: auto;
+  height: 300px;  /* Fixed height with scrolling for lengthy contract text */
+  overflow-y: auto;  /* Vertical scrollbar when content exceeds height */
   border: 1px solid #ced4da;
   padding: 15px;
   background-color: #fff;
   margin-bottom: 15px;
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.5;  /* Increased line height for better readability of legal text */
   text-align: left;
 }
 
+/* Signature section - highlighted area with light blue background */
 .signature-section {
   margin-bottom: 30px;
-  background-color: #f0f7ff;
+  background-color: #f0f7ff;  /* Light blue background for visual emphasis */
   border: 1px solid #cce5ff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  position: relative;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);  /* Subtle shadow for depth */
+  position: relative;  /* For positioning the ::after element */
 }
 
+/* Decorative bottom line for signature section */
 .signature-section::after {
   content: "";
   position: absolute;
   bottom: -15px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%);  /* Center the line */
   width: 95%;
   height: 1px;
-  background-color: #dee2e6;
+  background-color: #dee2e6;  /* Light gray separator line */
 }
 
+/* Signature section title */
 .signature-section h2 {
   font-size: 1.3rem;
   margin-bottom: 15px;
-  color: #0056b3;
-  border-bottom: 2px solid #0056b3;
+  color: #0056b3;  /* Blue text to match the section theme */
+  border-bottom: 2px solid #0056b3;  /* Blue underline for the title */
   padding-bottom: 8px;
-  display: inline-block;
+  display: inline-block;  /* Make border only as wide as the text */
 }
 
+/* Container for signature and initials fields */
 .signature-fields {
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  flex-wrap: wrap;  /* Allow fields to wrap on smaller screens */
+  gap: 20px;  /* Space between signature and initials fields */
   margin-bottom: 15px;
   align-items: flex-start;
-  background-color: #ffffff;
+  background-color: #ffffff;  /* White background for the input fields */
   padding: 15px;
   border-radius: 6px;
-  border: 1px solid #d1e7ff;
-  box-shadow: inset 0 0 5px rgba(0, 123, 255, 0.1);
+  border: 1px solid #d1e7ff;  /* Light blue border */
+  box-shadow: inset 0 0 5px rgba(0, 123, 255, 0.1);  /* Subtle inner shadow */
 }
 
+/* Individual signature field container */
 .signature-field {
-  flex: 1;
+  flex: 1;  /* Flexible width distribution */
   padding: 10px;
-  background-color: #f8fbff;
+  background-color: #f8fbff;  /* Very light blue background */
   border-radius: 5px;
-  border: 1px solid #e2eeff;
+  border: 1px solid #e2eeff;  /* Light blue border */
 }
 
-/* Make signature field wider than initials */
+/* Signature field - larger than initials field */
 .signature-field:first-child {
-  flex: 3;
+  flex: 3;  /* Take up more space than the initials field */
   min-width: 240px;
-  border-left: 3px solid #007bff;
+  border-left: 3px solid #007bff;  /* Blue accent border */
 }
 
-/* Make initials field narrower */
+/* Initials field - smaller than signature field */
 .signature-field:last-child {
   flex: 1;
   min-width: 120px;
-  max-width: 150px;
-  border-left: 3px solid #007bff;
+  max-width: 150px;  /* Limit width for initials */
+  border-left: 3px solid #007bff;  /* Blue accent border */
 }
 
+/* Labels for signature and initials fields */
 .signature-field label {
   display: block;
   margin-bottom: 10px;
   font-weight: bold;
-  color: #0056b3;
+  color: #0056b3;  /* Blue text */
   font-size: 0.9rem;
   padding-bottom: 5px;
-  border-bottom: 1px dashed #cce5ff;
+  border-bottom: 1px dashed #cce5ff;  /* Dotted separator line */
 }
 
+/* Terms and conditions agreement checkbox with label */
 .terms-agreement {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start;  /* Align checkbox with the top of the text */
   margin: 15px 0;
 }
 
+/* Checkbox styling for terms agreement */
 .terms-agreement input[type="checkbox"] {
-  margin-right: 10px;
-  margin-top: 3px;
+  margin-right: 10px;  /* Space between checkbox and label */
+  margin-top: 3px;  /* Align with first line of text */
 }
 
+/* Text label for terms agreement checkbox */
 .terms-agreement label {
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.4;  /* Increased line height for better readability */
 }
 
+/* Container for back and continue buttons at bottom of page */
 .contract-actions {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between;  /* Place buttons at opposite ends */
   margin-top: 30px;
 }
 
+/* Shared button styles */
 .secondary-button, .primary-button {
   padding: 10px 20px;
   border-radius: 4px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s;  /* Smooth hover effect */
 }
 
+/* Back button - light gray styling */
 .secondary-button {
   background-color: #e9ecef;
   color: #495057;
   border: 1px solid #ced4da;
 }
 
+/* Continue/primary button - blue styling */
 .primary-button {
-  background-color: #007bff;
+  background-color: #007bff;  /* Bootstrap primary blue */
   color: white;
   border: none;
 }
 
+/* Hover effect for back button */
 .secondary-button:hover {
-  background-color: #dee2e6;
+  background-color: #dee2e6;  /* Slightly darker on hover */
 }
 
+/* Hover effect for primary button */
 .primary-button:hover {
-  background-color: #0069d9;
+  background-color: #0069d9;  /* Slightly darker blue on hover */
 }
 
+/* Error message styling - displayed for validation errors */
 .error-message {
-  color: #dc3545;
+  color: #dc3545;  /* Bootstrap danger/error red */
   font-size: 0.8rem;
   margin-top: 5px;
 }
 
+/* Required field indicator (*) */
 .required {
-  color: #dc3545;
+  color: #dc3545;  /* Red asterisk for required fields */
 }
 
+/* Loading indicator shown while data is being fetched */
 .loading {
   text-align: center;
   padding: 30px;
   font-size: 1.2rem;
-  color: #6c757d;
+  color: #6c757d;  /* Medium gray text */
 }
 
-/* Contract specific styling */
+/* Contract specific styling - sections of the legal agreement */
 .contract-section {
-  margin-bottom: 20px;
+  margin-bottom: 20px;  /* Space between contract sections */
 }
 
+/* Section headings for contract parts */
 .section-header {
   font-weight: bold;
   font-size: 1.1rem;
   margin-bottom: 10px;
-  color: #2c3e50;
-  text-align: center;
+  color: #2c3e50;  /* Dark blue-gray text */
+  text-align: center;  /* Center align section headings */
 }
 
+/* Container for section content */
 .section-content {
   margin-left: 5px;
   text-align: left;
 }
 
+/* Paragraph spacing in contract sections */
 .section-content p {
   margin-bottom: 10px;
 }
 
+/* Emphasized cancellation text */
 .cancellation-text {
-  font-weight: bold;
+  font-weight: bold;  /* Bold text for important cancellation notice */
 }
 
+/* Acknowledgment text styling */
 .acknowledgment {
   font-weight: bold;
-  margin: 15px 0;
+  margin: 15px 0;  /* Added vertical space around acknowledgments */
 }
 
+/* Container for initial lines that require user initials */
 .initial-line {
   margin: 15px 0;
   font-weight: normal;
 }
 
+/* Styling for the initials text */
 .initials {
   display: inline-block;
   margin-left: 20px;
   font-weight: normal;
 }
 
+/* Line where signature appears */
 .signature-line {
   margin-top: 20px;
   font-style: italic;
 }
 
+/* Styling for date field next to signature */
 .date-line {
   margin: 5px 0;
 }
 
+/* Small descriptive text under signature */
 .signature-description {
   font-size: 0.8rem;
-  color: #6c757d;
+  color: #6c757d;  /* Medium gray text */
   border-top: 1px solid #dee2e6;
   padding-top: 5px;
   margin-top: 0;
 }
 
+/* Tab spacing for aligned content */
 .tab {
   display: inline-block;
-  width: 200px;
+  width: 200px;  /* Fixed width for consistent spacing */
 }
 
-/* Contract signature styles */
+/* Container for signature and date at bottom of contract */
 .contract-signature-container {
   margin-top: 40px;
   display: flex;
@@ -461,6 +526,7 @@
   margin-bottom: 15px;
 }
 
+/* Box for user's legal signature on the contract */
 .contract-signature-box {
   border: 1px solid #aaa;
   border-radius: 3px;
@@ -470,21 +536,24 @@
   text-align: center;
   background-color: #f8f9fa;
   margin-bottom: 10px;
-  transition: all 0.2s ease-in-out;
-  font-size: 1.8rem;
+  transition: all 0.2s ease-in-out;  /* Smooth hover effects */
+  font-size: 1.8rem;  /* Large font for signature */
 }
 
+/* Hover effects for signature box */
 .contract-signature-box:hover {
   background-color: #e9ecef;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
-  border: 1px solid #007bff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);  /* Subtle shadow on hover */
+  border: 1px solid #007bff;  /* Blue border on hover */
 }
 
+/* Styling when signature is completed */
 .contract-signature-box.signed {
-  background-color: #f0f8ff;
-  box-shadow: 0 0 3px rgba(0,123,255,0.5);
+  background-color: #f0f8ff;  /* Light blue background when signed */
+  box-shadow: 0 0 3px rgba(0,123,255,0.5);  /* Blue glow effect for signed state */
 }
 
+/* Date box next to signature */
 .contract-date-box {
   border: 1px solid #aaa;
   border-radius: 3px;

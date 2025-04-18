@@ -165,8 +165,17 @@ function LandingPage() {
           Enroll Now
         </button>
       </section>
+      
+      {/* Payment Processor Demo Link - For Development/Testing */}
+      <section className="demo-section">
+        <div className="demo-container">
+          <h3>Payment Processing Demo</h3>
+          <p>Test our secure payment processing system with Fluidpay and Converge.</p>
+          <Link to="/payment-demo" className="demo-link">View Payment Demo</Link>
+        </div>
+      </section>
     </div>
   );
 }
 
-export default LandingPage; 
+export default LandingPage;

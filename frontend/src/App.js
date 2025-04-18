@@ -6,6 +6,7 @@ import LandingPage from "./components/LandingPage.jsx";
 import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
 import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
+import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 
@@ -93,6 +94,7 @@ function AppContent() {
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}
           />
+          <Route path="/payment-demo" element={<PaymentProcessorDemo />} />
           {/* Add more routes as needed */}
         </Routes>
       </main>

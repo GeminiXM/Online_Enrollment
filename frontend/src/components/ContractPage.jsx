@@ -1,3 +1,17 @@
+/**
+ * ContractPage.jsx
+ * 
+ * This component renders the contract/membership agreement page where users review
+ * their membership details and sign/initial the legal agreement before proceeding to payment.
+ * 
+ * Key functionality:
+ * - Displays membership information summary
+ * - Allows users to select signature style
+ * - Provides contract terms and conditions based on club location (Denver/New Mexico)
+ * - Requires user signatures and initials on specific sections
+ * - Validates all required fields before allowing progression to payment
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';

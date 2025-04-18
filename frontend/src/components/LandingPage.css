@@ -334,6 +334,57 @@
   color: var(--primary-dark);
 }
 
+/* Demo section for payment processors */
+.demo-section {
+  padding: 2rem 1rem 4rem;
+  text-align: center;
+  margin-top: -1rem;
+}
+
+.demo-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-left: 4px solid #409eff;
+}
+
+.demo-container h3 {
+  color: #409eff;
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.demo-container p {
+  margin-bottom: 1.5rem;
+  color: #606266;
+}
+
+.demo-link {
+  display: inline-block;
+  background-color: #409eff;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.demo-link:hover {
+  background-color: #66b1ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  text-decoration: none;
+  color: white;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .hero-section {
@@ -372,4 +423,4 @@
   .landing-container h2 {
     font-size: 1.5rem;
   }
-} 
+}
