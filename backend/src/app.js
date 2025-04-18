@@ -23,7 +23,11 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet()); // Security headers
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:5000",
+    // Allow all origins in development, or use CORS_ORIGIN in production
+    origin: process.env.NODE_ENV === 'production' 
+      ? process.env.CORS_ORIGIN 
+      : true,
+    credentials: true
   })
 );
 app.use(express.json()); // Parse JSON bodies

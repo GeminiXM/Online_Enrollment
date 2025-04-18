@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [react(), svgr()],
   server: {
     port: 5000,
+    host: "0.0.0.0",
     proxy: {
       "/api": {
         target: "http://localhost:5001",
@@ -15,6 +16,7 @@ export default defineConfig({
       },
     },
   },
+  base: "/online-enrollment/",
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),

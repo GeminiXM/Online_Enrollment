@@ -2354,7 +2354,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     if (isLoadingPrice) {
       total += membershipType?.price || 0; // Use default price while loading
     } else {
-      total += membershipPrice || (membershipType?.price || 0);
+      total += (membershipPrice !== undefined ? membershipPrice : 0) || (membershipType?.price || 0);
     }
     
     // Do NOT add extra costs for family members that are already included in the membership price
@@ -2389,7 +2389,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
     
     // Start with prorated membership price - this already includes family members in the I/D/F type
-    let total = proratedPrice;
+    let total = proratedPrice !== undefined ? proratedPrice : 0;
     
     // Do NOT add extra family member costs - the membership price already includes this based on type
     
@@ -3174,7 +3174,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   {isLoadingPrice ? (
                     <span>Loading price...</span>
                   ) : (
-                    `$${proratedPrice.toFixed(2)}`
+                    `$${proratedPrice !== undefined ? proratedPrice.toFixed(2) : '0.00'}`
                   )}
                 </p>
                 <p className="price-detail">
@@ -3189,7 +3189,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   {isLoadingPrice ? (
                     <span>Loading price...</span>
                   ) : (
-                    `$${membershipPrice ? membershipPrice.toFixed(2) : (membershipType ? membershipType.price : '49.99')}/month`
+                    `$${membershipPrice !== undefined ? membershipPrice.toFixed(2) : (membershipType && membershipType.price ? membershipType.price.toFixed(2) : '49.99')}/month`
                   )}
                 </p>
               </div>

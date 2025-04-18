@@ -8,7 +8,9 @@ const config = {
   apiUrl:
     process.env.NODE_ENV === "production"
       ? "/api" // In production, use relative path (handled by proxy)
-      : "http://localhost:5001/api", // In development, use the full URL
+      : window.location.hostname === "localhost" 
+        ? "http://localhost:5001/api" // When accessed locally
+        : `http://${window.location.hostname}:5001/api`, // When accessed from another computer
 
   // Application name
   appName: "Fitness Facility Enrollment",
