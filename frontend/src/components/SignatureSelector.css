@@ -124,11 +124,16 @@
 }
 
 .signature-notice {
-  font-size: 0.6rem;
-  color: #6c757d;
+  font-size: 0.85rem;
+  color: #495057;
   text-align: center;
-  margin: 0;
+  margin: 5px 0;
   font-style: italic;
+  font-weight: 500;
+  padding: 5px;
+  background-color: #f0f7ff;
+  border-radius: 3px;
+  border-left: 3px solid #007bff;
 }
 
 /* For smaller screens, make everything more compact */

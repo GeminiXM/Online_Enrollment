@@ -732,7 +732,7 @@ const ContractPage = () => {
         <h2>Signature Selector</h2>
         <div className="signature-fields">
           <div className="signature-field">
-            <label>please select a signature style to be used throughout this legal document <span className="required">*</span></label>
+            <label><i>please select a signature style to be used throughout this legal document</i> <span className="required">*</span></label>
             <SignatureSelector 
               onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
               name={`${formData.firstName} ${formData.lastName}`}
