@@ -2768,3 +2768,22 @@
 2025-04-18 15:57:00:570 [32minfo[39m: [32mConnected to database for club 254[39m
 2025-04-18 15:57:00:570 [32minfo[39m: [32mBridge code retrieved successfully[39m
 2025-04-18 15:57:00:570 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-04-18 15:57:32:5732 [32minfo[39m: [32mServer running on port 5001[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mReceived request for membership price[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-18 15:57:42:5742 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mReceived request for membership price[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-04-18 15:57:43:5743 [32minfo[39m: [32mPrice retrieved successfully[39m

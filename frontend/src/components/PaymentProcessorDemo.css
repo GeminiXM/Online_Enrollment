@@ -1,7 +1,8 @@
 /* Payment Processor Demo Styles */
 
 .payment-container {
-  max-width: 350px;
+  max-width: 90%;      /* grow to 90% of its parent container */
+  max-width: 450px;
   margin: 0 auto;
   padding: 1rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,6 +31,12 @@
   align-items: center;
   border-left: 4px solid #3498db;
 }
+
+/* turn off flex on any .form-group not inside a .form-row */
+.payment-form > .form-group {
+  flex: none;
+}
+
 
 .processor-selection label,
 .test-card-selection label {
@@ -98,14 +105,28 @@
   border-radius: 8px;
 }
 
-.credit-card-logos img {
-  height: 20px;
-  opacity: 0.7;
+.credit-card-logos > div {
+  opacity: 0.6;
   transition: opacity 0.2s;
 }
 
-.credit-card-logos img.active {
+.credit-card-logos > div.active {
   opacity: 1;
+}
+
+.credit-card-logos svg {
+  height: 24px;
+  width: auto;
+}
+
+.card-type-icon svg {
+  height: 20px;
+  width: auto;
+}
+
+.card-logo svg {
+  height: 30px;
+  width: auto;
 }
 
 /* Form Styles */
@@ -254,7 +275,7 @@
 .card-preview {
   background: linear-gradient(135deg, #2c3e50, #4a5568);
   height: 140px;
-  width: 100%;
+  width: 90%;
   border-radius: 16px;
   margin-bottom: 0.5rem;
   padding: 1rem;
