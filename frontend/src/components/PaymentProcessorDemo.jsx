@@ -4,9 +4,9 @@ import './PaymentProcessorDemo.css';
 // Credit Card Logo SVGs - Real card brand logos 
 const CardLogos = {
  Visa: () => (
-    <svg
-      width="24"
-      height="24"
+<svg
+      width="36"
+      height="36"
       viewBox="0 0 24 24"
       role="img"
       xmlns="http://www.w3.org/2000/svg"
@@ -459,7 +459,7 @@ const PaymentProcessorDemo = () => {
             </div>
             
             <div style={{ display: "flex", gap: "5px", margin: 0 }}>
-              <div className="form-group" style={{ flex: 1, margin: 0 }}>
+              <div className="form-group" style={{ flex: 0.8, margin: 0 }}>
                 <label htmlFor="expiryDate" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
                   Expiration Date <span className="required">*</span>
                 </label>
@@ -485,7 +485,7 @@ const PaymentProcessorDemo = () => {
                 )}
               </div>
               
-              <div className="form-group" style={{ flex: 1, margin: 0 }}>
+              <div className="form-group" style={{ flex: 0.5, margin: 0 }}>
                 <label htmlFor="cvv" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
                   CVV <span className="required">*</span>
                 </label>
@@ -510,7 +510,34 @@ const PaymentProcessorDemo = () => {
                   </div>
                 )}
               </div>
+              
+              <div className="form-group" style={{ flex: 0.7, margin: 0 }}>
+                <label htmlFor="billingZipCode" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
+                  ZIP <span className="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="billingZipCode"
+                  name="billingZipCode"
+                  value={paymentFormData.billingZipCode}
+                  onChange={handleInputChange}
+                  placeholder="ZIP"
+                  maxLength="5"
+                  style={{ padding: "0.25rem 0.5rem", height: "28px" }}
+                />
+                {errors.billingZipCode && (
+                  <div className="error-message" style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    {errors.billingZipCode}
+                  </div>
+                )}
+              </div>
             </div>
+              
             
             <div className="form-group" style={{ margin: 0 }}>
               <label htmlFor="nameOnCard" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
@@ -537,31 +564,7 @@ const PaymentProcessorDemo = () => {
               )}
             </div>
             
-            <div className="form-group" style={{ margin: 0 }}>
-              <label htmlFor="billingZipCode" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
-                Billing ZIP Code <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="billingZipCode"
-                name="billingZipCode"
-                value={paymentFormData.billingZipCode}
-                onChange={handleInputChange}
-                placeholder="Enter ZIP code"
-                maxLength="10"
-                style={{ padding: "0.25rem 0.5rem", height: "28px" }}
-              />
-              {errors.billingZipCode && (
-                <div className="error-message" style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
-                  {errors.billingZipCode}
-                </div>
-              )}
-            </div>
+            
             
             <div className="form-actions" style={{ marginTop: "0.5rem" }}>
               <button 

@@ -115,17 +115,17 @@
 }
 
 .credit-card-logos svg {
-  height: 24px;
+  height: 32px;
   width: auto;
 }
 
 .card-type-icon svg {
-  height: 20px;
+  height: 26px;
   width: auto;
 }
 
 .card-logo svg {
-  height: 30px;
+  height: 40px;
   width: auto;
 }
 
@@ -196,7 +196,7 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  height: 20px;
+  height: 26px;
 }
 
 .error-message {
