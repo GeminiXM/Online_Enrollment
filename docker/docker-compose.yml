@@ -36,7 +36,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=${JWT_EXPIRES_IN}
-      - CORS_ORIGIN=http://localhost:5000
+      - CORS_ORIGIN=http://localhost:5000,http://vwbwebdev:5000
     # Uncomment if you have a local Informix database
     # depends_on:
     #   - db
@@ -53,4 +53,4 @@ services:
 
 # Uncomment if you want to run Informix in Docker
 # volumes:
-#   informix-data: 
+#   informix-data:

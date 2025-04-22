@@ -15,6 +15,13 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    hmr: {
+      host: [
+        "localhost",
+        "vwbwebdev"
+      ],
+    },
+    allowedHosts: ["localhost", "vwbwebdev"],
   },
   base: "/online-enrollment/",
   resolve: {

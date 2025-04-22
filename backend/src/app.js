@@ -23,9 +23,18 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet()); // Security headers
 app.use(
   cors({
-    // Allow all origins in development, or use CORS_ORIGIN in production
+    // Allow specific origins in production, or all origins in development
     origin: process.env.NODE_ENV === 'production' 
-      ? process.env.CORS_ORIGIN 
+      ? function(origin, callback) {
+          const allowedOrigins = process.env.CORS_ORIGIN.split(',');
+          // Allow requests with no origin (like mobile apps or curl requests)
+          if(!origin) return callback(null, true);
+          if(allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        }
       : true,
     credentials: true
   })
