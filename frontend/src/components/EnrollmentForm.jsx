@@ -1478,12 +1478,26 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
 
   const handleServiceAddonClick = (addon) => {
     setSelectedServiceAddons((prev) => {
+      // Check if the clicked addon is an "Unlimited" addon
+      const isUnlimitedAddon = addon.invtr_desc && addon.invtr_desc.includes("Unlimited");
+      
+      // Check if the addon is already selected
       const isSelected = prev.some(
         (item) => item.invtr_desc === addon.invtr_desc
       );
+      
       if (isSelected) {
+        // If it's already selected, just remove it
         return prev.filter((item) => item.invtr_desc !== addon.invtr_desc);
+      } else if (isUnlimitedAddon) {
+        // If it's an Unlimited addon, remove any other Unlimited addons first
+        const filteredAddons = prev.filter(
+          (item) => !item.invtr_desc || !item.invtr_desc.includes("Unlimited")
+        );
+        // Then add the newly selected Unlimited addon
+        return [...filteredAddons, addon];
       } else {
+        // For normal addons, just add it to the selection
         return [...prev, addon];
       }
     });

@@ -29,6 +29,15 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
     return false;
   }) || [];
 
+  // Separate unlimited addons from regular addons
+  const unlimitedAddons = serviceAddons.filter(addon => 
+    addon.invtr_desc && addon.invtr_desc.includes("Unlimited")
+  );
+  
+  const regularAddons = serviceAddons.filter(addon => 
+    !addon.invtr_desc || !addon.invtr_desc.includes("Unlimited")
+  );
+
   // If no service addons are available, show a message
   if (serviceAddons.length === 0) {
     return (
@@ -39,29 +48,67 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
   }
 
   return (
-    <div className="addons-grid">
-      {serviceAddons.map((addon, index) => (
-        <button
-          key={index}
-          type="button"
-          className={`addon-button ${
-            selectedAddons.some(
+    <div>
+      {/* Regular addons */}
+      <div className="addons-grid">
+        {regularAddons.map((addon, index) => (
+          <button
+            key={index}
+            type="button"
+            className={`addon-button ${
+              selectedAddons.some(
+                (item) => item.invtr_desc === addon.invtr_desc
+              )
+                ? "selected"
+                : ""
+            }`}
+            onClick={() => onAddonClick(addon)}
+          >
+            <div className="addon-description">
+              {addon.invtr_desc}
+            </div>
+            <div className="addon-price">${addon.invtr_price}</div>
+            {selectedAddons.some(
               (item) => item.invtr_desc === addon.invtr_desc
-            )
-              ? "selected"
-              : ""
-          }`}
-          onClick={() => onAddonClick(addon)}
-        >
-          <div className="addon-description">
-            {addon.invtr_desc}
+            ) && <span className="checkmark">✔</span>}
+          </button>
+        ))}
+      </div>
+      
+      {/* Only show unlimited section if there are unlimited addons */}
+      {unlimitedAddons.length > 0 && (
+        <>
+          <div className="addon-section-separator">
+            <h4>Child Care Options</h4>
+            <p className="note">Note: You can only select one of the following options at a time.</p>
           </div>
-          <div className="addon-price">${addon.invtr_price}</div>
-          {selectedAddons.some(
-            (item) => item.invtr_desc === addon.invtr_desc
-          ) && <span className="checkmark">✔</span>}
-        </button>
-      ))}
+          
+          <div className="addons-grid unlimited-addons">
+            {unlimitedAddons.map((addon, index) => (
+              <button
+                key={index}
+                type="button"
+                className={`addon-button ${
+                  selectedAddons.some(
+                    (item) => item.invtr_desc === addon.invtr_desc
+                  )
+                    ? "selected"
+                    : ""
+                }`}
+                onClick={() => onAddonClick(addon)}
+              >
+                <div className="addon-description">
+                  {addon.invtr_desc}
+                </div>
+                <div className="addon-price">${addon.invtr_price}</div>
+                {selectedAddons.some(
+                  (item) => item.invtr_desc === addon.invtr_desc
+                ) && <span className="checkmark">✔</span>}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };

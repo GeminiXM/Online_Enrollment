@@ -1315,6 +1315,48 @@ button:focus-visible {
   font-size: 1rem;
 }
 
+/* Addon Section Separator */
+.addon-section-separator {
+  background-color: rgba(0, 99, 124, 0.08);
+  padding: 1rem;
+  margin: 2rem 0 1rem 0;
+  border-radius: 6px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.addon-section-separator h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.addon-section-separator .note {
+  margin: 0;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #666;
+}
+
+/* Unlimited Addons Section */
+.unlimited-addons {
+  background-color: rgba(0, 99, 124, 0.05);
+  padding: 1rem;
+  border-radius: 6px;
+  border: 1px dashed var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.unlimited-addons .addon-button {
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 99, 124, 0.3);
+}
+
+.unlimited-addons .addon-button.selected {
+  background-color: rgba(0, 128, 128, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 99, 124, 0.3);
+}
+
 /* Responsive adjustments for shopping cart */
 @media (max-width: 1200px) {
   .shopping-cart {

@@ -212,33 +212,42 @@ const ContractPage = () => {
       // Extract add-ons from serviceAddons
       const serviceAddOns = data.serviceAddons?.map(addon => addon.description) || [];
       
-      // Process child programs and add-ons
-      let additionalServiceDetails = [];
-      let childPrograms = '';
-      let childProgramsMonthly = '';
-      let childProgramsDueNow = '';
+  // Process child programs and add-ons
+  let additionalServiceDetails = [];
+  let childPrograms = '';
+  let childProgramsMonthly = '';
+  let childProgramsDueNow = '';
+  
+  if (data.serviceAddons && data.serviceAddons.length > 0) {
+    // Check if club is in New Mexico
+    const isNewMexicoClub = data.club?.toString().includes('NM') || false;
+    
+    // Map all service addons to additionalServiceDetails
+    additionalServiceDetails = data.serviceAddons.map(addon => ({
+      name: addon.description,
+      dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
+      monthly: addon.price ? addon.price.toFixed(2) : '0.00'
+    }));
+    
+    // For Child Programs section, only include CAC child programs (Colorado only)
+    // Exclude "Unlimited" options (2020) which should only appear in Additional Services
+    if (!isNewMexicoClub) {
+      // For Colorado, only look for CAC child programs
+      const childProgramAddon = data.serviceAddons.find(addon => 
+        addon.description && 
+        addon.description.includes('CAC') && 
+        addon.description.includes('child')
+      );
       
-      if (data.serviceAddons && data.serviceAddons.length > 0) {
-        additionalServiceDetails = data.serviceAddons.map(addon => ({
-          name: addon.description,
-          dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
-          monthly: addon.price ? addon.price.toFixed(2) : '0.00'
-        }));
-        
-        // Look for child programs
-        const childProgramAddon = data.serviceAddons.find(addon => 
-          addon.description && 
-          (addon.description.includes('Child') || 
-           addon.description.includes('2020') || 
-           addon.description.includes('Nanny'))
-        );
-        
-        if (childProgramAddon) {
-          childPrograms = childProgramAddon.description;
-          childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
-          childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * 0.5).toFixed(2) : '0.00';
-        }
+      if (childProgramAddon) {
+        childPrograms = childProgramAddon.description;
+        childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
+        childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * 0.5).toFixed(2) : '0.00';
       }
+    }
+    // For New Mexico clubs, we don't show anything in the Child Programs section
+    // All "Unlimited" options (2020) will only appear in Additional Services
+  }
       
       // Compile list of add-ons from multiple sources
       let addOns = [...serviceAddOns];
