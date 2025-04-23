@@ -3,13 +3,14 @@
 
 import React from 'react';
 import { useClub } from '../context/ClubContext';
+import { useMembership } from '../context/MembershipContext';
 import './EnrollmentForm.css';
 
-const AddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
+const AddonButtons = ({ addons, selectedAddons, onAddonClick, membershipTypeValue }) => {
   // Get the selected club to check if it's a New Mexico club
   const { selectedClub } = useClub();
   const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
-
+  
   // Filter addons to only show those that include "Child" in the description
   // For New Mexico clubs, exclude addons that include "Unlimited"
   const childAddons = addons?.filter(addon => {
@@ -22,16 +23,29 @@ const AddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
       return false;
     }
     
+    // For New Mexico clubs, only show Child Addon when membership type is 'I' (Individual)
+    if (isNewMexicoClub && membershipTypeValue !== 'I') {
+      return false;
+    }
+    
     return true;
   }) || [];
 
-  // If no child addons are available, show a message
+  // If no child addons are available or membership type is 'D'/'F' for New Mexico clubs, show appropriate message
   if (childAddons.length === 0) {
-    return (
-      <div className="no-addons-message">
-        <p>No child program options are currently available.</p>
-      </div>
-    );
+    if (isNewMexicoClub && (membershipTypeValue === 'D' || membershipTypeValue === 'F')) {
+      return (
+        <div className="no-addons-message">
+          <p>Child memberships are included with your Dual/Family membership. You can add children without additional fees.</p>
+        </div>
+      );
+    } else {
+      return (
+        <div className="no-addons-message">
+          <p>No child program options are currently available.</p>
+        </div>
+      );
+    }
   }
 
   return (

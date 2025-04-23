@@ -334,9 +334,26 @@ function EnrollmentForm() {
   useEffect(() => {
     const newMembershipTypeValue = determineMembershipType();
     console.log(`Determined membership type: ${newMembershipTypeValue} based on family composition`);
+    
+    // Check for New Mexico clubs
+    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
+    
+    // If membership type is changing in New Mexico clubs
+    if (isNewMexicoClub && newMembershipTypeValue !== determinedMembershipType) {
+      // If changing to Family, remove Child Addon from shopping cart
+      if (newMembershipTypeValue === 'F') {
+        setSelectedChildAddons([]);
+        console.log('Removed Child Addon from cart for Family membership in New Mexico');
+      }
+      
+      // Always reset child forms when membership type changes for New Mexico clubs
+      setChildForms([]);
+      console.log(`Membership type changed from ${determinedMembershipType} to ${newMembershipTypeValue} - reset child forms`);
+    }
+    
     // Store the determined membership type in state
     setDeterminedMembershipType(newMembershipTypeValue);
-  }, [formData.familyMembers, determineMembershipType]);
+  }, [formData.familyMembers, determineMembershipType, selectedClub, determinedMembershipType]);
 
   // Trigger price refresh when membership type changes due to family composition changes
   useEffect(() => {
@@ -1241,31 +1258,53 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
 
 
   //ADDONS
-   // Update the handleChildAddonClick function
+  // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
+    // Check if this is a New Mexico club
+    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
+    
     setSelectedChildAddons(prev => {
       // If the clicked addon is already selected, clear the selection
       if (prev.some(item => item.invtr_desc === addon.invtr_desc)) {
         setChildForms([]); // Clear child forms when deselecting
         return [];
       }
-      // Otherwise, select only this addon
-      const childCount = extractChildCount(addon.invtr_desc);
       
-      // Initialize child forms based on the count
-      const newChildForms = Array(childCount).fill().map(() => ({
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        gender: "",
-        mobile: "",
-        home: "",
-        email: "",
-        emergencyContactName: "",
-        emergencyContactPhone: "",
-      }));
+      // For New Mexico clubs, start with just 1 child form as they allow unlimited children
+      if (isNewMexicoClub && determinedMembershipType === 'I') {
+        const newChildForms = [{
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "",
+          mobile: "",
+          home: "",
+          email: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+        }];
+        
+        setChildForms(newChildForms);
+      } else {
+        // For Colorado clubs, use the existing behavior of creating forms based on count
+        const childCount = extractChildCount(addon.invtr_desc);
+        
+        // Initialize child forms based on the count
+        const newChildForms = Array(childCount).fill().map(() => ({
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "",
+          mobile: "",
+          home: "",
+          email: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+        }));
+        
+        setChildForms(newChildForms);
+      }
       
-      setChildForms(newChildForms);
       return [addon];
     });
   };
@@ -1280,6 +1319,24 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       };
       return updated;
     });
+  };
+  
+  // Function to add another child form for New Mexico clubs
+  const addAnotherChildForm = () => {
+    setChildForms(prev => [
+      ...prev,
+      {
+        firstName: "",
+        lastName: "",
+        dateOfBirth: "",
+        gender: "",
+        mobile: "",
+        home: "",
+        email: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+      }
+    ]);
   };
   
   // Update the handleAddChildMember function to handle multiple children
@@ -1949,17 +2006,292 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
           <div className="tab-panel">
             <h3>Add Child Family Member</h3>
             <p>Add a child family member (0-11 years) to your membership.</p>
-              {/* Child program options */}
-            <AddonButtons 
-              addons={addons}
-              selectedAddons={selectedChildAddons}
-              onAddonClick={handleChildAddonClick}
-            />
             
-            {selectedChildAddons.length > 0 && childForms.length > 0 && (
+            {/* For New Mexico Family memberships, show direct child entry without requiring addon */}
+            {(selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') && 
+             determinedMembershipType === 'F' ? (
+              <div className="family-child-entry">
+                <p className="membership-message" style={{ 
+                  backgroundColor: '#e6f7ff', 
+                  padding: '12px', 
+                  borderRadius: '6px',
+                  marginBottom: '20px'
+                }}>
+                  Child memberships are included with your Family membership at no additional cost.
+                </p>
+                
+                {childForms.length === 0 && (
+                  <button 
+                    type="button" 
+                    className="add-child-button"
+                    onClick={() => {
+                      // Add a single empty child form for Family memberships
+                      setChildForms([{
+                        firstName: "",
+                        lastName: "",
+                        dateOfBirth: "",
+                        gender: "",
+                        mobile: "",
+                        home: "",
+                        email: "",
+                        emergencyContactName: "",
+                        emergencyContactPhone: "",
+                      }]);
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#4CAF50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      marginBottom: '20px'
+                    }}
+                  >
+                    Add Child
+                  </button>
+                )}
+                
+                {childForms.length > 0 && (
+                  <div className="child-forms-container">
+                    <h4>Child Information</h4>
+                    <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
+                    
+                    <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
+                      <button 
+                        type="button" 
+                        className="add-child-button"
+                        onClick={addAnotherChildForm}
+                        style={{
+                          padding: '8px 16px',
+                          backgroundColor: '#4CAF50',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer',
+                          fontSize: '14px'
+                        }}
+                      >
+                        Add Another Child
+                      </button>
+                    </div>
+                    
+                    {childForms.map((child, index) => (
+                      <div key={index} className="child-form" style={{ 
+                        backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+                        padding: '20px',
+                        marginBottom: '20px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}>
+                        <h5 style={{ 
+                          color: '#2c3e50',
+                          marginBottom: '15px',
+                          paddingBottom: '10px',
+                          borderBottom: '2px solid #e9ecef'
+                        }}>Child {index + 1}</h5>
+                        <div className="form-row name-row">
+                          <div className="form-group">
+                            <label htmlFor={`child${index}FirstName`}>
+                              First Name <span className="required">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}FirstName`}
+                              value={child.firstName}
+                              onChange={(e) => handleChildFormChange(index, 'firstName', e.target.value)}
+                              placeholder="Enter first name"
+                              required
+                            />
+                            {errors[`child${index}FirstName`] && (
+                              <span className="error-message">{errors[`child${index}FirstName`]}</span>
+                            )}
+                          </div>
+                          
+                          <div className="form-group middle-initial">
+                            <label htmlFor={`child${index}MiddleInitial`}>
+                              Initial
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}MiddleInitial`}
+                              value={child.middleInitial || ""}
+                              onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
+                              placeholder="M.I."
+                              maxLength="1"
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor={`child${index}LastName`}>
+                              Last Name <span className="required">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}LastName`}
+                              value={child.lastName}
+                              onChange={(e) => handleChildFormChange(index, 'lastName', e.target.value)}
+                              placeholder="Enter last name"
+                              required
+                            />
+                            {errors[`child${index}LastName`] && (
+                              <span className="error-message">{errors[`child${index}LastName`]}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="form-row birthdate-gender-email">
+                          <div className="form-group dob-field">
+                            <label htmlFor={`child${index}DateOfBirth`}>
+                              Date of Birth <span className="required">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              id={`child${index}DateOfBirth`}
+                              value={child.dateOfBirth}
+                              onChange={(e) => handleChildFormChange(index, 'dateOfBirth', e.target.value)}
+                              onBlur={(e) => {
+                                if (e.target.value) {
+                                  const ageError = validateChildAge(e.target.value);
+                                  if (ageError) {
+                                    setErrors(prev => {
+                                      const newErrors = {...prev};
+                                      newErrors[`child${index}DateOfBirth`] = ageError;
+                                      return newErrors;
+                                    });
+                                  }
+                                }
+                              }}
+                              required
+                            />
+                            {errors[`child${index}DateOfBirth`] && (
+                              <span className="error-message">{errors[`child${index}DateOfBirth`]}</span>
+                            )}
+                          </div>
+                          <div className="form-group gender-field">
+                            <label htmlFor={`child${index}Gender`}>
+                              Gender <span className="required">*</span>
+                            </label>
+                            <select
+                              id={`child${index}Gender`}
+                              value={child.gender}
+                              onChange={(e) => handleChildFormChange(index, 'gender', e.target.value)}
+                              required
+                            >
+                              <option value="">Select gender</option>
+                              <option value="M">Male</option>
+                              <option value="F">Female</option>
+                              <option value="N">Prefer not to say</option>
+                            </select>
+                            {errors[`child${index}Gender`] && (
+                              <span className="error-message">{errors[`child${index}Gender`]}</span>
+                            )}
+                          </div>
+                                              
+                          <div className="form-group email-field">
+                            <label htmlFor={`child${index}Email`}>
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              id={`child${index}Email`}
+                              value={child.email}
+                              onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
+                              placeholder="Enter email address"
+                            />
+                          
+                        </div>
+                        </div>
+
+                        <div className="form-row">
+                          <div className="form-group">
+                            <label htmlFor={`child${index}Mobile`}>
+                              Cell Phone
+                            </label>
+                            <input
+                              type="tel"
+                              id={`child${index}Mobile`}
+                              value={child.mobile}
+                              onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
+                              placeholder="Enter 10-digit phone number"
+                              required
+                            />
+                            {errors[`child${index}Mobile`] && (
+                              <span className="error-message">{errors[`child${index}Mobile`]}</span>
+                            )}
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor={`child${index}Home`}>
+                              Home Phone
+                            </label>
+                            <input
+                              type="tel"
+                              id={`child${index}Home`}
+                              value={child.home}
+                              onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
+                              placeholder="Enter 10-digit phone number"
+                            />
+                            {errors[`child${index}Home`] && (
+                              <span className="error-message">{errors[`child${index}Home`]}</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="form-actions">
+                      <button 
+                        type="button" 
+                        className="add-member-button"
+                        onClick={handleAddChildMember}
+                      >
+                        Add {childForms.length} {childForms.length === 1 ? 'Child' : 'Children'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                {/* Show normal Child Addon buttons for all other cases */}
+                <AddonButtons 
+                  addons={addons}
+                  selectedAddons={selectedChildAddons}
+                  onAddonClick={handleChildAddonClick}
+                  membershipTypeValue={determinedMembershipType}
+                />
+                
+                {selectedChildAddons.length > 0 && childForms.length > 0 && (
               <div className="child-forms-container">
                 <h4>Child Information</h4>
                 <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
+                
+                {/* New Mexico clubs with Individual membership type can add unlimited children */}
+                {(selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') && 
+                 determinedMembershipType === 'I' && (
+                  <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
+                    <button 
+                      type="button" 
+                      className="add-child-button"
+                      onClick={addAnotherChildForm}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: '#4CAF50',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px'
+                      }}
+                    >
+                      Add Another Child
+                    </button>
+                    <p style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                      New Mexico clubs allow you to add any number of children with the Child Addon.
+                    </p>
+                  </div>
+                )}
                 
                 {childForms.map((child, index) => (
                   <div key={index} className="child-form" style={{ 
@@ -2136,6 +2468,8 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   </button>
                 </div>
               </div>
+            )}
+              </>
             )}
           </div>
         );

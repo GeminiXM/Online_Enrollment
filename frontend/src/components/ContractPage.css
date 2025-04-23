@@ -101,7 +101,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #e67700;  /* Orange border for emphasis */
+  border: 1px solid #ffd2a3;  /* Light Orange border for emphasis */
   width: 100%;
   box-sizing: border-box;
 }

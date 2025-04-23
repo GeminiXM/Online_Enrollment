@@ -727,7 +727,7 @@ const ContractPage = () => {
           <div className="info-row">
             <div className="info-column">
               <div className="info-label">Membership Start Date</div>
-              <div className="info-value">
+              <div className="info-value" style={{ fontWeight: "bold" }}>
                 {formData.requestedStartDate ? formatDateWithoutTimezoneShift(formData.requestedStartDate) : ''}
               </div>
             </div>
