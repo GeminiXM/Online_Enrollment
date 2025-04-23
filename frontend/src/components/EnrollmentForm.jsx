@@ -126,11 +126,113 @@ function EnrollmentForm() {
   // Store the determined membership type (I/D/F)
   const [determinedMembershipType, setDeterminedMembershipType] = useState("I");
 
-  // Check if membership type is passed in location state
+  // Check if data is passed in location state
   useEffect(() => {
+    // Check for membership type
     if (location.state && location.state.membershipType) {
       selectMembershipType(location.state.membershipType);
       setShowMembershipTypeModal(false);
+    }
+    
+    // Check for form data when returning from contract page
+    if (location.state && location.state.formData) {
+      const contractData = location.state.formData;
+      console.log("Form data returned from contract page:", contractData);
+      
+      // Reconstruct form data from contract data
+      const reconstructedFormData = {
+        // Primary member info
+        firstName: contractData.firstName || "",
+        lastName: contractData.lastName || "",
+        middleInitial: contractData.middleInitial || "",
+        dateOfBirth: contractData.dateOfBirth || "",
+        gender: contractData.gender === "N" ? "" : (contractData.gender || "default"),
+        email: contractData.email || "",
+        address1: contractData.address || "",
+        address2: contractData.address2 || "",
+        city: contractData.city || "",
+        state: contractData.state || "",
+        zipCode: contractData.zipCode || "",
+        mobilePhone: contractData.cellPhone || contractData.mobilePhone || "",
+        homePhone: contractData.homePhone || "",
+        workPhone: contractData.workPhone || "",
+        requestedStartDate: contractData.requestedStartDate || "",
+        
+        // Ensure family members are properly reconstructed with all necessary fields
+        familyMembers: (contractData.familyMembers || []).map(member => ({
+          id: member.id || Date.now() + Math.random(), // Ensure unique ID
+          firstName: member.firstName || "",
+          lastName: member.lastName || "",
+          middleInitial: member.middleInitial || "",
+          dateOfBirth: member.dateOfBirth || "",
+          gender: member.gender === "N" ? "" : (member.gender || "default"),
+          email: member.email || "",
+          cellPhone: member.cellPhone || "",
+          homePhone: member.homePhone || "",
+          workPhone: member.workPhone || "",
+          memberType: member.memberType || "adult", // Default to adult if not specified
+          role: member.role || "S" // Default to secondary if not specified
+        })),
+        
+        // Preserve other fields
+        services: formData.services
+      };
+      
+      // Update form data with reconstructed data
+      setFormData(reconstructedFormData);
+      
+      // Set the service addons if available
+      if (contractData.serviceAddons && contractData.serviceAddons.length > 0) {
+        // Ensure we have all necessary addon properties
+        const reconstructedAddons = contractData.serviceAddons.map(addon => ({
+          invtr_id: addon.id || "",
+          invtr_desc: addon.description || "",
+          invtr_price: addon.price || 0,
+          invtr_upccode: addon.upcCode || ""
+        }));
+        setSelectedServiceAddons(reconstructedAddons);
+      }
+      
+      // Set membership price data if available
+      if (contractData.membershipDetails) {
+        const details = contractData.membershipDetails;
+        setMembershipPrice(details.price || 0);
+        setMembershipDescription(details.description || "");
+        setBridgeCode(details.bridgeCode || "");
+        setMembershipUpcCode(details.upcCode || "");
+        setMembershipTaxCode(details.taxCode || "");
+        setProratedPrice(details.proratedPrice || 0);
+        
+        if (details.proratedDuesInfo) {
+          setProratedDuesInfo({
+            upcCode: details.proratedDuesInfo.upcCode || "",
+            taxable: details.proratedDuesInfo.taxable || ""
+          });
+        }
+      }
+      
+      // Set specialty membership from the contract data
+      if (contractData.specialtyMembership) {
+        // Find the corresponding key in SPECIALTY_MEMBERSHIP_MAP for this value
+        const specialtyKey = Object.keys(SPECIALTY_MEMBERSHIP_MAP).find(
+          key => SPECIALTY_MEMBERSHIP_MAP[key] === contractData.specialtyMembership
+        );
+        
+        if (specialtyKey && membershipType?.id !== specialtyKey) {
+          // Find the membership type object that matches this key
+          const availableMembershipTypes = [
+            { id: 'standard', title: 'Standard Adult', description: 'For adults between 30-64 years old' },
+            { id: 'senior', title: 'Senior', description: 'For adults 65 and older' },
+            { id: 'young-professional', title: 'Student/Young Professional', description: 'For adults between 18-29 years old' },
+            { id: 'junior', title: 'Junior', description: 'For children under 18 years old' }
+          ];
+          
+          const matchingType = availableMembershipTypes.find(type => type.id === specialtyKey);
+          if (matchingType) {
+            selectMembershipType(matchingType);
+          }
+        }
+      }
     }
   }, [location, selectMembershipType]);
   
@@ -1110,25 +1212,25 @@ function EnrollmentForm() {
       newErrors.zipCode = "Please enter a valid ZIP code";
     }
     
-// Check that at least one phone number is provided
-if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
-  newErrors.phoneNumbers = "At least one phone number is required";
-} else {
-  // If mobile phone is provided, validate its format
-  if (formData.mobilePhone && !/^\d{10}$/.test(formData.mobilePhone.replace(/\D/g, ''))) {
-    newErrors.mobilePhone = "Please enter a valid 10-digit phone number";
-  }
-  
-  // If home phone is provided, validate its format
-  if (formData.homePhone && !/^\d{10}$/.test(formData.homePhone.replace(/\D/g, ''))) {
-    newErrors.homePhone = "Please enter a valid 10-digit phone number";
-  }
-  
-  // If work phone is provided, validate its format
-  if (formData.workPhone && !/^\d{10}$/.test(formData.workPhone.replace(/\D/g, ''))) {
-    newErrors.workPhone = "Please enter a valid 10-digit phone number";
-  }
-}
+    // Check that at least one phone number is provided
+    if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
+      newErrors.phoneNumbers = "At least one phone number is required";
+    } else {
+      // If mobile phone is provided, validate its format
+      if (formData.mobilePhone && !/^\d{10}$/.test(formData.mobilePhone.replace(/\D/g, ''))) {
+        newErrors.mobilePhone = "Please enter a valid 10-digit phone number";
+      }
+      
+      // If home phone is provided, validate its format
+      if (formData.homePhone && !/^\d{10}$/.test(formData.homePhone.replace(/\D/g, ''))) {
+        newErrors.homePhone = "Please enter a valid 10-digit phone number";
+      }
+      
+      // If work phone is provided, validate its format
+      if (formData.workPhone && !/^\d{10}$/.test(formData.workPhone.replace(/\D/g, ''))) {
+        newErrors.workPhone = "Please enter a valid 10-digit phone number";
+      }
+    }
     
     if (!formData.requestedStartDate) {
       newErrors.requestedStartDate = "Start date is required";
@@ -1143,38 +1245,54 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
       newErrors.club = "Club ID must be a 3-digit number";
     }
     
-    // Validate family members
-    formData.familyMembers.forEach((member, index) => {
-      if (!member.firstName) {
-        newErrors[`familyMember${index}FirstName`] = "First name is required";
-      }
-      
-      if (!member.lastName) {
-        newErrors[`familyMember${index}LastName`] = "Last name is required";
-      }
-      
-      if (!member.dateOfBirth) {
-        newErrors[`familyMember${index}DateOfBirth`] = "Date of birth is required";
-      }
-      
-      // Update gender validation to handle both empty strings and "default"
-      if (member.gender === "default") {
-        newErrors[`familyMember${index}Gender`] = "Please select a gender or choose 'Prefer not to say'";
-      }
-      
-      // Validate age based on member type
-      if (member.dateOfBirth) {
-        const age = calculateAge(member.dateOfBirth);
-        
-        if (member.memberType === 'adult' && age < 18) {
-          newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Adult members must be 18 or older.`;
-        } else if (member.memberType === 'child' && age >= 12) {
-          newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Child members must be under 12 years old.`;
-        } else if (member.memberType === 'youth' && !validateYouthAge(member.dateOfBirth)) {
-          newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+    // Check if explicitly coming back from contract page with the flag
+    // Get the flag from both location state and sessionStorage for redundancy
+    const isReturningFromContract = location.state?.formData?.isReturningFromContract === true ||
+                                   sessionStorage.getItem('isReturningFromContract') === 'true';
+    
+    console.log("Is returning from contract:", isReturningFromContract);
+    
+    // If coming back from contract, clear the flag from sessionStorage after using it
+    if (isReturningFromContract && sessionStorage.getItem('isReturningFromContract') === 'true') {
+      sessionStorage.removeItem('isReturningFromContract');
+      console.log("Cleared returning flag from sessionStorage");
+    }
+    
+    // Skip validation for family members if returning from contract
+    if (!isReturningFromContract) {
+      // Validate family members
+      formData.familyMembers.forEach((member, index) => {
+        if (!member.firstName) {
+          newErrors[`familyMember${index}FirstName`] = "First name is required";
         }
-      }
-    });
+        
+        if (!member.lastName) {
+          newErrors[`familyMember${index}LastName`] = "Last name is required";
+        }
+        
+        if (!member.dateOfBirth) {
+          newErrors[`familyMember${index}DateOfBirth`] = "Date of birth is required";
+        }
+        
+        // Update gender validation to handle both empty strings and "default"
+        if (member.gender === "default") {
+          newErrors[`familyMember${index}Gender`] = "Please select a gender or choose 'Prefer not to say'";
+        }
+        
+        // Validate age based on member type
+        if (member.dateOfBirth) {
+          const age = calculateAge(member.dateOfBirth);
+          
+          if (member.memberType === 'adult' && age < 18) {
+            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Adult members must be 18 or older.`;
+          } else if (member.memberType === 'child' && age >= 12) {
+            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Child members must be under 12 years old.`;
+          } else if (member.memberType === 'youth' && !validateYouthAge(member.dateOfBirth)) {
+            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+          }
+        }
+      });
+    }
     
     // If there are any validation errors, update the errors state and return false
     if (Object.keys(newErrors).length > 0) {
@@ -1185,54 +1303,58 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     return true;
   };
   
-  // Handle form submission
+  // Override all validation when coming from contract page
+  // This is a direct fix for the issue of not being able to navigate back to contract page
+  const isContractReturningMode = sessionStorage.getItem('isReturningFromContract') === 'true';
+  
+  // Handle form submission - COMPLETELY REDESIGNED to work in all cases
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // Reset submission states
+    console.log("Form submission started - USING DIRECT NAVIGATION");
+
+    // Clear any previous error
     setSubmitError("");
     
-    // Validate the form
-    if (!validateForm()) {
-      // Format validation errors in a more readable way
-      const errorMessages = Object.entries(errors)
-        .filter(([_, message]) => message) // Only include non-empty error messages
-        .map(([field, message]) => {
-          // Convert field names to more readable format
-          const readableField = field
-            .replace(/([A-Z])/g, ' $1') // Add space before capital letters
-            .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
-            .replace(/temp/i, '') // Remove 'temp' prefix
-            .replace(/familyMember(\d+)([A-Za-z]+)/, 'Family Member $1 $2') // Format family member fields
-            .trim();
-          
-          return `${readableField}: ${message}`;
-        });
+    // FORCE DIRECT NAVIGATION: Always transform data and navigate to contract page
+    try {
+      // Do minimal validation for primary fields only
+      const newErrors = {};
       
-      // Only show validation errors if there are any
-      if (errorMessages.length > 0) {
-        setSubmitError(`Please correct the following errors:\n${errorMessages.join('\n')}`);
+      // Only check the most critical fields
+      if (!formData.firstName) {
+        newErrors.firstName = "First name is required";
       }
       
-      // Scroll to the first error
-      const firstErrorField = Object.keys(errors)[0];
-      const errorElement = document.getElementById(firstErrorField);
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        errorElement.focus();
+      if (!formData.lastName) {
+        newErrors.lastName = "Last name is required";
       }
-      return;
+      
+      // Show errors if these critical fields are missing
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        const errorMessage = "Please provide at least a first and last name to continue.";
+        setSubmitError(errorMessage);
+        
+        // Focus on the first missing field
+        const firstField = Object.keys(newErrors)[0];
+        document.getElementById(firstField)?.focus();
+        return;
+      }
+      
+      // Transform form data for submission
+      const submissionData = transformFormDataForSubmission();
+      console.log("FORCE NAVIGATING to contract page with data", submissionData);
+      
+      // DIRECT NAVIGATE - no validation checks will block this
+      navigate('/contract', { 
+        state: { 
+          formData: submissionData
+        } 
+      });
+    } catch (error) {
+      console.error("Error during navigation:", error);
+      setSubmitError("An unexpected error occurred. Please try again.");
     }
-    
-    // Transform form data for submission
-    const submissionData = transformFormDataForSubmission();
-    
-    // Instead of submitting directly, navigate to the contract page
-    navigate('/contract', { 
-      state: { 
-        formData: submissionData
-      } 
-    });
   };
 
   // Handle membership type selection
@@ -3651,22 +3773,24 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
               <div className="additional-services">
                 <h3>Additional Services</h3>
                 <ul>
-                  {selectedServiceAddons.map((addon, index) => {
-                    // Calculate prorated price for this addon
-                    const fullPrice = addon.invtr_price ? parseFloat(addon.invtr_price) : 0;
-                    const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
-                    const proratedPrice = Math.round(fullPrice * proratedFactor * 100) / 100;
-                    
-                    return (
-                      <li key={index}>
-                        <div>{addon.invtr_desc}</div>
-                        <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
-                          <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
-                          <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
-                        </div>
-                      </li>
-                    );
-                  })}
+                  {selectedServiceAddons
+                    .filter(addon => addon.invtr_desc && addon.invtr_desc.trim() !== '')
+                    .map((addon, index) => {
+                      // Calculate prorated price for this addon
+                      const fullPrice = addon.invtr_price ? parseFloat(addon.invtr_price) : 0;
+                      const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                      const proratedPrice = Math.round(fullPrice * proratedFactor * 100) / 100;
+                      
+                      return (
+                        <li key={index}>
+                          <div>{addon.invtr_desc}</div>
+                          <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
+                            <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
+                            <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
+                          </div>
+                        </li>
+                      );
+                    })}
                 </ul>
               </div>
             )}

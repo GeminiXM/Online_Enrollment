@@ -212,7 +212,7 @@ const ContractPage = () => {
       // Extract add-ons from serviceAddons
       const serviceAddOns = data.serviceAddons?.map(addon => addon.description) || [];
       
-  // Process child programs and add-ons
+      // Process child programs and add-ons
   let additionalServiceDetails = [];
   let childPrograms = '';
   let childProgramsMonthly = '';
@@ -222,12 +222,15 @@ const ContractPage = () => {
     // Check if club is in New Mexico
     const isNewMexicoClub = data.club?.toString().includes('NM') || false;
     
-    // Map all service addons to additionalServiceDetails
-    additionalServiceDetails = data.serviceAddons.map(addon => ({
-      name: addon.description,
-      dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
-      monthly: addon.price ? addon.price.toFixed(2) : '0.00'
-    }));
+    // Map only valid service addons to additionalServiceDetails
+    // Filter out any service addons without a description or with empty description
+    additionalServiceDetails = data.serviceAddons
+      .filter(addon => addon.description && addon.description.trim() !== '')
+      .map(addon => ({
+        name: addon.description,
+        dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
+        monthly: addon.price ? addon.price.toFixed(2) : '0.00'
+      }));
     
     // For Child Programs section, only include CAC child programs (Colorado only)
     // Exclude "Unlimited" options (2020) which should only appear in Additional Services
@@ -840,7 +843,49 @@ const ContractPage = () => {
         <button 
           type="button" 
           className="secondary-button"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            // Store a flag in sessionStorage to indicate we're returning from the contract page
+            sessionStorage.setItem('isReturningFromContract', 'true');
+            
+            // Create a complete copy of all data to pass back to enrollment form
+            const completeFormData = {
+              ...formData,
+              // Add a specific flag to indicate we're returning from the contract page
+              isReturningFromContract: true,
+              // Original family members with all details
+              familyMembers: formData.familyMembers && formData.familyMembers.map(member => ({
+                id: member.id || Date.now() + Math.random(),
+                firstName: member.firstName || (member.name ? member.name.split(' ')[0] : ''),
+                lastName: member.lastName || (member.name ? member.name.split(' ').slice(1).join(' ') : ''),
+                middleInitial: member.middleInitial || '',
+                dateOfBirth: member.dateOfBirth || '',
+                gender: member.gender || '',
+                email: member.email || '',
+                cellPhone: member.cellPhone || member.mobilePhone || '',
+                homePhone: member.homePhone || '',
+                workPhone: member.workPhone || '',
+                memberType: member.memberType || (member.type === 'Adult' ? 'adult' : 
+                                                 member.type === 'Child' ? 'child' : 
+                                                 member.type === 'Youth' ? 'youth' : 'adult'),
+                role: member.role || 'S',
+                // Keep any other properties that might be there
+                ...member
+              })),
+              // Make sure service addons are properly formatted
+              serviceAddons: formData.serviceAddons?.map(addon => ({
+                invtr_id: addon.id || '',
+                invtr_desc: addon.description || addon.name || '',
+                invtr_price: typeof addon.price === 'number' ? addon.price : 
+                             (addon.monthly ? parseFloat(addon.monthly) : 0),
+                invtr_upccode: addon.upcCode || '',
+                // Preserve all original properties
+                ...addon
+              })) || [],
+              // Preserve any additional service details
+              additionalServicesDetails: formData.additionalServicesDetails || []
+            };
+            navigate('/enrollment', { state: { formData: completeFormData } });
+          }}
         >
           Back
         </button>
