@@ -25,8 +25,7 @@ const SignatureSelector = ({
     ? name.split(' ').map(part => part.charAt(0)).join('') 
     : name;
   
-  // For debugging
-  console.log(`Current font: ${SIGNATURE_FONTS[selectedFontIndex].name}, Index: ${selectedFontIndex}`);
+  // Font determined by selectedFontIndex
   
   // Auto-confirm for initials
   useEffect(() => {
@@ -49,22 +48,44 @@ const SignatureSelector = ({
     }
   }, [forcedFont]);
 
+  // Use a ref to keep track of the previous value to avoid infinite updates
+  const prevValueRef = React.useRef(null);
+  
   useEffect(() => {
+    // Create the current value object
+    let currentValue;
     if (confirmed || type === 'initials') {
-      // For initials, always pass value even without confirmation
-      // For signature, only pass when confirmed
-      onChange(
-        {
-          text: displayText,
-          font: SIGNATURE_FONTS[selectedFontIndex].font
-        }, 
-        SIGNATURE_FONTS[selectedFontIndex]
-      );
-    } else if (type === 'signature' && !confirmed) {
-      // Clear the signature if not confirmed and it's a signature
-      onChange('');
+      currentValue = {
+        text: displayText,
+        font: SIGNATURE_FONTS[selectedFontIndex].font
+      };
+    } else {
+      currentValue = '';
     }
-  }, [confirmed, selectedFontIndex, displayText, onChange, type]);
+    
+    // Only call onChange if the value has actually changed
+    const prevValue = prevValueRef.current;
+    const valueChanged = 
+      prevValue === null || // First render, always trigger onChange
+      typeof prevValue !== typeof currentValue ||
+      (typeof currentValue === 'object' && prevValue && 
+       (prevValue.text !== currentValue.text || prevValue.font !== currentValue.font)) ||
+      (typeof currentValue === 'string' && prevValue !== currentValue);
+    
+    if (valueChanged) {
+      // Update the ref with current value
+      prevValueRef.current = currentValue;
+      
+      if (confirmed || type === 'initials') {
+        // For initials, always pass value even without confirmation
+        // For signature, only pass when confirmed
+        onChange(currentValue, SIGNATURE_FONTS[selectedFontIndex]);
+      } else if (type === 'signature' && !confirmed) {
+        // Clear the signature if not confirmed and it's a signature
+        onChange('');
+      }
+    }
+  }, [confirmed, selectedFontIndex, displayText, type]);
   
   // Force reload of fonts to ensure they display properly
   useEffect(() => {
@@ -82,8 +103,7 @@ const SignatureSelector = ({
       document.head.appendChild(linkElement);
     });
     
-    // Log current font for debugging
-    console.log(`Setting font to: ${SIGNATURE_FONTS[selectedFontIndex].name}`);
+    // Load fonts for display
     
     // Return cleanup function
     return () => {
@@ -95,7 +115,6 @@ const SignatureSelector = ({
     setConfirmed(false);
     setSelectedFontIndex(prev => {
       const newIndex = prev === 0 ? SIGNATURE_FONTS.length - 1 : prev - 1;
-      console.log(`Changed font from ${SIGNATURE_FONTS[prev].name} to ${SIGNATURE_FONTS[newIndex].name}`);
       return newIndex;
     });
   };
@@ -104,7 +123,6 @@ const SignatureSelector = ({
     setConfirmed(false);
     setSelectedFontIndex(prev => {
       const newIndex = prev === SIGNATURE_FONTS.length - 1 ? 0 : prev + 1;
-      console.log(`Changed font from ${SIGNATURE_FONTS[prev].name} to ${SIGNATURE_FONTS[newIndex].name}`);
       return newIndex;
     });
   };

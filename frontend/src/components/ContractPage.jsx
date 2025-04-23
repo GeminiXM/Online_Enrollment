@@ -136,6 +136,37 @@ const ContractPage = () => {
     // If initials are set, return them, otherwise return empty string
     return signatureData.initials?.text || '';
   };
+  
+  // Calculate date 14 days from requested start date
+  const calculateCancellationDate = (startDateString) => {
+    if (!startDateString) return '';
+    
+    // Parse the date string - avoid timezone shifts by handling parts manually
+    const parts = startDateString.split(/[-T]/);
+    if (parts.length >= 3) {
+      const year = parseInt(parts[0], 10);
+      // JavaScript months are 0-based, so subtract 1 from the month
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      
+      // Create date with specific year, month, day in local timezone
+      const startDate = new Date(year, month, day);
+      
+      // Add 14 days to the start date
+      const cancellationDate = new Date(startDate);
+      cancellationDate.setDate(startDate.getDate() + 14);
+      
+      // Format to mm/dd/yyyy
+      return cancellationDate.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    }
+    
+    // Fallback for unexpected format
+    return startDateString;
+  };
 
   // Get enrollment data passed from previous page
   useEffect(() => {
@@ -290,7 +321,7 @@ const ContractPage = () => {
   }, [location, navigate]);
 
   const handleSignatureChange = (type, value, fontInfo) => {
-    console.log(`Signature change for ${type}:`, value);
+    // Update signature or initials based on the type
     
     if (type === 'signature') {
       // For signature, update the value and store the font info
@@ -436,7 +467,9 @@ const ContractPage = () => {
       signatureDate,
       handleSignatureClick,
       errors,  // Pass errors to handle error display
-      signatureData  // Pass the full signature data object
+      signatureData,  // Pass the full signature data object
+      formData,       // Pass the formData
+      calculateCancellationDate // Pass the function to calculate cancellation date
     };
     
     if (isNewMexicoClub) {
@@ -826,7 +859,9 @@ const DenverContract = ({
   signatureDate,
   handleSignatureClick,
   errors,
-  signatureData
+  signatureData,
+  formData,
+  calculateCancellationDate
 }) => {
   return (
     <>
@@ -834,7 +869,7 @@ const DenverContract = ({
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
           <p className="cancellation-text">COLORADO ATHLETIC CLUB (CAC) MONEY BACK GUARANTEE:</p>
-          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF 04/28/2025, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
           <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of Colorado Athletic Club. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>
@@ -1019,7 +1054,9 @@ const NewMexicoContract = ({
   signatureDate,
   handleSignatureClick,
   errors,
-  signatureData
+  signatureData,
+  formData,
+  calculateCancellationDate
 }) => {
   return (
     <>
@@ -1027,7 +1064,7 @@ const NewMexicoContract = ({
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
           <p className="cancellation-text">NEW MEXICO SPORTS AND WELLNESS (NMSW) MONEY BACK GUARANTEE:</p>
-          <p>NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF 04/29/2025, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p>NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
           <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of New Mexico Sports & Wellness. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>

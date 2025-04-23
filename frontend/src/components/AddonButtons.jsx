@@ -2,13 +2,28 @@
 // This component displays a grid of addon buttons for child memberships
 
 import React from 'react';
+import { useClub } from '../context/ClubContext';
 import './EnrollmentForm.css';
 
 const AddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
+  // Get the selected club to check if it's a New Mexico club
+  const { selectedClub } = useClub();
+  const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
+
   // Filter addons to only show those that include "Child" in the description
-  const childAddons = addons?.filter(addon => 
-    addon.invtr_desc && addon.invtr_desc.includes("Child")
-  ) || [];
+  // For New Mexico clubs, exclude addons that include "Unlimited"
+  const childAddons = addons?.filter(addon => {
+    if (!addon.invtr_desc || !addon.invtr_desc.includes("Child")) {
+      return false;
+    }
+    
+    // For New Mexico clubs, exclude "Unlimited" addons as they'll be shown in the Additional Services tab
+    if (isNewMexicoClub && addon.invtr_desc.includes("Unlimited")) {
+      return false;
+    }
+    
+    return true;
+  }) || [];
 
   // If no child addons are available, show a message
   if (childAddons.length === 0) {
