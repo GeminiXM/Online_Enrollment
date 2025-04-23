@@ -749,6 +749,9 @@ function EnrollmentForm() {
                 dateOfBirth: ageError
               }));
               
+              // Store the error message in the window object for the modal to access
+              window.dateOfBirthError = ageError;
+              
               // Only show membership type modal if we have a complete date and membership type
               if (membershipType) {
                 setShowMembershipTypeModal(true);

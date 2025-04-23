@@ -32,6 +32,8 @@ const membershipTypes = [
 
 function MembershipTypeModal({ isOpen, onClose, onSelectMembershipType }) {
   const { selectMembershipType } = useMembership();
+  // Get the dateOfBirth error message from EnrollmentForm
+  const dateOfBirthError = window.dateOfBirthError || null;
 
   if (!isOpen) return null;
 
@@ -52,9 +54,16 @@ function MembershipTypeModal({ isOpen, onClose, onSelectMembershipType }) {
           &times;
         </button>
         <h2>Select Your Membership Type</h2>
-        <p className="modal-description">
-          Please select the membership type that best applies to you:
-        </p>
+        {dateOfBirthError ? (
+          <div className="modal-error">
+            {dateOfBirthError}<br/>
+            Please select the membership type that better applies to your age:
+          </div>
+        ) : (
+          <p className="modal-description">
+            Please select the membership type that best applies to you:
+          </p>
+        )}
         
         <div className="membership-type-options">
           {membershipTypes.map((type) => (
@@ -74,4 +83,4 @@ function MembershipTypeModal({ isOpen, onClose, onSelectMembershipType }) {
   );
 }
 
-export default MembershipTypeModal; 
+export default MembershipTypeModal;
