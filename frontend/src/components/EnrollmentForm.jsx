@@ -1215,7 +1215,25 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
 
   // Handle membership type selection
   const handleMembershipTypeSelect = (type) => {
+    selectMembershipType(type);
     setShowMembershipTypeModal(false);
+    
+    // Re-validate date of birth with the newly selected membership type
+    if (formData.dateOfBirth) {
+      const ageError = validateAgeForMembershipType(formData.dateOfBirth, type);
+      if (ageError) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          dateOfBirth: ageError
+        }));
+      } else {
+        // Clear the error if validation passes
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          dateOfBirth: null
+        }));
+      }
+    }
   };
 
 
