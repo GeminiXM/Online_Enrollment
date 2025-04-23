@@ -315,11 +315,13 @@ function EnrollmentForm() {
     } else if (adultsCount === 2 && !isNewMexicoClub) {
       // Two adults (with or without children) in Denver = Dual (D)
       return "D";
-    } else if (adultsCount >= 2 && isNewMexicoClub) {
-      // Two adults with children in New Mexico = Family (F)
+    } else if (adultsCount >= 2 && childrenUnder12Count > 0 && isNewMexicoClub) {
+      // Two adults WITH CHILDREN in New Mexico = Family (F)
+      // Modified to check that there are actually children added
       return "F";
     } else if (adultsCount === 2) {
-      // Two adults = Dual (D)
+      // Two adults (without children) = Dual (D)
+      // This will now work for NM clubs too when no children are actually added
       return "D";
     } else if (adultsCount === 1) {
       // One adult = Individual (I)
@@ -1270,6 +1272,19 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
         return [];
       }
       
+      // First check if we need to reset incomplete child forms
+      // This prevents incorrect Family membership type when no children are actually added
+      if (childForms.length > 0) {
+        // Check if any childForm data has been entered 
+        const hasEnteredChildData = childForms.some(form => 
+          form.firstName || form.lastName || form.dateOfBirth || form.gender);
+          
+        if (!hasEnteredChildData) {
+          // If no data was entered, reset the child forms
+          setChildForms([]);
+        }
+      }
+      
       // For New Mexico clubs, start with just 1 child form as they allow unlimited children
       if (isNewMexicoClub && determinedMembershipType === 'I') {
         const newChildForms = [{
@@ -1612,7 +1627,7 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
     });
   };
 
- // Update the tab change handler to clear errors when switching tabs
+  // Update the tab change handler to clear errors when switching tabs
   const handleTabChange = (tab) => {
     // Clear any submission errors
     setSubmitError("");
@@ -1640,6 +1655,30 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
         delete newErrors.tempMobile;
         delete newErrors.tempHome;
         delete newErrors.tempEmail;
+        
+        // Only clear child forms and addons when leaving the child tab
+        // Don't clear when switching TO the child tab
+        if (tab !== 'child') {
+          // Check if leaving child tab without adding any children
+          // If there are childForms but none have been added to familyMembers,
+          // clear the selectedChildAddons to prevent incorrect Family dues
+          if (childForms.length > 0) {
+            // Check if any children from the current forms have been added
+            const childrenAdded = childForms.some(childForm => 
+              formData.familyMembers.some(member => 
+                member.memberType === 'child' && 
+                member.firstName === childForm.firstName && 
+                member.lastName === childForm.lastName
+              )
+            );
+            
+            // If no children from current forms were added, clear the child addons
+            if (!childrenAdded) {
+              setSelectedChildAddons([]);
+              setChildForms([]);
+            }
+          }
+        }
       } else if (activeTab === 'youth') {
         delete newErrors.tempFirstName;
         delete newErrors.tempLastName;
@@ -2007,9 +2046,9 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
             <h3>Add Child Family Member</h3>
             <p>Add a child family member (0-11 years) to your membership.</p>
             
-            {/* For New Mexico Family memberships, show direct child entry without requiring addon */}
+            {/* For New Mexico Family or Dual memberships, show direct child entry without requiring addon */}
             {(selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') && 
-             determinedMembershipType === 'F' ? (
+             (determinedMembershipType === 'F' || determinedMembershipType === 'D') ? (
               <div className="family-child-entry">
                 <p className="membership-message" style={{ 
                   backgroundColor: '#e6f7ff', 
@@ -2017,41 +2056,41 @@ if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
                   borderRadius: '6px',
                   marginBottom: '20px'
                 }}>
-                  Child memberships are included with your Family membership at no additional cost.
+                  Child memberships are included with your {determinedMembershipType === 'F' ? 'Family' : 'Dual'} membership at no additional cost.
                 </p>
                 
-                {childForms.length === 0 && (
-                  <button 
-                    type="button" 
-                    className="add-child-button"
-                    onClick={() => {
-                      // Add a single empty child form for Family memberships
-                      setChildForms([{
-                        firstName: "",
-                        lastName: "",
-                        dateOfBirth: "",
-                        gender: "",
-                        mobile: "",
-                        home: "",
-                        email: "",
-                        emergencyContactName: "",
-                        emergencyContactPhone: "",
-                      }]);
-                    }}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#4CAF50',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      marginBottom: '20px'
-                    }}
-                  >
-                    Add Child
-                  </button>
-                )}
+                {/* Always show the Add Child button for Family and Dual memberships */}
+                <button 
+                  type="button" 
+                  className="add-child-button"
+                  onClick={() => {
+                    // Add a single empty child form
+                    setChildForms([{
+                      firstName: "",
+                      lastName: "",
+                      dateOfBirth: "",
+                      gender: "",
+                      mobile: "",
+                      home: "",
+                      email: "",
+                      emergencyContactName: "",
+                      emergencyContactPhone: "",
+                    }]);
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#4CAF50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    marginBottom: '20px',
+                    display: childForms.length === 0 ? 'block' : 'none'
+                  }}
+                >
+                  Add Child
+                </button>
                 
                 {childForms.length > 0 && (
                   <div className="child-forms-container">
