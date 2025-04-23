@@ -1,97 +1,125 @@
 /* frontend/src/components/EnrollmentConfirmation.css */
 .enrollment-confirmation {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 80vh;
   padding: 2rem;
-  background-color: #f9fafb;
+  background-color: #f8f9fa;
 }
 
 .confirmation-container {
   max-width: 800px;
   width: 100%;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 2rem;
-  text-align: center;
 }
 
 .confirmation-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 2rem;
-}
-
-.confirmation-header h1 {
-  color: #1a56db;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  position: relative;
 }
 
 .success-icon {
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  width: 64px;
-  height: 64px;
-  background-color: #10b981;
-  color: white;
+  position: absolute;
+  right: 1rem;
+  background-color: #28a745;
   border-radius: 50%;
-  margin: 0 auto;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .success-icon svg {
-  width: 36px;
-  height: 36px;
+  fill: white;
+  width: 30px;
+  height: 30px;
 }
 
 .confirmation-message {
+  text-align: center;
   margin-bottom: 2rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 2rem;
 }
 
 .confirmation-message h2 {
-  color: #111827;
+  color: #0056b3;
   margin-bottom: 1rem;
-  font-size: 1.5rem;
-}
-
-.confirmation-message p {
-  color: #4b5563;
-  font-size: 1.125rem;
 }
 
 .confirmation-details {
   margin-bottom: 2rem;
-  text-align: left;
-  background-color: #f3f4f6;
-  padding: 1.5rem;
-  border-radius: 6px;
 }
 
 .confirmation-details h3 {
-  color: #111827;
+  color: #333;
   margin-bottom: 1rem;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
 }
 
 .confirmation-details ul {
-  list-style-type: none;
-  padding-left: 0;
+  padding-left: 1.5rem;
 }
 
 .confirmation-details li {
-  color: #4b5563;
-  margin-bottom: 0.75rem;
-  padding-left: 1.5rem;
-  position: relative;
+  margin-bottom: 0.5rem;
+  color: #555;
 }
 
-.confirmation-details li:before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #10b981;
-  font-weight: bold;
+/* Payment Confirmation Styles */
+.payment-confirmation {
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: #f9f9f9;
+}
+
+.payment-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed #e0e0e0;
+}
+
+.receipt-row:last-child {
+  border-bottom: none;
+}
+
+.receipt-label {
+  font-weight: 600;
+  color: #555;
+}
+
+.receipt-value {
+  color: #333;
+}
+
+.receipt-value.success {
+  color: #28a745;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.receipt-value.success svg {
+  color: #28a745;
 }
 
 .confirmation-actions {
@@ -102,12 +130,31 @@
 }
 
 .btn {
-  display: inline-block;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
+  border-radius: 5px;
+  font-weight: bold;
   text-decoration: none;
-  transition: all 0.2s;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #003d82;
+}
+
+.btn-secondary {
+  background-color: #f8f9fa;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.btn-secondary:hover {
+  background-color: #e2e6ea;
 }
 
 .btn-primary {
@@ -137,4 +184,4 @@
     width: 100%;
     text-align: center;
   }
-} 
+}

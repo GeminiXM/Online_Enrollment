@@ -9,6 +9,7 @@ import logger from "./utils/logger.js";
 // import authRoutes from './routes/auth.js';
 // import userRoutes from './routes/users.js';
 import enrollmentRoutes from "./routes/enrollmentRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 
 // Configure dotenv
 dotenv.config();
@@ -52,6 +53,7 @@ app.get("/api/health", (req, res) => {
 // app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 app.use("/api/enrollment", enrollmentRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

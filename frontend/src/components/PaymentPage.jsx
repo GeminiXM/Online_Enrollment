@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
+import PaymentProcessorDemo from './PaymentProcessorDemo';
 import './PaymentPage.css';
 
 const PaymentPage = () => {
@@ -26,8 +27,12 @@ const PaymentPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
+  const [processorName, setProcessorName] = useState('');
+  const [processorInfo, setProcessorInfo] = useState(null);
+  const [showProcessorDemo, setShowProcessorDemo] = useState(false);
+  const [paymentResponse, setPaymentResponse] = useState(null);
   
-  // Get enrollment data passed from previous page
+  // Get enrollment data and fetch payment processor info
   useEffect(() => {
     if (location.state) {
       const { formData, signatureData } = location.state;
@@ -50,6 +55,118 @@ const PaymentPage = () => {
             }));
           }
         }
+        
+        // Fetch the credit card processor for the club
+        const fetchProcessor = async () => {
+          try {
+            const clubId = formData.club || selectedClub?.id || "001";
+            console.log('Fetching CC processor for club:', clubId);
+            
+            // Set a default processor in case API calls fail
+            setProcessorName('CONVERGE'); // Default processor
+            
+            // First, get the processor name
+            const result = await api.getCCProcessorName(clubId);
+            console.log('CC processor API result:', result);
+            
+            if (result && result.success && result.processorName) {
+              // Trim any whitespace from the processor name
+              const processorToUse = result.processorName.trim();
+              console.log('Cleaned processor name:', processorToUse);
+              
+              // Update state with the cleaned processor name
+              setProcessorName(processorToUse);
+              
+              // Then fetch the appropriate processor info
+              if (processorToUse === 'FLUIDPAY') {
+                try {
+                  console.log('Fetching FluidPay info for club:', clubId);
+                  const fluidPayResult = await api.getFluidPayInfo(clubId);
+                  console.log('FluidPay API result:', fluidPayResult);
+                  
+                  if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
+                    console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
+                    setProcessorInfo(fluidPayResult.fluidPayInfo);
+                  } else {
+                    // Set fallback info for FluidPay
+                    setProcessorInfo({
+                      merchant_id: 'Demo FluidPay Merchant',
+                      fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
+                      fluidpay_api_key: '✓ Configured'
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error fetching FluidPay info:', error);
+                  setProcessorInfo({
+                    merchant_id: 'Demo FluidPay Merchant (Fallback)',
+                    fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
+                    fluidpay_api_key: '✓ Configured'
+                  });
+                }
+              } else {
+                // Use CONVERGE as default if not FluidPay
+                try {
+                  console.log('Fetching Converge info for club:', clubId);
+                  const convergeResult = await api.getConvergeInfo(clubId);
+                  console.log('Converge API result:', convergeResult);
+                  
+                  if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
+                    console.log('Setting Converge processor info:', convergeResult.convergeInfo);
+                    setProcessorInfo(convergeResult.convergeInfo);
+                  } else {
+                    // Set fallback info for Converge
+                    setProcessorInfo({
+                      merchant_id: 'Demo Converge Merchant',
+                      converge_user_id: 'webuser',
+                      converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
+                    });
+                  }
+                } catch (error) {
+                  console.error('Error fetching Converge info:', error);
+                  setProcessorInfo({
+                    merchant_id: 'Demo Converge Merchant (Fallback)',
+                    converge_user_id: 'webuser',
+                    converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
+                  });
+                }
+              }
+            } else {
+              // No processor name from API, use default
+              console.log('No processor name returned, using default CONVERGE');
+              
+              try {
+                const convergeResult = await api.getConvergeInfo(clubId);
+                if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
+                  setProcessorInfo(convergeResult.convergeInfo);
+                } else {
+                  setProcessorInfo({
+                    merchant_id: 'Demo Converge Merchant (Default)',
+                    converge_user_id: 'webuser',
+                    converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
+                  });
+                }
+              } catch (error) {
+                console.error('Error fetching default Converge info:', error);
+                setProcessorInfo({
+                  merchant_id: 'Demo Converge Merchant (Fallback)',
+                  converge_user_id: 'webuser',
+                  converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error in fetchProcessor:', error);
+            // Ensure we at least have a processor name and info
+            setProcessorName('CONVERGE');
+            setProcessorInfo({
+              merchant_id: 'Demo Converge Merchant (Error Fallback)',
+              converge_user_id: 'webuser',
+              converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
+            });
+          }
+        };
+        
+        fetchProcessor();
       }
       
       if (signatureData) {
@@ -59,7 +176,7 @@ const PaymentPage = () => {
       // If no data, go back to enrollment form
       navigate('/enrollment');
     }
-  }, [location, navigate]);
+  }, [location, navigate, selectedClub]);
   
   // Handle payment form input changes
   const handleInputChange = (e) => {
@@ -173,10 +290,8 @@ const PaymentPage = () => {
     return formData.membershipDetails.price || 0;
   };
   
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  // Process payment and show demo
+  const processPayment = async () => {
     // Reset submission state
     setSubmitError('');
     
@@ -188,19 +303,61 @@ const PaymentPage = () => {
     setIsSubmitting(true);
     
     try {
-      // For testing purposes, we're using the original enrollment submission endpoint
-      // In a real implementation, this would include payment processing
+      // Process the payment using the demo endpoint
+      const paymentData = {
+        clubId: formData.club || selectedClub?.id || "001",
+        cardNumber: paymentFormData.cardNumber.replace(/\s/g, ''),
+        expiryDate: paymentFormData.expiryDate,
+        cvv: paymentFormData.cvv,
+        nameOnCard: paymentFormData.nameOnCard,
+        billingZipCode: paymentFormData.billingZipCode,
+        amount: formData.membershipDetails?.price || "50.00",
+        membershipDetails: formData.membershipDetails,
+        processorName: processorName
+      };
       
+      // Show payment processor demo
+      setShowProcessorDemo(true);
+      
+      // Process payment
+      const result = await api.processPaymentDemo(paymentData);
+      
+      if (result.success) {
+        setPaymentResponse(result.paymentResponse);
+        
+        // Delay to allow user to see the result
+        setTimeout(() => {
+          finishEnrollment(result.paymentResponse);
+        }, 3000);
+      } else {
+        throw new Error(result.message || 'Payment processing failed');
+      }
+    } catch (error) {
+      console.error('Payment processing error:', error);
+      setSubmitError(error.message || 'An error occurred while processing your payment. Please try again.');
+      setShowProcessorDemo(false);
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Complete enrollment after payment
+  const finishEnrollment = async (paymentResult) => {
+    try {
       // Combine all data for submission
       const submissionData = {
         ...formData,
         // Add signature data
         signatureData: signatureData,
-        // Add payment data (this would be handled securely in a real implementation)
+        // Add payment data
         paymentInfo: {
           ...paymentFormData,
           // Remove spaces from card number
           cardNumber: paymentFormData.cardNumber.replace(/\s/g, ''),
+          // Add payment response
+          processorName: processorName,
+          transactionId: paymentResult.transaction_id || paymentResult.ssl_txn_id,
+          authorizationCode: paymentResult.authorization_code || paymentResult.ssl_approval_code,
+          last4: paymentResult.card_info?.last_four || paymentResult.ssl_card_number?.slice(-4)
         }
       };
       
@@ -214,31 +371,21 @@ const PaymentPage = () => {
         state: { 
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`
+          successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
+          paymentResponse: paymentResult
         } 
       });
-      
     } catch (error) {
       console.error('Enrollment submission error:', error);
-      
-      if (error.response) {
-        console.error('Error response status:', error.response.status);
-        console.error('Error response data:', error.response.data);
-        
-        // Format user-friendly error message based on server response
-        if (error.response.data?.missingFields) {
-          setSubmitError(`Missing required fields: ${error.response.data.missingFields.join(', ')}`);
-        } else if (error.response.data?.error) {
-          setSubmitError(error.response.data.error);
-        } else {
-          setSubmitError(error.response.data?.message || 'An error occurred while processing your payment. Please try again.');
-        }
-      } else {
-        setSubmitError('Network error. Please check your internet connection and try again.');
-      }
-    } finally {
+      setSubmitError('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
       setIsSubmitting(false);
     }
+  };
+  
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await processPayment();
   };
   
   if (!formData) {
@@ -252,6 +399,58 @@ const PaymentPage = () => {
       <div className="payment-layout">
         <div className="payment-summary">
           <h2>Payment Summary</h2>
+          
+          {processorName && (
+            <div className="processor-info">
+              <h3>Payment Processor Information</h3>
+              <div className="processor-details">
+                <p className="processor-name">
+                  <span className="detail-label">Processor:</span> 
+                  <span className="detail-value">{processorName === 'FLUIDPAY' ? 'FluidPay' : 'Converge (Elavon)'}</span>
+                </p>
+                
+                {processorInfo && (
+                  <div className="processor-config">
+                    {processorName === 'FLUIDPAY' ? (
+                      <>
+                        <p className="detail-item">
+                          <span className="detail-label">Merchant ID:</span>
+                          <span className="detail-value">{processorInfo.merchant_id}</span>
+                        </p>
+                        <p className="detail-item">
+                          <span className="detail-label">Base URL:</span>
+                          <span className="detail-value">{processorInfo.fluidpay_base_url ? '✓ Configured' : '⚠️ Missing'}</span>
+                        </p>
+                        <p className="detail-item">
+                          <span className="detail-label">API Key:</span>
+                          <span className="detail-value">{processorInfo.fluidpay_api_key ? '✓ Configured' : '⚠️ Missing'}</span>
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="detail-item">
+                          <span className="detail-label">Merchant ID:</span>
+                          <span className="detail-value">{processorInfo.merchant_id}</span>
+                        </p>
+                        <p className="detail-item">
+                          <span className="detail-label">User ID:</span>
+                          <span className="detail-value">{processorInfo.converge_user_id ? '✓ Configured' : '⚠️ Missing'}</span>
+                        </p>
+                        <p className="detail-item">
+                          <span className="detail-label">Process URL:</span>
+                          <span className="detail-value">{processorInfo.converge_url_process ? '✓ Configured' : '⚠️ Missing'}</span>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+                
+                {!processorInfo && (
+                  <p className="processor-warning">⚠️ Processor configuration not found for this club.</p>
+                )}
+              </div>
+            </div>
+          )}
           
           <div className="membership-summary">
             <h3>Membership Details</h3>
@@ -294,7 +493,23 @@ const PaymentPage = () => {
             </div>
           )}
           
-          <form className="payment-form" onSubmit={handleSubmit}>
+          {showProcessorDemo ? (
+            <div className="processor-demo-container">
+              <h3>Processing Payment with {processorName === 'FLUIDPAY' ? 'Fluidpay' : 'Converge'}</h3>
+              <PaymentProcessorDemo 
+                processor={processorName.toLowerCase()} 
+                paymentData={paymentFormData}
+                processorInfo={processorInfo}
+                paymentResponse={paymentResponse}
+              />
+              {submitError && (
+                <div className="error-message payment-error">
+                  {submitError}
+                </div>
+              )}
+            </div>
+          ) : (
+            <form className="payment-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="cardNumber">
                 Card Number <span className="required">*</span>
@@ -412,7 +627,8 @@ const PaymentPage = () => {
                 Your payment information is secure and encrypted
               </p>
             </div>
-          </form>
+            </form>
+          )}
         </div>
       </div>
     </div>

@@ -5,8 +5,63 @@ import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage } = location.state || {};
+  const { enrollmentData, memberName, successMessage, paymentResponse } = location.state || {};
   const { selectedClub } = useClub();
+  
+  // Format the payment timestamp
+  const formatTimestamp = () => {
+    const now = new Date();
+    return now.toLocaleString();
+  };
+
+  // Get last 4 digits of the card
+  const getLastFour = () => {
+    if (!paymentResponse) return 'XXXX';
+    
+    if (paymentResponse.processor === 'FLUIDPAY') {
+      return paymentResponse.card_info?.last_four || 'XXXX';
+    } else {
+      // Handle CONVERGE
+      const cardNumber = paymentResponse.ssl_card_number || '';
+      return cardNumber.slice(-4) || 'XXXX';
+    }
+  };
+  
+  // Get the card type
+  const getCardType = () => {
+    if (!paymentResponse) return 'Credit Card';
+    
+    if (paymentResponse.processor === 'FLUIDPAY') {
+      return paymentResponse.card_info?.card_type || 'Credit Card';
+    } else {
+      // Handle CONVERGE
+      return paymentResponse.ssl_card_type || 'Credit Card';
+    }
+  };
+  
+  // Get transaction ID
+  const getTransactionId = () => {
+    if (!paymentResponse) return '';
+    
+    if (paymentResponse.processor === 'FLUIDPAY') {
+      return paymentResponse.transaction_id || '';
+    } else {
+      // Handle CONVERGE
+      return paymentResponse.ssl_txn_id || '';
+    }
+  };
+  
+  // Get authorization code
+  const getAuthCode = () => {
+    if (!paymentResponse) return '';
+    
+    if (paymentResponse.processor === 'FLUIDPAY') {
+      return paymentResponse.authorization_code || '';
+    } else {
+      // Handle CONVERGE
+      return paymentResponse.ssl_approval_code || '';
+    }
+  };
 
   return (
     <div className="enrollment-confirmation">
@@ -26,6 +81,44 @@ function EnrollmentConfirmation() {
         </div>
 
         <div className="confirmation-details">
+          {paymentResponse && (
+            <div className="payment-confirmation">
+              <h3>Payment Information</h3>
+              <div className="payment-receipt">
+                <div className="receipt-row">
+                  <span className="receipt-label">Payment Processor:</span>
+                  <span className="receipt-value">{paymentResponse.processor || 'Credit Card Processor'}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Card:</span>
+                  <span className="receipt-value">{getCardType()} ending in {getLastFour()}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Transaction ID:</span>
+                  <span className="receipt-value">{getTransactionId()}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Authorization Code:</span>
+                  <span className="receipt-value">{getAuthCode()}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Date:</span>
+                  <span className="receipt-value">{formatTimestamp()}</span>
+                </div>
+                <div className="receipt-row">
+                  <span className="receipt-label">Status:</span>
+                  <span className="receipt-value success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    Approved
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <h3>What's Next?</h3>
           <ul>
             <li>You will receive a confirmation email with your enrollment details.</li>

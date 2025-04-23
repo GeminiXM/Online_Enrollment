@@ -35,12 +35,12 @@ api.interceptors.response.use(
   }
 );
 
-// API methods for enrollment
+// API methods for enrollment and payment
 const apiService = {
   // Base axios instance
   ...api,
 
-  // Submit enrollment form
+  // Generic post method
   post: (url, data) => api.post(url, data),
 
   // Get specialty membership bridge code
@@ -87,6 +87,56 @@ const apiService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching addons:', error);
+      throw error;
+    }
+  },
+
+  // Get credit card processor name for a club
+  getCCProcessorName: async (clubId) => {
+    try {
+      const response = await api.get('/payment/cc-processor', {
+        params: { clubId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching CC processor name:', error);
+      throw error;
+    }
+  },
+
+  // Get FluidPay payment processor information
+  getFluidPayInfo: async (clubId) => {
+    try {
+      const response = await api.get('/payment/fluidpay-info', {
+        params: { clubId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching FluidPay info:', error);
+      throw error;
+    }
+  },
+
+  // Get Converge payment processor information
+  getConvergeInfo: async (clubId) => {
+    try {
+      const response = await api.get('/payment/converge-info', {
+        params: { clubId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching Converge info:', error);
+      throw error;
+    }
+  },
+
+  // Process a demo payment
+  processPaymentDemo: async (paymentData) => {
+    try {
+      const response = await api.post('/payment/process-demo', paymentData);
+      return response.data;
+    } catch (error) {
+      console.error('Error processing demo payment:', error);
       throw error;
     }
   }

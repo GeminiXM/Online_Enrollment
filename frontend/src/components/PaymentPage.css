@@ -243,6 +243,68 @@
   color: #6c757d;
 }
 
+/* Payment Processor Information Styles */
+.processor-info {
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+}
+
+.processor-info h3 {
+  font-size: 1.1rem;
+  color: #495057;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.processor-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.processor-name {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e9ecef;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #495057;
+  display: inline-block;
+  width: 120px;
+}
+
+.detail-value {
+  font-weight: 500;
+  color: #343a40;
+}
+
+.processor-config {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.detail-item {
+  margin-bottom: 5px;
+}
+
+.processor-warning {
+  color: #dc3545;
+  padding: 10px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
 @media (max-width: 768px) {
   .payment-layout {
     flex-direction: column;
