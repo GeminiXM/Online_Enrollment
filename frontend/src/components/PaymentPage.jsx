@@ -5,6 +5,9 @@ import api from '../services/api.js';
 import PaymentProcessorDemo from './PaymentProcessorDemo';
 import './PaymentPage.css';
 
+// Import Google Fonts for signatures (same as SignatureSelector)
+import '../components/SignatureSelector.css';
+
 
 // Credit Card Logo SVGs - Real card brand logos 
 const CardLogos = {
@@ -584,12 +587,12 @@ const PaymentPage = () => {
             <h3>Agreement</h3>
             <p>You have agreed to the membership terms and conditions with your electronic signature.</p>
             {signatureData?.signature && (
-              <div className="signature-preview" style={{ 
-                fontFamily: signatureData.signature.font,
+          <div className="signature-preview" style={{ 
+                fontFamily: signatureData.selectedFont?.font || signatureData.signature?.font || 'inherit',
                 fontSize: '2rem',
                 lineHeight: '1.2'
               }}>
-                {signatureData.signature.text}
+                {signatureData.signature?.text || ''}
               </div>
             )}
           </div>
