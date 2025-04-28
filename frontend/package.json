@@ -18,7 +18,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "serve": "node src/server.js"
   },
   "eslintConfig": {
     "extends": [

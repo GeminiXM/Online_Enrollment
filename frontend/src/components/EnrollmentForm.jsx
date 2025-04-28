@@ -1320,7 +1320,7 @@ function EnrollmentForm() {
       // Do minimal validation for primary fields only
       const newErrors = {};
       
-      // Only check the most critical fields
+      // Validate all required fields
       if (!formData.firstName) {
         newErrors.firstName = "First name is required";
       }
@@ -1329,7 +1329,44 @@ function EnrollmentForm() {
         newErrors.lastName = "Last name is required";
       }
       
-      // Show errors if these critical fields are missing
+      if (!formData.dateOfBirth) {
+        newErrors.dateOfBirth = "Date of birth is required";
+      }
+      
+      if (formData.gender === "default") {
+        newErrors.gender = "Please select a gender or choose 'Prefer not to say'";
+      }
+      
+      if (!formData.email) {
+        newErrors.email = "Email is required";
+      } else if (!isValidEmail(formData.email)) {
+        newErrors.email = "Please enter a valid email address";
+      }
+      
+      if (!formData.address1) {
+        newErrors.address1 = "Address is required";
+      }
+      
+      if (!formData.city) {
+        newErrors.city = "City is required";
+      }
+      
+      if (!formData.state) {
+        newErrors.state = "State is required";
+      }
+      
+      if (!formData.zipCode) {
+        newErrors.zipCode = "ZIP code is required";
+      } else if (!isValidZipCode(formData.zipCode)) {
+        newErrors.zipCode = "Please enter a valid ZIP code";
+      }
+      
+      // Check that at least one phone number is provided
+      if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
+        newErrors.mobilePhone = "At least one phone number is required";
+      }
+      
+      // Show errors if any required fields are missing
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
         const errorMessage = "Please provide at least a first and last name to continue.";
