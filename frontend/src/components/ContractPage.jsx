@@ -213,10 +213,34 @@ const ContractPage = () => {
       const serviceAddOns = data.serviceAddons?.map(addon => addon.description) || [];
       
       // Process child programs and add-ons
-  let additionalServiceDetails = [];
+      let additionalServiceDetails = [];
   let childPrograms = '';
   let childProgramsMonthly = '';
   let childProgramsDueNow = '';
+  
+  // Calculate prorated factor (percentage of month remaining) - copied from EnrollmentForm
+  const calculateProratedFactor = (startDate) => {
+    if (!startDate) return 1; // Default to full price if no start date
+    
+    const start = new Date(startDate);
+    const today = new Date();
+    
+    // Use requested start date if it's in the future, otherwise use today
+    const effectiveDate = start > today ? start : today;
+    
+    // Get the last day of the month
+    const lastDay = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Calculate days remaining in the month (including the start date)
+    const daysRemaining = lastDay.getDate() - effectiveDate.getDate() + 1;
+    
+    // Calculate prorated factor (percentage of month remaining)
+    return daysRemaining / daysInMonth;
+  };
+  
+  // Get the proration factor based on the requested start date
+  const proratedFactor = calculateProratedFactor(data.requestedStartDate);
   
   if (data.serviceAddons && data.serviceAddons.length > 0) {
     // Check if club is in New Mexico
@@ -228,7 +252,7 @@ const ContractPage = () => {
       .filter(addon => addon.description && addon.description.trim() !== '')
       .map(addon => ({
         name: addon.description,
-        dueNow: addon.price ? (addon.price * 0.5).toFixed(2) : '0.00', // Prorated estimate
+        dueNow: addon.price ? (addon.price * proratedFactor).toFixed(2) : '0.00', // Use correct proration factor
         monthly: addon.price ? addon.price.toFixed(2) : '0.00'
       }));
     
@@ -245,7 +269,7 @@ const ContractPage = () => {
       if (childProgramAddon) {
         childPrograms = childProgramAddon.description;
         childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
-        childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * 0.5).toFixed(2) : '0.00';
+        childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * proratedFactor).toFixed(2) : '0.00';
       }
     }
     // For New Mexico clubs, we don't show anything in the Child Programs section
@@ -288,10 +312,11 @@ const ContractPage = () => {
       // Use cust_code as Membership ID, not the specialty membership code (bridgeCode)
       const membershipId = data.cust_code || '';
       
-      // Calculate tax and totals
+      // Calculate tax and totals using the same proration factor
       const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
-        total + (addon.price ? addon.price * 0.5 : 0), 0).toFixed(2) || '0.00';
+        total + (addon.price ? addon.price * proratedFactor : 0), 0).toFixed(2) || '0.00';
       
+      // Recalculate the tax amount using the updated proratedAddOns value
       const taxAmount = ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * 0.08).toFixed(2);
       const totalCollected = (
         parseFloat(initiationFee) + 

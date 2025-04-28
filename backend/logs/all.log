@@ -5844,3 +5844,51 @@
 2025-04-28 14:36:18:3618 [32minfo[39m: [32mAttempting database connection:[39m
 2025-04-28 14:36:18:3618 [32minfo[39m: [32mConnected to database for club 203[39m
 2025-04-28 14:36:18:3618 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mFetching CC processor name for club ID: 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mFetching CC processor name for club ID: 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mFetching Converge info for club ID: 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:30:36:3036 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mFetching Converge info for club ID: 203[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:30:37:3037 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mFetching CC processor name for club ID: 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mFetching CC processor name for club ID: 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mFetching Converge info for club ID: 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:31:15:3115 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mFetching Converge info for club ID: 203[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mAttempting database connection:[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mConnected to database for club 203[39m
+2025-04-28 15:31:16:3116 [32minfo[39m: [32mConverge info retrieved successfully[39m
