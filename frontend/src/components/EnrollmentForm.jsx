@@ -403,9 +403,8 @@ function EnrollmentForm() {
     const youthCount = formData.familyMembers.filter(member => 
       member.memberType === 'youth').length;
     
-    // Check if club is in New Mexico (club IDs with NM prefix or codes specified by business)
-    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
-                            selectedClub?.state === 'NM';
+    // Check if club is in New Mexico based on state
+    const isNewMexicoClub = selectedClub?.state === 'NM';
     
     // Apply membership type rules
     if (adultsCount === 1 && childrenUnder12Count > 0 && youthCount === 0) {
@@ -440,7 +439,7 @@ function EnrollmentForm() {
     console.log(`Determined membership type: ${newMembershipTypeValue} based on family composition`);
     
     // Check for New Mexico clubs
-    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
+    const isNewMexicoClub = selectedClub?.state === 'NM';
     
     // If membership type is changing in New Mexico clubs
     if (isNewMexicoClub && newMembershipTypeValue !== determinedMembershipType) {
@@ -611,7 +610,6 @@ function EnrollmentForm() {
   }, [formData.requestedStartDate, membershipPrice]);
   
   // State for form submission status
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
@@ -1164,148 +1162,6 @@ function EnrollmentForm() {
     });
   };
 
-  // Validate the form before submission
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Validate primary member fields
-    if (!formData.firstName) {
-      newErrors.firstName = "First name is required";
-    }
-    
-    if (!formData.lastName) {
-      newErrors.lastName = "Last name is required";
-    }
-    
-    if (!formData.dateOfBirth) {
-      newErrors.dateOfBirth = "Date of birth is required";
-    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth)) {
-      newErrors.dateOfBirth = "Date must be in YYYY-MM-DD format";
-    }
-    
-    // Update gender validation to handle both empty strings and "default"
-    if (formData.gender === "default") {
-      newErrors.gender = "Please select a gender or choose 'Prefer not to say'";
-    }
-    
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!isValidEmail(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-    
-    if (!formData.address1) {
-      newErrors.address1 = "Address is required";
-    }
-    
-    if (!formData.city) {
-      newErrors.city = "City is required";
-    }
-    
-    if (!formData.state) {
-      newErrors.state = "State is required";
-    }
-    
-    if (!formData.zipCode) {
-      newErrors.zipCode = "ZIP code is required";
-    } else if (!isValidZipCode(formData.zipCode)) {
-      newErrors.zipCode = "Please enter a valid ZIP code";
-    }
-    
-    // Check that at least one phone number is provided
-    if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
-      newErrors.phoneNumbers = "At least one phone number is required";
-    } else {
-      // If mobile phone is provided, validate its format
-      if (formData.mobilePhone && !/^\d{10}$/.test(formData.mobilePhone.replace(/\D/g, ''))) {
-        newErrors.mobilePhone = "Please enter a valid 10-digit phone number";
-      }
-      
-      // If home phone is provided, validate its format
-      if (formData.homePhone && !/^\d{10}$/.test(formData.homePhone.replace(/\D/g, ''))) {
-        newErrors.homePhone = "Please enter a valid 10-digit phone number";
-      }
-      
-      // If work phone is provided, validate its format
-      if (formData.workPhone && !/^\d{10}$/.test(formData.workPhone.replace(/\D/g, ''))) {
-        newErrors.workPhone = "Please enter a valid 10-digit phone number";
-      }
-    }
-    
-    if (!formData.requestedStartDate) {
-      newErrors.requestedStartDate = "Start date is required";
-    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(formData.requestedStartDate)) {
-      newErrors.requestedStartDate = "Date must be in YYYY-MM-DD format";
-    }
-    
-    // Validate club selection
-    if (!selectedClub || !selectedClub.id) {
-      newErrors.club = "Please select a club";
-    } else if (!/^\d{3}$/.test(String(selectedClub.id).padStart(3, '0'))) {
-      newErrors.club = "Club ID must be a 3-digit number";
-    }
-    
-    // Check if explicitly coming back from contract page with the flag
-    // Get the flag from both location state and sessionStorage for redundancy
-    const isReturningFromContract = location.state?.formData?.isReturningFromContract === true ||
-                                   sessionStorage.getItem('isReturningFromContract') === 'true';
-    
-    console.log("Is returning from contract:", isReturningFromContract);
-    
-    // If coming back from contract, clear the flag from sessionStorage after using it
-    if (isReturningFromContract && sessionStorage.getItem('isReturningFromContract') === 'true') {
-      sessionStorage.removeItem('isReturningFromContract');
-      console.log("Cleared returning flag from sessionStorage");
-    }
-    
-    // Skip validation for family members if returning from contract
-    if (!isReturningFromContract) {
-      // Validate family members
-      formData.familyMembers.forEach((member, index) => {
-        if (!member.firstName) {
-          newErrors[`familyMember${index}FirstName`] = "First name is required";
-        }
-        
-        if (!member.lastName) {
-          newErrors[`familyMember${index}LastName`] = "Last name is required";
-        }
-        
-        if (!member.dateOfBirth) {
-          newErrors[`familyMember${index}DateOfBirth`] = "Date of birth is required";
-        }
-        
-        // Update gender validation to handle both empty strings and "default"
-        if (member.gender === "default") {
-          newErrors[`familyMember${index}Gender`] = "Please select a gender or choose 'Prefer not to say'";
-        }
-        
-        // Validate age based on member type
-        if (member.dateOfBirth) {
-          const age = calculateAge(member.dateOfBirth);
-          
-          if (member.memberType === 'adult' && age < 18) {
-            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Adult members must be 18 or older.`;
-          } else if (member.memberType === 'child' && age >= 12) {
-            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Child members must be under 12 years old.`;
-          } else if (member.memberType === 'youth' && !validateYouthAge(member.dateOfBirth)) {
-            newErrors[`familyMember${index}DateOfBirth`] = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
-          }
-        }
-      });
-    }
-    
-    // If there are any validation errors, update the errors state and return false
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return false;
-    }
-    
-    return true;
-  };
-  
-  // Override all validation when coming from contract page
-  // This is a direct fix for the issue of not being able to navigate back to contract page
-  const isContractReturningMode = sessionStorage.getItem('isReturningFromContract') === 'true';
   
   // Handle form submission - COMPLETELY REDESIGNED to work in all cases
   const handleSubmit = (e) => {
@@ -1422,7 +1278,7 @@ function EnrollmentForm() {
   // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
     // Check if this is a New Mexico club
-    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
+    const isNewMexicoClub = selectedClub?.state === 'NM';
     
     setSelectedChildAddons(prev => {
       // If the clicked addon is already selected, clear the selection
@@ -1787,18 +1643,6 @@ function EnrollmentForm() {
   };
   
 
-  // Add a function to clear all temporary member errors when switching tabs
-  const clearTempMemberErrors = () => {
-    setErrors(prevErrors => {
-      const clearedErrors = { ...prevErrors };
-      Object.keys(clearedErrors).forEach(key => {
-        if (key.startsWith('temp') || key.startsWith('familyMember')) {
-          clearedErrors[key] = null;
-        }
-      });
-      return clearedErrors;
-    });
-  };
 
   // Update the tab change handler to clear errors when switching tabs
   const handleTabChange = (tab) => {
@@ -2217,11 +2061,24 @@ function EnrollmentForm() {
         return (
           <div className="tab-panel">
             <h3>Add Child Family Member</h3>
+            
+            {/* Add message for Dual membership in New Mexico */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'D' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Note:</strong> Adding children or a youth to a Dual membership in New Mexico will convert it to a Family membership.</p>
+              </div>
+            )}
+            
             <p>Add a child family member (0-11 years) to your membership.</p>
             
-            {/* For New Mexico Family or Dual memberships, show direct child entry without requiring addon */}
-            {(selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') && 
-             (determinedMembershipType === 'F' || determinedMembershipType === 'D') ? (
+            {/* For New Mexico Family memberships, show direct child entry without requiring addon */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'F' ? (
               <div className="family-child-entry">
                 <p className="membership-message" style={{ 
                   backgroundColor: '#e6f7ff', 
@@ -2229,7 +2086,7 @@ function EnrollmentForm() {
                   borderRadius: '6px',
                   marginBottom: '20px'
                 }}>
-                  Child memberships are included with your {determinedMembershipType === 'F' ? 'Family' : 'Dual'} membership at no additional cost.
+                  Child memberships are included with your Family membership at no additional cost.
                 </p>
                 
                 {/* Always show the Add Child button for Family and Dual memberships */}
@@ -2480,8 +2337,7 @@ function EnrollmentForm() {
                 <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
                 
                 {/* New Mexico clubs with Individual membership type can add unlimited children */}
-                {(selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') && 
-                 determinedMembershipType === 'I' && (
+                {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
                   <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
                     <button 
                       type="button" 
@@ -2686,11 +2542,50 @@ function EnrollmentForm() {
           </div>
         );
       
-     case 'youth':
+      case 'youth':
         return (
           <div className="tab-panel">
             <h3>Add Youth Family Member</h3>
             <p>Add a youth family member (12-20 years) to your membership.</p>
+            
+            {/* New Mexico club specific messages */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Important:</strong> Adding a Youth member to an Individual membership will convert it to a Dual membership.</p>
+              </div>
+            )}
+            
+            {/* Message for Dual memberships */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'D' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Note:</strong> Adding a youth to a Dual membership in New Mexico will convert it to a Family membership.</p>
+              </div>
+            )}
+            
+            {/* Message for Family memberships */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'F' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p>Youth memberships are included with your Family membership at no additional cost.</p>
+              </div>
+            )}
             
             <div className="form-row name-row">
               <div className="form-group">
