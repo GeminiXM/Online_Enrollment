@@ -545,11 +545,17 @@ currentYPos += 5;
       
         pdf.setFont('helvetica', 'normal');
         const monthToMonthText = 
-  'I understand that I am committing to a minimum three (3) month membership. ' +
+'I understand that I am committing to a minimum three (3) month membership. ' +
   'The three (3) month period commences on the 1st of the month following the date ' +
   'the membership begins. After fulfilling my minimum three (3) month membership ' +
   'commitment, I understand that the membership may be cancelled at any time with ' +
-  'written notice pursuant to the Resignation Policy.';
+  'written notice pursuant to the Resignation Policy (Item 4A) and the total dues ' +
+  'owing for the membership as well as all discounts and initiation fees are not ' +
+  'refundable. As such, any failure to use the membership indicated above and/or the ' +
+  'facilities and programs associated therewith does not relieve applicant of any ' +
+  'liability for payment of the total dues or other charges owing as indicated above, ' +
+  'regardless of circumstances. Dues may increase at any time, with a one (1) month ' +
+  'notice.';
 
       
         const splitMonthToMonth = pdf.splitTextToSize(monthToMonthText, 170);
@@ -644,9 +650,6 @@ currentYPos += 5;
       
 
 
-
-
-
       // ——— REFUND PARAGRAPH ———
       // (no extra currentYPos += 5 here—it's already included above)
 // 1) Body text
@@ -668,7 +671,9 @@ currentYPos += 5;
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
   currentYPos = 20;
-}
+      }
+      
+
 
 // ——— C. PAID‑IN‑FULL Section ———
 // 1) Header
@@ -852,6 +857,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   currentYPos = 20;
 }
 
+      
+      
 // ——— 4. TERMINATION/RESIGNATION RIGHTS ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('4. TERMINATION/RESIGNATION RIGHTS', 20, currentYPos);
@@ -873,43 +880,81 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 }
 
 // ——— A. RESIGNATION POLICY ———
+// 1) Render section header in bold
 pdf.setFont('helvetica', 'bold');
 pdf.text('A. RESIGNATION POLICY', 30, currentYPos);
-// 2) Small gap after header - removing this lays the header on top of the text paragraph
+
+// 2) Small gap after header to separate from body text
 currentYPos += 5;
 
+// 3) Switch to normal font for body
 pdf.setFont('helvetica', 'normal');
-const resignationText =
-  'All resignations must be made in writing (letter, fax, email, or in person at the club) and received by ' +
-  'The Club by the last day of the current calendar month to be effective for the following calendar month. ' +
-  'For example, if a written notice is received on or before January 30, the membership will terminate on ' +
-  'February 28. If a written notice is received on January 31, the membership will terminate on March 31. ' +
-  'Resignation requests will not be accepted over the telephone.';
+const resignationText = `
+A month-to-month membership may be cancelled by providing at least one (1) month's
+written notice. Cancellation shall be effective on the 1st of the month that is at
+least one (1) month after the date the notice is delivered. Notice can be provided by
+first class mail (Certified with Return Receipt Recommended), personal delivery of
+cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and
+facsimile transmission of cancellation form to 303-813-4197. Concurrently with the
+delivery of written notice, Member must pay the club any amounts due on the account as
+of the cancellation date and on or before the cancellation date member must return all
+membership cards. Those who have signed on an Extended Plan agreement are subject to the
+terms of their agreement and are responsible for the balance of remaining dues. All
+memberships are non-refundable, non-transferable, non-assignable and non-proprietary.
+`.trim();
+
+// 4) Split into lines that fit the page width
 const splitResignation = pdf.splitTextToSize(resignationText, 150);
+
+// 5) Draw the body text with automatic page breaks
 currentYPos = drawPagedText(pdf, splitResignation, 40, currentYPos);
 
-// only add your fixed 5pt gap
-currentYPos += 5;
+// ——— Initials for Resignation Policy ———
+// 6) If this section needs initials, render them 5 pts below the last line
+if (initialedSections?.resignation && signatureData?.initials?.text) {
+  // 6a) Check if initials would overflow past bottom margin
+  if (currentYPos + 5 > pdf.internal.pageSize.getHeight() - 20) {
+    pdf.addPage();
+    currentYPos = 20;
+  }
 
+  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.setFont('helvetica', 'normal');
+}
+
+// 7) Advance cursor 15 pts to leave space below initials and before next section
+currentYPos += 15;
+
+// ——— Overflow check before next section ———
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
   currentYPos = 20;
 }
 
-// ——— B. MEDICAL TERMINATION ———
+      
+      
+
+// ——— B. DEATH OR DISABILITY ———
 pdf.setFont('helvetica', 'bold');
-pdf.text('B. MEDICAL TERMINATION', 30, currentYPos);
+pdf.text('B. DEATH OR DISABILITY', 30, currentYPos);
 // 2) Small gap after header - removing this lays the header on top of the text paragraph
 currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const medicalText =
-  'Member may cancel this agreement for medical reasons. Verification from a medical doctor must be ' +
-  'provided to New Mexico Sports and Wellness. This verification must state that the member cannot ' +
-  'utilize membership or facilities due to a medical condition. A medical termination will become ' +
-  'effective with the normal billing cycle beginning the month following receipt of written notice and ' +
-  'verification. Monthly dues will be payable through the normal billing cycle of the month in which notice ' +
-  'is received.';
+  'The contract may be cancelled in the event of member\'s death or total disability during the ' +
+  'membership term. Total disability means a condition which has existed or will exist for more than ' +
+  'six (6) months and which will prevent Member from using the club. In order to establish death, the ' +
+  'member\'s estate must furnish to the club a death certificate. In order to establish disability, ' +
+  'Member must furnish the club certification of the disability by a licensed physician whose diagnosis ' +
+  'or treatment is within his scope of practice. Cancellation will be effective upon establishment of ' +
+  'death or disability according to these provisions. In the event that Member has paid membership fees ' +
+  'in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing ' +
+  'the total cost of the membership by the total number of months under the membership and multiplying ' +
+  'the result by the number of months expired under the membership term. As to membership fees paid ' +
+  'monthly, dues will be refunded for the month in which written notification is received of the death ' +
+  'or disability and the proper documentation outlined above has been provided.';
 const splitMedical = pdf.splitTextToSize(medicalText, 150);
 currentYPos = drawPagedText(pdf, splitMedical, 40, currentYPos);
 
@@ -922,22 +967,73 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 }
 
       
-// ——— C. RELOCATION ———
+
+// ——— 5. MEMBERSHIP POLICY ———
+// 1) Section header in bold
 pdf.setFont('helvetica', 'bold');
-pdf.text('C. RELOCATION', 30, currentYPos);
+pdf.text('5. MEMBERSHIP POLICY', 20, currentYPos);
+
+// 2) Small gap after header
+currentYPos += 5;
+
+// 3) Switch to normal font for body
+pdf.setFont('helvetica', 'normal');
+
+// First paragraph
+const membershipTermsParagraph1 =
+  'This membership contract is in force monthly upon payment of dues and other account charges. ' +
+  'By submitting this application, the member acknowledges that NMSW reserves the right to refuse ' +
+  'membership, or to terminate this agreement at any time without notice. Member agrees to abide by ' +
+  'the Corporate Member Regulations and by NMSW Membership Policies as they exist or may be amended ' +
+  'from time-to-time.';
+const splitTerms1 = pdf.splitTextToSize(membershipTermsParagraph1, 160);
+
+// Draw first paragraph with pagination
+currentYPos = drawPagedText(pdf, splitTerms1, 30, currentYPos);
+
+// 4) Fixed 5 pt gap between paragraphs
+currentYPos += 5;
+
+// Second paragraph
+const membershipTermsParagraph2 =
+  'Furthermore, member understands that should member\'s account balance become more than 60‑days past due, ' +
+  'NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for ' +
+  'unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred. ' +
+  'Member recognizes the inherent risks of participating in an exercise program and hereby holds NMSW harmless ' +
+  'from any and all injuries member, and/or member\'s family might incur in connection with member\'s membership ' +
+  'activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions. ' +
+  'Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership ' +
+  'dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities ' +
+  'or programs of the club.';
+const splitTerms2 = pdf.splitTextToSize(membershipTermsParagraph2, 160);
+
+// Draw second paragraph with pagination
+currentYPos = drawPagedText(pdf, splitTerms2, 30, currentYPos);
+
+// 5) Fixed 5 pt gap before next section
+currentYPos += 5;
+
+// 6) Overflow check for next section
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+
+      
+
+// ——— 6. MEMBERSHIP CARDS  ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('6. MEMBERSHIP CARDS', 20, currentYPos);
 // 2) Small gap after header - removing this lays the header on top of the text paragraph
 currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
-const relocationText =
-  'Member may cancel this agreement upon relocation. The cancellation will be effective ' +
-  'with the normal billing cycle beginning the month following receipt of written notice. ' +
-  'Monthly dues will be payable through the normal billing cycle of the month in which notice ' +
-  'is received. In order to qualify for relocation, the member must provide proof of move ' +
-  'outside a 50-mile radius of the nearest New Mexico Sports and Wellness. No other forms of ' +
-  'relocation other than that stated in this section will be considered.';
-const splitRelocation = pdf.splitTextToSize(relocationText, 150);
-currentYPos = drawPagedText(pdf, splitRelocation, 40, currentYPos);
+const mbrCardText =
+'I understand cards are mandatory and must be presented prior to entering NMSW. ' +
+  'Cards are not transferable to another person. There will be a replacement fee for each ' +
+  'lost card. I acknowledge that I am responsible for all charges incurred on my membership card.';
+const splitmbrCardText = pdf.splitTextToSize(mbrCardText, 160);
+currentYPos = drawPagedText(pdf, splitmbrCardText, 30, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -947,89 +1043,489 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   currentYPos = 20;
 }
 
-// ——— 5. TEMPORARY ABSENCE (LEAVE OF ABSENCE) ———
+      
+// ——— 7. HOURS OF OPERATION  ———
 pdf.setFont('helvetica', 'bold');
-pdf.text('5. TEMPORARY ABSENCE (LEAVE OF ABSENCE)', 20, currentYPos);
-// 2) Small gap after header - removing this lays the header on top of the text paragraph
-currentYPos += 5;
-
-pdf.setFont('helvetica', 'normal');
-const temporaryAbsenceText =
-  'Any member in good standing may suspend all membership privileges for a period of not ' +
-  'less than one (1) month and not more than six (6) months once per calendar year due to ' +
-  'medical or temporary relocation reasons. Written notice must be received by New Mexico ' +
-  'Sports and Wellness no less than seven (7) days from the time the leave is to commence. ' +
-  'Member must choose a specific date for the re-activation of membership. All fees or dues ' +
-  'that would be applicable during the leave period are suspended, but will resume upon the ' +
-  're-activation of the membership. At the time of re-activation the monthly dues rate will ' +
-  'be adjusted to the current rate, if different from the rate paid prior to leave. Should ' +
-  'Member not return to the club after the six (6) month period, the Member must pay a new ' +
-  'membership initiation fee. New Mexico Sports and Wellness may at any time modify or ' +
-  'discontinue the Leave of Absence privilege entirely.';
-const splitTemporaryAbsence = pdf.splitTextToSize(temporaryAbsenceText, 160);
-currentYPos = drawPagedText(pdf, splitTemporaryAbsence, 30, currentYPos);
-
-// only add your fixed 5pt gap
-currentYPos += 5;
-
-if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
-  pdf.addPage();
-  currentYPos = 20;
-}
-
-// ——— 6. DEATH ———
-pdf.setFont('helvetica', 'bold');
-pdf.text('6. DEATH', 20, currentYPos);
-// 2) Small gap after header - removing this lays the header on top of the text paragraph
-currentYPos += 5;
-
-pdf.setFont('helvetica', 'normal');
-const deathText =
-  "Upon the death of the Primary Member, the Primary Member's surviving spouse or domestic partner " +
-  "shall automatically become the Primary Member. If there is no surviving spouse or domestic partner " +
-  "or if the surviving spouse or domestic partner does not want to continue the membership, the " +
-  "membership may be cancelled upon the personal representative of the estate providing written " +
-  "notification to New Mexico Sports and Wellness of the death.";
-const splitDeath = pdf.splitTextToSize(deathText, 160);
-currentYPos = drawPagedText(pdf, splitDeath, 30, currentYPos);
-
-// only add your fixed 5pt gap
-currentYPos += 5;
-
-if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
-  pdf.addPage();
-  currentYPos = 20;
-}
-
-// ——— 7. INDEMNIFICATION AND RISK ———
-pdf.setFont('helvetica', 'bold');
-pdf.text('7. INDEMNIFICATION AND RISK', 20, currentYPos);
+pdf.text('7. HOURS OF OPERATION ', 20, currentYPos);
 // 2) Small gap after header - removing this lays the header on top of the text paragraph
 currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const indemnificationText =
-  'It is expressly agreed that all use of New Mexico Sports and Wellness shall be undertaken ' +
-  'by the Member at his or her sole risk and New Mexico Sports and Wellness shall not be liable ' +
-  'for any injuries or any damage to any member, or the property of any member, or be subject ' +
-  'to any claim, demand, injury or damages. The Member hereby holds New Mexico Sports and ' +
-  'Wellness, its officers, owners, employees, agents and contractors (including but not limited ' +
-  'to the owner, proprietors, partners or shareholders of New Mexico Sports and Wellness), ' +
-  'harmless from all claims which may be brought by the undersigned member and/or his or her ' +
-  'guests and invitees against any of the foregoing for any such injuries or claims aforesaid. ' +
-  'The undersigned acknowledges that he/she has read this paragraph and fully understands it.';
+  'Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in NMSW.';
 const splitIndemnification = pdf.splitTextToSize(indemnificationText, 160);
 currentYPos = drawPagedText(pdf, splitIndemnification, 30, currentYPos);
 
-const paragraphHeightIndem = splitIndemnification.length * 5;
-// add extra 20 units before signature block
-currentYPos += paragraphHeightIndem + 20;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
+// 7) Overflow check for next header
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
   currentYPos = 20;
 }
 
+      
+      // ——— 8. LEAVE OF ABSENCE POLICY   ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('8. LEAVE OF ABSENCE POLICY', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const leaveOfAbsencePolicyText =
+  'This Membership may be put on a Leave of Absence (LOA). LOA requests must be in writing ' +
+  'and submitted by the last day of the month for the LOA to be effective the following month. ' +
+  'LOA must state the leave and return date. There is a monthly charge for accounts in LOA ' +
+  '(exceptions for medical LOAs may be approved for no charge with proper medical documentation). ' +
+  'There will be no retroaction or partial month adjustments. A medical LOA must be accompanied ' +
+  'by a doctor\'s note. If member chooses to cancel their membership while on a LOA, the ' +
+  'membership is reinstated, full dues will be charged for the final month of membership and ' +
+  'the cancellation policy takes effect. An LOA extends any memberships in an Extended Plan by ' +
+  'the number of months the membership is in a LOA status.';
+
+      
+const splitleaveOfAbsencePolicyText = pdf.splitTextToSize(leaveOfAbsencePolicyText, 160);
+currentYPos = drawPagedText(pdf, splitleaveOfAbsencePolicyText, 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+      
+      
+            // ——— 9. PERSONAL TRAINING   ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('9. PERSONAL TRAINING', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const personalTrainerPolicyText =
+  'Personal trainers not employed by NMSW are not allowed to train or consult in any part of ' +
+  'the clubs due to NMSW\'s interest in ensuring the accuracy of information relayed, as well as ' +
+  'to reduce the potential for injury.';
+      
+const splitpersonalTrainerPolicyText = pdf.splitTextToSize(personalTrainerPolicyText, 160);
+currentYPos = drawPagedText(pdf, splitpersonalTrainerPolicyText, 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+      
+
+            // ——— 10. EMERGENCY MEDICAL AID    ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('10. EMERGENCY MEDICAL AID', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const emergencyMedicalPolicyText =
+  'NMSW reserves the right to call emergency medical aid for an injured Member or guest ' +
+  'and said Member or guest accepts responsibility for any financial obligations arising ' +
+  'from such emergency medical aid or transportation to a medical facility.';
+
+      
+const splitemergencyMedicalPolicyText = pdf.splitTextToSize(emergencyMedicalPolicyText, 160);
+currentYPos = drawPagedText(pdf, splitemergencyMedicalPolicyText, 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+
+
+                  // ——— 11. AMENDING OF RULES    ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('11. AMENDING OF RULES', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const amendmentPolicyText =
+  'I understand NMSW reserves the right to amend or add to these conditions and to adopt ' +
+  'new conditions as it may deem necessary for the proper management of the clubs and the business.';
+
+const splitamendmentPolicyText  = pdf.splitTextToSize(amendmentPolicyText , 160);
+currentYPos = drawPagedText(pdf, splitamendmentPolicyText , 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+      
+
+
+                        // ——— 12. UNAVAILABILITY OF FACILITY OR SERVICES   ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('12. UNAVAILABILITY OF FACILITY OR SERVICES', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const facilityUnavailabilityPolicyText =
+  'I agree to accept the fact that a particular facility or service in the premises ' +
+  'may be unavailable at any particular time due to mechanical breakdown, fire, act of ' +
+  'God, condemnation, loss of lease, catastrophe or any other reason. Further, I agree ' +
+  'not to hold NMSW responsible or liable for such occurrences.';
+
+
+const splitfacilityUnavailabilityPolicyText  = pdf.splitTextToSize(facilityUnavailabilityPolicyText , 160);
+currentYPos = drawPagedText(pdf, splitfacilityUnavailabilityPolicyText , 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+      
+
+
+                              // ——— 13. HEALTH WARRANTY   ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('13. HEALTH WARRANTY', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const healthWarrantyText =
+  'I warrant and represent that I, any family member, ward or guest (each, a "Guest") who uses any ' +
+  'NMSW facility has no disability, impairment or illness preventing such person from engaging in ' +
+  'active or passive exercise or that will be detrimental or inimical to such person\'s health, ' +
+  'safety or physical condition. I acknowledge and agree that: (1) NMSW will rely on the foregoing ' +
+  'warranty in issuing my membership, (2) NMSW may perform a fitness assessment or similar testing ' +
+  'to establish my or my Guests\' initial physical statistics, (3) if any fitness or similar testing ' +
+  'is performed by NMSW, it is solely for the purpose of providing comparative data with which I or ' +
+  'my Guests may chart progress in a program and is not for any diagnostic purposes whatsoever, ' +
+  'and (4) NMSW shall not be subject to any claim or demand whatsoever on account of NMSW\'s evaluation ' +
+  'or interpretation of such fitness assessment or similar testing. I and my Guests are responsible ' +
+  'for understanding our respective medical history and should consult with a physician prior to ' +
+  'engaging in exercise or continuation of exercise if a medical condition appears to be developing.';
+
+
+const splithealthWarrantyText = pdf.splitTextToSize(healthWarrantyText , 160);
+currentYPos = drawPagedText(pdf, splithealthWarrantyText , 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+
+
+
+                                    // ———14. DAMAGE TO FACILITIES    ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('14. DAMAGE TO FACILITIES', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const damageText = `I agree to pay for any damage that I, my family or my Guests may cause this club's facilities through careless or negligent use thereof.`.trim;
+
+
+const splitdamageText = pdf.splitTextToSize(damageText , 160);
+currentYPos = drawPagedText(pdf, splitdamageText , 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+
+
+
+      
+                                    // ———15. THEFT OR DAMAGE TO PERSONAL PROPERTY   ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('15. THEFT OR DAMAGE TO PERSONAL PROPERTY', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const liabilityPropertyText =
+  'I acknowledge that NMSW will not accept responsibility for theft, loss or damage to ' +
+  'personal property left in a locker or in NMSW or for theft, loss or damage to automobiles ' +
+  'or personal property left in NMSW parking lot. NMSW suggests that members do not bring ' +
+  'valuables on NMSW premises. Signs are posted throughout the club and are strictly enforced.';
+
+const splitliabilityPropertyText = pdf.splitTextToSize(liabilityPropertyText , 160);
+currentYPos = drawPagedText(pdf, splitliabilityPropertyText , 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+
+
+
+            
+                                    // ———16. RELEASE FROM LIABILITY    ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('16. RELEASE FROM LIABILITY ', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+
+pdf.setFont('helvetica', 'normal');
+const assumptionOfRiskText =
+  'I agree, in attending and using the facilities and equipment therein, that I do so at my own risk. ' +
+  'NMSW shall not be liable for any damages arising from personal injuries sustained by me and/or my guest(s) ' +
+  'in, or about the premises. I assume full responsibility for any injuries or damages which may occur to me ' +
+  'in, on or about the premises, and I do hereby fully and forever release and discharge NMSW and all associated ' +
+  'owners, employees, and agents from any and all claims, demands, damages, rights of action or causes of action ' +
+  'present or future, whether the same be known or unknown, anticipated or unanticipated, resulting from or arising ' +
+  'out of my use or intended use of the said facilities and equipment thereof.';
+
+
+const splitassumptionOfRiskText = pdf.splitTextToSize(assumptionOfRiskText , 160);
+currentYPos = drawPagedText(pdf, splitassumptionOfRiskText, 30, currentYPos);
+
+// only add your fixed 5pt gap
+currentYPos += 5;
+
+// 7) Overflow check for next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+      }
+
+
+
+// ——— 17. WAIVER AND RELEASE OF ELECTRONIC MEDIA ———
+// 1) Render section header in bold
+pdf.setFont('helvetica', 'bold');
+pdf.text('17. WAIVER AND RELEASE OF ELECTRONIC MEDIA', 20, currentYPos);
+
+// 2) Small gap after header
+currentYPos += 5;
+
+// 3) Switch to normal font for paragraphs
+pdf.setFont('helvetica', 'normal');
+
+// Paragraph 1
+const mediaReleaseText1 =
+  'I recognize, acknowledge and grant permission for Starmark Holdings, LLC, its affiliates, ' +
+  'subsidiaries, employees, successors and/or anyone acting with its authority, to take and use ' +
+  'still photographs, motion picture, video, sound recordings and/or testimonials of me and/or any ' +
+  'family member, ward or guest.';
+const splitMedia1 = pdf.splitTextToSize(mediaReleaseText1, 160);
+currentYPos = drawPagedText(pdf, splitMedia1, 30, currentYPos);
+currentYPos += 5; // gap before next paragraph
+
+// Paragraph 2
+const mediaReleaseText2 =
+  'I hereby waive any right to inspect or approve the photographs, electronic matter, and/or ' +
+  'finished products that may be used in conjunction with them now or in the future. I hereby grant ' +
+  'all right, title and interest I may now have in the photographs, electronic matter, and/or ' +
+  'finished products to Starmark Holdings, LLC and/or anyone acting with its authority, and hereby ' +
+  'waive any right to royalties or other compensation arising from or related to the use of the ' +
+  'photographs, electronic matter, and/or finished matter.';
+const splitMedia2 = pdf.splitTextToSize(mediaReleaseText2, 160);
+currentYPos = drawPagedText(pdf, splitMedia2, 30, currentYPos);
+currentYPos += 5; // gap before next paragraph
+
+// Paragraph 3 (communications consent)
+const communicationsConsentText3 =
+  'I hereby consent to receive future calls, text messages, and/or short message service ("SMS") ' +
+  'calls (collectively, "Calls") that deliver prerecorded or prewritten messages by or on behalf of ' +
+  'Wellbridge to me. Providing consent to receive such Calls is not a condition of purchasing any ' +
+  'goods or services from Wellbridge. I understand that I may revoke this consent by following the ' +
+  "'opt-out' procedures presented upon receiving a Call.";
+const splitComm = pdf.splitTextToSize(communicationsConsentText3, 160);
+currentYPos = drawPagedText(pdf, splitComm, 30, currentYPos);
+
+// 4) Fixed 5 pt gap before next section
+currentYPos += 5;
+
+// 5) Overflow check before next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+
+
+ // ——— 18. CORPORATE MEMBERS REGULATIONS ———
+// 1) Section header in bold
+pdf.setFont('helvetica', 'bold');
+pdf.text('18. CORPORATE MEMBERS REGULATIONS', 20, currentYPos);
+currentYPos += 5;
+
+// 2) Item 1 label in bold, text in normal
+pdf.setFont('helvetica', 'bold');
+pdf.text('1.', 30, currentYPos);
+pdf.setFont('helvetica', 'normal');
+      const corpItem1 = 'Corporate members must be a W-2 paid employee or associate of a firm or approved organization ' +
+        'that has a corporate membership with NMSW, unless otherwise agreed to in writing.NMSW must be notified immediately of any change in employment status.';
+const splitCorp1 = pdf.splitTextToSize(corpItem1, 150);
+currentYPos = drawPagedText(pdf, splitCorp1, 34, currentYPos);
+currentYPos += 5;
+
+// 3) Item 2 label in bold, text in normal
+pdf.setFont('helvetica', 'bold');
+pdf.text('2.', 30, currentYPos);
+pdf.setFont('helvetica', 'normal');
+      const corpItem2 = 'Discounts on monthly dues may change in accordance with the number or employees of the corporate firm ' +
+        'who belong to NMSW.I understand I will lose my corporate discount and will be readjusted to regular rates if my ' +
+        'employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.';
+const splitCorp2 = pdf.splitTextToSize(corpItem2, 150);
+currentYPos = drawPagedText(pdf, splitCorp2, 34, currentYPos);
+currentYPos += 5;
+
+// 4) Item 3 label in bold, text in normal
+pdf.setFont('helvetica', 'bold');
+pdf.text('3.', 30, currentYPos);
+pdf.setFont('helvetica', 'normal');
+      const corpItem3 = 'It is the member\'s responsibility to notify NMSW of any change in employment status. I understand that ' +
+        'I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.';
+const splitCorp3 = pdf.splitTextToSize(corpItem3, 150);
+currentYPos = drawPagedText(pdf, splitCorp3, 34, currentYPos);
+currentYPos += 5;
+
+// 5) Item 4 label in bold, text in normal
+pdf.setFont('helvetica', 'bold');
+pdf.text('4.', 30, currentYPos);
+pdf.setFont('helvetica', 'normal');
+const corpItem4 = 'Proof of employment must be provided to obtain the corporate discount.';
+const splitCorp4 = pdf.splitTextToSize(corpItem4, 150);
+currentYPos = drawPagedText(pdf, splitCorp4, 34, currentYPos);
+      currentYPos += 5;
+      
+
+      // ——— Initials for Corporate Discount Section ———
+// 6) If this section needs initials, render them 5 pts below the last line
+if (initialedSections?.corporate && signatureData?.initials?.text) {
+  // 6a) Check if initials would overflow past bottom margin
+  if (currentYPos + 5 > pdf.internal.pageSize.getHeight() - 20) {
+    pdf.addPage();
+    currentYPos = 20;
+  }
+
+  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.setFont('helvetica', 'normal');
+
+  // 6b) Advance cursor past initials gap
+  currentYPos += 10; // 5 pts for initials + 5 pts before next section
+} else {
+  // no initials, just leave a 5 pt gap
+  currentYPos += 5;
+}
+
+// 6) Overflow check before next section
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+
+
+
+                                          // ———19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS    ———
+pdf.setFont('helvetica', 'bold');
+pdf.text('19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS', 20, currentYPos);
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
+// ——— SYP DISCOUNT DETAILS Section ———
+// 1) Ensure font is normal for body text
+pdf.setFont('helvetica', 'normal');
+
+// Paragraph 1
+const sypText1 =
+  'Student/Young Professional (SYP) discounted memberships are offered exclusively to ' +
+  'members between the ages of 19-29. This special discounted rate will be honored through ' +
+  'the age of 29. I understand that beginning the month after my 30th birthday my monthly dues ' +
+  'rate will increase by $10. Each year thereafter my monthly rate will increase by an additional ' +
+  '$10 until my rate reaches the then current rate. I also understand that my rate may also change ' +
+  'for any other upgrades or downgrades of the membership that I may initiate.';
+const splitSyp1 = pdf.splitTextToSize(sypText1, 160);
+currentYPos = drawPagedText(pdf, splitSyp1, 30, currentYPos);
+
+// 2) Fixed 5 pt gap before next paragraph
+currentYPos += 5;
+
+// Paragraph 2
+const sypText2 =
+  'Proof of age must be received within 14 days; otherwise your membership will be converted to ' +
+  'the equivalent of one individually priced membership and you will be responsible for the entire ' +
+  'billed amount. If the documentation is not received by 04/30/2025, your rate will go to $115.00 ' +
+  'per month until the proper documentation is provided. The club will not issue a dues credit for any ' +
+  'portion of the additional charges once billed.';
+const splitSyp2 = pdf.splitTextToSize(sypText2, 160);
+currentYPos = drawPagedText(pdf, splitSyp2, 30, currentYPos);
+
+// 3) Fixed 5 pt gap before next paragraph
+currentYPos += 5;
+
+// Paragraph 3
+const sypText3 =
+  'As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, ' +
+  'assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships ' +
+  'and other entities with which it is or may in the future become affiliated. The terms and conditions ' +
+  'contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW ' +
+  'and the member, and no oral promises are made a part of it.';
+const splitSyp3 = pdf.splitTextToSize(sypText3, 160);
+currentYPos = drawPagedText(pdf, splitSyp3, 30, currentYPos);
+
+// ——— Initials for SYP Discount Section ———
+// 6) If this section needs initials, render them 5 pts below the last line
+if (initialedSections?.syp && signatureData?.initials?.text) {
+  // 6a) Check if initials would overflow past bottom margin
+  if (currentYPos + 5 > pdf.internal.pageSize.getHeight() - 20) {
+    pdf.addPage();
+    currentYPos = 20;
+  }
+
+  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.setFont('helvetica', 'normal');
+
+  // 6b) Advance cursor past initials gap
+  currentYPos += 10; // 5 pts for initials + 5 pts before next section
+} else {
+  // no initials, just leave a 5 pt gap
+  currentYPos += 5;
+}
+
+
+// 5) Overflow check before the next header
+if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
+  pdf.addPage();
+  currentYPos = 20;
+}
+
+
+
+//////////////////// SIGNATURE
       
       // Signature Section - Fixed header spacing
       pdf.setFontSize(12);
