@@ -6,6 +6,7 @@ const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSe
   const canvasRef = useRef(null);
   const [isGenerating, setIsGenerating] = useState(false);
   
+  
   // Function to calculate cancellation date (14 days from start date)
   const calculateCancellationDate = (startDate) => {
     if (!startDate) return '';
@@ -446,16 +447,18 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
 
 
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
       
+
       // Contract Terms Section - on a new page
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Terms and Conditions', 105, 20, { align: 'center' });
   
       // CANCELLATION RIGHT Section - Fixed header spacing
-      pdf.setFontSize(12);
+      pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('CANCELLATION RIGHT', 20, 35);
+      pdf.text('CANCELLATION RIGHT', 105, 35,  { align: 'center' });
       
       // Added spacing after section header
       pdf.setFontSize(10);
@@ -479,16 +482,23 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       pdf.text(splitCancellationText, 20, 50);
       
       // Adjust vertical position after cancellation text
-      let currentYPos = 50 + (splitCancellationText.length * 5) + 3; // Reduced space
+      let currentYPos = 50 + (splitCancellationText.length * 4) + 5; // Reduced space
       
-      // Acknowledgment text
-      pdf.setFont('helvetica', 'bold');
-      const acknowledgmentText = "EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:";
-      pdf.text(acknowledgmentText, 20, currentYPos);
+        // Acknowledgment text — wrap at 170 pts
+        pdf.setFont('helvetica', 'bold');
+        const acknowledgmentText =
+          'EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE ' +
+          'AND COPIES HEREOF:';
+        const lines = pdf.splitTextToSize(acknowledgmentText, 170);
+        pdf.text(lines, 20, currentYPos);
+
+        // advance Y if you need to draw more content below
+        currentYPos += lines.length * 4;
+
       
       // Agreement understanding text
       pdf.setFont('helvetica', 'normal');
-      currentYPos += 7; // Reduced space
+      currentYPos += 5; // Reduced space
       const agreementUnderstandingText = "I have read and understand this agreement along with the terms and conditions " +
         "contained on this document and will abide by the rules and regulations of New Mexico Sports & Wellness.In addition, " +
         "I understand that the primary member represents all members and accepts all responsibility on the account and that all " +
@@ -504,7 +514,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // MEMBERSHIP AGREEMENT Section - Fixed header spacing
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
-      pdf.text('MEMBERSHIP AGREEMENT', 20, currentYPos);
+      pdf.text('MEMBERSHIP AGREEMENT', 105, currentYPos,  { align: 'center' });
       
       // Added spacing after section header
       currentYPos += 3;
@@ -698,7 +708,7 @@ const paidInFullText =
 const splitPaidInFull = pdf.splitTextToSize(paidInFullText, 160);
 
 // 4) Draw and paginate
-currentYPos = drawPagedText(pdf, splitPaidInFull, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitPaidInFull, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -727,7 +737,7 @@ const eftText =
   'cards and provide the appropriate information to avoid having your old account charged ' +
   'for your monthly dues.';
 const splitEFT = pdf.splitTextToSize(eftText, 160);
-currentYPos = drawPagedText(pdf, splitEFT, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitEFT, 20, currentYPos);
 
 // currentYPos now at bottom of EFT text
 // only add your fixed 5pt gap
@@ -751,7 +761,7 @@ const delinquentText =
   'returned due to insufficient funds and credit cards that are declined when a balance ' +
   'is due. The Primary Member is responsible for all charges incurred.';
 const splitDelinquent = pdf.splitTextToSize(delinquentText, 160);
-currentYPos = drawPagedText(pdf, splitDelinquent, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitDelinquent, 20, currentYPos);
 
 // currentYPos now at bottom of EFT text
 // only add your fixed 5pt gap
@@ -774,7 +784,7 @@ const referralsText =
   'the membership agreement. Any Member in default of payment due may NOT cure the default ' +
   'by way of credit for "referral" members to New Mexico Sports and Wellness.';
 const splitReferrals = pdf.splitTextToSize(referralsText, 160);
-currentYPos = drawPagedText(pdf, splitReferrals, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitReferrals, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -796,7 +806,7 @@ const emailText =
   'New Mexico Sports and Wellness, The Wellbridge Company and their affiliated companies. ' +
   'Any further distribution of my email address is unauthorized.';
 const splitEmail = pdf.splitTextToSize(emailText, 160);
-currentYPos = drawPagedText(pdf, splitEmail, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitEmail, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -820,7 +830,7 @@ const upgradesText =
   'following month. Primary Member\'s signature is required for all changes. Proof of ' +
   'eligibility/residency to upgrade/add members is required.';
 const splitUpgrades = pdf.splitTextToSize(upgradesText, 160);
-currentYPos = drawPagedText(pdf, splitUpgrades, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitUpgrades, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -847,7 +857,7 @@ const cancellationRightText =
   "attorney's fee, court costs and all other expenses incurred by NMSW in making the collection. All " +
   "outstanding amounts not paid when due shall accumulate interest at the rate of 1.5% per month.";
 const splitCancellationRight = pdf.splitTextToSize(cancellationRightText, 160);
-currentYPos = drawPagedText(pdf, splitCancellationRight, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitCancellationRight, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -869,7 +879,7 @@ pdf.setFont('helvetica', 'normal');
 const terminationText =
   'In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:';
 const splitTermination = pdf.splitTextToSize(terminationText, 160);
-currentYPos = drawPagedText(pdf, splitTermination, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitTermination, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -907,7 +917,7 @@ memberships are non-refundable, non-transferable, non-assignable and non-proprie
 const splitResignation = pdf.splitTextToSize(resignationText, 150);
 
 // 5) Draw the body text with automatic page breaks
-currentYPos = drawPagedText(pdf, splitResignation, 40, currentYPos);
+currentYPos = drawPagedText(pdf, splitResignation, 30, currentYPos);
 
 // ——— Initials for Resignation Policy ———
 // 6) If this section needs initials, render them 5 pts below the last line
@@ -919,7 +929,7 @@ if (initialedSections?.resignation && signatureData?.initials?.text) {
   }
 
   pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
   pdf.setFont('helvetica', 'normal');
 }
 
@@ -956,7 +966,7 @@ const medicalText =
   'monthly, dues will be refunded for the month in which written notification is received of the death ' +
   'or disability and the proper documentation outlined above has been provided.';
 const splitMedical = pdf.splitTextToSize(medicalText, 150);
-currentYPos = drawPagedText(pdf, splitMedical, 40, currentYPos);
+currentYPos = drawPagedText(pdf, splitMedical, 30, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -985,30 +995,32 @@ const membershipTermsParagraph1 =
   'By submitting this application, the member acknowledges that NMSW reserves the right to refuse ' +
   'membership, or to terminate this agreement at any time without notice. Member agrees to abide by ' +
   'the Corporate Member Regulations and by NMSW Membership Policies as they exist or may be amended ' +
-  'from time-to-time.';
+  'from time-to-time.'.trim();
+
 const splitTerms1 = pdf.splitTextToSize(membershipTermsParagraph1, 160);
 
 // Draw first paragraph with pagination
-currentYPos = drawPagedText(pdf, splitTerms1, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitTerms1, 20, currentYPos);
 
 // 4) Fixed 5 pt gap between paragraphs
 currentYPos += 5;
 
 // Second paragraph
-const membershipTermsParagraph2 =
-  'Furthermore, member understands that should member\'s account balance become more than 60‑days past due, ' +
-  'NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for ' +
-  'unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred. ' +
-  'Member recognizes the inherent risks of participating in an exercise program and hereby holds NMSW harmless ' +
-  'from any and all injuries member, and/or member\'s family might incur in connection with member\'s membership ' +
-  'activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions. ' +
-  'Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership ' +
-  'dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities ' +
-  'or programs of the club.';
+      const membershipTermsParagraph2 = 
+      `Furthermore, member understands that should member's account balance become more than 60-days past due, ` +
+`NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for ` +
+  `unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred.  ` +
+  `Member recognizes the inherent risks of participating in an exercise program and hereby holds NMSW harmless  ` +
+  `from any and all injuries member, and/or member\'s family might incur in connection with member\'s membership  ` +
+  `activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions.  ` +
+  `Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership  ` +
+  `dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities ` +
+  `or programs of the club.`.trim();
+
 const splitTerms2 = pdf.splitTextToSize(membershipTermsParagraph2, 160);
 
 // Draw second paragraph with pagination
-currentYPos = drawPagedText(pdf, splitTerms2, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitTerms2, 20, currentYPos);
 
 // 5) Fixed 5 pt gap before next section
 currentYPos += 5;
@@ -1033,7 +1045,7 @@ const mbrCardText =
   'Cards are not transferable to another person. There will be a replacement fee for each ' +
   'lost card. I acknowledge that I am responsible for all charges incurred on my membership card.';
 const splitmbrCardText = pdf.splitTextToSize(mbrCardText, 160);
-currentYPos = drawPagedText(pdf, splitmbrCardText, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitmbrCardText, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1054,7 +1066,7 @@ pdf.setFont('helvetica', 'normal');
 const indemnificationText =
   'Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in NMSW.';
 const splitIndemnification = pdf.splitTextToSize(indemnificationText, 160);
-currentYPos = drawPagedText(pdf, splitIndemnification, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitIndemnification, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1086,7 +1098,7 @@ const leaveOfAbsencePolicyText =
 
       
 const splitleaveOfAbsencePolicyText = pdf.splitTextToSize(leaveOfAbsencePolicyText, 160);
-currentYPos = drawPagedText(pdf, splitleaveOfAbsencePolicyText, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitleaveOfAbsencePolicyText, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1111,7 +1123,7 @@ const personalTrainerPolicyText =
   'to reduce the potential for injury.';
       
 const splitpersonalTrainerPolicyText = pdf.splitTextToSize(personalTrainerPolicyText, 160);
-currentYPos = drawPagedText(pdf, splitpersonalTrainerPolicyText, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitpersonalTrainerPolicyText, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1137,7 +1149,7 @@ const emergencyMedicalPolicyText =
 
       
 const splitemergencyMedicalPolicyText = pdf.splitTextToSize(emergencyMedicalPolicyText, 160);
-currentYPos = drawPagedText(pdf, splitemergencyMedicalPolicyText, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitemergencyMedicalPolicyText, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1161,7 +1173,7 @@ const amendmentPolicyText =
   'new conditions as it may deem necessary for the proper management of the clubs and the business.';
 
 const splitamendmentPolicyText  = pdf.splitTextToSize(amendmentPolicyText , 160);
-currentYPos = drawPagedText(pdf, splitamendmentPolicyText , 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitamendmentPolicyText , 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1189,7 +1201,7 @@ const facilityUnavailabilityPolicyText =
 
 
 const splitfacilityUnavailabilityPolicyText  = pdf.splitTextToSize(facilityUnavailabilityPolicyText , 160);
-currentYPos = drawPagedText(pdf, splitfacilityUnavailabilityPolicyText , 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitfacilityUnavailabilityPolicyText , 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1225,7 +1237,7 @@ const healthWarrantyText =
 
 
 const splithealthWarrantyText = pdf.splitTextToSize(healthWarrantyText , 160);
-currentYPos = drawPagedText(pdf, splithealthWarrantyText , 30, currentYPos);
+currentYPos = drawPagedText(pdf, splithealthWarrantyText , 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1245,11 +1257,11 @@ pdf.text('14. DAMAGE TO FACILITIES', 20, currentYPos);
 currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
-const damageText = `I agree to pay for any damage that I, my family or my Guests may cause this club's facilities through careless or negligent use thereof.`.trim;
+const damageText = `I agree to pay for any damage that I, my family or my Guests may cause this club's facilities through careless or negligent use thereof.`.trim();
 
 
 const splitdamageText = pdf.splitTextToSize(damageText , 160);
-currentYPos = drawPagedText(pdf, splitdamageText , 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitdamageText , 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1277,7 +1289,7 @@ const liabilityPropertyText =
   'valuables on NMSW premises. Signs are posted throughout the club and are strictly enforced.';
 
 const splitliabilityPropertyText = pdf.splitTextToSize(liabilityPropertyText , 160);
-currentYPos = drawPagedText(pdf, splitliabilityPropertyText , 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitliabilityPropertyText , 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1309,7 +1321,7 @@ const assumptionOfRiskText =
 
 
 const splitassumptionOfRiskText = pdf.splitTextToSize(assumptionOfRiskText , 160);
-currentYPos = drawPagedText(pdf, splitassumptionOfRiskText, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitassumptionOfRiskText, 20, currentYPos);
 
 // only add your fixed 5pt gap
 currentYPos += 5;
@@ -1340,7 +1352,7 @@ const mediaReleaseText1 =
   'still photographs, motion picture, video, sound recordings and/or testimonials of me and/or any ' +
   'family member, ward or guest.';
 const splitMedia1 = pdf.splitTextToSize(mediaReleaseText1, 160);
-currentYPos = drawPagedText(pdf, splitMedia1, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitMedia1, 20, currentYPos);
 currentYPos += 5; // gap before next paragraph
 
 // Paragraph 2
@@ -1352,7 +1364,7 @@ const mediaReleaseText2 =
   'waive any right to royalties or other compensation arising from or related to the use of the ' +
   'photographs, electronic matter, and/or finished matter.';
 const splitMedia2 = pdf.splitTextToSize(mediaReleaseText2, 160);
-currentYPos = drawPagedText(pdf, splitMedia2, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitMedia2, 20, currentYPos);
 currentYPos += 5; // gap before next paragraph
 
 // Paragraph 3 (communications consent)
@@ -1363,7 +1375,7 @@ const communicationsConsentText3 =
   'goods or services from Wellbridge. I understand that I may revoke this consent by following the ' +
   "'opt-out' procedures presented upon receiving a Call.";
 const splitComm = pdf.splitTextToSize(communicationsConsentText3, 160);
-currentYPos = drawPagedText(pdf, splitComm, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitComm, 20, currentYPos);
 
 // 4) Fixed 5 pt gap before next section
 currentYPos += 5;
@@ -1432,11 +1444,11 @@ if (initialedSections?.corporate && signatureData?.initials?.text) {
   }
 
   pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
   pdf.setFont('helvetica', 'normal');
 
   // 6b) Advance cursor past initials gap
-  currentYPos += 10; // 5 pts for initials + 5 pts before next section
+  currentYPos += 15; // 10 pts for initials + 5 pts before next section
 } else {
   // no initials, just leave a 5 pt gap
   currentYPos += 5;
@@ -1468,7 +1480,7 @@ const sypText1 =
   '$10 until my rate reaches the then current rate. I also understand that my rate may also change ' +
   'for any other upgrades or downgrades of the membership that I may initiate.';
 const splitSyp1 = pdf.splitTextToSize(sypText1, 160);
-currentYPos = drawPagedText(pdf, splitSyp1, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitSyp1, 20, currentYPos);
 
 // 2) Fixed 5 pt gap before next paragraph
 currentYPos += 5;
@@ -1481,20 +1493,12 @@ const sypText2 =
   'per month until the proper documentation is provided. The club will not issue a dues credit for any ' +
   'portion of the additional charges once billed.';
 const splitSyp2 = pdf.splitTextToSize(sypText2, 160);
-currentYPos = drawPagedText(pdf, splitSyp2, 30, currentYPos);
+currentYPos = drawPagedText(pdf, splitSyp2, 20, currentYPos);
 
 // 3) Fixed 5 pt gap before next paragraph
 currentYPos += 5;
 
-// Paragraph 3
-const sypText3 =
-  'As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, ' +
-  'assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships ' +
-  'and other entities with which it is or may in the future become affiliated. The terms and conditions ' +
-  'contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW ' +
-  'and the member, and no oral promises are made a part of it.';
-const splitSyp3 = pdf.splitTextToSize(sypText3, 160);
-currentYPos = drawPagedText(pdf, splitSyp3, 30, currentYPos);
+
 
 // ——— Initials for SYP Discount Section ———
 // 6) If this section needs initials, render them 5 pts below the last line
@@ -1506,17 +1510,29 @@ if (initialedSections?.syp && signatureData?.initials?.text) {
   }
 
   pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 30, currentYPos + 5);
+  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
   pdf.setFont('helvetica', 'normal');
 
   // 6b) Advance cursor past initials gap
-  currentYPos += 10; // 5 pts for initials + 5 pts before next section
+  currentYPos += 15; // 10 pts for initials + 5 pts before next section
 } else {
   // no initials, just leave a 5 pt gap
   currentYPos += 5;
 }
 
+      // Paragraph 3
+const sypText3 =
+  'As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, ' +
+  'assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships ' +
+  'and other entities with which it is or may in the future become affiliated. The terms and conditions ' +
+  'contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW ' +
+  'and the member, and no oral promises are made a part of it.';
+const splitSyp3 = pdf.splitTextToSize(sypText3, 160);
+currentYPos = drawPagedText(pdf, splitSyp3, 20, currentYPos);
 
+     // Fixed 5 pt gap before next paragraph
+currentYPos += 5;
+      
 // 5) Overflow check before the next header
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -1538,47 +1554,53 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
       
-      const signatureText = 'By signing below, I acknowledge that I have read and understand this agreement along with the terms and conditions contained in this document and agree to abide by the rules and regulations of New Mexico Sports and Wellness.';
+      const signatureText =
+        'By signing below, I acknowledge that I have read and understand this agreement along ' +
+        'with the terms and conditions contained in this document and agree to abide by the ' +
+        'rules and regulations of New Mexico Sports and Wellness.';
       
       const splitSignatureText = pdf.splitTextToSize(signatureText, 170);
       pdf.text(splitSignatureText, 20, currentYPos);
       
-      // Update position for signature lines with some spacing - reduced spacing
+      // Advance past the signature paragraph
       currentYPos += (splitSignatureText.length * 5) + 10;
       
-      // Signature line
+      // Member Signature field
       if (signatureData?.signature?.text) {
+        // Render the actual signature text
         pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
         pdf.setFontSize(14);
         pdf.text(signatureData.signature.text, 60, currentYPos);
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(10);
+             // Fixed 5 pt gap before signature line
+        currentYPos += 5;
+                // Draw the signature line “Draw a horizontal line from (x=20, y=currentYPos) over to (x=100, y=currentYPos).”
+        pdf.line(20, currentYPos, 100, currentYPos);
+        pdf.setFontSize(10);
         pdf.text('Member Signature', 60, currentYPos + 5);
       } else {
-        // Just draw a line for signature
+        // Draw the signature line
         pdf.line(20, currentYPos, 100, currentYPos);
         pdf.setFontSize(10);
         pdf.text('Member Signature', 60, currentYPos + 5);
       }
       
-      // Date
+      // Date field for member signature
       if (signatureDate) {
         pdf.text(signatureDate, 150, currentYPos);
+                // Draw the signature line
+        pdf.line(20, currentYPos, 100, currentYPos);
+        pdf.setFontSize(10);
+        pdf.text('Member Signature', 60, currentYPos + 5);
       } else {
         pdf.line(120, currentYPos, 180, currentYPos);
       }
       pdf.text('Date', 150, currentYPos + 5);
       
-      // Club Representative signature
-      currentYPos += 15;
-      pdf.line(20, currentYPos, 100, currentYPos);
-      pdf.text('Club Representative', 60, currentYPos + 5);
+
       
-      // Date for club signature
-      pdf.line(120, currentYPos, 180, currentYPos);
-      pdf.text('Date', 150, currentYPos + 5);
-      
-      // Add page numbers
+      // Add page numbers to footer
       const pageCount = pdf.internal.getNumberOfPages();
       for (let i = 1; i <= pageCount; i++) {
         pdf.setPage(i);
@@ -1586,21 +1608,21 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
         pdf.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
       }
       
-      // Save the PDF
+      // Save the PDF file
       const fileName = `${formData.lastName || 'Member'}_${formData.firstName || ''}_membership_agreement.pdf`;
       pdf.save(fileName);
       
       setIsGenerating(false);
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error('Error generating PDF:', error);
       setIsGenerating(false);
       alert(`Canvas PDF Generation Error: ${error.message || 'Unknown error'}`);
     }
   };
   
   return (
-    <button 
-      className="canvas-pdf-button" 
+    <button
+      className="canvas-pdf-button"
       onClick={generatePDF}
       disabled={isGenerating || !formData || !signatureData}
     >
