@@ -540,8 +540,8 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         pdf.setFont('helvetica', 'bold');
         pdf.text('MONTH-TO-MONTH', 20, currentYPos);
       
-        // Added spacing after section header
-        currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
       
         pdf.setFont('helvetica', 'normal');
         const monthToMonthText = 
@@ -568,7 +568,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         // Update position for next subsection - reduced space
         const totalAdvance = paragraphHeight + 5 + (initialedSections?.monthToMonth ? 5 : 0);
 
-        currentYPos += totalAdvance + 5;
+        currentYPos += totalAdvance;
       
         // Check if we need a new page for the Extended Plan section
         if (currentYPos > 230) {
@@ -587,73 +587,59 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         pdf.setFont('helvetica', 'bold');
         pdf.text('EXTENDED PLAN', 20, currentYPos);
 
-        // 2) Gap after header
-        currentYPos += 3;
+        // 2) Small gap after header - removing this lays the header on top of the text paragraph
+        currentYPos += 5;
 
         // 3) Body text
         pdf.setFont('helvetica', 'normal');
-        const extendedPlanText = 
-  'I elect to pay for the number of selected months on this agreement for consecutive ' +
-  'months of member dues plus any club charges (if applicable) made by myself or any other ' +
-  'persons included in my membership. I understand that I am committing to a minimum ' +
-  'three (3) month membership. The three (3) month period commences on the 1st of the month ' +
-  'following the date the membership begins. Member acknowledges that in order to be relieved ' +
-  'of the agreement terms, the balance of the dues owed for the remaining months of the ' +
-  'agreement must be paid in full. Special consideration can be made if cause for cancellation ' +
-  'is based on a medical contingency and written authorization from a doctor is received; or ' +
-  'if a member moves 50 miles or more away from the nearest New Mexico Sports and Wellness ' +
-  'with proof of new residency. Any Leave of Absence taken during the initial term of this ' +
-  'agreement will extend the commitment by the number of months the member\'s account is on ' +
-  'Leave of Absence. Rate for Student/Young Professional memberships will only be honored ' +
-  'through the current maximum age for this type of membership regardless of whether the ' +
-  'number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT ' +
-  'PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation ' +
-  'Policy (Item 4A) applies. I authorize NMSW to collect payment under the method of payment ' +
-  'indicated on the agreement and the balance of the remaining dues owed should I not satisfy ' +
-  'the terms of the agreement.';
+        const extendedPlanText =
+          'I elect to pay for the number of selected months on this agreement for consecutive ' +
+          'months of member dues plus any club charges (if applicable) made by myself or any other ' +
+          'persons included in my membership. I understand that I am committing to a minimum ' +
+          'three (3) month membership. The three (3) month period commences on the 1st of the month ' +
+          'following the date the membership begins. Member acknowledges that in order to be relieved ' +
+          'of the agreement terms, the balance of the dues owed for the remaining months of the ' +
+          'agreement must be paid in full. Special consideration can be made if cause for cancellation ' +
+          'is based on a medical contingency and written authorization from a doctor is received; or ' +
+          'if a member moves 50 miles or more away from the nearest New Mexico Sports and Wellness ' +
+          'with proof of new residency. Any Leave of Absence taken during the initial term of this ' +
+          'agreement will extend the commitment by the number of months the member\'s account is on ' +
+          'Leave of Absence. Rate for Student/Young Professional memberships will only be honored ' +
+          'through the current maximum age for this type of membership regardless of whether the ' +
+          'number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT ' +
+          'PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation ' +
+          'Policy (Item 4A) applies. I authorize NMSW to collect payment under the method of payment ' +
+          'indicated on the agreement and the balance of the remaining dues owed should I not satisfy ' +
+          'the terms of the agreement.';
 
   
         const splitExtendedPlan = pdf.splitTextToSize(extendedPlanText, 170);
 
-        // Use our helper to draw and page‑break
+        // (header + drawPagedText omitted for brevity)
         currentYPos = drawPagedText(pdf, splitExtendedPlan, 20, currentYPos);
 
-        // 4) Compute paragraphHeight **locally** for this block
-        const paragraphHeight = splitExtendedPlan.length * 5;
-
-        // 5) Initials 5 units below
+        // 5) Initials 5 pts up (so they sit right against the last line)
         if (initialedSections?.extendedPlan && signatureData?.initials?.text) {
-          // page‑break check before initials
+          // page‑overflow check
           if (currentYPos + 5 > pdf.internal.pageSize.getHeight() - 20) {
             pdf.addPage();
             currentYPos = 20;
           }
 
-
           pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
-          pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos +5);
+          // place initials 5pts above currentYPos
+          pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
           pdf.setFont('helvetica', 'normal');
-
-          // advance past initials
-          currentYPos += 5;
         }
 
-        // 6) Extra 5‑unit gap before next section
-  // now advance Y by:
-  //   paragraphHeight       // the height of the text
-  // + 5                     // gap between text and initials
-  // + (initialed ? 5 : 0)   // extra gap if initials were drawn
-  // + 5                     // final gap before next section
-  const totalAdvance = paragraphHeight  + 5  + (initialedSections?.extendedPlan ? 5 : 0) ;
+        // 6) Now advance by 15pts total: 5 for that “lift,” +10 for gap before refund
+        currentYPos += 15;
 
-  currentYPos += totalAdvance +5;
-
-        // 7) Overflow check for the next header
+        // overflow check again, if needed
         if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
           pdf.addPage();
           currentYPos = 20;
         }
-
       }
       
 
@@ -661,9 +647,10 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
 
 
 
-// ——— REFUND PARAGRAPH ———
+      // ——— REFUND PARAGRAPH ———
+      // (no extra currentYPos += 5 here—it's already included above)
 // 1) Body text
-pdf.setFont('helvetica', 'normal');
+      pdf.setFont('helvetica', 'normal');
 const refundText = 
   'Except as expressly provided in this Membership Agreement, no portion of the initial fee ' +
   'or monthly membership dues is refundable, regardless of whether member attends or uses, ' +
@@ -671,16 +658,11 @@ const refundText =
 
 const splitRefundText = pdf.splitTextToSize(refundText, 170);
 
-// 2) Draw and paginate
+// drawPagedText already moved you past the text
 currentYPos = drawPagedText(pdf, splitRefundText, 20, currentYPos);
 
-// 3) Compute paragraphHeight
-const paragraphHeightRefund = splitRefundText.length * 5;
-
-// 4) Advance Y by paragraph + fixed gaps (no initials here)
-currentYPos += paragraphHeightRefund    // height of text
-              + 5                      // gap where initials would go
-              + 5;                     // final gap before next header
+// now only add the fixed 5pt gap before the next header
+currentYPos += 5;
 
 // 5) Overflow check
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
@@ -693,8 +675,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 pdf.setFont('helvetica', 'bold');
 pdf.text('C. PAID-IN-FULL', 20, currentYPos);
 
-// 2) Small gap after header
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 // 3) Body text
 pdf.setFont('helvetica', 'normal');
@@ -713,11 +695,8 @@ const splitPaidInFull = pdf.splitTextToSize(paidInFullText, 160);
 // 4) Draw and paginate
 currentYPos = drawPagedText(pdf, splitPaidInFull, 30, currentYPos);
 
-// 5) Compute paragraphHeight
-const paragraphHeightPaid = splitPaidInFull.length * 5;
-
-// 6) Advance Y by paragraph + fixed gaps
-currentYPos += paragraphHeightPaid + 5 + 5;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 // 7) Overflow check for next header
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
@@ -731,7 +710,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— D. EFT Section ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('D. EFT', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const eftText = 
@@ -744,8 +724,9 @@ const eftText =
 const splitEFT = pdf.splitTextToSize(eftText, 160);
 currentYPos = drawPagedText(pdf, splitEFT, 30, currentYPos);
 
-const paragraphHeightEFT = splitEFT.length * 5;
-currentYPos += paragraphHeightEFT + 10;
+// currentYPos now at bottom of EFT text
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -755,7 +736,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— E. DELINQUENT ACCOUNTS Section ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('E. DELINQUENT ACCOUNTS', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const delinquentText = 
@@ -766,8 +748,9 @@ const delinquentText =
 const splitDelinquent = pdf.splitTextToSize(delinquentText, 160);
 currentYPos = drawPagedText(pdf, splitDelinquent, 30, currentYPos);
 
-const paragraphHeightDelq = splitDelinquent.length * 5;
-currentYPos += paragraphHeightDelq + 10;
+// currentYPos now at bottom of EFT text
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -777,7 +760,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— F. REFERRALS Section ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('F. REFERRALS', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const referralsText = 
@@ -787,8 +771,8 @@ const referralsText =
 const splitReferrals = pdf.splitTextToSize(referralsText, 160);
 currentYPos = drawPagedText(pdf, splitReferrals, 30, currentYPos);
 
-const paragraphHeightRef = splitReferrals.length * 5;
-currentYPos += paragraphHeightRef + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -798,7 +782,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— G. EMAIL Section ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('G. EMAIL', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const emailText = 
@@ -808,8 +793,8 @@ const emailText =
 const splitEmail = pdf.splitTextToSize(emailText, 160);
 currentYPos = drawPagedText(pdf, splitEmail, 30, currentYPos);
 
-const paragraphHeightEmail = splitEmail.length * 5;
-currentYPos += paragraphHeightEmail + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -819,7 +804,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— 2. UPGRADES/DOWNGRADES Section ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('2. UPGRADES/DOWNGRADES', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const upgradesText = 
@@ -831,8 +817,8 @@ const upgradesText =
 const splitUpgrades = pdf.splitTextToSize(upgradesText, 160);
 currentYPos = drawPagedText(pdf, splitUpgrades, 30, currentYPos);
 
-const paragraphHeightUpg = splitUpgrades.length * 5;
-currentYPos += paragraphHeightUpg + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -843,7 +829,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
  // ——— 3. CLUB’S RIGHT OF CANCELLATION ———
 pdf.setFont('helvetica', 'bold');
 pdf.text("3. CLUB'S RIGHT OF CANCELLATION", 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const cancellationRightText =
@@ -857,8 +844,8 @@ const cancellationRightText =
 const splitCancellationRight = pdf.splitTextToSize(cancellationRightText, 160);
 currentYPos = drawPagedText(pdf, splitCancellationRight, 30, currentYPos);
 
-const paragraphHeightCancel = splitCancellationRight.length * 5;
-currentYPos += paragraphHeightCancel + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -868,7 +855,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— 4. TERMINATION/RESIGNATION RIGHTS ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('4. TERMINATION/RESIGNATION RIGHTS', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const terminationText =
@@ -876,8 +864,8 @@ const terminationText =
 const splitTermination = pdf.splitTextToSize(terminationText, 160);
 currentYPos = drawPagedText(pdf, splitTermination, 30, currentYPos);
 
-const paragraphHeightTerm = splitTermination.length * 5;
-currentYPos += paragraphHeightTerm + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -887,7 +875,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— A. RESIGNATION POLICY ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('A. RESIGNATION POLICY', 30, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const resignationText =
@@ -899,8 +888,8 @@ const resignationText =
 const splitResignation = pdf.splitTextToSize(resignationText, 150);
 currentYPos = drawPagedText(pdf, splitResignation, 40, currentYPos);
 
-const paragraphHeightResign = splitResignation.length * 5;
-currentYPos += paragraphHeightResign + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -910,7 +899,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— B. MEDICAL TERMINATION ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('B. MEDICAL TERMINATION', 30, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const medicalText =
@@ -923,8 +913,8 @@ const medicalText =
 const splitMedical = pdf.splitTextToSize(medicalText, 150);
 currentYPos = drawPagedText(pdf, splitMedical, 40, currentYPos);
 
-const paragraphHeightMedical = splitMedical.length * 5;
-currentYPos += paragraphHeightMedical + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -935,7 +925,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— C. RELOCATION ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('C. RELOCATION', 30, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const relocationText =
@@ -948,8 +939,8 @@ const relocationText =
 const splitRelocation = pdf.splitTextToSize(relocationText, 150);
 currentYPos = drawPagedText(pdf, splitRelocation, 40, currentYPos);
 
-const paragraphHeightReloc = splitRelocation.length * 5;
-currentYPos += paragraphHeightReloc + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -959,7 +950,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— 5. TEMPORARY ABSENCE (LEAVE OF ABSENCE) ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('5. TEMPORARY ABSENCE (LEAVE OF ABSENCE)', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const temporaryAbsenceText =
@@ -977,8 +969,8 @@ const temporaryAbsenceText =
 const splitTemporaryAbsence = pdf.splitTextToSize(temporaryAbsenceText, 160);
 currentYPos = drawPagedText(pdf, splitTemporaryAbsence, 30, currentYPos);
 
-const paragraphHeightTemp = splitTemporaryAbsence.length * 5;
-currentYPos += paragraphHeightTemp + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -988,7 +980,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— 6. DEATH ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('6. DEATH', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const deathText =
@@ -1000,8 +993,8 @@ const deathText =
 const splitDeath = pdf.splitTextToSize(deathText, 160);
 currentYPos = drawPagedText(pdf, splitDeath, 30, currentYPos);
 
-const paragraphHeightDeath = splitDeath.length * 5;
-currentYPos += paragraphHeightDeath + 10;
+// only add your fixed 5pt gap
+currentYPos += 5;
 
 if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
   pdf.addPage();
@@ -1011,7 +1004,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 // ——— 7. INDEMNIFICATION AND RISK ———
 pdf.setFont('helvetica', 'bold');
 pdf.text('7. INDEMNIFICATION AND RISK', 20, currentYPos);
-currentYPos += 3;
+// 2) Small gap after header - removing this lays the header on top of the text paragraph
+currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const indemnificationText =
