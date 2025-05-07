@@ -738,12 +738,12 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const eftText = 
-  'All dues and Member charges will be payable monthly (with the exception of annual ' +
-  'dues prepayments) and collected by Electronic Funds Transfer (EFT) from either the ' +
-  'Member\'s bank account or charged to an approved credit card. Please notify New ' +
-  'Mexico Sports and Wellness (NMSW) at the time you change bank accounts or credit ' +
-  'cards and provide the appropriate information to avoid having your old account charged ' +
-  'for your monthly dues.';
+  `All dues and Member charges will be payable monthly (with the exception of annual ` +
+  `dues prepayments) and collected by Electronic Funds Transfer (EFT) from either the ` +
+  `Member's bank account or charged to an approved credit card. Please notify ${getClubName()} ` +
+  `(${getClubAbbreviation()}) at the time you change bank accounts or credit ` +
+  `cards and provide the appropriate information to avoid having your old account charged ` +
+  `for your monthly dues.`;
 const splitEFT = pdf.splitTextToSize(eftText, 160);
 currentYPos = drawPagedText(pdf, splitEFT, 20, currentYPos);
 
@@ -788,9 +788,9 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const referralsText = 
-  'If a dues referral program is in effect, it will not extend or modify the terms of ' +
-  'the membership agreement. Any Member in default of payment due may NOT cure the default ' +
-  'by way of credit for "referral" members to New Mexico Sports and Wellness.';
+  `If a dues referral program is in effect, it will not extend or modify the terms of ` +
+  `the membership agreement. Any Member in default of payment due may NOT cure the default ` +
+  `by way of credit for "referral" members to ${getClubName()}.`;
 const splitReferrals = pdf.splitTextToSize(referralsText, 160);
 currentYPos = drawPagedText(pdf, splitReferrals, 20, currentYPos);
 
@@ -810,9 +810,9 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const emailText = 
-  'By providing my email address, I am consenting to receive information via email from ' +
-  'New Mexico Sports and Wellness, The Wellbridge Company and their affiliated companies. ' +
-  'Any further distribution of my email address is unauthorized.';
+  `By providing my email address, I am consenting to receive information via email from ` +
+  `${getClubName()}, The Wellbridge Company and their affiliated companies. ` +
+  `Any further distribution of my email address is unauthorized.`;
 const splitEmail = pdf.splitTextToSize(emailText, 160);
 currentYPos = drawPagedText(pdf, splitEmail, 20, currentYPos);
 
@@ -857,13 +857,13 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const cancellationRightText =
-  "Management of NMSW may suspend or cancel the rights, privileges or membership of any Member whose " +
-  "actions are detrimental to the facility or do not comply with the rules and regulations of the facility " +
-  "or upon any failure of a Member to make payment to NMSW of all amounts due from the Member within sixty " +
-  "(60) days after billed. NMSW has the option of declaring any other indebtedness of the Member to NMSW " +
-  "immediately due and payable, without notice or demand. The Member agrees to pay NMSW a reasonable " +
-  "attorney's fee, court costs and all other expenses incurred by NMSW in making the collection. All " +
-  "outstanding amounts not paid when due shall accumulate interest at the rate of 1.5% per month.";
+  `Management of ${getClubAbbreviation()} may suspend or cancel the rights, privileges or membership of any Member whose ` +
+  `actions are detrimental to the facility or do not comply with the rules and regulations of the facility ` +
+  `upon any failure of a Member to make payment to ${getClubAbbreviation()} of all amounts due from the Member within sixty ` +
+  `(60) days after billed. ${getClubAbbreviation()} has the option of declaring any other indebtedness of the Member to ${getClubAbbreviation()} ` +
+  `immediately due and payable, without notice or demand. The Member agrees to pay ${getClubAbbreviation()} a reasonable ` +
+  `attorney's fee, court costs and all other expenses incurred by ${getClubAbbreviation()} in making the collection. All ` +
+  `outstanding amounts not paid when due shall accumulate interest at the rate of 1.5% per month.`;
 const splitCancellationRight = pdf.splitTextToSize(cancellationRightText, 160);
 currentYPos = drawPagedText(pdf, splitCancellationRight, 20, currentYPos);
 
@@ -999,11 +999,11 @@ pdf.setFont('helvetica', 'normal');
 
 // First paragraph
 const membershipTermsParagraph1 =
-  'This membership contract is in force monthly upon payment of dues and other account charges. ' +
-  'By submitting this application, the member acknowledges that NMSW reserves the right to refuse ' +
-  'membership, or to terminate this agreement at any time without notice. Member agrees to abide by ' +
-  'the Corporate Member Regulations and by NMSW Membership Policies as they exist or may be amended ' +
-  'from time-to-time.'.trim();
+  `This membership contract is in force monthly upon payment of dues and other account charges. ` +
+  `By submitting this application, the member acknowledges that ${getClubAbbreviation()} reserves the right to refuse ` +
+  `membership, or to terminate this agreement at any time without notice. Member agrees to abide by ` +
+  `the Corporate Member Regulations and by ${getClubAbbreviation()} Membership Policies as they exist or may be amended ` +
+  `from time-to-time.`.trim();
 
 const splitTerms1 = pdf.splitTextToSize(membershipTermsParagraph1, 160);
 
@@ -1016,11 +1016,11 @@ currentYPos += 5;
 // Second paragraph
       const membershipTermsParagraph2 = 
       `Furthermore, member understands that should member's account balance become more than 60-days past due, ` +
-`NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for ` +
+`${getClubAbbreviation()} may cancel the membership at its sole discretion. If the collection process is commenced by ${getClubAbbreviation()} for ` +
   `unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred.  ` +
-  `Member recognizes the inherent risks of participating in an exercise program and hereby holds NMSW harmless  ` +
-  `from any and all injuries member, and/or member\'s family might incur in connection with member\'s membership  ` +
-  `activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions.  ` +
+  `Member recognizes the inherent risks of participating in an exercise program and hereby holds ${getClubAbbreviation()} harmless  ` +
+  `from any and all injuries member, and/or member's family might incur in connection with member's membership  ` +
+  `activities at ${getClubAbbreviation()}. This is our entire agreement; no verbal statements may alter or change its provisions.  ` +
   `Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership  ` +
   `dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities ` +
   `or programs of the club.`.trim();
@@ -1049,9 +1049,9 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const mbrCardText =
-'I understand cards are mandatory and must be presented prior to entering NMSW. ' +
-  'Cards are not transferable to another person. There will be a replacement fee for each ' +
-  'lost card. I acknowledge that I am responsible for all charges incurred on my membership card.';
+`I understand cards are mandatory and must be presented prior to entering ${getClubAbbreviation()}. ` +
+  `Cards are not transferable to another person. There will be a replacement fee for each ` +
+  `lost card. I acknowledge that I am responsible for all charges incurred on my membership card.`;
 const splitmbrCardText = pdf.splitTextToSize(mbrCardText, 160);
 currentYPos = drawPagedText(pdf, splitmbrCardText, 20, currentYPos);
 
@@ -1072,7 +1072,7 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const indemnificationText =
-  'Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in NMSW.';
+  `Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in ${getClubAbbreviation()}.`;
 const splitIndemnification = pdf.splitTextToSize(indemnificationText, 160);
 currentYPos = drawPagedText(pdf, splitIndemnification, 20, currentYPos);
 
@@ -1126,9 +1126,9 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const personalTrainerPolicyText =
-  'Personal trainers not employed by NMSW are not allowed to train or consult in any part of ' +
-  'the clubs due to NMSW\'s interest in ensuring the accuracy of information relayed, as well as ' +
-  'to reduce the potential for injury.';
+  `Personal trainers not employed by ${getClubAbbreviation()} are not allowed to train or consult in any part of ` +
+  `the clubs due to ${getClubAbbreviation()}'s interest in ensuring the accuracy of information relayed, as well as ` +
+  `to reduce the potential for injury.`;
       
 const splitpersonalTrainerPolicyText = pdf.splitTextToSize(personalTrainerPolicyText, 160);
 currentYPos = drawPagedText(pdf, splitpersonalTrainerPolicyText, 20, currentYPos);
@@ -1151,9 +1151,9 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const emergencyMedicalPolicyText =
-  'NMSW reserves the right to call emergency medical aid for an injured Member or guest ' +
-  'and said Member or guest accepts responsibility for any financial obligations arising ' +
-  'from such emergency medical aid or transportation to a medical facility.';
+  `${getClubAbbreviation()} reserves the right to call emergency medical aid for an injured Member or guest ` +
+  `and said Member or guest accepts responsibility for any financial obligations arising ` +
+  `from such emergency medical aid or transportation to a medical facility.`;
 
       
 const splitemergencyMedicalPolicyText = pdf.splitTextToSize(emergencyMedicalPolicyText, 160);
@@ -1177,8 +1177,8 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const amendmentPolicyText =
-  'I understand NMSW reserves the right to amend or add to these conditions and to adopt ' +
-  'new conditions as it may deem necessary for the proper management of the clubs and the business.';
+  `I understand ${getClubAbbreviation()} reserves the right to amend or add to these conditions and to adopt ` +
+  `new conditions as it may deem necessary for the proper management of the clubs and the business.`;
 
 const splitamendmentPolicyText  = pdf.splitTextToSize(amendmentPolicyText , 160);
 currentYPos = drawPagedText(pdf, splitamendmentPolicyText , 20, currentYPos);
@@ -1202,10 +1202,10 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const facilityUnavailabilityPolicyText =
-  'I agree to accept the fact that a particular facility or service in the premises ' +
-  'may be unavailable at any particular time due to mechanical breakdown, fire, act of ' +
-  'God, condemnation, loss of lease, catastrophe or any other reason. Further, I agree ' +
-  'not to hold NMSW responsible or liable for such occurrences.';
+  `I agree to accept the fact that a particular facility or service in the premises ` +
+  `may be unavailable at any particular time due to mechanical breakdown, fire, act of ` +
+  `God, condemnation, loss of lease, catastrophe or any other reason. Further, I agree ` +
+  `not to hold ${getClubAbbreviation()} responsible or liable for such occurrences.`;
 
 
 const splitfacilityUnavailabilityPolicyText  = pdf.splitTextToSize(facilityUnavailabilityPolicyText , 160);
@@ -1230,18 +1230,18 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const healthWarrantyText =
-  'I warrant and represent that I, any family member, ward or guest (each, a "Guest") who uses any ' +
-  'NMSW facility has no disability, impairment or illness preventing such person from engaging in ' +
-  'active or passive exercise or that will be detrimental or inimical to such person\'s health, ' +
-  'safety or physical condition. I acknowledge and agree that: (1) NMSW will rely on the foregoing ' +
-  'warranty in issuing my membership, (2) NMSW may perform a fitness assessment or similar testing ' +
-  'to establish my or my Guests\' initial physical statistics, (3) if any fitness or similar testing ' +
-  'is performed by NMSW, it is solely for the purpose of providing comparative data with which I or ' +
-  'my Guests may chart progress in a program and is not for any diagnostic purposes whatsoever, ' +
-  'and (4) NMSW shall not be subject to any claim or demand whatsoever on account of NMSW\'s evaluation ' +
-  'or interpretation of such fitness assessment or similar testing. I and my Guests are responsible ' +
-  'for understanding our respective medical history and should consult with a physician prior to ' +
-  'engaging in exercise or continuation of exercise if a medical condition appears to be developing.';
+  `I warrant and represent that I, any family member, ward or guest (each, a "Guest") who uses any ` +
+  `${getClubAbbreviation()} facility has no disability, impairment or illness preventing such person from engaging in ` +
+  `active or passive exercise or that will be detrimental or inimical to such person's health, ` +
+  `safety or physical condition. I acknowledge and agree that: (1) ${getClubAbbreviation()} will rely on the foregoing ` +
+  `warranty in issuing my membership, (2) ${getClubAbbreviation()} may perform a fitness assessment or similar testing ` +
+  `to establish my or my Guests' initial physical statistics, (3) if any fitness or similar testing ` +
+  `is performed by ${getClubAbbreviation()}, it is solely for the purpose of providing comparative data with which I or ` +
+  `my Guests may chart progress in a program and is not for any diagnostic purposes whatsoever, ` +
+  `and (4) ${getClubAbbreviation()} shall not be subject to any claim or demand whatsoever on account of ${getClubAbbreviation()}'s evaluation ` +
+  `or interpretation of such fitness assessment or similar testing. I and my Guests are responsible ` +
+  `for understanding our respective medical history and should consult with a physician prior to ` +
+  `engaging in exercise or continuation of exercise if a medical condition appears to be developing.`;
 
 
 const splithealthWarrantyText = pdf.splitTextToSize(healthWarrantyText , 160);
@@ -1291,10 +1291,10 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const liabilityPropertyText =
-  'I acknowledge that NMSW will not accept responsibility for theft, loss or damage to ' +
-  'personal property left in a locker or in NMSW or for theft, loss or damage to automobiles ' +
-  'or personal property left in NMSW parking lot. NMSW suggests that members do not bring ' +
-  'valuables on NMSW premises. Signs are posted throughout the club and are strictly enforced.';
+  `I acknowledge that ${getClubAbbreviation()} will not accept responsibility for theft, loss or damage to ` +
+  `personal property left in a locker or in ${getClubAbbreviation()} or for theft, loss or damage to automobiles ` +
+  `or personal property left in ${getClubAbbreviation()} parking lot. ${getClubAbbreviation()} suggests that members do not bring ` +
+  `valuables on ${getClubAbbreviation()} premises. Signs are posted throughout the club and are strictly enforced.`;
 
 const splitliabilityPropertyText = pdf.splitTextToSize(liabilityPropertyText , 160);
 currentYPos = drawPagedText(pdf, splitliabilityPropertyText , 20, currentYPos);
@@ -1319,13 +1319,13 @@ currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const assumptionOfRiskText =
-  'I agree, in attending and using the facilities and equipment therein, that I do so at my own risk. ' +
-  'NMSW shall not be liable for any damages arising from personal injuries sustained by me and/or my guest(s) ' +
-  'in, or about the premises. I assume full responsibility for any injuries or damages which may occur to me ' +
-  'in, on or about the premises, and I do hereby fully and forever release and discharge NMSW and all associated ' +
-  'owners, employees, and agents from any and all claims, demands, damages, rights of action or causes of action ' +
-  'present or future, whether the same be known or unknown, anticipated or unanticipated, resulting from or arising ' +
-  'out of my use or intended use of the said facilities and equipment thereof.';
+  `I agree, in attending and using the facilities and equipment therein, that I do so at my own risk. ` +
+  `${getClubAbbreviation()} shall not be liable for any damages arising from personal injuries sustained by me and/or my guest(s) ` +
+  `in, or about the premises. I assume full responsibility for any injuries or damages which may occur to me ` +
+  `in, on or about the premises, and I do hereby fully and forever release and discharge ${getClubAbbreviation()} and all associated ` +
+  `owners, employees, and agents from any and all claims, demands, damages, rights of action or causes of action ` +
+  `present or future, whether the same be known or unknown, anticipated or unanticipated, resulting from or arising ` +
+  `out of my use or intended use of the said facilities and equipment thereof.`;
 
 
 const splitassumptionOfRiskText = pdf.splitTextToSize(assumptionOfRiskText , 160);
@@ -1405,8 +1405,8 @@ currentYPos += 5;
 pdf.setFont('helvetica', 'bold');
 pdf.text('1.', 30, currentYPos);
 pdf.setFont('helvetica', 'normal');
-      const corpItem1 = 'Corporate members must be a W-2 paid employee or associate of a firm or approved organization ' +
-        'that has a corporate membership with NMSW, unless otherwise agreed to in writing.NMSW must be notified immediately of any change in employment status.';
+      const corpItem1 = `Corporate members must be a W-2 paid employee or associate of a firm or approved organization ` +
+        `that has a corporate membership with ${getClubAbbreviation()}, unless otherwise agreed to in writing.${getClubAbbreviation()} must be notified immediately of any change in employment status.`;
 const splitCorp1 = pdf.splitTextToSize(corpItem1, 150);
 currentYPos = drawPagedText(pdf, splitCorp1, 34, currentYPos);
 currentYPos += 5;
@@ -1415,9 +1415,9 @@ currentYPos += 5;
 pdf.setFont('helvetica', 'bold');
 pdf.text('2.', 30, currentYPos);
 pdf.setFont('helvetica', 'normal');
-      const corpItem2 = 'Discounts on monthly dues may change in accordance with the number or employees of the corporate firm ' +
-        'who belong to NMSW.I understand I will lose my corporate discount and will be readjusted to regular rates if my ' +
-        'employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.';
+      const corpItem2 = `Discounts on monthly dues may change in accordance with the number or employees of the corporate firm ` +
+        `who belong to ${getClubAbbreviation()}.I understand I will lose my corporate discount and will be readjusted to regular rates if my ` +
+        `employer drops below the minimum required number of participating employees for them to be eligible in the corporate discount program.`;
 const splitCorp2 = pdf.splitTextToSize(corpItem2, 150);
 currentYPos = drawPagedText(pdf, splitCorp2, 34, currentYPos);
 currentYPos += 5;
@@ -1426,8 +1426,8 @@ currentYPos += 5;
 pdf.setFont('helvetica', 'bold');
 pdf.text('3.', 30, currentYPos);
 pdf.setFont('helvetica', 'normal');
-      const corpItem3 = 'It is the member\'s responsibility to notify NMSW of any change in employment status. I understand that ' +
-        'I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.';
+      const corpItem3 = `It is the member's responsibility to notify ${getClubAbbreviation()} of any change in employment status. I understand that ` +
+        `I will be assessed appropriate monthly fees should I leave the above corporation/organization, or the corporation/organization drops its corporate membership.`;
 const splitCorp3 = pdf.splitTextToSize(corpItem3, 150);
 currentYPos = drawPagedText(pdf, splitCorp3, 34, currentYPos);
 currentYPos += 5;
@@ -1529,12 +1529,12 @@ if (initialedSections?.syp && signatureData?.initials?.text) {
 }
 
       // Paragraph 3
-const sypText3 =
-  'As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, ' +
-  'assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships ' +
-  'and other entities with which it is or may in the future become affiliated. The terms and conditions ' +
-  'contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW ' +
-  'and the member, and no oral promises are made a part of it.';
+      const sypText3 =
+  `As used herein, the abbreviation "${getClubAbbreviation()}" means ${getClubName()}, its successors, ` +
+  `assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships ` +
+  `and other entities with which it is or may in the future become affiliated. The terms and conditions ` +
+  `contained herein, along with the Rules and Regulations, constitute the full agreement between ${getClubAbbreviation()} ` +
+  `and the member, and no oral promises are made a part of it.`;
 const splitSyp3 = pdf.splitTextToSize(sypText3, 160);
 currentYPos = drawPagedText(pdf, splitSyp3, 20, currentYPos);
 
