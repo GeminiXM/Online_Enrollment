@@ -32,26 +32,14 @@ const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSe
   
   // Function to check if club is in New Mexico
   const isNewMexicoClub = () => {
-    console.log("Club detection - selectedClub:", selectedClub);
-    
-    // Important: Match the logic in ContractPage exactly
-    if (selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') {
-      console.log("Is New Mexico club based on selectedClub: true");
-      return true;
-    }
-    
-    console.log("Is New Mexico club: false (defaulting to Denver/Colorado)");
-    return false;
+    return selectedClub?.id?.toString().includes('NM') || 
+           selectedClub?.state === 'NM' ||
+           formData?.club?.toString().includes('NM');
   };
   
   // Function to get club name
   const getClubName = () => {
     return isNewMexicoClub() ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club';
-  };
-  
-  // Function to get club abbreviation
-  const getClubAbbreviation = () => {
-    return isNewMexicoClub() ? 'NMSW' : 'CAC';
   };
   
 /**
@@ -161,8 +149,12 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Add title based on club type
       pdf.setFontSize(18);
       pdf.setFont('helvetica', 'bold');
-      pdf.text(getClubName(), 105, 20, { align: 'center' });
-      pdf.text('Membership Agreement', 105, 30, { align: 'center' });
+      if (isNewMexicoClub()) {
+        pdf.text('New Mexico Sports and Wellness', 105, 20, { align: 'center' });
+        pdf.text('Membership Agreement', 105, 30, { align: 'center' });
+      } else {
+        pdf.text('Membership Agreement', 105, 20, { align: 'center' });
+      }
       
       // Member Information Section
       pdf.setFontSize(14);
@@ -406,8 +398,8 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Authorization text
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      const authText = `I hereby request and authorize ${getClubName()} to charge my account via Electronic Funds Transfer on a monthly basis beginning ${formatDate(formData.requestedStartDate) || ''}.`;
-      const additionalAuthText = `The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to ${getClubName()} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.`;
+      const authText = `I hereby request and authorize ${isNewMexicoClub() ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} to charge my account via Electronic Funds Transfer on a monthly basis beginning ${formatDate(formData.requestedStartDate) || ''}.`;
+      const additionalAuthText = `The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to ${isNewMexicoClub() ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.`;
       
       const splitAuthText = pdf.splitTextToSize(authText, 170);
       const splitAdditionalAuthText = pdf.splitTextToSize(additionalAuthText, 170);
@@ -472,18 +464,18 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       
-      const cancellationHeader = `${getClubName()} (${getClubAbbreviation()}) MONEY BACK GUARANTEE:`;
+      const cancellationHeader = "NEW MEXICO SPORTS AND WELLNESS (NMSW) MONEY BACK GUARANTEE:";
       pdf.text(cancellationHeader, 20, 45);
       
       // Cancellation terms
       pdf.setFont('helvetica', 'normal');
-      const cancellationText = `${getClubAbbreviation()} EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES ` +
-        `NOT APPLY TO AMOUNTS OWED BY MEMBER TO ${getClubAbbreviation()} UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS ` +
-        `INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO ${getClubName()} THAT ` +
-        `YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND ` +
-        `DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE ` +
-        `POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE ` +
-        `YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, ` +
+      const cancellationText = `NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES ` +
+        `NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS ` +
+        `INCLUDE THE DATE ON THIS AGREEMENT.YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO ` +
+        `SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND ` +
+        `DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB.A NOTICE IS DEEMED DELIVERED ON THE DATE ` +
+        `POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL.IF YOU PROPERLY EXERCISE ` +
+        `YOUR RIGHT TO RESCIND WITHIN 14 DAYS(NOT LATER THAN 5PM) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, ` +
         `YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
       
       const splitCancellationText = pdf.splitTextToSize(cancellationText, 170);
@@ -507,11 +499,11 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Agreement understanding text
       pdf.setFont('helvetica', 'normal');
       currentYPos += 5; // Reduced space
-      const agreementUnderstandingText = `I have read and understand this agreement along with the terms and conditions ` +
-        `contained on this document and will abide by the rules and regulations of ${getClubName()}. In addition, ` +
-        `I understand that the primary member represents all members and accepts all responsibility on the account and that all ` +
-        `memberships are non-transferable and non-assignable to another individual. By signing this document or sending this ` +
-        `by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.`;
+      const agreementUnderstandingText = "I have read and understand this agreement along with the terms and conditions " +
+        "contained on this document and will abide by the rules and regulations of New Mexico Sports & Wellness.In addition, " +
+        "I understand that the primary member represents all members and accepts all responsibility on the account and that all " +
+        "memberships are non - transferable and non - assignable to another individual.By signing this document or sending this " +
+        "by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.";
       
       const splitAgreementText = pdf.splitTextToSize(agreementUnderstandingText, 170);
       pdf.text(splitAgreementText, 20, currentYPos);
@@ -544,8 +536,8 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       
       currentYPos += (splitFeeStructureAText.length * 5) + 3; // Reduced space
       pdf.text('B.', 20, currentYPos);
-      const feeStructureBText = `The Member elects to purchase a membership and to pay ` +
-      `to ${getClubName()} (${getClubAbbreviation()}) the required total monthly dues as indicated on this agreement under one of the following scenarios: `;
+      const feeStructureBText = "The Member elects to purchase a membership and to pay " +
+      "to New Mexico Sports and Wellness(NMSW) the required total monthly dues as indicated on this agreement under one of the following scenarios: ";
       const splitFeeStructureBText = pdf.splitTextToSize(feeStructureBText, 160);
       pdf.text(splitFeeStructureBText, 30, currentYPos);
       
@@ -617,24 +609,24 @@ currentYPos += 5;
         // 3) Body text
         pdf.setFont('helvetica', 'normal');
         const extendedPlanText =
-          `I elect to pay for the number of selected months on this agreement for consecutive ` +
-          `months of member dues plus any club charges (if applicable) made by myself or any other ` +
-          `persons included in my membership. I understand that I am committing to a minimum ` +
-          `three (3) month membership. The three (3) month period commences on the 1st of the month ` +
-          `following the date the membership begins. Member acknowledges that in order to be relieved ` +
-          `of the agreement terms, the balance of the dues owed for the remaining months of the ` +
-          `agreement must be paid in full. Special consideration can be made if cause for cancellation ` +
-          `is based on a medical contingency and written authorization from a doctor is received; or ` +
-          `if a member moves 50 miles or more away from the nearest ${getClubName()} ` +
-          `with proof of new residency. Any Leave of Absence taken during the initial term of this ` +
-          `agreement will extend the commitment by the number of months the member's account is on ` +
-          `Leave of Absence. Rate for Student/Young Professional memberships will only be honored ` +
-          `through the current maximum age for this type of membership regardless of whether the ` +
-          `number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT ` +
-          `PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation ` +
-          `Policy (Item 4A) applies. I authorize ${getClubAbbreviation()} to collect payment under the method of payment ` +
-          `indicated on the agreement and the balance of the remaining dues owed should I not satisfy ` +
-          `the terms of the agreement.`;
+          'I elect to pay for the number of selected months on this agreement for consecutive ' +
+          'months of member dues plus any club charges (if applicable) made by myself or any other ' +
+          'persons included in my membership. I understand that I am committing to a minimum ' +
+          'three (3) month membership. The three (3) month period commences on the 1st of the month ' +
+          'following the date the membership begins. Member acknowledges that in order to be relieved ' +
+          'of the agreement terms, the balance of the dues owed for the remaining months of the ' +
+          'agreement must be paid in full. Special consideration can be made if cause for cancellation ' +
+          'is based on a medical contingency and written authorization from a doctor is received; or ' +
+          'if a member moves 50 miles or more away from the nearest New Mexico Sports and Wellness ' +
+          'with proof of new residency. Any Leave of Absence taken during the initial term of this ' +
+          'agreement will extend the commitment by the number of months the member\'s account is on ' +
+          'Leave of Absence. Rate for Student/Young Professional memberships will only be honored ' +
+          'through the current maximum age for this type of membership regardless of whether the ' +
+          'number of selected months on this agreement has expired or not. AT THE END OF THE AGREEMENT ' +
+          'PERIOD CHOSEN THIS PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation ' +
+          'Policy (Item 4A) applies. I authorize NMSW to collect payment under the method of payment ' +
+          'indicated on the agreement and the balance of the remaining dues owed should I not satisfy ' +
+          'the terms of the agreement.';
 
   
         const splitExtendedPlan = pdf.splitTextToSize(extendedPlanText, 170);
@@ -1563,9 +1555,9 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
       pdf.setFont('helvetica', 'normal');
       
       const signatureText =
-        `By signing below, I acknowledge that I have read and understand this agreement along ` +
-        `with the terms and conditions contained in this document and agree to abide by the ` +
-        `rules and regulations of ${getClubName()}.`;
+        'By signing below, I acknowledge that I have read and understand this agreement along ' +
+        'with the terms and conditions contained in this document and agree to abide by the ' +
+        'rules and regulations of New Mexico Sports and Wellness.';
       
       const splitSignatureText = pdf.splitTextToSize(signatureText, 170);
       pdf.text(splitSignatureText, 20, currentYPos);

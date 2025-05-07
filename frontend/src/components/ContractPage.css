@@ -596,8 +596,7 @@
 
 /* Date box next to signature */
 .contract-date-box {
-  border: 1px solid #aaa;
-  border-radius: 3px;
+
   padding: 5px 10px;
   width: 150px;
   text-align: center;
