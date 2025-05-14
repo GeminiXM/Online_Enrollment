@@ -1,12 +1,44 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
 const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub }) => {
-  const canvasRef = useRef(null);
+ 
   const [isGenerating, setIsGenerating] = useState(false);
   
+// Function to load custom fonts 
+  const loadFonts = async (pdf) =>
+  {
+    try {
+    // Adjust paths to where you store the fonts
+await pdf.addFont('../assets/fonts/GreatVibes-Regular.ttf', 'Great Vibes', 'cursive'); 
+await pdf.addFont('../assets/fonts/RougeScript-Regular.ttf', 'Rouge Script', 'cursive'); 
+  await pdf.addFont('../assets/fonts/Whisper-Regular.ttf', 'Whisper', 'cursive');
+  await pdf.addFont('../assets/fonts/OvertheRainbow-Regular.ttf', 'Over the Rainbow', 'cursive'); 
+  await pdf.addFont('../assets/fonts/LaBelleAurore-Regular.ttf', 'La Belle Aurore', 'cursive');
+  await pdf.addFont('../assets/fonts/BilboSwashCaps-Regular.ttf', 'Bilbo Swash Caps', 'cursive'); 
   
+      console.log('All fonts loaded successfully');
+      return true;
+    } catch (error) {
+      console.error('Error loading fonts:', error); return false;
+    }
+  }; 
+  
+  // Function to extract font name from signatureData 
+  const getSelectedFontName = () => {
+    if (!signatureData?.selectedFont?.font) return 'helvetica'; 
+    
+    // Extract the font name from format like "'Great Vibes', cursive" 
+    const fontMatch = signatureData.selectedFont.font.match(/'(\[^']+)'/) ||
+      signatureData.selectedFont.font.match(/"(\[^"]+)"/); 
+      
+    return fontMatch ? fontMatch[1] : 'helvetica';
+  };
+
+
+
+
   // Function to calculate cancellation date (14 days from start date)
   const calculateCancellationDate = (startDate) => {
     if (!startDate) return '';
@@ -154,6 +186,14 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         format: 'letter'
       });
       
+// Load custom fonts 
+const fontsLoaded = await loadFonts(pdf); 
+
+      // Get the selected font name from signatureData 
+      const selectedFontName = getSelectedFontName();
+      console.log('Using font:', selectedFontName);
+
+
       // Set font styles
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
@@ -188,8 +228,30 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         theme: 'grid',
         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
         margin: { left: 20, right: 20 }
+
+ 
+
       });
       
+       // Helper function to apply signature font to the document 
+        const applySignatureFont = () => {
+          try {
+            if (fontsLoaded) {
+              // Use the custom font if it was loaded successfully 
+              pdf.setFont(selectedFontName, 'normal');
+            } else {
+              // Fall back to times italic if custom fonts failed to load 
+              pdf.setFont('times', 'italic');
+            }
+            pdf.setFontSize(16); // Larger size for signature font 
+          } catch (error) {
+            console.error('Error applying signature font:', error);
+            pdf.setFont('times', 'italic'); // Fallback 
+          }
+        };
+
+
+
       // Contact Information
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
@@ -583,10 +645,12 @@ currentYPos += 5;
 
         // Display initials if section is initialed - with less spacing
         if (initialedSections?.monthToMonth && signatureData?.initials?.text) {
-          pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+          applySignatureFont();
+
           const initialsY = currentYPos + paragraphHeight;
           pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, initialsY);
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont('helvetica', 'normal'); // Reset font after signature
+
         }
       
         // Update position for next subsection - reduced space
@@ -650,10 +714,12 @@ currentYPos += 5;
             currentYPos = 20;
           }
 
-          pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+          applySignatureFont();
+
           // place initials 5pts above currentYPos
           pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
-          pdf.setFont('helvetica', 'normal');
+          pdf.setFont('helvetica', 'normal'); // Reset font after signature
+
         }
 
         // 6) Now advance by 15pts total: 5 for that “lift,” +10 for gap before refund
@@ -1451,9 +1517,10 @@ if (initialedSections?.corporate && signatureData?.initials?.text) {
     currentYPos = 20;
   }
 
-  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+  applySignatureFont();
+
   pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('helvetica', 'normal'); //Reset font
 
   // 6b) Advance cursor past initials gap
   currentYPos += 15; // 10 pts for initials + 5 pts before next section
@@ -1517,9 +1584,11 @@ if (initialedSections?.syp && signatureData?.initials?.text) {
     currentYPos = 20;
   }
 
-  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+    applySignatureFont();
+
   pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont('helvetica', 'normal'); //Reset font
+
 
   // 6b) Advance cursor past initials gap
   currentYPos += 15; // 10 pts for initials + 5 pts before next section
@@ -1576,7 +1645,7 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
       // Member Signature field
       if (signatureData?.signature?.text) {
         // Render the actual signature text
-        pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
+        applySignatureFont();
         pdf.setFontSize(14);
         pdf.text(signatureData.signature.text, 60, currentYPos);
         pdf.setFont('helvetica', 'normal');

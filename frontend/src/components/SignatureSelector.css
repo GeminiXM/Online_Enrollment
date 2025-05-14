@@ -184,18 +184,60 @@
   }
 }
 
-/* Import Google Fonts for signature styles - using font-display:swap for performance */
-/* This ensures text remains visible during webfont load */
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Sacramento&display=swap');
+/* Replace Google Fonts imports with local font files using @font-face */
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('../assets/fonts/GreatVibes-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Rouge Script';
+  src: url('../assets/fonts/RougeScript-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Whisper';
+  src: url('../assets/fonts/Whisper-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Over the Rainbow';
+  src: url('../assets/fonts/OvertheRainbow-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'La Belle Aurore';
+  src: url('../assets/fonts/LaBelleAurore-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bilbo Swash Caps';
+  src: url('../assets/fonts/BilboSwashCaps-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Font family class definitions for each signature style */
 /* !important ensures these styles override any inherited styles */
 .font-great-vibes { font-family: 'Great Vibes', cursive !important; }  /* Elegant flowing script */
-.font-dancing-script { font-family: 'Dancing Script', cursive !important; }  /* Casual handwritten style */
-.font-tangerine { font-family: 'Tangerine', cursive !important; }  /* Delicate calligraphy style */
-.font-pacifico { font-family: 'Pacifico', cursive !important; }  /* Bouncy, fun script */
-.font-sacramento { font-family: 'Sacramento', cursive !important; }  /* Thin, airy script */
+.font-rouge-script { font-family: 'Rouge Script', cursive !important; }  /* Elegant calligraphy */
+.font-whisper { font-family: 'Whisper', cursive !important; }  /* Casual handwritten style */
+.font-over-the-rainbow { font-family: 'Over the Rainbow', cursive !important; }  /* Playful handwriting */
+.font-la-belle-aurore { font-family: 'La Belle Aurore', cursive !important; }  /* Delicate handwriting */
+.font-bilbo-swash-caps { font-family: 'Bilbo Swash Caps', cursive !important; }  /* Decorative cursive */

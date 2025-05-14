@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import './SignatureSelector.css';
 
-// Array of cursive font styles to choose from with display names and CSS classes
+// Array of cursive font styles to choose from with display names and CSS classes 
 const SIGNATURE_FONTS = [
   { font: "'Great Vibes', cursive", name: "Great Vibes", class: "font-great-vibes" },
-  { font: "'Dancing Script', cursive", name: "Dancing Script", class: "font-dancing-script" },
-  { font: "'Tangerine', cursive", name: "Tangerine", class: "font-tangerine" },
-  { font: "'Pacifico', cursive", name: "Pacifico", class: "font-pacifico" },
-  { font: "'Sacramento', cursive", name: "Sacramento", class: "font-sacramento" }
+  { font: "'Rouge Script', cursive", name: "Rouge Script", class: "font-rouge-script" },
+  { font: "'Whisper', cursive", name: "Whisper", class: "font-whisper" },
+  { font: "'Over the Rainbow', cursive", name: "Over the Rainbow", class: "font-over-the-rainbow" },
+  { font: "'La Belle Aurore', cursive", name: "La Belle Aurore", class: "font-la-belle-aurore" },
+  { font: "'Bilbo Swash Caps', cursive", name: "Bilbo Swash Caps", class: "font-bilbo-swash-caps" }
 ];
+
 
 const SignatureSelector = ({ 
   onChange, 
