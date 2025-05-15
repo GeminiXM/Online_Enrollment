@@ -2,33 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
-// Pull in your encoded font string from that separate file
+// These are the Base64 ecncoded fonts needed for jsPDF to show the correct fonts
+// selected from the ContractPage / SignatureSelector
 import GreatVibesBase64 from '@/assets/fonts/base64/GreatVibes';
+import BilboSwashCapsBase64 from '@/assets/fonts/base64/BilboSwashCaps';
+import LaBelleAuroreBase64 from '@/assets/fonts/base64/LaBelleAurore';
+import OvertheRainbowBase64 from '@/assets/fonts/base64/OvertheRainbow';
+import RougeScriptBase64 from '@/assets/fonts/base64/RougeScript';
+import WhisperBase64 from '@/assets/fonts/base64/Whisper';
 
 const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub }) => {
  
   const [isGenerating, setIsGenerating] = useState(false);
   
-// These are base64-encoded font data snippets for each font
-// In a production app, you would convert each full TTF font file to base64
-// Note: These are truncated for example purposes - real ones would be much longer
-const FONT_DATA = {
-  
-  "RougeScript-normal": "AAEAAAAPADAAAwDAT1MvMmFHSV0AAAKMAAAAYGNtYXBMbVUBAAADMAAAAOJjdnQgAAAAAAEkAAAAABJwb3N0...",
-  "Whisper-normal": "AAEAAAAPADAAAwDAT1MvMj2SSS0AAAD8AAAAVmNtYXCgQKDWAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQYL5RtAAADZAAAADZoaGVhB8MDygAAA5wAAAAkaG10eDeAAVQAAAO8AAAAOGxvY2EDM...",
-  "OvertheRainbow-normal": "AAEAAAAPADAAAwDAT1MvMj52fLIAAAD8AAAAVmNtYXChZKHgAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQaqNMsAAADZAAAADZoaGVhB8MDzAAAA5wAAAAkaG10eENHAZoAAAO8AAAA...",
-  "LaBelleAurore-normal": "AAEAAAAPADAAAwDAT1MvMj5rSpcAAAD8AAAAVmNtYXBfMZ07AAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQLcINVAAADZAAAADZoaGVhB5oD7AAAA5wAAAAkaG10eEKNAZ4AAAO8AAAAUGxvY2ETPhTcAAAEDAAAAAp...",
-  "BilboSwashCaps-normal": "AAEAAAAPADAAAwDAT1MvMj5KSZcAAAD8AAAAVmNtYXDgw1UmAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQWtdG6AAADZAAAADZoaGVhB7UDyAAAA5wAAAAkaG10eEJUAUkAAAO8AAAARGxvY2..."
-};
 
 // Define the mapping between font names and their internal keys
 const SIGNATURE_FONTS = [
   { name: "Great Vibes", fontKey: "GreatVibes", fontData: GreatVibesBase64 },
-  { name: "Rouge Script", fontKey: "RougeScript", fontData: FONT_DATA["RougeScript-normal"] },
-  { name: "Whisper", fontKey: "Whisper", fontData: FONT_DATA["Whisper-normal"] },
-  { name: "Over the Rainbow", fontKey: "OvertheRainbow", fontData: FONT_DATA["OvertheRainbow-normal"] },
-  { name: "La Belle Aurore", fontKey: "LaBelleAurore", fontData: FONT_DATA["LaBelleAurore-normal"] },
-  { name: "Bilbo Swash Caps", fontKey: "BilboSwashCaps", fontData: FONT_DATA["BilboSwashCaps-normal"] }
+  { name: "Rouge Script", fontKey: "RougeScript", fontData: RougeScriptBase64 },
+  { name: "Whisper", fontKey: "Whisper", fontData: WhisperBase64 },
+  { name: "Over the Rainbow", fontKey: "OvertheRainbow", fontData: OvertheRainbowBase64 },
+  { name: "La Belle Aurore", fontKey: "LaBelleAurore", fontData: LaBelleAuroreBase64 },
+  { name: "Bilbo Swash Caps", fontKey: "BilboSwashCaps", fontData: BilboSwashCapsBase64 }
 ];
 
 // Load and register fonts with jsPDF
