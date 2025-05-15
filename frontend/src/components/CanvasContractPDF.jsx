@@ -2,36 +2,95 @@ import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
+// Pull in your encoded font string from that separate file
+import GreatVibesBase64 from '@/assets/fonts/base64/GreatVibes';
+
 const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub }) => {
  
   const [isGenerating, setIsGenerating] = useState(false);
   
-// Function to load custom fonts 
-  const loadFonts = async (pdf) =>
-  {
-    try {
-    // Adjust paths to where you store the fonts
-await pdf.addFont('../assets/fonts/GreatVibes-Regular.ttf', 'Great Vibes', 'cursive'); 
-await pdf.addFont('../assets/fonts/RougeScript-Regular.ttf', 'Rouge Script', 'cursive'); 
-  await pdf.addFont('../assets/fonts/Whisper-Regular.ttf', 'Whisper', 'cursive');
-  await pdf.addFont('../assets/fonts/OvertheRainbow-Regular.ttf', 'Over the Rainbow', 'cursive'); 
-  await pdf.addFont('../assets/fonts/LaBelleAurore-Regular.ttf', 'La Belle Aurore', 'cursive');
-  await pdf.addFont('../assets/fonts/BilboSwashCaps-Regular.ttf', 'Bilbo Swash Caps', 'cursive'); 
+// These are base64-encoded font data snippets for each font
+// In a production app, you would convert each full TTF font file to base64
+// Note: These are truncated for example purposes - real ones would be much longer
+const FONT_DATA = {
   
-      console.log('All fonts loaded successfully');
-      return true;
-    } catch (error) {
-      console.error('Error loading fonts:', error); return false;
-    }
-  }; 
+  "RougeScript-normal": "AAEAAAAPADAAAwDAT1MvMmFHSV0AAAKMAAAAYGNtYXBMbVUBAAADMAAAAOJjdnQgAAAAAAEkAAAAABJwb3N0...",
+  "Whisper-normal": "AAEAAAAPADAAAwDAT1MvMj2SSS0AAAD8AAAAVmNtYXCgQKDWAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQYL5RtAAADZAAAADZoaGVhB8MDygAAA5wAAAAkaG10eDeAAVQAAAO8AAAAOGxvY2EDM...",
+  "OvertheRainbow-normal": "AAEAAAAPADAAAwDAT1MvMj52fLIAAAD8AAAAVmNtYXChZKHgAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQaqNMsAAADZAAAADZoaGVhB8MDzAAAA5wAAAAkaG10eENHAZoAAAO8AAAA...",
+  "LaBelleAurore-normal": "AAEAAAAPADAAAwDAT1MvMj5rSpcAAAD8AAAAVmNtYXBfMZ07AAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQLcINVAAADZAAAADZoaGVhB5oD7AAAA5wAAAAkaG10eEKNAZ4AAAO8AAAAUGxvY2ETPhTcAAAEDAAAAAp...",
+  "BilboSwashCaps-normal": "AAEAAAAPADAAAwDAT1MvMj5KSZcAAAD8AAAAVmNtYXDgw1UmAAABVAAAAdJjdnQgAAloAAAAzgAAAABmcGdtAAUA3AAAAM4AAAGUdmhlYWQWtdG6AAADZAAAADZoaGVhB7UDyAAAA5wAAAAkaG10eEJUAUkAAAO8AAAARGxvY2..."
+};
+
+// Define the mapping between font names and their internal keys
+const SIGNATURE_FONTS = [
+  { name: "Great Vibes", fontKey: "GreatVibes", fontData: GreatVibesBase64 },
+  { name: "Rouge Script", fontKey: "RougeScript", fontData: FONT_DATA["RougeScript-normal"] },
+  { name: "Whisper", fontKey: "Whisper", fontData: FONT_DATA["Whisper-normal"] },
+  { name: "Over the Rainbow", fontKey: "OvertheRainbow", fontData: FONT_DATA["OvertheRainbow-normal"] },
+  { name: "La Belle Aurore", fontKey: "LaBelleAurore", fontData: FONT_DATA["LaBelleAurore-normal"] },
+  { name: "Bilbo Swash Caps", fontKey: "BilboSwashCaps", fontData: FONT_DATA["BilboSwashCaps-normal"] }
+];
+
+// Load and register fonts with jsPDF
+const loadFontsIntoJsPDF = (pdf) => {
+  try {
+    // Add each font to the PDF's virtual file system and register it
+    SIGNATURE_FONTS.forEach(font => {
+      const fontFileName = `${font.fontKey}-normal.ttf`;
+      
+      // Add the file to VFS with its base64 data
+      pdf.addFileToVFS(fontFileName, font.fontData);
+      
+      // Register the font for use in the PDF
+      pdf.addFont(fontFileName, font.fontKey, 'normal');
+      
+      console.log(`Registered font: ${font.name}`);
+    });
+    
+    return true;
+  } catch (error) {
+    console.error('Error loading fonts into jsPDF:', error);
+    return false;
+  }
+};
+
+// Function to create a signature image on canvas and return it as base64 data URL
+const createSignatureImage = (text, fontFamily, fontSize = 24) => {
+  try {
+    // Create canvas element
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size based on text length (estimated)
+    const width = text.length * fontSize * 0.8;
+    canvas.width = width;
+    canvas.height = fontSize * 2; // Double the font size for height
+    
+    // Fill with white background (optional, for debugging)
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Set the font and draw the text
+    ctx.font = `italic ${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = 'black';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 10, canvas.height / 2);
+    
+    // Convert to data URL
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Error creating signature image:', error);
+    return null;
+  }
+};
   
   // Function to extract font name from signatureData 
   const getSelectedFontName = () => {
     if (!signatureData?.selectedFont?.font) return 'helvetica'; 
     
     // Extract the font name from format like "'Great Vibes', cursive" 
-    const fontMatch = signatureData.selectedFont.font.match(/'(\[^']+)'/) ||
-      signatureData.selectedFont.font.match(/"(\[^"]+)"/); 
+    const fontMatch = signatureData.selectedFont.font.match(/'([^']+)'/) ||
+      signatureData.selectedFont.font.match(/"([^"]+)"/); 
       
     return fontMatch ? fontMatch[1] : 'helvetica';
   };
@@ -64,15 +123,11 @@ await pdf.addFont('../assets/fonts/RougeScript-Regular.ttf', 'Rouge Script', 'cu
   
   // Function to check if club is in New Mexico
   const isNewMexicoClub = () => {
-    console.log("Club detection - selectedClub:", selectedClub);
-    
     // Important: Match the logic in ContractPage exactly
     if (selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') {
-      console.log("Is New Mexico club based on selectedClub: true");
       return true;
     }
     
-    console.log("Is New Mexico club: false (defaulting to Denver/Colorado)");
     return false;
   };
   
@@ -185,13 +240,33 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         unit: 'mm',
         format: 'letter'
       });
-      
-// Load custom fonts 
-const fontsLoaded = await loadFonts(pdf); 
-
       // Get the selected font name from signatureData 
       const selectedFontName = getSelectedFontName();
       console.log('Using font:', selectedFontName);
+      
+      // Load and register fonts for PDF
+      const fontsLoaded = await loadFontsIntoJsPDF(pdf);
+      console.log('Fonts loaded successfully:', fontsLoaded);
+      
+      // Create signature images for later use
+      let signatureImageData = null;
+      let initialsImageData = null;
+      
+      if (signatureData?.signature?.text) {
+        signatureImageData = createSignatureImage(
+          signatureData.signature.text, 
+          selectedFontName,
+          24 // Larger font size for signature
+        );
+      }
+      
+      if (signatureData?.initials?.text) {
+        initialsImageData = createSignatureImage(
+          signatureData.initials.text,
+          selectedFontName,
+          18 // Smaller font size for initials
+        );
+      }
 
 
       // Set font styles
@@ -233,20 +308,50 @@ const fontsLoaded = await loadFonts(pdf);
 
       });
       
-       // Helper function to apply signature font to the document 
+      // Helper function to apply signature font to the document 
         const applySignatureFont = () => {
           try {
-            if (fontsLoaded) {
-              // Use the custom font if it was loaded successfully 
-              pdf.setFont(selectedFontName, 'normal');
-            } else {
-              // Fall back to times italic if custom fonts failed to load 
-              pdf.setFont('times', 'italic');
+            // Get the selected font name 
+            const fontName = getSelectedFontName();
+            console.log('Applying font:', fontName);
+            
+            // Map to jsPDF font keys
+            let fontKey = 'times';
+            let fontSize = 16;
+            
+            // Map the font name to the internal font key and size
+            if (fontName === 'Great Vibes') {
+              fontKey = 'GreatVibes';
+              fontSize = 18;
+            } else if (fontName === 'Rouge Script') {
+              fontKey = 'RougeScript';
+              fontSize = 17;
+            } else if (fontName === 'Whisper') {
+              fontKey = 'Whisper';
+              fontSize = 20;
+            } else if (fontName === 'Over the Rainbow') {
+              fontKey = 'OvertheRainbow';
+              fontSize = 16;
+            } else if (fontName === 'La Belle Aurore') {
+              fontKey = 'LaBelleAurore';
+              fontSize = 17;
+            } else if (fontName === 'Bilbo Swash Caps') {
+              fontKey = 'BilboSwashCaps';
+              fontSize = 17;
             }
-            pdf.setFontSize(16); // Larger size for signature font 
+            
+            // Use the embedded custom font
+            if (fontKey !== 'times') {
+              pdf.setFont(fontKey, 'normal');
+            } else {
+              pdf.setFont('times', 'italic'); // Fallback to times italic
+            }
+            
+            pdf.setFontSize(fontSize);
           } catch (error) {
             console.error('Error applying signature font:', error);
-            pdf.setFont('times', 'italic'); // Fallback 
+            pdf.setFont('times', 'italic'); // Fallback
+            pdf.setFontSize(16);
           }
         };
 

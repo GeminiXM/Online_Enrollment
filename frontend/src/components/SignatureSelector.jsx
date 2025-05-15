@@ -89,29 +89,7 @@ const SignatureSelector = ({
     }
   }, [confirmed, selectedFontIndex, displayText, type]);
   
-  // Force reload of fonts to ensure they display properly
-  useEffect(() => {
-    // Load the fonts explicitly
-    const fontLinks = SIGNATURE_FONTS.map(font => {
-      const fontName = font.name.replace(/\s/g, '+');
-      return `https://fonts.googleapis.com/css2?family=${fontName}&display=swap`;
-    });
-    
-    // Create link elements for each font
-    fontLinks.forEach(link => {
-      const linkElement = document.createElement('link');
-      linkElement.rel = 'stylesheet';
-      linkElement.href = link;
-      document.head.appendChild(linkElement);
-    });
-    
-    // Load fonts for display
-    
-    // Return cleanup function
-    return () => {
-      // Optional: Remove the dynamically added link elements when component unmounts
-    };
-  }, [selectedFontIndex]);
+  // Note: No need to dynamically load fonts as they're now included via CSS @font-face rules
 
   const handlePrevFont = () => {
     setConfirmed(false);
