@@ -322,22 +322,22 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
             // Map the font name to the internal font key and size
             if (fontName === 'Great Vibes') {
               fontKey = 'GreatVibes';
-              fontSize = 18;
+              fontSize = 10;
             } else if (fontName === 'Rouge Script') {
               fontKey = 'RougeScript';
-              fontSize = 17;
+              fontSize = 10;
             } else if (fontName === 'Whisper') {
               fontKey = 'Whisper';
-              fontSize = 20;
+              fontSize = 10;
             } else if (fontName === 'Over the Rainbow') {
               fontKey = 'OvertheRainbow';
-              fontSize = 16;
+              fontSize = 10;
             } else if (fontName === 'La Belle Aurore') {
               fontKey = 'LaBelleAurore';
-              fontSize = 17;
+              fontSize = 10;
             } else if (fontName === 'Bilbo Swash Caps') {
               fontKey = 'BilboSwashCaps';
-              fontSize = 17;
+              fontSize = 10;
             }
             
             // Use the embedded custom font
@@ -824,7 +824,7 @@ currentYPos += 5;
           // place initials 5pts above currentYPos
           pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
           pdf.setFont('helvetica', 'normal'); // Reset font after signature
-
+          pdf.setFontSize(10);
         }
 
         // 6) Now advance by 15pts total: 5 for that “lift,” +10 for gap before refund
