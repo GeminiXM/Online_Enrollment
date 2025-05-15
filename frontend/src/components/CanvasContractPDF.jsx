@@ -750,12 +750,21 @@ currentYPos += 5;
 
         // Display initials if section is initialed - with less spacing
         if (initialedSections?.monthToMonth && signatureData?.initials?.text) {
-          applySignatureFont();
-
           const initialsY = currentYPos + paragraphHeight;
-          pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, initialsY);
-          pdf.setFont('helvetica', 'normal'); // Reset font after signature
-
+          
+          // Standard font for "INITIAL:" text
+          pdf.setFont('helvetica', 'normal');
+          pdf.text("INITIAL:", 20, initialsY);
+          
+          // Calculate position for initials based on width of "INITIAL:" text
+          const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+          
+          // Apply signature font for the actual initials
+          applySignatureFont();
+          pdf.text(signatureData.initials.text, 20 + textWidth + 2, initialsY);
+          
+          // Reset font after signature
+          pdf.setFont('helvetica', 'normal');
         }
       
         // Update position for next subsection - reduced space
@@ -819,10 +828,18 @@ currentYPos += 5;
             currentYPos = 20;
           }
 
+          // Standard font for "INITIAL:" text
+          pdf.setFont('helvetica', 'normal');
+          pdf.text("INITIAL:", 20, currentYPos + 5);
+          
+          // Calculate position for initials based on width of "INITIAL:" text
+          const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+          
+          // Apply signature font for the actual initials
           applySignatureFont();
-
-          // place initials 5pts above currentYPos
-          pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
+          pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
+          
+          // Reset font after signature
           pdf.setFont('helvetica', 'normal'); // Reset font after signature
           pdf.setFontSize(10);
         }
@@ -1099,7 +1116,7 @@ const splitResignation = pdf.splitTextToSize(resignationText, 150);
 currentYPos = drawPagedText(pdf, splitResignation, 30, currentYPos);
 
 // ——— Initials for Resignation Policy ———
-// 6) If this section needs initials, render them 5 pts below the last line
+// 6) If this section needs initials, render them 5 pts below the last line
 if (initialedSections?.resignation && signatureData?.initials?.text) {
   // 6a) Check if initials would overflow past bottom margin
   if (currentYPos + 5 > pdf.internal.pageSize.getHeight() - 20) {
@@ -1107,8 +1124,18 @@ if (initialedSections?.resignation && signatureData?.initials?.text) {
     currentYPos = 20;
   }
 
-  pdf.setFont(signatureData.selectedFont?.font || 'helvetica', 'italic');
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
+  // Standard font for "INITIAL:" text
+  pdf.setFont('helvetica', 'normal');
+  pdf.text("INITIAL:", 20, currentYPos + 5);
+  
+  // Calculate position for initials based on width of "INITIAL:" text
+  const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+  
+  // Apply signature font for the actual initials
+  applySignatureFont();
+  pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
+  
+  // Reset font after signature
   pdf.setFont('helvetica', 'normal');
 }
 
@@ -1622,9 +1649,18 @@ if (initialedSections?.corporate && signatureData?.initials?.text) {
     currentYPos = 20;
   }
 
+  // Standard font for "INITIAL:" text
+  pdf.setFont('helvetica', 'normal');
+  pdf.text("INITIAL:", 20, currentYPos + 5);
+  
+  // Calculate position for initials based on width of "INITIAL:" text
+  const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+  
+  // Apply signature font for the actual initials
   applySignatureFont();
-
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
+  pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
+  
+  // Reset font after signature
   pdf.setFont('helvetica', 'normal'); //Reset font
 
   // 6b) Advance cursor past initials gap
@@ -1689,9 +1725,18 @@ if (initialedSections?.syp && signatureData?.initials?.text) {
     currentYPos = 20;
   }
 
-    applySignatureFont();
-
-  pdf.text(`INITIAL: ${signatureData.initials.text}`, 20, currentYPos + 5);
+  // Standard font for "INITIAL:" text
+  pdf.setFont('helvetica', 'normal');
+  pdf.text("INITIAL:", 20, currentYPos + 5);
+  
+  // Calculate position for initials based on width of "INITIAL:" text
+  const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
+  
+  // Apply signature font for the actual initials
+  applySignatureFont();
+  pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
+  
+  // Reset font after signature
   pdf.setFont('helvetica', 'normal'); //Reset font
 
 
@@ -1747,19 +1792,24 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
       // Advance past the signature paragraph
       currentYPos += (splitSignatureText.length * 5) + 10;
       
-      // Member Signature field
+// Member Signature field
       if (signatureData?.signature?.text) {
-        // Render the actual signature text
-        applySignatureFont();
-        pdf.setFontSize(14);
-        pdf.text(signatureData.signature.text, 60, currentYPos);
         pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(10);
-             // Fixed 5 pt gap before signature line
-        currentYPos += 5;
-                // Draw the signature line “Draw a horizontal line from (x=20, y=currentYPos) over to (x=100, y=currentYPos).”
-        pdf.line(20, currentYPos, 100, currentYPos);
+        
+        // Apply signature font for the actual signature
+        applySignatureFont();
+        pdf.setFontSize(18);
+        pdf.text(signatureData.signature.text, 60, currentYPos);
+        
+        // Reset to normal font
+        pdf.setFont('helvetica', 'normal');
         pdf.setFontSize(10);
+        
+        // Fixed 5 pt gap before signature line
+        currentYPos += 5;
+        // Draw the signature line
+        pdf.line(20, currentYPos, 100, currentYPos);
         pdf.text('Member Signature', 60, currentYPos + 5);
       } else {
         // Draw the signature line
