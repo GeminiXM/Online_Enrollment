@@ -919,13 +919,6 @@ const ContractPage = () => {
         
         {/* PDF Download Buttons */}
         <div className="pdf-download-container">
-          <PDFDownloadButton 
-            formData={formData}
-            signatureData={signatureData}
-            signatureDate={signatureDate}
-            initialedSections={initialedBoxes}
-            selectedClub={selectedClub}
-          />
           <CanvasContractPDF
             formData={formData}
             signatureData={signatureData}

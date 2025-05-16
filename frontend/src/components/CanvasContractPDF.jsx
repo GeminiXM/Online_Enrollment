@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { jsPDF } from 'jspdf';
 import { autoTable } from 'jspdf-autotable';
 
-// These are the Base64 ecncoded fonts needed for jsPDF to show the correct fonts
+// These are the Base64 encoded fonts needed for jsPDF to show the correct fonts
 // selected from the ContractPage / SignatureSelector
 import GreatVibesBase64 from '@/assets/fonts/base64/GreatVibes';
 import BilboSwashCapsBase64 from '@/assets/fonts/base64/BilboSwashCaps';
@@ -49,35 +49,7 @@ const loadFontsIntoJsPDF = (pdf) => {
   }
 };
 
-// Function to create a signature image on canvas and return it as base64 data URL
-const createSignatureImage = (text, fontFamily, fontSize = 24) => {
-  try {
-    // Create canvas element
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size based on text length (estimated)
-    const width = text.length * fontSize * 0.8;
-    canvas.width = width;
-    canvas.height = fontSize * 2; // Double the font size for height
-    
-    // Fill with white background (optional, for debugging)
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Set the font and draw the text
-    ctx.font = `italic ${fontSize}px ${fontFamily}`;
-    ctx.fillStyle = 'black';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, 10, canvas.height / 2);
-    
-    // Convert to data URL
-    return canvas.toDataURL('image/png');
-  } catch (error) {
-    console.error('Error creating signature image:', error);
-    return null;
-  }
-};
+
   
   // Function to extract font name from signatureData 
   const getSelectedFontName = () => {
@@ -220,6 +192,53 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
     return dateString;
   };
 
+      // Helper function to apply signature font to the document 
+      const applySignatureFont = (pdf) => {
+        try {
+          // Get the selected font name 
+          const fontName = getSelectedFontName();
+          console.log('Applying font:', fontName);
+          
+          // Map to jsPDF font keys
+          let fontKey = 'times';
+          let fontSize = 16;
+          
+          // Map the font name to the internal font key and size
+          if (fontName === 'Great Vibes') {
+            fontKey = 'GreatVibes';
+            fontSize = 12;
+          } else if (fontName === 'Rouge Script') {
+            fontKey = 'RougeScript';
+            fontSize = 12;
+          } else if (fontName === 'Whisper') {
+            fontKey = 'Whisper';
+            fontSize = 12;
+          } else if (fontName === 'Over the Rainbow') {
+            fontKey = 'OvertheRainbow';
+            fontSize = 12;
+          } else if (fontName === 'La Belle Aurore') {
+            fontKey = 'LaBelleAurore';
+            fontSize = 12;
+          } else if (fontName === 'Bilbo Swash Caps') {
+            fontKey = 'BilboSwashCaps';
+            fontSize = 12;
+          }
+          
+          // Use the embedded custom font
+          if (fontKey !== 'times') {
+            pdf.setFont(fontKey, 'normal');
+          } else {
+            pdf.setFont('times', 'italic'); // Fallback to times italic
+          }
+          
+          pdf.setFontSize(fontSize);
+        } catch (error) {
+          console.error('Error applying signature font:', error);
+          pdf.setFont('times', 'italic'); // Fallback
+          pdf.setFontSize(16);
+        }
+      };
+
   const generatePDF = async () => {
     if (!formData || !signatureData) {
       alert("Missing required data for PDF generation");
@@ -243,27 +262,6 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       const fontsLoaded = await loadFontsIntoJsPDF(pdf);
       console.log('Fonts loaded successfully:', fontsLoaded);
       
-      // Create signature images for later use
-      let signatureImageData = null;
-      let initialsImageData = null;
-      
-      if (signatureData?.signature?.text) {
-        signatureImageData = createSignatureImage(
-          signatureData.signature.text, 
-          selectedFontName,
-          24 // Larger font size for signature
-        );
-      }
-      
-      if (signatureData?.initials?.text) {
-        initialsImageData = createSignatureImage(
-          signatureData.initials.text,
-          selectedFontName,
-          18 // Smaller font size for initials
-        );
-      }
-
-
       // Set font styles
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(10);
@@ -275,17 +273,12 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       pdf.text('Membership Agreement', 105, 30, { align: 'center' });
       
       // Member Information Section
-      pdf.setFontSize(14);
-      pdf.text('Membership Information', 20, 45);
-      
-      // PRIMARY MEMBER SECTION
       pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('PRIMARY MEMBER', 20, 55);
-      
+      pdf.text('Membership Information - PRIMARY MEMBER', 20, 45);
+          
       // Primary Member details table - matches ContractPage layout
       autoTable(pdf, {
-        startY: 60,
+        startY: 50,
         head: [['Last Name', 'First Name', 'DOB', 'Gender']],
         body: [
           [
@@ -299,79 +292,31 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
         margin: { left: 20, right: 20 }
 
- 
 
       });
       
-      // Helper function to apply signature font to the document 
-        const applySignatureFont = () => {
-          try {
-            // Get the selected font name 
-            const fontName = getSelectedFontName();
-            console.log('Applying font:', fontName);
-            
-            // Map to jsPDF font keys
-            let fontKey = 'times';
-            let fontSize = 16;
-            
-            // Map the font name to the internal font key and size
-            if (fontName === 'Great Vibes') {
-              fontKey = 'GreatVibes';
-              fontSize = 10;
-            } else if (fontName === 'Rouge Script') {
-              fontKey = 'RougeScript';
-              fontSize = 10;
-            } else if (fontName === 'Whisper') {
-              fontKey = 'Whisper';
-              fontSize = 10;
-            } else if (fontName === 'Over the Rainbow') {
-              fontKey = 'OvertheRainbow';
-              fontSize = 10;
-            } else if (fontName === 'La Belle Aurore') {
-              fontKey = 'LaBelleAurore';
-              fontSize = 10;
-            } else if (fontName === 'Bilbo Swash Caps') {
-              fontKey = 'BilboSwashCaps';
-              fontSize = 10;
-            }
-            
-            // Use the embedded custom font
-            if (fontKey !== 'times') {
-              pdf.setFont(fontKey, 'normal');
-            } else {
-              pdf.setFont('times', 'italic'); // Fallback to times italic
-            }
-            
-            pdf.setFontSize(fontSize);
-          } catch (error) {
-            console.error('Error applying signature font:', error);
-            pdf.setFont('times', 'italic'); // Fallback
-            pdf.setFontSize(16);
-          }
-        };
-
-
 
       // Contact Information
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       const memberTableEndY = pdf.lastAutoTable.finalY;
-      pdf.text('E-mail', 20, memberTableEndY + 10);
-      
+           
       // Email row
       autoTable(pdf, {
-        startY: memberTableEndY + 15,
+        startY: memberTableEndY + 2,
+        head: [['Email']],
         body: [
           [formData.email || '']
         ],
         theme: 'grid',
+        headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
         margin: { left: 20, right: 20 }
       });
       
       // Address information
       const emailTableEndY = pdf.lastAutoTable.finalY;
       autoTable(pdf, {
-        startY: emailTableEndY + 5,
+        startY: emailTableEndY + 2,
         head: [['Home Address', 'City', 'State', 'ZIP Code']],
         body: [
           [
@@ -389,7 +334,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Phone information
       const addressTableEndY = pdf.lastAutoTable.finalY;
       autoTable(pdf, {
-        startY: addressTableEndY + 5,
+        startY: addressTableEndY + 2,
         head: [['Cell Phone', 'Home Phone', 'Work Phone']],
         body: [
           [
@@ -406,7 +351,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Membership details section
       const phoneTableEndY = pdf.lastAutoTable.finalY;
       autoTable(pdf, {
-        startY: phoneTableEndY + 10,
+        startY: phoneTableEndY + 2,
         head: [['Membership Type', 'Add-on Options', 'Specialty Membership', 'Agreement Type']],
         body: [
           [
@@ -755,7 +700,7 @@ currentYPos += 5;
           const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
           
           // Apply signature font for the actual initials
-          applySignatureFont();
+          applySignatureFont(pdf);
           pdf.text(signatureData.initials.text, 20 + textWidth + 2, initialsY);
           
           // Reset font after signature
@@ -831,7 +776,7 @@ currentYPos += 5;
           const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
           
           // Apply signature font for the actual initials
-          applySignatureFont();
+          applySignatureFont(pdf);
           pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
           
           // Reset font after signature
@@ -1127,11 +1072,12 @@ if (initialedSections?.resignation && signatureData?.initials?.text) {
   const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
   
   // Apply signature font for the actual initials
-  applySignatureFont();
+  applySignatureFont(pdf);
   pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
   
   // Reset font after signature
   pdf.setFont('helvetica', 'normal');
+  pdf.setFontSize(10);
 }
 
 // 7) Advance cursor 15 pts to leave space below initials and before next section
@@ -1632,7 +1578,9 @@ pdf.setFont('helvetica', 'normal');
 const corpItem4 = 'Proof of employment must be provided to obtain the corporate discount.';
 const splitCorp4 = pdf.splitTextToSize(corpItem4, 150);
 currentYPos = drawPagedText(pdf, splitCorp4, 34, currentYPos);
-      currentYPos += 5;
+     
+//gap if needed
+      // currentYPos += 5;
       
 
       // ——— Initials for Corporate Discount Section ———
@@ -1652,11 +1600,12 @@ if (initialedSections?.corporate && signatureData?.initials?.text) {
   const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
   
   // Apply signature font for the actual initials
-  applySignatureFont();
+  applySignatureFont(pdf);
   pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
   
   // Reset font after signature
   pdf.setFont('helvetica', 'normal'); //Reset font
+  pdf.setFontSize(10);
 
   // 6b) Advance cursor past initials gap
   currentYPos += 15; // 10 pts for initials + 5 pts before next section
@@ -1707,7 +1656,7 @@ const splitSyp2 = pdf.splitTextToSize(sypText2, 160);
 currentYPos = drawPagedText(pdf, splitSyp2, 20, currentYPos);
 
 // 3) Fixed 5 pt gap before next paragraph
-currentYPos += 5;
+//currentYPos += 5;
 
 
 
@@ -1728,11 +1677,12 @@ if (initialedSections?.syp && signatureData?.initials?.text) {
   const textWidth = pdf.getStringUnitWidth("INITIAL:") * pdf.internal.getFontSize() / pdf.internal.scaleFactor;
   
   // Apply signature font for the actual initials
-  applySignatureFont();
+  applySignatureFont(pdf);
   pdf.text(signatureData.initials.text, 20 + textWidth + 2, currentYPos + 5);
   
   // Reset font after signature
   pdf.setFont('helvetica', 'normal'); //Reset font
+  pdf.setFontSize(10);
 
 
   // 6b) Advance cursor past initials gap
@@ -1793,8 +1743,8 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
         pdf.setFontSize(10);
         
         // Apply signature font for the actual signature
-        applySignatureFont();
-        pdf.setFontSize(18);
+        applySignatureFont(pdf);
+        pdf.setFontSize(22);
         pdf.text(signatureData.signature.text, 60, currentYPos);
         
         // Reset to normal font
