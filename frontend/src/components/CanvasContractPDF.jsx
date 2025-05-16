@@ -274,7 +274,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       
       // Member Information Section
       pdf.setFontSize(10);
-      pdf.text('Membership Information - PRIMARY MEMBER', 20, 45);
+      pdf.text(`Home Club: ${selectedClub?.name || selectedClub?.locationName || ''} Membership Information - PRIMARY MEMBER`, 20, 45);
           
       // Primary Member details table - matches ContractPage layout
       autoTable(pdf, {
