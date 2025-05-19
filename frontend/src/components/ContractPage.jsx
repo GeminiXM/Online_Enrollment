@@ -916,7 +916,7 @@ const ContractPage = () => {
           Back
         </button>
         
-        {/* PDF Download Buttons */}
+        {/* PDF Download Buttons */} 
         <div className="pdf-download-container">
           <CanvasContractPDF
             formData={formData}
@@ -924,6 +924,7 @@ const ContractPage = () => {
             signatureDate={signatureDate}
             initialedSections={initialedBoxes}
             selectedClub={selectedClub}
+            membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
           />
         </div>
         

@@ -11,7 +11,7 @@ import OvertheRainbowBase64 from '@/assets/fonts/base64/OvertheRainbow';
 import RougeScriptBase64 from '@/assets/fonts/base64/RougeScript';
 import WhisperBase64 from '@/assets/fonts/base64/Whisper';
 
-const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub }) => {
+const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub, membershipPrice }) => {
  
   const [isGenerating, setIsGenerating] = useState(false);
   
@@ -63,7 +63,10 @@ const loadFontsIntoJsPDF = (pdf) => {
   };
 
 
-
+  // format it as dollars (two decimals) This is the base price for membership used in SYP Contract text
+  const priceString = membershipPrice != null
+    ? `$${Number(membershipPrice).toFixed(2)}`
+    : '$115.00';
 
   // Function to calculate cancellation date (14 days from start date)
   const calculateCancellationDate = (startDate) => {
@@ -351,7 +354,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       // Membership details section
       const phoneTableEndY = pdf.lastAutoTable.finalY;
       autoTable(pdf, {
-        startY: phoneTableEndY + 2,
+        startY: phoneTableEndY + 5,
         head: [['Membership Type', 'Add-on Options', 'Specialty Membership', 'Agreement Type']],
         body: [
           [
@@ -366,52 +369,9 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         margin: { left: 20, right: 20 }
       });
       
-      // Financial Information
-      const membershipTableEndY = pdf.lastAutoTable.finalY;
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Financial Details', 20, membershipTableEndY + 15);
-      
-      // Financial details table
-      autoTable(pdf, {
-        startY: membershipTableEndY + 20,
-        head: [['Item', 'Amount']],
-        body: [
-          ['Initiation Fee', `$${formData.initiationFee || '0.00'}`],
-          ['Pro-rated Dues', `$${formData.proratedDues || '0.00'}`],
-          ['Pro-rated Add-Ons', `$${formData.proratedAddOns || '0.00'}`],
-          ['Packages', `$${formData.packagesFee || '0.00'}`],
-          ['Taxes', `$${formData.taxAmount || '0.00'}`],
-          ['Total Collected (Tax included)', `$${formData.totalCollected || '0.00'}`]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
-        margin: { left: 20, right: 20 }
-      });
-      
-      // Monthly Cost Going Forward
-      const financialTableEndY = pdf.lastAutoTable.finalY;
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Monthly Cost Going Forward', 20, financialTableEndY + 15);
-      
-      autoTable(pdf, {
-        startY: financialTableEndY + 20,
-        body: [
-          [{content: `${formData.displayMembershipType || 'Individual'} Dues ${formData.displayAgreementType || 'Month-to-month'}`, styles: {fontStyle: 'normal'}}, 
-           {content: `$${formData.monthlyDues || '0.00'}`, styles: {fontStyle: 'normal'}}],
-          [{content: 'Total Monthly Membership Dues Rate', styles: {fontStyle: 'normal'}}, 
-           {content: `$${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}`, styles: {fontStyle: 'normal'}}],
-          [{content: 'Membership Start Date', styles: {fontStyle: 'normal'}}, 
-           {content: formatDate(formData.requestedStartDate) || '', styles: {fontStyle: 'bold'}}]
-        ],
-        theme: 'grid',
-        margin: { left: 20, right: 20 }
-      });
-      
       // Family Members Section (if applicable)
       const monthlyTableEndY = pdf.lastAutoTable.finalY;
-      let currentY = monthlyTableEndY + 15;
+      let currentY = monthlyTableEndY + 10;
       
       if (formData.familyMembers && formData.familyMembers.length > 0) {
         pdf.setFontSize(12);
@@ -435,7 +395,33 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         
         currentY = pdf.lastAutoTable.finalY + 10;
       }
-      
+
+
+      // Additional Services Section (if applicable)
+      if (formData.additionalServicesDetails && formData.additionalServicesDetails.length > 0) {
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Additional Services', 20, currentY);
+        
+        const additionalServicesData = [];
+        
+        formData.additionalServicesDetails.forEach(service => {
+          const serviceInfo = [service.name || ''];
+          if (service.dueNow) additionalServicesData.push([`Due now: $${service.dueNow}`]);
+          if (service.monthly) additionalServicesData.push([`Monthly: $${service.monthly}`]);
+          additionalServicesData.push(serviceInfo);
+        });
+        
+        autoTable(pdf, {
+          startY: currentY + 5,
+          body: additionalServicesData,
+          theme: 'grid',
+          margin: { left: 20, right: 20 }
+        });
+        
+        currentY = pdf.lastAutoTable.finalY + 10;
+      }
+
       // Child Programs Section (if applicable)
       if (formData.childPrograms) {
         pdf.setFontSize(12);
@@ -463,31 +449,97 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         
         currentY = pdf.lastAutoTable.finalY + 10;
       }
+
+      // Combined Financial Information
+      const membershipTableEndY = pdf.lastAutoTable.finalY;
       
-      // Additional Services Section (if applicable)
-      if (formData.additionalServicesDetails && formData.additionalServicesDetails.length > 0) {
-        pdf.setFontSize(12);
-        pdf.setFont('helvetica', 'bold');
-        pdf.text('Additional Services', 20, currentY);
-        
-        const additionalServicesData = [];
-        
-        formData.additionalServicesDetails.forEach(service => {
-          const serviceInfo = [service.name || ''];
-          if (service.dueNow) additionalServicesData.push([`Due now: $${service.dueNow}`]);
-          if (service.monthly) additionalServicesData.push([`Monthly: $${service.monthly}`]);
-          additionalServicesData.push(serviceInfo);
-        });
-        
-        autoTable(pdf, {
-          startY: currentY + 5,
-          body: additionalServicesData,
-          theme: 'grid',
-          margin: { left: 20, right: 20 }
-        });
-        
-        currentY = pdf.lastAutoTable.finalY + 10;
+      // Calculate approximate height needed for the Financial Information section
+      // Title + space + table header + 6 rows in the table + margins
+      const financialSectionHeight = 5 + 10 + 10 + (6 * 10) + 20; // Estimated height in mm
+      
+      // Check if we need to start a new page for the Financial Information section
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const remainingSpace = pageHeight - membershipTableEndY - 20; // 20mm bottom margin
+      
+      // If not enough space, start a new page
+      if (remainingSpace < financialSectionHeight) {
+        pdf.addPage();
+        currentY = 20; // Reset Y position to top of new page with margin
+      } else {
+        currentY = membershipTableEndY + 15;
       }
+      
+      // Now render the Financial Information section
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Financial Information', 20, currentY);
+      
+      // Combined table with two columns
+      autoTable(pdf, {
+        startY: currentY + 5, //space above this section
+        head: [
+          [
+            {content: 'Financial Details', colSpan: 2, styles: {fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center'}},
+            {content: 'Monthly Cost Going Forward', colSpan: 2, styles: {fillColor: [60,60,60], textColor: [255,255,255], fontStyle: 'bold', halign: 'center'}}
+          ]
+        ],
+        body: [
+          [
+            {content: 'Initiation Fee', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.initiationFee || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: `${formData.displayMembershipType || 'Individual'} Dues ${formData.displayAgreementType || 'Month-to-month'}`, styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.monthlyDues || '0.00'}`, styles: {fontStyle: 'normal'}}
+          ],
+          [
+            {content: 'Pro-rated Dues', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.proratedDues || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: 'Total Monthly Membership Dues Rate', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}`, styles: {fontStyle: 'normal'}}
+          ],
+          [
+            {content: 'Pro-rated Add-Ons', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.proratedAddOns || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: 'Membership Start Date', styles: {fontStyle: 'normal'}}, 
+            {content: formatDate(formData.requestedStartDate) || '', styles: {fontStyle: 'bold'}}
+          ],
+          [
+            {content: 'Packages', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.packagesFee || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: '', styles: {fontStyle: 'normal'}}, 
+            {content: '', styles: {fontStyle: 'normal'}}
+          ],
+          [
+            {content: 'Taxes', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.taxAmount || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: '', styles: {fontStyle: 'normal'}}, 
+            {content: '', styles: {fontStyle: 'normal'}}
+          ],
+          [
+            {content: 'Total Collected (Tax included)', styles: {fontStyle: 'normal'}}, 
+            {content: `$${formData.totalCollected || '0.00'}`, styles: {fontStyle: 'normal'}},
+            {content: '', styles: {fontStyle: 'normal'}}, 
+            {content: '', styles: {fontStyle: 'normal'}}
+          ]
+        ],
+        theme: 'grid',
+        columnStyles: {
+          0: {cellWidth: 55},
+          1: {cellWidth: 32},
+          2: {cellWidth: 55},
+          3: {cellWidth: 32}
+        },
+        margin: { left: 20, right: 20 }
+      });
+      
+      
+      
+
+      
+
+      
+      currentY = pdf.lastAutoTable.finalY + 10;
+
+
       
       // Membership ID Section (if applicable)
       if (formData.membershipId) {
@@ -1649,11 +1701,17 @@ currentYPos += 5;
 const sypText2 =
   'Proof of age must be received within 14 days; otherwise your membership will be converted to ' +
   'the equivalent of one individually priced membership and you will be responsible for the entire ' +
-  'billed amount. If the documentation is not received by 04/30/2025, your rate will go to $115.00 ' +
-  'per month until the proper documentation is provided. The club will not issue a dues credit for any ' +
-  'portion of the additional charges once billed.';
+  'billed amount. If the documentation is not received by ' +
+  (formData?.requestedStartDate
+    ? calculateCancellationDate(formData.requestedStartDate)
+    : ''
+  ) +
+  ', your rate will go to ' + priceString + ' per month until the proper documentation is provided. ' +
+  'The club will not issue a dues credit for any portion of the additional charges once billed.';
+
 const splitSyp2 = pdf.splitTextToSize(sypText2, 160);
 currentYPos = drawPagedText(pdf, splitSyp2, 20, currentYPos);
+
 
 // 3) Fixed 5 pt gap before next paragraph
 //currentYPos += 5;
