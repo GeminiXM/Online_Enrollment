@@ -207,7 +207,9 @@ const ContractPage = () => {
       // Process family members
       const familyMembers = data.familyMembers?.map(member => ({
         name: `${member.firstName} ${member.lastName}`,
-        type: member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'
+        type: member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth',
+        gender: member.gender || '',
+        dateOfBirth: member.dateOfBirth || ''
       })) || [];
       
       // Extract add-ons from serviceAddons
@@ -647,11 +649,11 @@ const ContractPage = () => {
           <div className="info-section family-members-section">
             <div className="info-header">Family Members ({formData.familyMembers.length})</div>
             <div className="info-content">
-              {formData.familyMembers.map((member, index) => (
-                <div key={index} className="family-member-item">
-                  {member.name} - {member.type}
-                </div>
-              ))}
+         {formData.familyMembers.map((member, index) => (
+           <div key={index} className="family-member-item">
+             {member.name} - {member.gender ? `${member.gender} - ` : ''}{member.type}{member.dateOfBirth ? ` - ${formatDateWithoutTimezoneShift(member.dateOfBirth)}` : ''}
+           </div>
+         ))}
             </div>
           </div>
         )}
@@ -926,6 +928,8 @@ const ContractPage = () => {
             selectedClub={selectedClub}
             membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
           />
+          {/* Debug display for family members data */}
+          {/* {JSON.stringify(formData.familyMembers)} */}
         </div>
         
         <button 

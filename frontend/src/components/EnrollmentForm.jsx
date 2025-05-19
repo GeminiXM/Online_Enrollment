@@ -97,6 +97,33 @@ const validateYouthAge = (dateOfBirth) => {
   return age >= 12 && age <= 20;
 };
 
+// Utility function to format dates without timezone shifts
+const formatDateWithoutTimezoneShift = (dateString) => {
+  if (!dateString) return '';
+  
+  // Parse the date string - avoid timezone shifts by handling parts manually
+  const parts = dateString.split(/[-T]/);
+  if (parts.length >= 3) {
+    const year = parseInt(parts[0], 10);
+    // JavaScript months are 0-based, so subtract 1 from the month
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    
+    // Create date with specific year, month, day in local timezone
+    const date = new Date(year, month, day);
+    
+    // Format to mm/dd/yyyy
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  }
+  
+  // Fallback for unexpected format
+  return dateString;
+};
+
 function EnrollmentForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -1813,7 +1840,10 @@ function EnrollmentForm() {
                   <div className="member-info">
                     <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
                     <p>{member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'} Member</p>
-                    <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p>
+                  <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p>
+                  {member.dateOfBirth && (
+                    <p><strong>Birthday:</strong> {formatDateWithoutTimezoneShift(member.dateOfBirth)}</p>
+                  )}
                   </div>
                   <button 
                     type="button" 

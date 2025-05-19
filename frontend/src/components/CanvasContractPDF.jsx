@@ -409,15 +409,30 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         pdf.setFont('helvetica', 'bold');
         pdf.text(`Family Members (${formData.familyMembers.length})`, 20, currentY);
         
-        // Create family members table
-        const familyMembersData = formData.familyMembers.map(member => [
-          member.name || `${member.firstName || ''} ${member.lastName || ''}`,
-          member.type || ''
-        ]);
+        // Debug output to see what's in familyMembers  
+        console.log("Family members data for PDF:", formData.familyMembers);
+
+        // Create family members table with extended information
+        const familyMembersData = formData.familyMembers.map(member => {
+          // Ensure all required properties exist, using different possible property names
+          const name = member.name || `${member.firstName || ''} ${member.lastName || ''}`;
+          const gender = member.gender || '';
+          const type = member.type || member.memberType || '';
+          const birthday = member.dateOfBirth ? formatDate(member.dateOfBirth) : '';
+          
+          console.log(`Processing member: ${name}, Gender: ${gender}, Type: ${type}, Birthday: ${birthday}`);
+          
+          return [
+            name,
+            gender,
+            type,
+            birthday
+          ];
+        });
         
         autoTable(pdf, {
           startY: currentY + 5,
-          head: [['Name', 'Type']],
+          head: [['Name', 'Gender', 'Type', 'Birthday']],
           body: familyMembersData,
           theme: 'grid',
           headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
@@ -1888,8 +1903,11 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
         pdf.text(`Page ${i} of ${pageCount}`, 105, 290, { align: 'center' });
       }
       
-      // Save the PDF file
-      const fileName = `${formData.lastName || 'Member'}_${formData.firstName || ''}_membership_agreement.pdf`;
+          // Debug output to see what's in familyMembers
+          console.log("Family members data for PDF:", formData.familyMembers);
+          
+          // Save the PDF file
+          const fileName = `${formData.lastName || 'Member'}_${formData.firstName || ''}_membership_agreement.pdf`;
       pdf.save(fileName);
       
       setIsGenerating(false);
