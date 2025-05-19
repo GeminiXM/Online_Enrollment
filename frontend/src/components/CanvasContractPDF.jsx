@@ -356,7 +356,7 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
         body: [
           [
             formData.displayMembershipType || 'Individual',
-            formData.addOns && formData.addOns.length > 0 ? formData.addOns.join(', ') : 'None',
+            formData.addOns && formData.addOns.length > 0 ? formData.addOns.map(addon => addon.trim()).join(', ') : 'None',
             formData.displaySpecialtyMembership || 'None',
             formData.displayAgreementType || 'Month-to-month'
           ]

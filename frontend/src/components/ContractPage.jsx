@@ -16,7 +16,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import SignatureSelector from './SignatureSelector';
-import { PDFDownloadButton, PDFPreview } from './ContractPDFFixed';
 import CanvasContractPDF from './CanvasContractPDF';
 import './ContractPage.css';
 
