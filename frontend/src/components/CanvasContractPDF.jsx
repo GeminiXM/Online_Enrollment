@@ -452,16 +452,19 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         const additionalServicesData = [];
         
         formData.additionalServicesDetails.forEach(service => {
-          const serviceInfo = [service.name || ''];
-          if (service.dueNow) additionalServicesData.push([`Due now: $${service.dueNow}`]);
-          if (service.monthly) additionalServicesData.push([`Monthly: $${service.monthly}`]);
-          additionalServicesData.push(serviceInfo);
+          additionalServicesData.push([
+            service.name || '',
+            service.dueNow ? `$${service.dueNow}` : '',
+            service.monthly ? `$${service.monthly}` : ''
+          ]);
         });
         
         autoTable(pdf, {
           startY: currentY + 5,
+          head: [['Description', 'Due Now', 'Monthly']],
           body: additionalServicesData,
           theme: 'grid',
+          headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
           margin: { left: 20, right: 20 }
         });
         
