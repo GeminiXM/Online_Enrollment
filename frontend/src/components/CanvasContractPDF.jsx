@@ -137,7 +137,15 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
   return y;
 }
 
-
+// Helper to get first day of next month and format it
+function formatFirstOfNextMonthMMDDYYYY(dateString) {
+  const d = new Date(dateString);
+  const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  const mm = String(next.getMonth() + 1).padStart(2, '0');
+  const dd = String(next.getDate()).padStart(2, '0');
+  const yyyy = next.getFullYear();
+  return `${mm}/${dd}/${yyyy}`;
+}
 
   // Function to format dates consistently
   const formatDate = (dateString) => {
@@ -275,10 +283,33 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       pdf.text(getClubName(), 105, 20, { align: 'center' });
       pdf.text('Membership Agreement', 105, 30, { align: 'center' });
       
-      // Member Information Section
-      pdf.setFontSize(10);
-      pdf.text(`Home Club: ${selectedClub?.name || selectedClub?.locationName || ''} Membership Information - PRIMARY MEMBER`, 20, 45);
-          
+// Member Information Section
+const xStart = 20;
+const y = 45;
+
+// 1) Draw the prefix in your normal size
+pdf.setFontSize(10);
+const prefix = 'Home Club: ';
+pdf.text(prefix, xStart, y);
+
+// measure how wide that was
+const prefixWidth = pdf.getTextWidth(prefix);
+
+// 2) Draw the club name larger
+const clubName = selectedClub?.name || selectedClub?.locationName || '';
+const clubFontSize = 14;      // or whatever size you like
+pdf.setFontSize(clubFontSize);
+pdf.text(clubName, xStart + prefixWidth, y);
+
+// measure that width too
+const clubNameWidth = pdf.getTextWidth(clubName);
+
+// 3) Continue the rest of the line back at normal size
+pdf.setFontSize(10);
+const suffix = '          Membership Information - PRIMARY MEMBER';
+pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
+
+      
       // Primary Member details table - matches ContractPage layout
       autoTable(pdf, {
         startY: 50,
@@ -561,12 +592,26 @@ function drawPagedText(pdf, lines, x, startY, lineHeight = 5, bottomMargin = 10)
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Payment Authorization', 20, currentY);
-      
-      // Authorization text
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'normal');
-      const authText = `I hereby request and authorize ${getClubName()} to charge my account via Electronic Funds Transfer on a monthly basis beginning ${formatDate(formData.requestedStartDate) || ''}.`;
-      const additionalAuthText = `The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to ${getClubName()} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.`;
+
+
+  const beginDate = formData.requestedStartDate
+  ? formatFirstOfNextMonthMMDDYYYY(formData.requestedStartDate)
+  : '';
+
+// Authorization text
+pdf.setFontSize(10);
+pdf.setFont('helvetica', 'normal');
+
+const authText =
+  `I hereby request and authorize ${getClubName()} to charge my account via Electronic Funds Transfer ` +
+  `on a monthly basis beginning ${beginDate}.`;
+
+const additionalAuthText =
+  `The debit will consist of monthly dues plus any other club charges (if applicable) made by ` +
+  `myself or other persons included in my membership in accordance with the resignation policy ` +
+  `detailed in the Terms and Conditions within this Agreement. The authorization is extended by me ` +
+  `to ${getClubName()} and/or its authorized agents or firms engaged in the business of ` +
+        `processing check and charge card debits.`;
       
       const splitAuthText = pdf.splitTextToSize(authText, 170);
       const splitAdditionalAuthText = pdf.splitTextToSize(additionalAuthText, 170);
