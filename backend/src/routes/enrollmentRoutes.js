@@ -5,7 +5,7 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import logger from "../utils/logger.js";
-import { submitEnrollment, getAddons, getSpecialtyMembershipBridgeCode, getMembershipPrice } from "../controllers/enrollmentController.js";
+import { submitEnrollment, getAddons, getSpecialtyMembershipBridgeCode, getMembershipPrice, getTaxRate } from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
 
 const router = express.Router();
@@ -253,6 +253,26 @@ router.get("/price", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while retrieving the membership price. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/tax-rate
+ * @desc Get tax rate for New Mexico clubs
+ * @access Public
+ */
+router.get("/tax-rate", async (req, res) => {
+  try {
+    return await getTaxRate(req, res);
+  } catch (error) {
+    logger.error("Error in tax-rate route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the tax rate. Please try again later.",
     });
   }
 });

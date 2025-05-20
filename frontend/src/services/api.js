@@ -139,6 +139,19 @@ const apiService = {
       console.error('Error processing demo payment:', error);
       throw error;
     }
+  },
+
+  // Get tax rate for New Mexico clubs
+  getTaxRate: async (clubId) => {
+    try {
+      const response = await api.get('/enrollment/tax-rate', {
+        params: { clubId }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tax rate:', error);
+      throw error;
+    }
   }
 };
 

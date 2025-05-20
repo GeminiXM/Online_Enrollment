@@ -405,7 +405,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
       let currentY = monthlyTableEndY + 10;
       
       if (formData.familyMembers && formData.familyMembers.length > 0) {
-        pdf.setFontSize(12);
+        pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.text(`Family Members (${formData.familyMembers.length})`, 20, currentY);
         
@@ -445,7 +445,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
 
       // Additional Services Section (if applicable)
       if (formData.additionalServicesDetails && formData.additionalServicesDetails.length > 0) {
-        pdf.setFontSize(12);
+        pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Additional Services', 20, currentY);
         
@@ -473,7 +473,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
 
       // Child Programs Section (if applicable)
       if (formData.childPrograms) {
-        pdf.setFontSize(12);
+        pdf.setFontSize(10);
         pdf.setFont('helvetica', 'bold');
         pdf.text('Child Programs', 20, currentY);
         
@@ -519,7 +519,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
       }
       
       // Now render the Financial Information section
-      pdf.setFontSize(12);
+      pdf.setFontSize(10);
       pdf.setFont('helvetica', 'bold');
       pdf.text('Financial Information', 20, currentY);
       

@@ -118,6 +118,63 @@ export const getSpecialtyMembershipBridgeCode = async (req, res) => {
 };
 
 /**
+ * @desc Get tax rate for New Mexico clubs
+ * @route GET /api/enrollment/tax-rate
+ * @access Public
+ */
+export const getTaxRate = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for tax rate");
+
+    // Get the club ID from query parameters - used only for database connection
+    const clubId = req.query.clubId || "001"; // Default to "001" if not provided
+
+    logger.info(`Fetching tax rate using club ID ${clubId} for database connection`);
+
+    // Execute the stored procedure from SQL file - no parameters needed
+    const result = await executeSqlProcedure("web_proc_GetTaxRate", clubId, []);
+
+    // Extract the tax rate from the result
+    let taxRate = 0.07625; // Default tax rate in case of failure
+    if (result && result.length > 0) {
+      const firstRow = result[0];
+      if (firstRow) {
+        // Check for the tax_rate field or first property
+        if (firstRow.tax_rate !== undefined) {
+          taxRate = parseFloat(firstRow.tax_rate);
+        } else {
+          // Fallback to first property
+          const firstKey = Object.keys(firstRow)[0];
+          if (firstKey) {
+            taxRate = parseFloat(firstRow[firstKey]);
+          }
+        }
+      }
+    }
+
+    logger.info("Tax rate retrieved successfully", {
+      taxRate
+    });
+
+    res.status(200).json({
+      success: true,
+      taxRate
+    });
+  } catch (error) {
+    logger.error("Error in getTaxRate:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving tax rate",
+      error: error.message,
+    });
+  }
+};
+
+/**
  * @desc Get membership price
  * @route GET /api/enrollment/price
  * @access Public

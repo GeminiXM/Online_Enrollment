@@ -319,8 +319,12 @@ const ContractPage = () => {
       const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
         total + (addon.price ? addon.price * proratedFactor : 0), 0).toFixed(2) || '0.00';
       
-      // Recalculate the tax amount using the updated proratedAddOns value
-      const taxAmount = ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * 0.08).toFixed(2);
+      // Get tax rate from membershipDetails or use a default
+      const taxRate = data.membershipDetails?.taxRate || 0.08; // Default to 8% if not provided
+      
+      // Use the provided tax amount if available, otherwise calculate it
+      const taxAmount = data.membershipDetails?.proratedTaxAmount || 
+                       ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * taxRate).toFixed(2);
       const totalCollected = (
         parseFloat(initiationFee) + 
         parseFloat(proratedDues) + 

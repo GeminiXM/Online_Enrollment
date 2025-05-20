@@ -152,6 +152,10 @@ function EnrollmentForm() {
   const [proratedPrice, setProratedPrice] = useState(0);
   // Store the determined membership type (I/D/F)
   const [determinedMembershipType, setDeterminedMembershipType] = useState("I");
+  // Tax rate state - default value in case API call fails
+  const [taxRate, setTaxRate] = useState(0.07625);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [proratedTaxAmount, setProratedTaxAmount] = useState(0);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -633,9 +637,39 @@ function EnrollmentForm() {
     if (formData.requestedStartDate && membershipPrice) {
       const prorated = calculateProratedPrice(formData.requestedStartDate, membershipPrice);
       setProratedPrice(prorated);
+      
+      // Calculate tax amount for prorated price
+      const proratedTax = Number((prorated * taxRate).toFixed(2));
+      setProratedTaxAmount(proratedTax);
+      
+      // Calculate tax for full membership price
+      const fullTax = Number((membershipPrice * taxRate).toFixed(2));
+      setTaxAmount(fullTax);
     }
-  }, [formData.requestedStartDate, membershipPrice]);
+  }, [formData.requestedStartDate, membershipPrice, taxRate]);
   
+  // Fetch tax rate when club changes
+  useEffect(() => {
+    const fetchTaxRate = async () => {
+      if (!selectedClub) return;
+      
+      try {
+        const response = await api.getTaxRate(selectedClub.id);
+        
+        if (response.success) {
+          console.log("Tax rate fetched:", response.taxRate);
+          setTaxRate(response.taxRate);
+        } else {
+          console.error("Failed to fetch tax rate:", response.message);
+        }
+      } catch (error) {
+        console.error("Error fetching tax rate:", error);
+      }
+    };
+    
+    fetchTaxRate();
+  }, [selectedClub]);
+
   // State for form submission status
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -773,7 +807,10 @@ function EnrollmentForm() {
         upcCode: membershipUpcCode,
         taxCode: membershipTaxCode,
         proratedDuesInfo: proratedDuesInfo,
-        proratedPrice: proratedPrice
+        proratedPrice: proratedPrice,
+        taxRate: taxRate,
+        taxAmount: taxAmount,
+        proratedTaxAmount: proratedTaxAmount
       },
       // Additional information for tracking
       agreementType: 'M', // Always monthly as per requirements
@@ -3760,16 +3797,40 @@ function EnrollmentForm() {
             <div className="cart-total">
               <div className="due-now-total">
                 <h3>Total Due Now</h3>
-                <p className="total-price">
-                  ${calculateTotalProratedCost().toFixed(2)}
-                </p>
+                <div className="price-breakdown">
+                  <div className="price-row">
+                    <span>Subtotal</span>
+                    <span>${calculateTotalProratedCost().toFixed(2)}</span>
+                  </div>
+                  <div className="price-row">
+                    <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    <span>${proratedTaxAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="price-row total">
+                    <span><strong>Total with Tax</strong></span>
+                    <span><strong>${(calculateTotalProratedCost() + proratedTaxAmount).toFixed(2)}</strong></span>
+                  </div>
+                </div>
                 <p className="price-detail">
                   Prorated from {formData.requestedStartDate ? formData.requestedStartDate.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1') : 'selected date'} to end of month
                 </p>
               </div>
               <div className="monthly-total">
                 <h3>Monthly Cost Going Forward</h3>
-                <p className="total-price">${calculateTotalCost().toFixed(2)}/month</p>
+                <div className="price-breakdown">
+                  <div className="price-row">
+                    <span>Subtotal</span>
+                    <span>${calculateTotalCost().toFixed(2)}/month</span>
+                  </div>
+                  <div className="price-row">
+                    <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    <span>${taxAmount.toFixed(2)}/month</span>
+                  </div>
+                  <div className="price-row total">
+                    <span><strong>Total with Tax</strong></span>
+                    <span><strong>${(calculateTotalCost() + taxAmount).toFixed(2)}/month</strong></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
