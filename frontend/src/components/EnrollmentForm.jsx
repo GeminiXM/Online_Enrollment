@@ -638,15 +638,21 @@ function EnrollmentForm() {
       const prorated = calculateProratedPrice(formData.requestedStartDate, membershipPrice);
       setProratedPrice(prorated);
       
+      // Only apply tax for New Mexico clubs (state is NM)
+      const isNewMexicoClub = selectedClub?.state === 'NM';
+      const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
+      
       // Calculate tax amount for prorated price
-      const proratedTax = Number((prorated * taxRate).toFixed(2));
+      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
       setProratedTaxAmount(proratedTax);
       
       // Calculate tax for full membership price
-      const fullTax = Number((membershipPrice * taxRate).toFixed(2));
+      const fullTax = Number((membershipPrice * effectiveTaxRate).toFixed(2));
       setTaxAmount(fullTax);
+      
+      console.log(`Tax calculation: isNewMexicoClub=${isNewMexicoClub}, effectiveTaxRate=${effectiveTaxRate}, fullTax=${fullTax}`);
     }
-  }, [formData.requestedStartDate, membershipPrice, taxRate]);
+  }, [formData.requestedStartDate, membershipPrice, taxRate, selectedClub]);
   
   // Fetch tax rate when club changes
   useEffect(() => {
@@ -3803,7 +3809,11 @@ function EnrollmentForm() {
                     <span>${calculateTotalProratedCost().toFixed(2)}</span>
                   </div>
                   <div className="price-row">
-                    <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    {selectedClub?.state === 'NM' ? (
+                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    ) : (
+                      <span>Tax</span>
+                    )}
                     <span>${proratedTaxAmount.toFixed(2)}</span>
                   </div>
                   <div className="price-row total">
@@ -3823,7 +3833,11 @@ function EnrollmentForm() {
                     <span>${calculateTotalCost().toFixed(2)}/month</span>
                   </div>
                   <div className="price-row">
-                    <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    {selectedClub?.state === 'NM' ? (
+                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                    ) : (
+                      <span>Tax</span>
+                    )}
                     <span>${taxAmount.toFixed(2)}/month</span>
                   </div>
                   <div className="price-row total">

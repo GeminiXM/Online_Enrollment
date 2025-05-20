@@ -129,14 +129,17 @@ export const getTaxRate = async (req, res) => {
 
     // Get the club ID from query parameters - used only for database connection
     const clubId = req.query.clubId || "001"; // Default to "001" if not provided
-
+    
+    // The club ID itself might not contain 'NM', so we can't rely on that
+    // We'll get the tax rate from the database, then check in the frontend
+    // if we should apply it (only for New Mexico clubs)
     logger.info(`Fetching tax rate using club ID ${clubId} for database connection`);
 
-    // Execute the stored procedure from SQL file - no parameters needed
+    // For New Mexico clubs, execute the stored procedure to get tax rate
     const result = await executeSqlProcedure("web_proc_GetTaxRate", clubId, []);
 
     // Extract the tax rate from the result
-    let taxRate = 0.07625; // Default tax rate in case of failure
+    let taxRate = 0.07625; // Default tax rate for New Mexico in case of failure
     if (result && result.length > 0) {
       const firstRow = result[0];
       if (firstRow) {

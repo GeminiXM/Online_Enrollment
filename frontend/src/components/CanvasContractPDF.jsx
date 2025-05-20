@@ -93,12 +93,14 @@ const loadFontsIntoJsPDF = (pdf) => {
   
   // Function to check if club is in New Mexico
   const isNewMexicoClub = () => {
-    // Important: Match the logic in ContractPage exactly
-    if (selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM') {
-      return true;
-    }
-    
-    return false;
+    // Only check state property (club IDs are numeric)
+    return selectedClub?.state === 'NM' || false;
+  };
+  
+  // Function to get tax rate - zero for non-NM clubs
+  const getTaxRate = () => {
+    // Only return a non-zero tax rate for New Mexico clubs
+    return isNewMexicoClub() ? 0.07625 : 0;
   };
   
   // Function to get club name
@@ -499,7 +501,10 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         currentY = pdf.lastAutoTable.finalY + 10;
       }
 
-      // Combined Financial Information
+      // Use the tax rate function for calculations
+      const effectiveTaxRate = getTaxRate();
+      
+      // Combined Financial Information 
       const membershipTableEndY = pdf.lastAutoTable.finalY;
       
       // Calculate approximate height needed for the Financial Information section

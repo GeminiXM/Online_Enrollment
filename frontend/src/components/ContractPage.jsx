@@ -315,16 +315,22 @@ const ContractPage = () => {
       // Use cust_code as Membership ID, not the specialty membership code (bridgeCode)
       const membershipId = data.cust_code || '';
       
-      // Calculate tax and totals using the same proration factor
+      // Calculate add-ons total using the same proration factor
       const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
         total + (addon.price ? addon.price * proratedFactor : 0), 0).toFixed(2) || '0.00';
       
-      // Get tax rate from membershipDetails or use a default
-      const taxRate = data.membershipDetails?.taxRate || 0.08; // Default to 8% if not provided
+      // Check if club is in New Mexico by state property
+      const isNewMexicoClub = selectedClub?.state === 'NM' || false;
       
-      // Use the provided tax amount if available, otherwise calculate it
-      const taxAmount = data.membershipDetails?.proratedTaxAmount || 
-                       ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * taxRate).toFixed(2);
+      // Get tax rate from membershipDetails or use a default (only for New Mexico)
+      const taxRate = isNewMexicoClub ? (data.membershipDetails?.taxRate || 0.08) : 0; // Only apply tax for NM
+      
+      // Calculate tax amount (will be 0 for non-NM clubs)
+      const taxAmount = isNewMexicoClub ? 
+                      (data.membershipDetails?.proratedTaxAmount || 
+                       ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * taxRate).toFixed(2)) : 
+                      '0.00'; // Zero tax for non-NM clubs
+      
       const totalCollected = (
         parseFloat(initiationFee) + 
         parseFloat(proratedDues) + 
@@ -447,8 +453,7 @@ const ContractPage = () => {
     }
     
     // Check if club is in New Mexico
-    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
-                           selectedClub?.state === 'NM';
+    const isNewMexicoClub = selectedClub?.state === 'NM' || false;
     
     // Define which initial boxes are required based on contract type
     const requiredBoxes = isNewMexicoClub 
@@ -495,9 +500,8 @@ const ContractPage = () => {
 
   // Determine contract text based on club
   const getContractText = () => {
-    // Check if club is in New Mexico (club IDs with NM prefix or codes specified by business)
-    const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || 
-                           selectedClub?.state === 'NM';
+    // Check if club is in New Mexico by state property
+    const isNewMexicoClub = selectedClub?.state === 'NM' || false;
     
     // Pass props needed for initial boxes and signature
     const contractProps = {
