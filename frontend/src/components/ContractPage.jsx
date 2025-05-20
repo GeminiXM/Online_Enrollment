@@ -114,6 +114,7 @@ const ContractPage = () => {
   });
   const [isSigned, setIsSigned] = useState(false);
   const [signatureDate, setSignatureDate] = useState('');
+  const [isSignatureConfirmed, setIsSignatureConfirmed] = useState(false);
 
   // Toggle the initialed state of a specific box
   const toggleInitialBox = (boxId) => {
@@ -381,6 +382,13 @@ const ContractPage = () => {
         // Only update the selectedFont if we have fontInfo (which means it's confirmed)
         ...(fontInfo ? { selectedFont: fontInfo } : {})
       }));
+      
+      // If we have fontInfo, the signature has been confirmed
+      if (fontInfo) {
+        setIsSignatureConfirmed(true);
+      } else {
+        setIsSignatureConfirmed(false);
+      }
     } else if (type === 'initials') {
       // For initials, just update the value but keep using the font from signature
       setSignatureData(prev => ({
@@ -856,7 +864,15 @@ const ContractPage = () => {
  
       <div className="contract-text">
         <h2>Terms and Conditions</h2>
-        <div className="scrollable-text">
+        <div className={`scrollable-text ${!isSignatureConfirmed ? 'disabled-scrolling' : ''}`}>
+          {!isSignatureConfirmed && (
+            <div className="scroll-overlay">
+              <div className="overlay-message">
+                <i className="overlay-icon">🔒</i>
+                <p>Please confirm your signature to review the terms and conditions</p>
+              </div>
+            </div>
+          )}
           {getContractText()}
         </div>
       </div>
