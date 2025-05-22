@@ -907,23 +907,46 @@ const ContractPage = () => {
         <div className="signature-fields">
           <div className="signature-field">
             <label><i>please select a signature style to be used throughout this legal document</i> <span className="required">*</span></label>
-            <SignatureSelector 
-              onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
-              name={`${formData.firstName} ${formData.lastName}`}
-              type="signature"
-            />
+            {formData.specialtyMembership === 'J' ? (
+              <>
+                <p className="guardian-signature-note">
+                  <i>As this is a Junior membership, the legal guardian will sign the agreement.</i>
+                </p>
+                <SignatureSelector 
+                  onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
+                  name={`${formData.guardianFirstName} ${formData.guardianLastName}`}
+                  type="signature"
+                />
+              </>
+            ) : (
+              <SignatureSelector 
+                onChange={(value, fontInfo) => handleSignatureChange('signature', value, fontInfo)}
+                name={`${formData.firstName} ${formData.lastName}`}
+                type="signature"
+              />
+            )}
             {errors.signature && <div className="error-message">{errors.signature}</div>}
           </div>
           
           <div className="signature-field">
             <label>Initials: <span className="required">*</span></label>
-            <SignatureSelector 
-              onChange={(value) => handleSignatureChange('initials', value)}
-              name={`${formData.firstName} ${formData.lastName}`}
-              type="initials"
-              forcedFont={signatureData.selectedFont}
-              showFontControls={false}
-            />
+            {formData.specialtyMembership === 'J' ? (
+              <SignatureSelector 
+                onChange={(value) => handleSignatureChange('initials', value)}
+                name={`${formData.guardianFirstName} ${formData.guardianLastName}`}
+                type="initials"
+                forcedFont={signatureData.selectedFont}
+                showFontControls={false}
+              />
+            ) : (
+              <SignatureSelector 
+                onChange={(value) => handleSignatureChange('initials', value)}
+                name={`${formData.firstName} ${formData.lastName}`}
+                type="initials"
+                forcedFont={signatureData.selectedFont}
+                showFontControls={false}
+              />
+            )}
             {errors.initials && <div className="error-message">{errors.initials}</div>}
           </div>
         </div> 
@@ -1212,23 +1235,9 @@ const DenverContract = ({
           <p>The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between CAC and the Member, and no oral promises are made a part of it.</p>
           
             <div className="contract-signature-container">
-              <div 
-                className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
-                onClick={handleSignatureClick}
-                style={{ 
-                  fontFamily: selectedFont?.font || 'inherit',
-                  cursor: 'pointer'
-                }}
-              >
-                {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
-              </div>
-              <div className="contract-date-box">
-                {isSigned ? signatureDate : 'Date'}
-              </div>
-              
-              {/* Legal Guardian Signature for Junior Memberships */}
-              {formData.specialtyMembership === 'J' && (
-                <div className="guardian-signature-section">
+              {formData.specialtyMembership === 'J' ? (
+                /* Show only Guardian Signature for Junior Memberships */
+                <>
                   <div className="guardian-signature-label">Legal Guardian Signature:</div>
                   <div 
                     className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
@@ -1238,10 +1247,25 @@ const DenverContract = ({
                       cursor: 'pointer'
                     }}
                   >
-                    {isSigned ? `${formData.guardianFirstName || ''} ${formData.guardianLastName || ''}` : 'Guardian Signature'}
+                    {isSigned ? `${formData.guardianFirstName || ''} ${formData.guardianLastName || ''}` : 'Click to sign'}
                   </div>
+                </>
+              ) : (
+                /* Show regular Signature for all other memberships */
+                <div 
+                  className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+                  onClick={handleSignatureClick}
+                  style={{ 
+                    fontFamily: selectedFont?.font || 'inherit',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
                 </div>
               )}
+              <div className="contract-date-box">
+                {isSigned ? signatureDate : 'Date'}
+              </div>
             </div>
           {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
@@ -1403,20 +1427,37 @@ const NewMexicoContract = ({
           <p>As used herein, the abbreviation "NMSW" means New Mexico Sports & Wellness, its successors, assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships and other entities with which it is or may in the future become affiliated. The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between NMSW and the member, and no oral promises are made a part of it.</p>
           
           <div className="contract-signature-container">
-            <div 
-              className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
-              onClick={handleSignatureClick}
-              style={{ 
-                fontFamily: selectedFont?.font || 'inherit', 
-                cursor: 'pointer'
-              }}
-            >
-              {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
-            </div>
+            {formData.specialtyMembership === 'J' ? (
+              /* Show only Guardian Signature for Junior Memberships */
+              <>
+                <div className="guardian-signature-label">Legal Guardian Signature:</div>
+                <div 
+                  className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+                  onClick={handleSignatureClick}
+                  style={{ 
+                    fontFamily: selectedFont?.font || 'inherit',
+                    cursor: 'pointer'
+                  }}
+                >
+                  {isSigned ? `${formData.guardianFirstName || ''} ${formData.guardianLastName || ''}` : 'Click to sign'}
+                </div>
+              </>
+            ) : (
+              /* Show regular Signature for all other memberships */
+              <div 
+                className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+                onClick={handleSignatureClick}
+                style={{ 
+                  fontFamily: selectedFont?.font || 'inherit',
+                  cursor: 'pointer'
+                }}
+              >
+                {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
+              </div>
+            )}
             <div className="contract-date-box">
               {isSigned ? signatureDate : 'Date'}
             </div>
-           
           </div>
           {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
