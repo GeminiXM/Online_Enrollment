@@ -7,6 +7,7 @@ import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
 import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
 import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
+import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 
@@ -91,6 +92,7 @@ function AppContent() {
         <Route path="/enrollment" element={<EnrollmentForm />} />
         <Route path="/contract" element={<ContractPage />} />
         <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/payment-converge" element={<ConvergeLightboxPayment />} />
         <Route
           path="/enrollment-confirmation"
           element={<EnrollmentConfirmation />}

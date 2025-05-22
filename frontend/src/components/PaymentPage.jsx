@@ -496,9 +496,25 @@ const PaymentPage = () => {
     }
   };
   
+  // Add state to track payment method selection
+  const [paymentMethod, setPaymentMethod] = useState('standard');
+  
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // If Converge Lightbox is selected, redirect to the Lightbox payment page
+    if (paymentMethod === 'converge-lightbox') {
+      navigate('/payment-converge', {
+        state: {
+          formData: formData,
+          signatureData: signatureData
+        }
+      });
+      return;
+    }
+    
+    // Otherwise process payment normally
     await processPayment();
   };
   
@@ -617,24 +633,64 @@ const PaymentPage = () => {
             </div>
           </div>
           
-          {/* Card Preview */}
-          <div className={`card-preview ${getCardType()}`} style={{ height: "110px", marginBottom: "0.25rem" }}>
-            <div className="card-chip"></div>
-            <div className="card-number-display">
-              <span>{formatCardNumberDisplay()}</span>
-            </div>
-            <div className="card-details-row">
-              <div className="card-holder">
-                {paymentFormData.nameOnCard || 'CARDHOLDER NAME'}
+          {/* Payment Method Selection */}
+          <div className="payment-method-selection">
+            <h3>Select Payment Method</h3>
+            <div className="payment-options">
+              <div className="payment-option">
+                <input 
+                  type="radio" 
+                  id="standardPayment" 
+                  name="paymentMethod" 
+                  value="standard"
+                  checked={paymentMethod === 'standard'}
+                  onChange={() => setPaymentMethod('standard')}
+                />
+                <label htmlFor="standardPayment">
+                  <span className="payment-option-title">Standard Payment Form</span>
+                  <span className="payment-option-description">Enter your card details directly on this page</span>
+                </label>
               </div>
-              <div className="card-expiry">
-                {paymentFormData.expiryDate || 'MM/YY'}
-              </div>
-            </div>
-            <div className="card-logo">
-              {getCardLogo()}
+              
+              {processorName === 'CONVERGE' && (
+                <div className="payment-option">
+                  <input 
+                    type="radio" 
+                    id="convergeLightboxPayment" 
+                    name="paymentMethod" 
+                    value="converge-lightbox"
+                    checked={paymentMethod === 'converge-lightbox'}
+                    onChange={() => setPaymentMethod('converge-lightbox')}
+                  />
+                  <label htmlFor="convergeLightboxPayment">
+                    <span className="payment-option-title">Converge Lightbox Payment</span>
+                    <span className="payment-option-description">Use Converge's secure payment system in a popup window</span>
+                  </label>
+                </div>
+              )}
             </div>
           </div>
+
+          {/* Only show card preview if standard payment method is selected */}
+          {paymentMethod === 'standard' && (
+            <div className={`card-preview ${getCardType()}`} style={{ height: "110px", marginBottom: "0.25rem" }}>
+              <div className="card-chip"></div>
+              <div className="card-number-display">
+                <span>{formatCardNumberDisplay()}</span>
+              </div>
+              <div className="card-details-row">
+                <div className="card-holder">
+                  {paymentFormData.nameOnCard || 'CARDHOLDER NAME'}
+                </div>
+                <div className="card-expiry">
+                  {paymentFormData.expiryDate || 'MM/YY'}
+                </div>
+              </div>
+              <div className="card-logo">
+                {getCardLogo()}
+              </div>
+            </div>
+          )}
 
           {submitError && (
             <div className="error-message payment-error">

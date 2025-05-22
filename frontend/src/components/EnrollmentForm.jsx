@@ -371,6 +371,11 @@ function EnrollmentForm() {
   // Get today's date in YYYY-MM-DD format for the min attribute of date inputs
   const today = new Date().toISOString().split('T')[0];
   
+  // Calculate date 7 days from today for max attribute of date inputs
+  const sevenDaysFromToday = new Date();
+  sevenDaysFromToday.setDate(sevenDaysFromToday.getDate() + 7);
+  const maxDate = sevenDaysFromToday.toISOString().split('T')[0];
+  
   // State for active tab
   const [activeTab, setActiveTab] = useState('members');
   
@@ -870,6 +875,7 @@ function EnrollmentForm() {
     
     // Add guardian information for Junior memberships
     if (isJuniorMembership) {
+      // Store guardian info in a nested object for backend processing
       submissionData.guardian = {
         firstName: formData.guardianFirstName,
         lastName: formData.guardianLastName,
@@ -882,6 +888,16 @@ function EnrollmentForm() {
         homePhone: formData.homePhone ? formData.homePhone.replace(/\D/g, '') : '',
         workPhone: formData.workPhone ? formData.workPhone.replace(/\D/g, '') : ''
       };
+      
+      // Also add guardian fields directly to the main object for ContractPage display
+      submissionData.guardianFirstName = formData.guardianFirstName;
+      submissionData.guardianLastName = formData.guardianLastName;
+      submissionData.guardianMiddleInitial = formData.guardianMiddleInitial || '';
+      submissionData.guardianDateOfBirth = formData.guardianDateOfBirth;
+      submissionData.guardianGender = formData.guardianGender === "default" ? "" : formData.guardianGender;
+      submissionData.guardianEmail = formData.guardianEmail;
+      submissionData.guardianRelationship = formData.guardianRelationship;
+      submissionData.guardianPhone = formData.mobilePhone; // Use mobile as primary guardian phone
     }
     
     return submissionData;
@@ -1292,10 +1308,54 @@ function EnrollmentForm() {
         newErrors.mobilePhone = "At least one phone number is required";
       }
       
+      // Add validation for Junior memberships - check guardian fields
+      if (isJuniorMembership) {
+        if (!formData.guardianFirstName) {
+          newErrors.guardianFirstName = "Guardian first name is required";
+        }
+        
+        if (!formData.guardianLastName) {
+          newErrors.guardianLastName = "Guardian last name is required";
+        }
+        
+        if (!formData.guardianDateOfBirth) {
+          newErrors.guardianDateOfBirth = "Guardian date of birth is required";
+        }
+        
+        if (!formData.guardianEmail) {
+          newErrors.guardianEmail = "Guardian email is required";
+        } else if (!isValidEmail(formData.guardianEmail)) {
+          newErrors.guardianEmail = "Please enter a valid guardian email address";
+        }
+        
+        if (!formData.guardianRelationship) {
+          newErrors.guardianRelationship = "Guardian relationship is required";
+        }
+        
+        if (!formData.guardianConsent) {
+          newErrors.guardianConsent = "You must confirm that you are the legal guardian";
+        }
+      }
+      
       // Show errors if any required fields are missing
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        const errorMessage = "Please provide at least a first and last name to continue.";
+        
+        // Set appropriate error message based on the types of errors
+        let errorMessage = "Please provide at least a first and last name to continue.";
+        
+        // If there are guardian errors for Junior membership, show a specific message
+        if (isJuniorMembership && (
+          newErrors.guardianFirstName || 
+          newErrors.guardianLastName || 
+          newErrors.guardianDateOfBirth || 
+          newErrors.guardianEmail || 
+          newErrors.guardianRelationship || 
+          newErrors.guardianConsent
+        )) {
+          errorMessage = "Please complete all required guardian information fields before continuing.";
+        }
+        
         setSubmitError(errorMessage);
         
         // Focus on the first missing field
@@ -3007,6 +3067,7 @@ function EnrollmentForm() {
                 value={formData.requestedStartDate}
                 onChange={handleChange}
                 min={today}
+                max={maxDate}
                 aria-required="true"
                 aria-invalid={!!errors.requestedStartDate}
                 aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}

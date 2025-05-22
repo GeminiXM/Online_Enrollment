@@ -3,7 +3,7 @@
 
 /* CSS Variables for consistent theming */
 :root {
-  --primary-color: #00637C; /* #008080; /* Teal - Used for headers, buttons, and accents */
+  --primary-color: #00637C; /* #0082B5 is the wellbridge color /* #008080; /* Teal - Used for headers, buttons, and accents */
   --primary-dark: #006666; /* Darker teal - Used for hover states and emphasis */
   --primary-light: #00a3a3; /* Lighter teal - Used for borders and subtle elements */
   --secondary-color: #ffffff; /* White - Used for form background */
@@ -148,12 +148,12 @@ body {
 
 /* Specific styles for prorated price */
 .prorated-price {
-  border-left: 3px solid var(--primary-color);
+  border-left: 3px solid #28a745; 
 }
 
 /* Specific styles for monthly price */
 .monthly-price {
-  border-left: 3px solid #28a745;
+  border-left: 3px solid var(--primary-color);
 }
 
 .cart-item .description {

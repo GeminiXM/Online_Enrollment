@@ -1,0 +1,286 @@
+/* ConvergeLightboxPayment.css */
+
+.payment-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.payment-container h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #0275d8;
+}
+
+.payment-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .payment-layout {
+    flex-direction: row;
+    gap: 2rem;
+  }
+  
+  .payment-summary {
+    flex: 1;
+    max-width: 350px;
+  }
+  
+  .payment-form-container {
+    flex: 2;
+  }
+}
+
+.payment-summary {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #dee2e6;
+}
+
+.payment-summary h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.payment-summary h3 {
+  font-size: 1.15rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.processor-info {
+  background-color: #e9f7fe;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #b8daff;
+}
+
+.processor-details {
+  font-size: 0.9rem;
+}
+
+.processor-name {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.detail-label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+  color: #555;
+}
+
+.detail-value {
+  color: #0275d8;
+}
+
+.processor-config {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.detail-item {
+  margin-bottom: 0.25rem;
+}
+
+.membership-summary {
+  margin-bottom: 1.5rem;
+}
+
+.membership-type {
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.membership-club {
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.price-details {
+  background-color: #f0f0f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.price-row.recurring {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #ccc;
+  font-weight: bold;
+}
+
+.price-label {
+  color: #555;
+}
+
+.price-value {
+  font-weight: bold;
+  color: #0275d8;
+}
+
+.customer-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #555;
+  margin-right: 0.5rem;
+}
+
+.agreement-summary {
+  margin-top: 1.5rem;
+}
+
+.signature-preview {
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.payment-form-container {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.payment-form-container h2 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.lightbox-explainer {
+  margin-bottom: 2rem;
+}
+
+.lightbox-explainer h3 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  color: #444;
+}
+
+.lightbox-explainer p {
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  color: #555;
+}
+
+.credit-card-logos {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.success-message {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #155724;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+  color: #721c24;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.secondary-button, 
+.primary-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondary-button {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.secondary-button:hover {
+  background-color: #e9ecef;
+}
+
+.primary-button {
+  background-color: #0275d8;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #0069d9;
+}
+
+.primary-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.payment-security-notice {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.payment-security-notice p {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

@@ -460,6 +460,36 @@ const ContractPage = () => {
       newErrors.contractSignature = "Please sign the contract at the bottom of the agreement";
     }
     
+    // Validate guardian information for Junior memberships
+    if (formData.specialtyMembership === 'J') {
+      if (!formData.guardianFirstName) {
+        newErrors.guardianFirstName = "Guardian first name is required";
+      }
+      
+      if (!formData.guardianLastName) {
+        newErrors.guardianLastName = "Guardian last name is required";
+      }
+      
+      if (!formData.guardianDateOfBirth) {
+        newErrors.guardianDateOfBirth = "Guardian date of birth is required";
+      }
+      
+      if (!formData.guardianEmail) {
+        newErrors.guardianEmail = "Guardian email is required";
+      }
+      
+      if (!formData.guardianRelationship) {
+        newErrors.guardianRelationship = "Guardian relationship is required";
+      }
+      
+      // If there are guardian errors, display an alert
+      if (newErrors.guardianFirstName || newErrors.guardianLastName || 
+          newErrors.guardianDateOfBirth || newErrors.guardianEmail || 
+          newErrors.guardianRelationship) {
+        newErrors.guardian = "Legal guardian information is incomplete. Please go back and complete all required guardian fields.";
+      }
+    }
+    
     // Check if club is in New Mexico
     const isNewMexicoClub = selectedClub?.state === 'NM' || false;
     
@@ -579,6 +609,7 @@ const ContractPage = () => {
           </div>
         </div>
         
+       
         {/* Contact Information Section (no extra space) */}
         <div className="info-section contact-section" style={{ marginTop: '-8px' }}>
           <div className="info-row">
@@ -623,6 +654,46 @@ const ContractPage = () => {
           </div>
         </div>
         
+
+        {/* Legal Guardian Information Section - Only show for Junior Memberships */}
+        {formData.specialtyMembership === 'J' && (
+          <div className="info-section legal-guardian-section">
+            <div className="info-row">
+              <div className="info-column">
+                <div className="primary-member-label-container">
+                  <div className="primary-member-label">LEGAL GUARDIAN</div>
+                </div>
+              </div>
+              <div className="info-column">
+                <div className="info-label">Last Name</div>
+                <div className="info-value">{formData.guardianLastName || 'N/A'}</div>
+              </div>
+              <div className="info-column">
+                <div className="info-label">First Name</div>
+                <div className="info-value">{formData.guardianFirstName || 'N/A'}</div>
+              </div>
+              <div className="info-column">
+                <div className="info-label">Relationship</div>
+                <div className="info-value">
+                  {formData.guardianRelationship ? 
+                    formData.guardianRelationship.charAt(0).toUpperCase() + formData.guardianRelationship.slice(1).replace('_', ' ') : 
+                    'N/A'}
+                </div>
+              </div>
+            </div>
+            <div className="info-row">
+              <div className="info-column">
+                <div className="info-label">Phone</div>
+                <div className="info-value">{formData.guardianPhone || 'N/A'}</div>
+              </div>
+              <div className="info-column">
+                <div className="info-label">Email</div>
+                <div className="info-value">{formData.guardianEmail || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Membership Details Section */}
         <div className="info-section membership-details-section">
           <div className="info-row membership-types-row">
@@ -1140,22 +1211,38 @@ const DenverContract = ({
           
           <p>The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between CAC and the Member, and no oral promises are made a part of it.</p>
           
-          <div className="contract-signature-container">
-            <div 
-              className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
-              onClick={handleSignatureClick}
-              style={{ 
-                fontFamily: selectedFont?.font || 'inherit',
-                cursor: 'pointer'
-              }}
-            >
-              {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
+            <div className="contract-signature-container">
+              <div 
+                className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+                onClick={handleSignatureClick}
+                style={{ 
+                  fontFamily: selectedFont?.font || 'inherit',
+                  cursor: 'pointer'
+                }}
+              >
+                {isSigned ? signature?.text || 'Click to sign' : 'Click to sign'}
+              </div>
+              <div className="contract-date-box">
+                {isSigned ? signatureDate : 'Date'}
+              </div>
+              
+              {/* Legal Guardian Signature for Junior Memberships */}
+              {formData.specialtyMembership === 'J' && (
+                <div className="guardian-signature-section">
+                  <div className="guardian-signature-label">Legal Guardian Signature:</div>
+                  <div 
+                    className={`contract-signature-box ${isSigned ? 'signed' : ''}`}
+                    onClick={handleSignatureClick}
+                    style={{ 
+                      fontFamily: selectedFont?.font || 'inherit',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {isSigned ? `${formData.guardianFirstName || ''} ${formData.guardianLastName || ''}` : 'Guardian Signature'}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="contract-date-box">
-              {isSigned ? signatureDate : 'Date'}
-            </div>
-           
-          </div>
           {errors?.contractSignature && <div className="error-message">{errors.contractSignature}</div>}
         </div>
       </div>

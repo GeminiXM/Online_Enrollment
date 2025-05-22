@@ -152,6 +152,29 @@ const apiService = {
       console.error('Error fetching tax rate:', error);
       throw error;
     }
+  },
+
+  // Get a transaction token for Converge Lightbox
+  getConvergeToken: async (tokenData) => {
+    try {
+      const response = await api.post('/payment/converge-token', tokenData);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting Converge token:', error);
+      
+      // For demo purposes, simulate a token response
+      // In production, you would never do this - tokens should only come from a secure backend
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn('DEMO MODE: Returning mock token for development');
+        return {
+          success: true,
+          ssl_txn_auth_token: `DEMO_TOKEN_${Date.now()}`,
+          message: 'This is a simulated token for demonstration purposes only'
+        };
+      }
+      
+      throw error;
+    }
   }
 };
 
