@@ -84,3 +84,15 @@
 2025-05-20 14:25:30:2530 [31merror[39m: [31mError executing query:[39m
 2025-05-20 14:25:30:2530 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-05-20 14:25:30:2530 [31merror[39m: [31mError in getTaxRate:[39m
+2025-05-20 16:56:28:5628 [31merror[39m: [31mError executing query:[39m
+2025-05-20 16:56:28:5628 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-05-20 16:56:28:5628 [31merror[39m: [31mError in getTaxRate:[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError executing query:[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError in getTaxRate:[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError executing query:[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-05-20 17:37:46:3746 [31merror[39m: [31mError in getTaxRate:[39m
+2025-05-20 17:51:03:513 [31merror[39m: [31mError connecting to database:[39m
+2025-05-20 17:51:03:513 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-05-20 17:51:03:513 [31merror[39m: [31mError in getMembershipPrice:[39m

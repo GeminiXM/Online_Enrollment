@@ -473,6 +473,10 @@ const ContractPage = () => {
       if (!formData.guardianDateOfBirth) {
         newErrors.guardianDateOfBirth = "Guardian date of birth is required";
       }
+
+      if (!formData.guardianGender) {
+        newErrors.guardianGender = "Guardian gender is required";
+      }
       
       if (!formData.guardianEmail) {
         newErrors.guardianEmail = "Guardian email is required";
@@ -484,7 +488,7 @@ const ContractPage = () => {
       
       // If there are guardian errors, display an alert
       if (newErrors.guardianFirstName || newErrors.guardianLastName || 
-          newErrors.guardianDateOfBirth || newErrors.guardianEmail || 
+          newErrors.guardianDateOfBirth || newErrors.guardianGender ||newErrors.guardianEmail || 
           newErrors.guardianRelationship) {
         newErrors.guardian = "Legal guardian information is incomplete. Please go back and complete all required guardian fields.";
       }
@@ -671,6 +675,17 @@ const ContractPage = () => {
               <div className="info-column">
                 <div className="info-label">First Name</div>
                 <div className="info-value">{formData.guardianFirstName || 'N/A'}</div>
+              </div>
+              <div className="info-column">
+              <div className="info-label">DOB</div>
+              <div className="info-value">
+                {formData.guardianDateOfBirth ? formatDateWithoutTimezoneShift(formData.guardianDateOfBirth) : 
+                 formData.guardianDateOfBirth ? formatDateWithoutTimezoneShift(formData.guardianDateOfBirth) : ''}
+              </div>
+            </div>
+              <div className="info-column">
+                <div className="info-label">Gender</div>
+                <div className="info-value">{formData.guardianGender || 'N/A'}</div>
               </div>
               <div className="info-column">
                 <div className="info-label">Relationship</div>

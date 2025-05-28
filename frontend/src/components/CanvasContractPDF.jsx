@@ -327,10 +327,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         theme: 'grid',
         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
         margin: { left: 20, right: 20 }
-
-
       });
-      
 
       // Contact Information
       pdf.setFontSize(10);
@@ -367,40 +364,88 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         margin: { left: 20, right: 20 }
       });
       
-      // Phone information
-      const addressTableEndY = pdf.lastAutoTable.finalY;
-      autoTable(pdf, {
-        startY: addressTableEndY + 2,
-        head: [['Cell Phone', 'Home Phone', 'Work Phone']],
-        body: [
-          [
-            formData.mobilePhone || formData.cellPhone || '',
-            formData.homePhone || '',
-            formData.workPhone || ''
-          ]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
-        margin: { left: 20, right: 20 }
-      });
-      
-      // Membership details section
-      const phoneTableEndY = pdf.lastAutoTable.finalY;
-      autoTable(pdf, {
-        startY: phoneTableEndY + 5,
-        head: [['Membership Type', 'Add-on Options', 'Specialty Membership', 'Agreement Type']],
-        body: [
-          [
-            formData.displayMembershipType || 'Individual',
-            formData.addOns && formData.addOns.length > 0 ? formData.addOns.map(addon => addon.trim()).join(', ') : 'None',
-            formData.displaySpecialtyMembership || 'None',
-            formData.displayAgreementType || 'Month-to-month'
-          ]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [60, 60, 60], textColor: [255, 255, 255], fontStyle: 'bold' },
-        margin: { left: 20, right: 20 }
-      });
+       // Phone information
+       const addressTableEndY = pdf.lastAutoTable.finalY;
+       autoTable(pdf, {
+         startY: addressTableEndY + 2,
+         head: [['Cell Phone', 'Home Phone', 'Work Phone']],
+         body: [
+           [
+             formData.mobilePhone || formData.cellPhone || '',
+             formData.homePhone || '',
+             formData.workPhone || ''
+           ]
+         ],
+         theme: 'grid',
+         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
+         margin: { left: 20, right: 20 }
+       });
+ 
+       // Legal Guardian Information Section - Only show for Junior Memberships
+       const phoneTableEndY = pdf.lastAutoTable.finalY;
+       let currentTableEndY = phoneTableEndY;
+       
+       if (formData.specialtyMembership === 'J') {
+         // Legal Guardian label
+         pdf.setFontSize(10);
+         pdf.setFont('helvetica', 'bold');
+         pdf.text('LEGAL GUARDIAN', 20, currentTableEndY + 7);
+         
+         // Legal Guardian details table - matches ContractPage layout
+         autoTable(pdf, {
+           startY: currentTableEndY + 10,
+           head: [['Last Name', 'First Name', 'DOB', 'Gender', 'Relationship']],
+           body: [
+             [
+               formData.guardianLastName || '',
+               formData.guardianFirstName || '',
+               formatDate(formData.guardianDateOfBirth) || '',
+               formData.guardianGender || '',
+               formData.guardianRelationship.charAt(0).toUpperCase() + formData.guardianRelationship.slice(1).replace('_', ' ')  || ''
+             ]
+           ],
+           theme: 'grid',
+           headStyles: { fillColor: [220, 220, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
+           margin: { left: 20, right: 20 }
+         });
+         
+         // Guardian Email and Phone on same row
+         const guardianTableEndY = pdf.lastAutoTable.finalY;
+         autoTable(pdf, {
+           startY: guardianTableEndY + 2,
+           head: [['Email', 'Phone']],
+           body: [
+             [
+               formData.guardianEmail || '',
+               formData.guardianPhone || ''
+             ]
+           ],
+           theme: 'grid',
+           headStyles: { fillColor: [220, 220, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
+           margin: { left: 20, right: 20 }
+         });
+         
+         currentTableEndY = pdf.lastAutoTable.finalY;
+       }
+ 
+       // Membership details section
+       autoTable(pdf, {
+         startY: currentTableEndY + 5,
+         head: [['Membership Type', 'Add-on Options', 'Specialty Membership', 'Agreement Type']],
+         body: [
+           [
+             formData.displayMembershipType || 'Individual',
+             formData.addOns && formData.addOns.length > 0 ? formData.addOns.map(addon => addon.trim()).join(', ') : 'None',
+             formData.displaySpecialtyMembership || 'None',
+             formData.displayAgreementType || 'Month-to-month'
+           ]
+         ],
+         theme: 'grid',
+         headStyles: { fillColor: [60, 60, 60], textColor: [255, 255, 255], fontStyle: 'bold' },
+         margin: { left: 20, right: 20 }
+       });
+ 
+
       
       // Family Members Section (if applicable)
       const monthlyTableEndY = pdf.lastAutoTable.finalY;

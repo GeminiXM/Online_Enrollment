@@ -1321,6 +1321,10 @@ function EnrollmentForm() {
         if (!formData.guardianDateOfBirth) {
           newErrors.guardianDateOfBirth = "Guardian date of birth is required";
         }
+
+        if (!formData.guardianDateOfBirth) {
+          newErrors.guardianGender = "Guardian gender is required";
+        }
         
         if (!formData.guardianEmail) {
           newErrors.guardianEmail = "Guardian email is required";
@@ -1349,6 +1353,7 @@ function EnrollmentForm() {
           newErrors.guardianFirstName || 
           newErrors.guardianLastName || 
           newErrors.guardianDateOfBirth || 
+          newErrors.guardianGender || 
           newErrors.guardianEmail || 
           newErrors.guardianRelationship || 
           newErrors.guardianConsent
@@ -1856,6 +1861,7 @@ function EnrollmentForm() {
         guardianFirstName: "",
         guardianLastName: "",
         guardianEmail: "",
+        guardianGender: "",
         guardianPhone: "",
         guardianRelationship: ""
       });
