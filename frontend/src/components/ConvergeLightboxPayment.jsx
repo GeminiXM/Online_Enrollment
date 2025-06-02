@@ -81,6 +81,7 @@ const ConvergeLightboxPayment = () => {
   // Data states
   const [formData, setFormData] = useState(null);
   const [signatureData, setSignatureData] = useState(null);
+  const [initialedSections, setInitialedSections] = useState(null);
   const [customerInfo, setCustomerInfo] = useState({
     firstName: '',
     lastName: '',
@@ -104,7 +105,7 @@ const ConvergeLightboxPayment = () => {
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
     if (location.state) {
-      const { formData, signatureData } = location.state;
+      const { formData, signatureData, initialedSections } = location.state;
       
       if (formData) {
         setFormData(formData);
@@ -165,6 +166,9 @@ const ConvergeLightboxPayment = () => {
       
       if (signatureData) {
         setSignatureData(signatureData);
+      }
+      if (initialedSections) {
+        setInitialedSections(initialedSections);
       }
     } else {
       // If no data, go back to enrollment form
@@ -593,6 +597,12 @@ const handleLightboxResponse = (event) => {
       // Consider adding transaction logging for payment reconciliation
       const response = await api.post('/enrollment', submissionData);
       
+// Debug logging before navigation
+console.log('ConvergeLightboxPayment - About to navigate with:');
+console.log('  formData:', formData);
+console.log('  signatureData:', signatureData);
+console.log('  initialedSections:', initialedSections);
+
       // Navigate to confirmation page
       navigate('/enrollment-confirmation', { 
         state: { 
@@ -601,7 +611,8 @@ const handleLightboxResponse = (event) => {
           successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
           paymentResponse: paymentResult,
           formData: formData,
-          signatureData: signatureData
+          signatureData: signatureData,
+          initialedSections: initialedSections
         } 
       });
     } catch (error) {

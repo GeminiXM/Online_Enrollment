@@ -13,6 +13,12 @@ import WhisperBase64 from '@/assets/fonts/base64/Whisper';
 
 const CanvasContractPDF = ({ formData, signatureData, signatureDate, initialedSections, selectedClub, membershipPrice }) => {
  
+// Debug logging
+console.log('CanvasContractPDF - Received props:');
+console.log('  initialedSections:', initialedSections);
+console.log('  signatureData:', signatureData);
+console.log('  signatureData.initials:', signatureData?.initials);
+
   const [isGenerating, setIsGenerating] = useState(false);
   
 

@@ -244,6 +244,9 @@ const PaymentPage = () => {
       if (signatureData) {
         setSignatureData(signatureData);
       }
+      if (initialedSections) {
+        setInitialedSections(initialedSections);
+      }
     } else {
       // If no data, go back to enrollment form
       navigate('/enrollment');
@@ -487,7 +490,10 @@ const PaymentPage = () => {
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
           successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
-          paymentResponse: paymentResult
+          paymentResponse: paymentResult,
+          formData: formData,              
+          signatureData: signatureData,     
+          initialedSections: initialedSections  
         } 
       });
     } catch (error) {
@@ -509,7 +515,8 @@ const PaymentPage = () => {
       navigate('/payment-converge', {
         state: {
           formData: formData,
-          signatureData: signatureData
+          signatureData: signatureData,
+          initialedSections: initialedSections 
         }
       });
       return;

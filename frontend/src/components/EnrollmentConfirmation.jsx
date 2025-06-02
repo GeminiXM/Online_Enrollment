@@ -6,9 +6,14 @@ import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData } = location.state || {};
+  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections } = location.state || {};
   const { selectedClub } = useClub();
   
+// Debug logging
+console.log('EnrollmentConfirmation - location.state:', location.state);
+console.log('EnrollmentConfirmation - initialedSections:', initialedSections);
+console.log('EnrollmentConfirmation - signatureData:', signatureData);
+
   // Format the payment timestamp
   const formatTimestamp = () => {
     const now = new Date();
@@ -138,6 +143,7 @@ function EnrollmentConfirmation() {
                 formData={formData}
                 signatureData={signatureData}
                 signatureDate={formatTimestamp()}
+                initialedSections={initialedSections}
                 selectedClub={selectedClub}
                 membershipPrice={formData.membershipDetails?.price || formData.monthlyDues}
               />
