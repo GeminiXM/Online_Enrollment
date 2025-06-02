@@ -84,6 +84,7 @@ const PaymentPage = () => {
   // Data from previous screens
   const [formData, setFormData] = useState(null);
   const [signatureData, setSignatureData] = useState(null);
+  const [initialedSections, setInitialedSections] = useState(null);
   
   // Payment form state
   const [paymentFormData, setPaymentFormData] = useState({
@@ -106,7 +107,7 @@ const PaymentPage = () => {
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
     if (location.state) {
-      const { formData, signatureData } = location.state;
+      const { formData, signatureData, initialedSections } = location.state;
       
       if (formData) {
         setFormData(formData);

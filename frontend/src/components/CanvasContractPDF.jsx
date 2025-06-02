@@ -1977,7 +1977,7 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
       onClick={generatePDF}
       disabled={isGenerating || !formData || !signatureData}
     >
-      {isGenerating ? 'Generating Canvas PDF...' : 'Download Canvas PDF'}
+      {isGenerating ? 'Generating Contract PDF...' : 'Download Contract PDF'}
     </button>
   );
 };

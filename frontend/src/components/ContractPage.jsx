@@ -531,7 +531,8 @@ const ContractPage = () => {
       navigate('/payment', {
         state: {
           formData: formData,
-          signatureData: signatureData
+          signatureData: signatureData,
+          initialedSections: initialedBoxes
         }
       });
     } else if (errors.initialBoxes && errors.initialBoxes.length > 0) {
@@ -1219,7 +1220,7 @@ const DenverContract = ({
           
           <p>Student/Young Professional (SYP) discounted memberships are offered exclusively to members between the ages of 19-29. This special discounted rate will be honored through the age of 29. I understand that beginning the month after my 30th birthday my monthly dues rate will increase by $10. Each year thereafter my monthly rate will increase by an additional $10 until my rate reaches the then current rate. I also understand that my rate may also change for any other upgrades or downgrades of the membership that I may initiate.</p>
           
-          <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/29/2025, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
+          <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -1235,7 +1236,7 @@ const DenverContract = ({
           
           <p>Although you were unable to provide corporate proof when beginning your membership, we would like to offer you the opportunity to immediately take advantage of your membership.</p>
           
-          <p>If this proof is not received within 14 days, your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/29/2025, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
+          <p>If this proof is not received within 14 days, your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, your rate will go to $150.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -1427,7 +1428,7 @@ const NewMexicoContract = ({
           
           <p><strong>19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS</strong></p>
           <p>Student/Young Professional (SYP) discounted memberships are offered exclusively to members between the ages of 19-29. This special discounted rate will be honored through the age of 29. I understand that beginning the month after my 30th birthday my monthly dues rate will increase by $10. Each year thereafter my monthly rate will increase by an additional $10 until my rate reaches the then current rate. I also understand that my rate may also change for any other upgrades or downgrades of the membership that I may initiate.</p>
-          <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by 04/30/2025, your rate will go to $115.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
+          <p>Proof of age must be received within 14 days; otherwise your membership will be converted to the equivalent of one individually priced membership and you will be responsible for the entire billed amount. If the documentation is not received by {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, your rate will go to $115.00 per month until the proper documentation is provided. The club will not issue a dues credit for any portion of the additional charges once billed.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox

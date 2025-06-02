@@ -97,6 +97,9 @@ const ConvergeLightboxPayment = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentResult, setPaymentResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [showResultPopup, setShowResultPopup] = useState(false);
+  const [popupMessage, setPopupMessage] = useState('');
+  const [popupType, setPopupType] = useState(''); // 'success' or 'error'
   
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
@@ -204,7 +207,7 @@ const ConvergeLightboxPayment = () => {
   
   // Demo mode state - true when in demo/simulation mode
   // PRODUCTION: Remove this demoMode state in production - always use the real integration
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
 
   // Load the Converge script
   useEffect(() => {
@@ -375,134 +378,194 @@ const ConvergeLightboxPayment = () => {
       }
     };
     
-    // PRODUCTION DATA REQUIRED:
-    // Try to load the real Converge script
-    const script = document.createElement('script');
-    script.id = 'converge-script';
-    // PRODUCTION: Ensure this points to the correct Converge environment
-    // For production use: https://api.convergepay.com/hosted-payments/presentation.js
-    // For staging/testing: https://api.demo.convergepay.com/hosted-payments/presentation.js
-    script.src = 'https://api.convergepay.com/hosted-payments/presentation.js';
-    script.async = true;
-    script.onload = () => {
-      console.log('Converge script loaded successfully');
-      setDemoMode(false);
-    };
-    script.onerror = () => {
-      console.warn('Failed to load Converge script - using simulation mode instead');
-      setDemoMode(true);
-    };
-    
-    document.body.appendChild(script);
-    
-    // Clean up on unmount
-    return () => {
-      const scriptElement = document.getElementById('converge-script');
-      if (scriptElement) {
-        document.body.removeChild(scriptElement);
-      }
-    };
-  }, []);
+     // PRODUCTION DATA REQUIRED:
+  // Load the correct Converge script based on environment
+  const script = document.createElement('script');
+  script.id = 'converge-script';
   
-  // Function to launch the Converge Lightbox
-  const launchLightbox = async () => {
-    // Get a transaction token from your server
-    const token = await fetchTransactionToken();
-    if (!token) return;
+  // PRODUCTION: Change this to production URL
+  // For production: https://api.convergepay.com/hosted-payments/PayWithConverge.js
+  // For demo/testing: https://api.demo.convergepay.com/hosted-payments/PayWithConverge.js
+  script.src = 'https://api.demo.convergepay.com/hosted-payments/PayWithConverge.js';
+  script.async = true;
+  script.onload = () => {
+    console.log('Converge PayWithConverge script loaded successfully');
+    // setDemoMode(false); // DEMO: Keep in demo mode - uncomment for production
+  };
+  script.onerror = () => {
+    console.warn('Failed to load Converge script - using simulation mode instead');
+    setDemoMode(true); // Fallback to simulation
+  };
+  
+  document.body.appendChild(script);
+  
+  // Clean up on unmount
+  return () => {
+    const scriptElement = document.getElementById('converge-script');
+    if (scriptElement) {
+      document.body.removeChild(scriptElement);
+    }
+  };
+}, []);
+  
+// Function to launch the Converge Lightbox
+const launchLightbox = async () => {
+  // Get a transaction token from your server
+  const token = await fetchTransactionToken();
+  if (!token) return;
+  
+  try {
+    // Payment fields including billing information
+    const paymentFields = {
+      ssl_txn_auth_token: token,
+      ssl_first_name: customerInfo.firstName,
+      ssl_last_name: customerInfo.lastName,
+      ssl_avs_address: customerInfo.address,
+      ssl_city: customerInfo.city,
+      ssl_state: customerInfo.state,
+      ssl_avs_zip: customerInfo.zipCode,
+      ssl_phone: customerInfo.phone,
+      ssl_email: customerInfo.email
+    };
     
-    try {
-      // Set up a listener for the Converge postMessage response
+    if (demoMode) {
+      console.log('Using demo/simulation mode for Converge Lightbox');
+      
+      // DEMO MODE: Set up postMessage listener for simulation
       window.addEventListener('message', handleLightboxResponse, false);
       
-      // PRODUCTION DATA REQUIRED:
-      // These parameters need to be properly configured for production use
-      const lightboxParams = {
-        ssl_txn_auth_token: token,
-        
-        // Customize the appearance of the lightbox
-        style: {
-          // PRODUCTION: Replace with your actual club logo URL from a CDN or server
-          logoUrl: selectedClub?.logoUrl || 'https://via.placeholder.com/150x80?text=Your+Gym+Logo',
-          
-          // PRODUCTION: Configure these to match your brand colors and style
-          buttonText: 'Complete Payment',
-          primaryColor: '#0275d8',
-          textColor: '#333333',
-          headerText: `${selectedClub?.name || 'Gym'} Membership Payment`
+      // Launch simulation
+      window.simulateConvergeLightbox({
+        paymentFields: paymentFields,
+        onCancel: () => {
+          setErrorMessage('Payment was cancelled.');
+          setIsSubmitting(false);
+        }
+      });
+    } else {
+      console.log('Using real Converge Lightbox integration');
+      
+      // PRODUCTION: Use official Converge callback approach
+      const callback = {
+        onError: function (error) {
+          console.error('Converge Lightbox error:', error);
+          setErrorMessage('Payment system error. Please try again later.');
+          setIsSubmitting(false);
         },
-        
-        // PRODUCTION DATA REQUIRED:
-        // This must be a secure endpoint on your production server
-        // that can handle and process the callback data from Converge
-        // Should be a full URL, not a relative path
-        ssl_callback_url: '/api/converge/callback'
+        onCancelled: function () {
+          console.log('Payment cancelled by user');
+          setErrorMessage('Payment was cancelled.');
+          setIsSubmitting(false);
+        },
+        onDeclined: function (response) {
+          console.log('Payment declined:', response);
+          setPaymentResult({
+            success: false,
+            errorCode: response.ssl_result,
+            errorMessage: response.ssl_result_message
+          });
+          setErrorMessage(response.ssl_result_message || 'Payment was declined. Please try again.');
+          setIsSubmitting(false);
+        },
+        onApproval: function (response) {
+          console.log('Payment approved:', response);
+          setPaymentResult({
+            success: true,
+            transactionId: response.ssl_txn_id,
+            authorizationCode: response.ssl_approval_code,
+            cardNumber: response.ssl_card_number,
+            cardType: response.ssl_card_type
+          });
+          
+          setTimeout(() => {
+            finishEnrollment(response);
+          }, 3000);
+        }
       };
       
-      // Launch the lightbox using our custom wrapper function that handles both real and simulated modes
-      if (demoMode) {
-        console.log('Using demo/simulation mode for Converge Lightbox');
+      // PRODUCTION: Launch real Converge Lightbox using official method
+      if (window.PayWithConverge) {
+        window.PayWithConverge.open(paymentFields, callback);
       } else {
-        console.log('Using real Converge Lightbox integration');
+        throw new Error('PayWithConverge is not loaded');
       }
-      
-      // Use our wrapper function that handles both real and simulated modes
-      window.launchConvergeLightbox(lightboxParams);
-      
-    } catch (error) {
-      console.error('Error launching Converge Lightbox:', error);
-      setErrorMessage('Unable to launch payment form. Please try again later.');
-      setIsSubmitting(false);
     }
+    
+  } catch (error) {
+    console.error('Error launching Converge Lightbox:', error);
+    setErrorMessage('Unable to launch payment form. Please try again later.');
+    setIsSubmitting(false);
+  }
   };
   
-  // Handle the response from the Lightbox
-  const handleLightboxResponse = (event) => {
-    try {
-      // PRODUCTION DATA REQUIRED:
-      // Origin validation should match your Converge environment
-      // For production: 'https://api.convergepay.com'
-      // For staging/testing: 'https://api.demo.convergepay.com'
-      if (event.origin !== 'https://api.convergepay.com') {
-        return;
-      }
-      
-      const response = event.data;
-      console.log('Converge Lightbox response:', response);
-      
-      // Remove the event listener to prevent duplicate handling
-      window.removeEventListener('message', handleLightboxResponse, false);
-      
-      // Process the payment response
-      if (response.ssl_result === '0') {
-        // Success! Process the successful payment
-        setPaymentResult({
-          success: true,
-          transactionId: response.ssl_txn_id,
-          authorizationCode: response.ssl_approval_code,
-          cardNumber: response.ssl_card_number, // Last 4 digits only
-          cardType: response.ssl_card_type
-        });
-        
-        // Delay to allow user to see the result
-        setTimeout(() => {
-          finishEnrollment(response);
-        }, 3000);
-      } else {
-        // Payment failed
-        setPaymentResult({
-          success: false,
-          errorCode: response.ssl_result,
-          errorMessage: response.ssl_result_message
-        });
-        setErrorMessage(response.ssl_result_message || 'Payment processing failed. Please try again.');
-        setIsSubmitting(false);
-      }
-    } catch (error) {
-      console.error('Error processing Converge response:', error);
-      setErrorMessage('An error occurred while processing your payment. Please try again.');
-      setIsSubmitting(false);
+
+// Handle the response from the Lightbox (DEMO MODE ONLY)
+const handleLightboxResponse = (event) => {
+  try {
+    // PRODUCTION DATA REQUIRED:
+    // This function is only used in demo mode
+    // In production, responses come through the callback functions
+    
+    // PRODUCTION: Update origin validation for your environment
+    // For production: 'https://api.convergepay.com'
+    // For demo: 'https://api.demo.convergepay.com'
+    const expectedOrigin = 'https://api.demo.convergepay.com';
+    
+    // Skip origin check in demo mode since it's simulated
+    if (!demoMode && event.origin !== expectedOrigin) {
+      return;
     }
-  };
+    
+    const response = event.data;
+    console.log('Payment response received:', response);
+    
+    // Check if payment was successful
+    if (response.ssl_result === '0') {
+      // Payment successful
+      const successResult = {
+        success: true,
+        transactionId: response.ssl_txn_id,
+        authorizationCode: response.ssl_approval_code,
+        cardNumber: response.ssl_card_number,
+        cardType: response.ssl_card_type
+      };
+      
+      setPaymentResult(successResult);
+      setPopupType('success');
+      setPopupMessage(`Payment successful! Transaction ID: ${response.ssl_txn_id}`);
+      setShowResultPopup(true);
+      
+      // Wait a moment then process enrollment
+      setTimeout(() => {
+        setShowResultPopup(false);
+        finishEnrollment(response);
+      }, 3000);
+      
+    } else {
+      // Payment failed
+      const errorResult = {
+        success: false,
+        errorCode: response.ssl_result,
+        errorMessage: response.ssl_result_message || 'Payment failed'
+      };
+      
+      setPaymentResult(errorResult);
+      setPopupType('error');
+      setPopupMessage(`Payment failed: ${response.ssl_result_message || 'Unknown error'}`);
+      setShowResultPopup(true);
+      setIsSubmitting(false);
+      
+      // Auto-hide error popup after 5 seconds
+      setTimeout(() => {
+        setShowResultPopup(false);
+      }, 5000);
+    }
+  } catch (error) {
+    console.error('Error processing Converge response:', error);
+    setErrorMessage('An error occurred while processing your payment. Please try again.');
+    setIsSubmitting(false);
+  }
+};
   
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {
@@ -536,7 +599,9 @@ const ConvergeLightboxPayment = () => {
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
           successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
-          paymentResponse: paymentResult
+          paymentResponse: paymentResult,
+          formData: formData,
+          signatureData: signatureData
         } 
       });
     } catch (error) {
@@ -572,10 +637,53 @@ const ConvergeLightboxPayment = () => {
   
   return (
     <div className="payment-container">
+      {/* Payment Result Popup */}
+      {showResultPopup && (
+        <div className="popup-overlay">
+          <div className={`popup-modal ${popupType}`}>
+            <div className="popup-header">
+              <h3>
+                {popupType === 'success' ? (
+                  <span className="success-icon">✅</span>
+                ) : (
+                  <span className="error-icon">❌</span>
+                )}
+                {popupType === 'success' ? 'Payment Successful!' : 'Payment Failed'}
+              </h3>
+              <button 
+                className="popup-close" 
+                onClick={() => setShowResultPopup(false)}
+                aria-label="Close popup"
+              >
+                ×
+              </button>
+            </div>
+            <div className="popup-content">
+              <p>{popupMessage}</p>
+              {popupType === 'success' && (
+                <p className="popup-redirect-message">
+                  Redirecting to confirmation page...
+                </p>
+              )}
+            </div>
+            {popupType === 'error' && (
+              <div className="popup-actions">
+                <button 
+                  className="popup-button primary"
+                  onClick={() => setShowResultPopup(false)}
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
       <h1>Complete Your Membership with Converge</h1>
       
-      {/* Include Converge Hosted Payments JS */}
-      <script src="https://api.convergepay.com/hosted-payments/presentation.js"></script>
+      {/* REMOVE THIS LINE - script is loaded dynamically */}
+      {/* <script src="https://api.convergepay.com/hosted-payments/presentation.js"></script> */}
       
       <div className="payment-layout">
         <div className="payment-summary">
@@ -661,7 +769,7 @@ const ConvergeLightboxPayment = () => {
           <h2>Payment Information</h2>
           
           <div className="lightbox-explainer">
-            <h3>Converge Lightbox Payment</h3>
+            <h3>Converge Lightbox Payment {demoMode && <span style={{color: 'orange'}}>(DEMO MODE)</span>}</h3>
             <p>
               When you click the "Pay Now" button below, a secure payment form will appear where 
               you can safely enter your credit card information. Your payment will be processed securely 

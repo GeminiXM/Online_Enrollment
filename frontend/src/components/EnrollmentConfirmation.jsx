@@ -1,11 +1,12 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
+import CanvasContractPDF from './CanvasContractPDF';
 import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage, paymentResponse } = location.state || {};
+  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData } = location.state || {};
   const { selectedClub } = useClub();
   
   // Format the payment timestamp
@@ -126,6 +127,23 @@ function EnrollmentConfirmation() {
             <li>Bring a valid photo ID and any required documentation.</li>
           </ul>
         </div>
+
+        {/* Contract Download Section */}
+        {formData && signatureData && (
+          <div className="contract-download-section">
+            <h3>Your Membership Contract</h3>
+            <p>Download your completed membership agreement for your records.</p>
+            <div className="contract-download-actions">
+              <CanvasContractPDF 
+                formData={formData}
+                signatureData={signatureData}
+                signatureDate={formatTimestamp()}
+                selectedClub={selectedClub}
+                membershipPrice={formData.membershipDetails?.price || formData.monthlyDues}
+              />
+            </div>
+          </div>
+        )}
 
         <div className="confirmation-actions">
           <Link to="/" className="btn btn-primary">

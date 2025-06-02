@@ -96,3 +96,9 @@
 2025-05-20 17:51:03:513 [31merror[39m: [31mError connecting to database:[39m
 2025-05-20 17:51:03:513 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
 2025-05-20 17:51:03:513 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-05-28 15:48:18:4818 [31merror[39m: [31mError executing query:[39m
+2025-05-28 15:48:18:4818 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertWebStrcustr[39m
+2025-05-28 15:48:18:4818 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-06-02 10:38:54:3854 [31merror[39m: [31mError executing query:[39m
+2025-06-02 10:38:54:3854 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertWebStrcustr[39m
+2025-06-02 10:38:54:3854 [31merror[39m: [31mError in submitEnrollment:[39m
