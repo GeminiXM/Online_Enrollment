@@ -102,3 +102,6 @@
 2025-06-02 10:38:54:3854 [31merror[39m: [31mError executing query:[39m
 2025-06-02 10:38:54:3854 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertWebStrcustr[39m
 2025-06-02 10:38:54:3854 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-06-02 16:17:32:1732 [31merror[39m: [31mError executing query:[39m
+2025-06-02 16:17:32:1732 [31merror[39m: [31mError executing SQL procedure: procNextMembershipId[39m
+2025-06-02 16:17:32:1732 [31merror[39m: [31mError calling procNextMembershipId:[39m

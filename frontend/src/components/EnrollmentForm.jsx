@@ -12,6 +12,7 @@ import MembershipTypeModal from "./MembershipTypeModal";
 import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 import AddonButtons from "./AddonButtons";
 import ServiceAddonButtons from './ServiceAddonButtons';
+import PersonalTrainingModal from './PersonalTrainingModal';
 
 // Add this near the top of the file with other constants
 const SPECIALTY_MEMBERSHIP_MAP = {
@@ -156,6 +157,10 @@ function EnrollmentForm() {
   const [taxRate, setTaxRate] = useState(0.07625);
   const [taxAmount, setTaxAmount] = useState(0);
   const [proratedTaxAmount, setProratedTaxAmount] = useState(0);
+
+  const [showPTModal, setShowPTModal] = useState(false);
+  const [hasPTAddon, setHasPTAddon] = useState(false);
+  const [formSubmissionData, setFormSubmissionData] = useState(null);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -1257,7 +1262,6 @@ function EnrollmentForm() {
     // Clear any previous error
     setSubmitError("");
     
-    // FORCE DIRECT NAVIGATION: Always transform data and navigate to contract page
     try {
       // Do minimal validation for primary fields only
       const newErrors = {};
@@ -1371,17 +1375,48 @@ function EnrollmentForm() {
       
       // Transform form data for submission
       const submissionData = transformFormDataForSubmission();
-      console.log("FORCE NAVIGATING to contract page with data", submissionData);
+      console.log("Preparing to show PT modal with data", submissionData);
       
-      // DIRECT NAVIGATE - no validation checks will block this
+      // Store the submission data and show PT modal
+      setFormSubmissionData(submissionData);
+      setShowPTModal(true);
+    } catch (error) {
+      console.error("Error during form submission:", error);
+      setSubmitError("An unexpected error occurred. Please try again.");
+    }
+  };
+
+  const handlePTAccept = () => {
+    setHasPTAddon(true);
+    setShowPTModal(false);
+    // Add the PT addon to your selected addons
+    const ptAddon = {
+      id: 'pt-sessions',
+      name: 'Personal Training Sessions',
+      price: 149,
+      description: '4 Personal Training Sessions'
+    };
+    setSelectedServiceAddons(prev => [...prev, ptAddon]);
+    
+    // Navigate to contract page with the stored submission data
+    if (formSubmissionData) {
       navigate('/contract', { 
         state: { 
-          formData: submissionData
+          formData: formSubmissionData
         } 
       });
-    } catch (error) {
-      console.error("Error during navigation:", error);
-      setSubmitError("An unexpected error occurred. Please try again.");
+    }
+  };
+
+  const handlePTDecline = () => {
+    setShowPTModal(false);
+    // Navigate to contract page with the stored submission data
+    if (formSubmissionData) {
+      navigate('/contract', { 
+        state: { 
+          formData: formSubmissionData
+        } 
+      });
     }
   };
 
@@ -3917,6 +3952,12 @@ function EnrollmentForm() {
           </div>
         </div>
       </div>
+      
+      <PersonalTrainingModal 
+        isOpen={showPTModal}
+        onClose={handlePTDecline}
+        onAccept={handlePTAccept}
+      />
     </div>
   );
 }
