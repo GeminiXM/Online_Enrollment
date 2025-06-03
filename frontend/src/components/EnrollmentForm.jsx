@@ -1422,6 +1422,10 @@ function EnrollmentForm() {
 
   // Handle membership type selection
   const handleMembershipTypeSelect = (type) => {
+    // Store the previous membership type for comparison
+    const previousType = membershipType;
+    
+    // Update the membership type
     selectMembershipType(type);
     setShowMembershipTypeModal(false);
     
@@ -1439,6 +1443,57 @@ function EnrollmentForm() {
           ...prevErrors,
           dateOfBirth: null
         }));
+      }
+    }
+
+    // Handle existing family members based on the new membership type
+    if (formData.familyMembers.length > 0) {
+      // If changing to Junior or SYP membership
+      if (type.id === 'junior' || type.id === 'young-professional') {
+        // Clear all family members as Junior and SYP memberships can't have additional members
+        setFormData(prev => ({
+          ...prev,
+          familyMembers: []
+        }));
+        // Clear any child forms
+        setChildForms([]);
+        // Clear selected addons
+        setSelectedChildAddons([]);
+        setSelectedServiceAddons([]);
+        
+        // Show alert for SYP membership change
+        if (type.id === 'young-professional') {
+          alert("Student/Young Professional memberships cannot have family members. All family members have been removed.");
+        }
+      }
+      // If changing from Junior or SYP to any other type
+      else if (previousType?.id === 'junior' || previousType?.id === 'young-professional') {
+        // Keep the form data but allow adding new members
+        // No need to clear anything as these memberships don't have family members
+      }
+      // For all other membership type changes
+      else {
+        // Keep existing family members but validate their ages against the new membership type
+        const updatedFamilyMembers = formData.familyMembers.map(member => {
+          if (member.dateOfBirth) {
+            const ageError = validateAgeForMembershipType(member.dateOfBirth, type);
+            if (ageError) {
+              // If the member's age is invalid for the new membership type, remove them
+              return null;
+            }
+          }
+          return member;
+        }).filter(Boolean); // Remove any null entries
+
+        setFormData(prev => ({
+          ...prev,
+          familyMembers: updatedFamilyMembers
+        }));
+
+        // If any members were removed due to age validation, show a message
+        if (updatedFamilyMembers.length < formData.familyMembers.length) {
+          alert("Some family members were removed because they don't meet the age requirements for the selected membership type.");
+        }
       }
     }
   };
