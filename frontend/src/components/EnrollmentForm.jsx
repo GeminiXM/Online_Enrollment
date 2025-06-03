@@ -1502,31 +1502,44 @@ function EnrollmentForm() {
   //ADDONS
   // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
-    // Extract the number of children from the addon description
-    const childCount = extractChildCount(addon.invtr_desc);
-    
-    if (childCount > 0) {
-      // Create an array of empty child forms based on the count
-      const newChildForms = Array(childCount).fill().map(() => ({
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        gender: "",
-        mobile: "",
-        home: "",
-        email: ""
-      }));
+    // Check if this addon is already selected
+    const isAlreadySelected = selectedChildAddons.some(
+      selected => selected.invtr_desc === addon.invtr_desc
+    );
+
+    if (isAlreadySelected) {
+      // If already selected, remove it and clear child forms
+      setSelectedChildAddons(prev => 
+        prev.filter(a => a.invtr_desc !== addon.invtr_desc)
+      );
+      setChildForms([]);
+    } else {
+      // Extract the number of children from the addon description
+      const childCount = extractChildCount(addon.invtr_desc);
       
-      // Update the child forms state
-      setChildForms(newChildForms);
-      
-      // Update selected addons
-      setSelectedChildAddons(prev => {
-        // Remove any existing child addons
-        const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
-        // Add the new child addon
-        return [...filteredAddons, addon];
-      });
+      if (childCount > 0) {
+        // Create an array of empty child forms based on the count
+        const newChildForms = Array(childCount).fill().map(() => ({
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "",
+          mobile: "",
+          home: "",
+          email: ""
+        }));
+        
+        // Update the child forms state
+        setChildForms(newChildForms);
+        
+        // Update selected addons
+        setSelectedChildAddons(prev => {
+          // Remove any existing child addons
+          const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
+          // Add the new child addon
+          return [...filteredAddons, addon];
+        });
+      }
     }
   };
 
