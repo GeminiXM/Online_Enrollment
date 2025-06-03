@@ -14966,3 +14966,355 @@
 2025-06-03 10:47:15:4715 [32minfo[39m: [32mConnected to database for club 204[39m
 2025-06-03 10:47:15:4715 [32minfo[39m: [32mPrice retrieved successfully[39m
 2025-06-03 10:47:15:4715 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching addons for club ID: 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching tax rate using club ID 204 for database connection[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching bridge code for club ID: 204, specialty membership: [39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mTax rate retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching tax rate using club ID 204 for database connection[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mTax rate retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching addons for club ID: 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:24:5024 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mFetching bridge code for club ID: 204, specialty membership: [39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 10:50:29:5029 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:50:33:5033 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mFetching CC processor name for club ID: 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mReceived request for CC processor name[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mFetching CC processor name for club ID: 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetCCProcessor[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mFetching Converge info for club ID: 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mCC processor name retrieved successfully[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mFetching Converge info for club ID: 204[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-06-03 10:57:54:5754 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:57:55:5755 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:57:55:5755 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mFetching Converge info for club ID: 204[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mReceived request for Converge processor info[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mFetching Converge info for club ID: 204[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mExecuting SQL procedure: procConvergeItemSelect1[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:24:5824 [32minfo[39m: [32mConverge info retrieved successfully[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mReceived enrollment submission:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mFamily members data:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mPreparing membership record:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: procNextMembershipId[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mRaw result from procNextMembershipId:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mFound ID using key 'next_id'[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mUsing customer code:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mInserting primary membership record:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: web_proc_InsertWebStrcustr[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mPrimary membership record inserted successfully[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mInserting primary member record[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: web_proc_InsertWebAsamembr[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mPrimary member record inserted successfully[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mInserting message information[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: web_proc_InsertWebAsamessag[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mMessage information inserted successfully[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mInserting contract information[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: web_proc_InsertWebAsacontr[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mContract information inserted successfully[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mInserting receipt document for membership dues[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mExecuting SQL procedure: web_proc_InsertWebAsprecdoc[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 10:58:36:5836 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 10:58:37:5837 [32minfo[39m: [32mMembership dues receipt document inserted successfully[39m
+2025-06-03 10:58:37:5837 [32minfo[39m: [32mEnrollment submission completed successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching addons for club ID: 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching bridge code for club ID: 204, specialty membership: [39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching tax rate using club ID 204 for database connection[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mTax rate retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching addons for club ID: 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching bridge code for club ID: 204, specialty membership: [39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching tax rate using club ID 204 for database connection[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mTax rate retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mFetching price for club ID: 204, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mConnected to database for club 204[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:44:37:4437 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 11:45:00:450 [32minfo[39m: [32mFetching addons for club ID: 254[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mFetching tax rate using club ID 254 for database connection[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:45:01:451 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 11:45:01:451 [31merror[39m: [31mError executing query:[39m
+2025-06-03 11:45:01:451 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:45:01:451 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:49:02:492 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:50:13:5013 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching addons for club ID: 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching tax rate using club ID 254 for database connection[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError executing query:[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching addons for club ID: 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching tax rate using club ID 254 for database connection[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mFetching price for club ID: 254, membership type: D, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:53:58:5358 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError executing query:[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 11:53:58:5358 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 11:54:01:541 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 12:10:28:1028 [32minfo[39m: [32mServer running on port 5001[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching tax rate using club ID 254 for database connection[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching addons for club ID: 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mBridge code retrieved successfully[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mReceived request for addons[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mFetching addons for club ID: 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetAddons[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:55:1055 [32minfo[39m: [32mAddons retrieved successfully[39m
+2025-06-03 12:10:56:1056 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:56:1056 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:56:1056 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError executing query:[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mReceived request for tax rate[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mFetching tax rate using club ID 254 for database connection[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError executing query:[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-03 12:10:57:1057 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mReceived request for specialty membership bridge code[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mFetching bridge code for club ID: 254, specialty membership: [39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mExecuting SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mReceived request for membership price[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mFetching price for club ID: 254, membership type: I, agreement type: M, specialty membership: , bridge code: [39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mExecuting SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mAttempting database connection:[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mPrice retrieved successfully[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mConnected to database for club 254[39m
+2025-06-03 12:10:57:1057 [32minfo[39m: [32mBridge code retrieved successfully[39m

@@ -1447,68 +1447,72 @@ function EnrollmentForm() {
   //ADDONS
   // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
-    // Check if this is a New Mexico club
-    const isNewMexicoClub = selectedClub?.state === 'NM';
+    // Extract the number of children from the addon description
+    const childCount = extractChildCount(addon.invtr_desc);
     
-    setSelectedChildAddons(prev => {
-      // If the clicked addon is already selected, clear the selection
-      if (prev.some(item => item.invtr_desc === addon.invtr_desc)) {
-        setChildForms([]); // Clear child forms when deselecting
-        return [];
-      }
+    if (childCount > 0) {
+      // Create an array of empty child forms based on the count
+      const newChildForms = Array(childCount).fill().map(() => ({
+        firstName: "",
+        lastName: "",
+        dateOfBirth: "",
+        gender: "",
+        mobile: "",
+        home: "",
+        email: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
+      }));
       
-      // First check if we need to reset incomplete child forms
-      // This prevents incorrect Family membership type when no children are actually added
-      if (childForms.length > 0) {
-        // Check if any childForm data has been entered 
-        const hasEnteredChildData = childForms.some(form => 
-          form.firstName || form.lastName || form.dateOfBirth || form.gender);
-          
-        if (!hasEnteredChildData) {
-          // If no data was entered, reset the child forms
-          setChildForms([]);
-        }
-      }
+      // Update the child forms state
+      setChildForms(newChildForms);
       
-      // For New Mexico clubs, start with just 1 child form as they allow unlimited children
-      if (isNewMexicoClub && determinedMembershipType === 'I') {
-        const newChildForms = [{
-          firstName: "",
-          lastName: "",
-          dateOfBirth: "",
-          gender: "",
-          mobile: "",
-          home: "",
-          email: "",
-          emergencyContactName: "",
-          emergencyContactPhone: "",
-        }];
-        
-        setChildForms(newChildForms);
-      } else {
-        // For Colorado clubs, use the existing behavior of creating forms based on count
-        const childCount = extractChildCount(addon.invtr_desc);
-        
-        // Initialize child forms based on the count
-        const newChildForms = Array(childCount).fill().map(() => ({
-          firstName: "",
-          lastName: "",
-          dateOfBirth: "",
-          gender: "",
-          mobile: "",
-          home: "",
-          email: "",
-          emergencyContactName: "",
-          emergencyContactPhone: "",
-        }));
-        
-        setChildForms(newChildForms);
-      }
-      
-      return [addon];
-    });
+      // Update selected addons
+      setSelectedChildAddons(prev => {
+        // Remove any existing child addons
+        const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
+        // Add the new child addon
+        return [...filteredAddons, addon];
+      });
+    }
   };
-  
+
+  // ... existing code ...
+
+  // Keep only this version of extractChildCount
+  const extractChildCount = (description) => {
+    // Handle different formats of child count in description
+    const lowerDesc = description.toLowerCase();
+    
+    // Match patterns like "2 children", "2 child", "two children", etc.
+    const numberMatch = description.match(/(\d+)\s*(?:child|children)/i);
+    if (numberMatch) {
+      return parseInt(numberMatch[1], 10);
+    }
+    
+    // Match word numbers like "two", "three", etc.
+    const wordNumbers = {
+      'one': 1,
+      'two': 2,
+      'three': 3,
+      'four': 4,
+      'five': 5
+    };
+    
+    for (const [word, number] of Object.entries(wordNumbers)) {
+      if (lowerDesc.includes(word)) {
+        return number;
+      }
+    }
+    
+    // Default to 1 if no count is found
+    return 1;
+  };
+
+  // ... existing code ...
+
+  // Remove the duplicate extractChildCount function that was here
+
   // Function to handle changes to a specific child form
   const handleChildFormChange = (index, field, value) => {
     setChildForms(prev => {
@@ -1687,32 +1691,6 @@ function EnrollmentForm() {
       }
     });
   };
-
-  // Function to extract number of children from addon description
-  const extractChildCount = (description) => {
-    if (!description) return 0;
-    
-    // Check for Denver format (CAC prefix)
-    const denverRegex = /CAC\s+(\d+)\s+(?:child|children)/i;
-    const denverMatch = description.match(denverRegex);
-    
-    if (denverMatch && denverMatch[1]) {
-      return parseInt(denverMatch[1], 10);
-    }
-    
-    // Check for NMSW format (2020 prefix)
-    const nmswRegex = /2020\s+(\d+)\s+(?:child|children)/i;
-    const nmswMatch = description.match(nmswRegex);
-    
-    if (nmswMatch && nmswMatch[1]) {
-      return parseInt(nmswMatch[1], 10);
-    }
-    
-    // Default to 1 if no number is found
-    return 1;
-  };
-
-
 
   // Render the tabs based on membership type
   const renderTabs = () => {
@@ -2496,222 +2474,231 @@ function EnrollmentForm() {
                 )}
               </div>
             ) : (
-              <>
-                {/* Show normal Child Addon buttons for all other cases */}
-                <AddonButtons 
+              <div className="child-addon-section">
+                <AddonButtons
                   addons={addons}
                   selectedAddons={selectedChildAddons}
                   onAddonClick={handleChildAddonClick}
-                  membershipTypeValue={determinedMembershipType}
                 />
                 
-                {selectedChildAddons.length > 0 && childForms.length > 0 && (
-              <div className="child-forms-container">
-                <h4>Child Information</h4>
-                <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
-                
-                {/* New Mexico clubs with Individual membership type can add unlimited children */}
-                {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
-                  <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
-                    <button 
-                      type="button" 
-                      className="add-child-button"
-                      onClick={addAnotherChildForm}
+                {childForms.length > 0 && (
+                  <div className="child-forms-container">
+                    <h4>Child Information</h4>
+                    <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
+                    
+                    {childForms.map((child, index) => (
+                      <div key={index} className="child-form" style={{ 
+                        backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+                        padding: '20px',
+                        marginBottom: '20px',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                      }}>
+                        <h5 style={{ 
+                          color: '#2c3e50',
+                          marginBottom: '15px',
+                          paddingBottom: '10px',
+                          borderBottom: '2px solid #e9ecef'
+                        }}>Child {index + 1}</h5>
+                        <div className="form-row name-row">
+                          <div className="form-group">
+                            <label htmlFor={`child${index}FirstName`}>
+                              First Name <span className="required">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}FirstName`}
+                              value={child.firstName}
+                              onChange={(e) => handleChildFormChange(index, 'firstName', e.target.value)}
+                              placeholder="Enter first name"
+                              required
+                            />
+                            {errors[`child${index}FirstName`] && (
+                              <span className="error-message">{errors[`child${index}FirstName`]}</span>
+                            )}
+                          </div>
+                          
+                          <div className="form-group middle-initial">
+                            <label htmlFor={`child${index}MiddleInitial`}>
+                              Initial
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}MiddleInitial`}
+                              value={child.middleInitial || ""}
+                              onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
+                              placeholder="M.I."
+                              maxLength="1"
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor={`child${index}LastName`}>
+                              Last Name <span className="required">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}LastName`}
+                              value={child.lastName}
+                              onChange={(e) => handleChildFormChange(index, 'lastName', e.target.value)}
+                              placeholder="Enter last name"
+                              required
+                            />
+                            {errors[`child${index}LastName`] && (
+                              <span className="error-message">{errors[`child${index}LastName`]}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="form-row birthdate-gender-email">
+                          <div className="form-group dob-field">
+                            <label htmlFor={`child${index}DateOfBirth`}>
+                              Date of Birth <span className="required">*</span>
+                            </label>
+                            <input
+                              type="date"
+                              id={`child${index}DateOfBirth`}
+                              value={child.dateOfBirth}
+                              onChange={(e) => handleChildFormChange(index, 'dateOfBirth', e.target.value)}
+                              onBlur={(e) => {
+                                if (e.target.value) {
+                                  const ageError = validateChildAge(e.target.value);
+                                  if (ageError) {
+                                    setErrors(prev => {
+                                      const newErrors = {...prev};
+                                      newErrors[`child${index}DateOfBirth`] = ageError;
+                                      return newErrors;
+                                    });
+                                  }
+                                }
+                              }}
+                              required
+                            />
+                            {errors[`child${index}DateOfBirth`] && (
+                              <span className="error-message">{errors[`child${index}DateOfBirth`]}</span>
+                            )}
+                          </div>
+                          <div className="form-group gender-field">
+                            <label htmlFor={`child${index}Gender`}>
+                              Gender <span className="required">*</span>
+                            </label>
+                            <select
+                              id={`child${index}Gender`}
+                              value={child.gender}
+                              onChange={(e) => handleChildFormChange(index, 'gender', e.target.value)}
+                              required
+                            >
+                              <option value="">Select gender</option>
+                              <option value="M">Male</option>
+                              <option value="F">Female</option>
+                              <option value="N">Prefer not to say</option>
+                            </select>
+                            {errors[`child${index}Gender`] && (
+                              <span className="error-message">{errors[`child${index}Gender`]}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="form-row contact-info">
+                          <div className="form-group">
+                            <label htmlFor={`child${index}Mobile`}>
+                              Mobile Phone
+                            </label>
+                            <input
+                              type="tel"
+                              id={`child${index}Mobile`}
+                              value={child.mobile}
+                              onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
+                              placeholder="(555) 555-5555"
+                            />
+                            {errors[`child${index}Mobile`] && (
+                              <span className="error-message">{errors[`child${index}Mobile`]}</span>
+                            )}
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor={`child${index}Home`}>
+                              Home Phone
+                            </label>
+                            <input
+                              type="tel"
+                              id={`child${index}Home`}
+                              value={child.home}
+                              onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
+                              placeholder="(555) 555-5555"
+                            />
+                            {errors[`child${index}Home`] && (
+                              <span className="error-message">{errors[`child${index}Home`]}</span>
+                            )}
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor={`child${index}Email`}>
+                              Email
+                            </label>
+                            <input
+                              type="email"
+                              id={`child${index}Email`}
+                              value={child.email}
+                              onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
+                              placeholder="email@example.com"
+                            />
+                            {errors[`child${index}Email`] && (
+                              <span className="error-message">{errors[`child${index}Email`]}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="form-row emergency-contact">
+                          <div className="form-group">
+                            <label htmlFor={`child${index}EmergencyContactName`}>
+                              Emergency Contact Name
+                            </label>
+                            <input
+                              type="text"
+                              id={`child${index}EmergencyContactName`}
+                              value={child.emergencyContactName}
+                              onChange={(e) => handleChildFormChange(index, 'emergencyContactName', e.target.value)}
+                              placeholder="Emergency contact name"
+                            />
+                          </div>
+                          
+                          <div className="form-group">
+                            <label htmlFor={`child${index}EmergencyContactPhone`}>
+                              Emergency Contact Phone
+                            </label>
+                            <input
+                              type="tel"
+                              id={`child${index}EmergencyContactPhone`}
+                              value={child.emergencyContactPhone}
+                              onChange={(e) => handleChildFormChange(index, 'emergencyContactPhone', e.target.value)}
+                              placeholder="(555) 555-5555"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <button
+                      type="button"
+                      className="add-child-member-button"
+                      onClick={handleAddChildMember}
                       style={{
-                        padding: '8px 16px',
+                        padding: '10px 20px',
                         backgroundColor: '#4CAF50',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        fontSize: '14px'
+                        fontSize: '16px',
+                        marginTop: '20px'
                       }}
                     >
-                      Add Another Child
+                      Add Child Member
                     </button>
-                    <p style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
-                      New Mexico clubs allow you to add any number of children with the Child Addon.
-                    </p>
                   </div>
                 )}
-                
-                {childForms.map((child, index) => (
-                  <div key={index} className="child-form" style={{ 
-                    backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
-                    padding: '20px',
-                    marginBottom: '20px',
-                    borderRadius: '8px',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                  }}>
-                    <h5 style={{ 
-                      color: '#2c3e50',
-                      marginBottom: '15px',
-                      paddingBottom: '10px',
-                      borderBottom: '2px solid #e9ecef'
-                    }}>Child {index + 1}</h5>
-                    <div className="form-row name-row">
-                      <div className="form-group">
-                        <label htmlFor={`child${index}FirstName`}>
-                          First Name <span className="required">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id={`child${index}FirstName`}
-                          value={child.firstName}
-                          onChange={(e) => handleChildFormChange(index, 'firstName', e.target.value)}
-                          placeholder="Enter first name"
-                          required
-                        />
-                        {errors[`child${index}FirstName`] && (
-                          <span className="error-message">{errors[`child${index}FirstName`]}</span>
-                        )}
-                      </div>
-                      
-                      <div className="form-group middle-initial">
-                        <label htmlFor={`child${index}MiddleInitial`}>
-                          Initial
-                        </label>
-                        <input
-                          type="text"
-                          id={`child${index}MiddleInitial`}
-                          value={child.middleInitial || ""}
-                          onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
-                          placeholder="M.I."
-                          maxLength="1"
-                        />
-                      </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor={`child${index}LastName`}>
-                          Last Name <span className="required">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id={`child${index}LastName`}
-                          value={child.lastName}
-                          onChange={(e) => handleChildFormChange(index, 'lastName', e.target.value)}
-                          placeholder="Enter last name"
-                          required
-                        />
-                        {errors[`child${index}LastName`] && (
-                          <span className="error-message">{errors[`child${index}LastName`]}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="form-row birthdate-gender-email">
-                      <div className="form-group dob-field">
-                        <label htmlFor={`child${index}DateOfBirth`}>
-                          Date of Birth <span className="required">*</span>
-                        </label>
-                        <input
-                          type="date"
-                          id={`child${index}DateOfBirth`}
-                          value={child.dateOfBirth}
-                          onChange={(e) => handleChildFormChange(index, 'dateOfBirth', e.target.value)}
-                          onBlur={(e) => {
-                            if (e.target.value) {
-                              const ageError = validateChildAge(e.target.value);
-                              if (ageError) {
-                                setErrors(prev => {
-                                  const newErrors = {...prev};
-                                  newErrors[`child${index}DateOfBirth`] = ageError;
-                                  return newErrors;
-                                });
-                              }
-                            }
-                          }}
-                          required
-                        />
-                        {errors[`child${index}DateOfBirth`] && (
-                          <span className="error-message">{errors[`child${index}DateOfBirth`]}</span>
-                        )}
-                      </div>
-                      <div className="form-group gender-field">
-                        <label htmlFor={`child${index}Gender`}>
-                          Gender <span className="required">*</span>
-                        </label>
-                        <select
-                          id={`child${index}Gender`}
-                          value={child.gender}
-                          onChange={(e) => handleChildFormChange(index, 'gender', e.target.value)}
-                          required
-                        >
-                          <option value="">Select gender</option>
-                          <option value="M">Male</option>
-                          <option value="F">Female</option>
-                          <option value="N">Prefer not to say</option>
-                        </select>
-                        {errors[`child${index}Gender`] && (
-                          <span className="error-message">{errors[`child${index}Gender`]}</span>
-                        )}
-                      </div>
-                                          
-                      <div className="form-group email-field">
-                        <label htmlFor={`child${index}Email`}>
-                          Email
-                        </label>
-                        <input
-                          type="email"
-                          id={`child${index}Email`}
-                          value={child.email}
-                          onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
-                          placeholder="Enter email address"
-                        />
-                      
-                    </div>
-                    </div>
-
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor={`child${index}Mobile`}>
-                          Cell Phone
-                        </label>
-                        <input
-                          type="tel"
-                          id={`child${index}Mobile`}
-                          value={child.mobile}
-                          onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
-                          placeholder="Enter 10-digit phone number"
-                          required
-                        />
-                        {errors[`child${index}Mobile`] && (
-                          <span className="error-message">{errors[`child${index}Mobile`]}</span>
-                        )}
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor={`child${index}Home`}>
-                          Home Phone
-                        </label>
-                        <input
-                          type="tel"
-                          id={`child${index}Home`}
-                          value={child.home}
-                          onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
-                          placeholder="Enter 10-digit phone number"
-                        />
-                        {errors[`child${index}Home`] && (
-                          <span className="error-message">{errors[`child${index}Home`]}</span>
-                        )}
-                      </div>
-                    </div>
-
-
-                  </div>
-                ))}
-                
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="add-member-button"
-                    onClick={handleAddChildMember}
-                  >
-                    Add {childForms.length} {childForms.length === 1 ? 'Child' : 'Children'}
-                  </button>
-                </div>
               </div>
-            )}
-              </>
             )}
           </div>
         );
