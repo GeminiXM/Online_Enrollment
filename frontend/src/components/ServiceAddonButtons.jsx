@@ -1,35 +1,26 @@
 // frontend/src/components/ServiceAddonButtons.jsx
 // This component displays a grid of addon buttons for additional services
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useClub } from '../context/ClubContext';
 import './EnrollmentForm.css';
 
 const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
-  // Get the selected club to check if it's a New Mexico club
+  const [hoveredAddon, setHoveredAddon] = useState(null);
   const { selectedClub } = useClub();
   const isNewMexicoClub = selectedClub?.id?.toString().includes('NM') || selectedClub?.state === 'NM';
 
-  // Filter addons based on conditions
   const serviceAddons = addons?.filter(addon => {
     if (!addon.invtr_desc) return false;
-    
     const descLower = addon.invtr_desc.toLowerCase();
     const isChildRelated = descLower.includes("child") || descLower.includes("children");
-    
-    // Include all non-child related addons
     if (!isChildRelated) return true;
-    
-    // For New Mexico clubs, include child-related addons that contain "Unlimited"
     if (isNewMexicoClub && addon.invtr_desc.includes("Unlimited")) {
       return true;
     }
-    
-    // Exclude other child-related addons
     return false;
   }) || [];
 
-  // Separate unlimited addons from regular addons
   const unlimitedAddons = serviceAddons.filter(addon => 
     addon.invtr_desc && addon.invtr_desc.includes("Unlimited")
   );
@@ -38,7 +29,6 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
     !addon.invtr_desc || !addon.invtr_desc.includes("Unlimited")
   );
 
-  // If no service addons are available, show a message
   if (serviceAddons.length === 0) {
     return (
       <div className="no-addons-message">
@@ -47,35 +37,78 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
     );
   }
 
+  const getDescription = (addonName) => {
+    switch(addonName) {
+      case 'Tennis Passport':
+        return 'Allows you to play tennis at any Wellbridge club location';
+      case 'Racquet Court Reservation':
+        return 'Reserve racquet courts for your preferred time';
+      case 'Passport All Clubs':
+        return 'Access to all Wellbridge club locations';
+      case 'Child Care':
+        return 'Access to our child care facilities during your workout';
+      case 'Unlimited Child Care':
+        return 'Unlimited access to our child care facilities';
+      case 'Locker':
+        return 'Reserved locker for your personal use';
+      case 'Towel Service':
+        return 'Clean towels provided during your visits';
+      case 'Personal Training':
+        return 'One-on-one training sessions with our certified trainers';
+      case 'Group Fitness':
+        return 'Access to all group fitness classes';
+      case 'Spa Access':
+        return 'Access to spa facilities and services';
+      case 'Pool Access':
+        return 'Access to swimming pool facilities';
+      case 'Basketball Court':
+        return 'Access to basketball court facilities';
+      case 'Squash Court':
+        return 'Access to squash court facilities';
+      default:
+        return `Description for: ${addonName}`;
+    }
+  };
+
   return (
     <div>
-      {/* Regular addons */}
       <div className="addons-grid">
         {regularAddons.map((addon, index) => (
-          <button
+          <div 
             key={index}
-            type="button"
-            className={`addon-button ${
-              selectedAddons.some(
-                (item) => item.invtr_desc === addon.invtr_desc
-              )
-                ? "selected"
-                : ""
-            }`}
-            onClick={() => onAddonClick(addon)}
+            className="addon-button-container"
+            onMouseEnter={() => setHoveredAddon(addon.invtr_desc)}
+            onMouseLeave={() => setHoveredAddon(null)}
           >
-            <div className="addon-description">
-              {addon.invtr_desc}
-            </div>
-            <div className="addon-price">${addon.invtr_price}</div>
-            {selectedAddons.some(
-              (item) => item.invtr_desc === addon.invtr_desc
-            ) && <span className="checkmark">✔</span>}
-          </button>
+            <button
+              type="button"
+              className={`addon-button ${
+                selectedAddons.some(
+                  (item) => item.invtr_desc === addon.invtr_desc
+                )
+                  ? "selected"
+                  : ""
+              }`}
+              onClick={() => onAddonClick(addon)}
+            >
+              <div className="addon-description">
+                {addon.invtr_desc}
+              </div>
+              <div className="addon-price">${addon.invtr_price}</div>
+              {selectedAddons.some(
+                (item) => item.invtr_desc === addon.invtr_desc
+              ) && <span className="checkmark">✔</span>}
+            </button>
+          </div>
         ))}
       </div>
       
-      {/* Only show unlimited section if there are unlimited addons */}
+      {hoveredAddon && (
+        <div className="addon-description-text">
+          {getDescription(hoveredAddon)}
+        </div>
+      )}
+      
       {unlimitedAddons.length > 0 && (
         <>
           <div className="addon-section-separator">
@@ -85,26 +118,30 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
           
           <div className="addons-grid unlimited-addons">
             {unlimitedAddons.map((addon, index) => (
-              <button
+              <div 
                 key={index}
-                type="button"
-                className={`addon-button ${
-                  selectedAddons.some(
-                    (item) => item.invtr_desc === addon.invtr_desc
-                  )
-                    ? "selected"
-                    : ""
-                }`}
-                onClick={() => onAddonClick(addon)}
+                className="addon-button-container"
               >
-                <div className="addon-description">
-                  {addon.invtr_desc}
-                </div>
-                <div className="addon-price">${addon.invtr_price}</div>
-                {selectedAddons.some(
-                  (item) => item.invtr_desc === addon.invtr_desc
-                ) && <span className="checkmark">✔</span>}
-              </button>
+                <button
+                  type="button"
+                  className={`addon-button ${
+                    selectedAddons.some(
+                      (item) => item.invtr_desc === addon.invtr_desc
+                    )
+                      ? "selected"
+                      : ""
+                  }`}
+                  onClick={() => onAddonClick(addon)}
+                >
+                  <div className="addon-description">
+                    {addon.invtr_desc}
+                  </div>
+                  <div className="addon-price">${addon.invtr_price}</div>
+                  {selectedAddons.some(
+                    (item) => item.invtr_desc === addon.invtr_desc
+                  ) && <span className="checkmark">✔</span>}
+                </button>
+              </div>
             ))}
           </div>
         </>

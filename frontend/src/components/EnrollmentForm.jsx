@@ -1514,9 +1514,7 @@ function EnrollmentForm() {
         gender: "",
         mobile: "",
         home: "",
-        email: "",
-        emergencyContactName: "",
-        emergencyContactPhone: "",
+        email: ""
       }));
       
       // Update the child forms state
@@ -1591,9 +1589,7 @@ function EnrollmentForm() {
         gender: "",
         mobile: "",
         home: "",
-        email: "",
-        emergencyContactName: "",
-        emergencyContactPhone: "",
+        email: ""
       }
     ]);
   };
@@ -2309,9 +2305,7 @@ function EnrollmentForm() {
                       gender: "",
                       mobile: "",
                       home: "",
-                      email: "",
-                      emergencyContactName: "",
-                      emergencyContactPhone: "",
+                      email: ""
                     }]);
                   }}
                   style={{
@@ -2701,34 +2695,6 @@ function EnrollmentForm() {
                             {errors[`child${index}Email`] && (
                               <span className="error-message">{errors[`child${index}Email`]}</span>
                             )}
-                          </div>
-                        </div>
-
-                        <div className="form-row emergency-contact">
-                          <div className="form-group">
-                            <label htmlFor={`child${index}EmergencyContactName`}>
-                              Emergency Contact Name
-                            </label>
-                            <input
-                              type="text"
-                              id={`child${index}EmergencyContactName`}
-                              value={child.emergencyContactName}
-                              onChange={(e) => handleChildFormChange(index, 'emergencyContactName', e.target.value)}
-                              placeholder="Emergency contact name"
-                            />
-                          </div>
-                          
-                          <div className="form-group">
-                            <label htmlFor={`child${index}EmergencyContactPhone`}>
-                              Emergency Contact Phone
-                            </label>
-                            <input
-                              type="tel"
-                              id={`child${index}EmergencyContactPhone`}
-                              value={child.emergencyContactPhone}
-                              onChange={(e) => handleChildFormChange(index, 'emergencyContactPhone', e.target.value)}
-                              placeholder="(555) 555-5555"
-                            />
                           </div>
                         </div>
                       </div>

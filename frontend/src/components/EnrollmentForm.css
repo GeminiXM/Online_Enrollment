@@ -1379,3 +1379,63 @@ button:focus-visible {
     font-size: 1.5rem;
   }
 }
+
+/* Addon button container for tooltip positioning */
+.addon-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip styles */
+.addon-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 99, 124, 0.95);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  z-index: 1000;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  max-width: 250px;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Add a small arrow to the tooltip */
+.addon-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: rgba(0, 99, 124, 0.95) transparent transparent transparent;
+}
+
+/* Ensure tooltip is visible on hover */
+.addon-button-container:hover .addon-tooltip {
+  display: block;
+}
+
+.addon-description-text {
+  margin-top: 15px;
+  padding: 10px 15px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  color: #333333;
+  font-size: 0.9rem;
+  text-align: center;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e0e0e0;
+}
