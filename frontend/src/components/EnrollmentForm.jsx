@@ -2059,6 +2059,19 @@ function EnrollmentForm() {
         );
       
       case 'new_adult':
+        // Check if there's already an additional adult
+        const hasAdditionalAdult = formData.familyMembers.some(member => member.memberType === 'adult');
+        
+        if (hasAdditionalAdult) {
+          return (
+            <div className="tab-panel">
+              <h3>Add Adult Family Member</h3>
+              <p className="no-more-adults-message">One Adult successfully Added to this Membership.<br /><br />
+                Any additional adults must purchase their own membership. No further adults can be added to this membership.</p>
+            </div>
+          );
+        }
+        
         return (
           <div className="tab-panel">
             <h3>Add Adult Family Member</h3>
@@ -2125,8 +2138,8 @@ function EnrollmentForm() {
               </div>
             </div>
             
-            <div className="form-row birthdate-gender-email">
-              <div className="form-group dob-field">
+            <div className="form-row">
+              <div className="form-group">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
                 </label>
@@ -2136,7 +2149,6 @@ function EnrollmentForm() {
                   name="dateOfBirth"
                   value={adultMember.dateOfBirth}
                   onChange={handleTempMemberChange}
-                  max={today}
                   aria-required="true"
                   aria-invalid={!!errors.tempDateOfBirth}
                   aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
@@ -2147,7 +2159,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-              
+
               <div className="form-group gender-field">
                 <label htmlFor="tempGender">
                   Gender <span className="required">*</span>
@@ -2195,8 +2207,8 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-
-            <div className="form-row phone-numbers">
+            
+            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
                   Cell Phone
@@ -2207,7 +2219,7 @@ function EnrollmentForm() {
                   name="cellPhone"
                   value={adultMember.cellPhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter mobile phone"
+                  placeholder="Enter cell phone number"
                   aria-invalid={!!errors.tempCellPhone}
                   aria-describedby={errors.tempCellPhone ? "tempCellPhone-error" : undefined}
                 />
@@ -2228,7 +2240,7 @@ function EnrollmentForm() {
                   name="homePhone"
                   value={adultMember.homePhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter home phone"
+                  placeholder="Enter home phone number"
                   aria-invalid={!!errors.tempHomePhone}
                   aria-describedby={errors.tempHomePhone ? "tempHomePhone-error" : undefined}
                 />
@@ -2249,7 +2261,7 @@ function EnrollmentForm() {
                   name="workPhone"
                   value={adultMember.workPhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter work phone"
+                  placeholder="Enter work phone number"
                   aria-invalid={!!errors.tempWorkPhone}
                   aria-describedby={errors.tempWorkPhone ? "tempWorkPhone-error" : undefined}
                 />
@@ -2262,8 +2274,8 @@ function EnrollmentForm() {
             </div>
             
             <div className="form-actions">
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="add-member-button"
                 onClick={() => addFamilyMember('adult')}
               >
