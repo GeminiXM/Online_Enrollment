@@ -94,7 +94,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
               <div className="addon-description">
                 {addon.invtr_desc}
               </div>
-              <div className="addon-price">${addon.invtr_price}</div>
+              <div className="addon-price">${addon.invtr_price} /mo</div>
               {selectedAddons.some(
                 (item) => item.invtr_desc === addon.invtr_desc
               ) && <span className="checkmark">✔</span>}
@@ -136,7 +136,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
                   <div className="addon-description">
                     {addon.invtr_desc}
                   </div>
-                  <div className="addon-price">${addon.invtr_price}</div>
+                  <div className="addon-price">${addon.invtr_price} /mo</div>
                   {selectedAddons.some(
                     (item) => item.invtr_desc === addon.invtr_desc
                   ) && <span className="checkmark">✔</span>}

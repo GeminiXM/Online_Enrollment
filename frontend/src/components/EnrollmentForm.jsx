@@ -1502,24 +1502,22 @@ function EnrollmentForm() {
   //ADDONS
   // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
-    // Check if this addon is already selected
     const isAlreadySelected = selectedChildAddons.some(
       selected => selected.invtr_desc === addon.invtr_desc
     );
 
+    const isNewMexicoClub = selectedClub?.state === 'NM';
+    const isUnlimitedChild = addon.invtr_desc?.toLowerCase().includes('unlimited');
+
     if (isAlreadySelected) {
-      // If already selected, remove it and clear child forms
       setSelectedChildAddons(prev => 
         prev.filter(a => a.invtr_desc !== addon.invtr_desc)
       );
       setChildForms([]);
     } else {
-      // Extract the number of children from the addon description
-      const childCount = extractChildCount(addon.invtr_desc);
-      
-      if (childCount > 0) {
-        // Create an array of empty child forms based on the count
-        const newChildForms = Array(childCount).fill().map(() => ({
+      if (isNewMexicoClub && isUnlimitedChild) {
+        setChildForms([{
+          id: Date.now() + Math.random(),
           firstName: "",
           lastName: "",
           dateOfBirth: "",
@@ -1527,19 +1525,27 @@ function EnrollmentForm() {
           mobile: "",
           home: "",
           email: ""
-        }));
-        
-        // Update the child forms state
-        setChildForms(newChildForms);
-        
-        // Update selected addons
-        setSelectedChildAddons(prev => {
-          // Remove any existing child addons
-          const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
-          // Add the new child addon
-          return [...filteredAddons, addon];
-        });
+        }]);
+      } else {
+        const childCount = extractChildCount(addon.invtr_desc);
+        if (childCount > 0) {
+          const newChildForms = Array(childCount).fill().map(() => ({
+            id: Date.now() + Math.random(),
+            firstName: "",
+            lastName: "",
+            dateOfBirth: "",
+            gender: "",
+            mobile: "",
+            home: "",
+            email: ""
+          }));
+          setChildForms(newChildForms);
+        }
       }
+      setSelectedChildAddons(prev => {
+        const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
+        return [...filteredAddons, addon];
+      });
     }
   };
 
@@ -1596,6 +1602,7 @@ function EnrollmentForm() {
     setChildForms(prev => [
       ...prev,
       {
+        id: Date.now() + Math.random(),
         firstName: "",
         lastName: "",
         dateOfBirth: "",
@@ -2021,8 +2028,8 @@ function EnrollmentForm() {
             </div>
             
             {formData.familyMembers.length > 0 ? (
-              formData.familyMembers.map(member => (
-                <div className="member-card" key={member.id}>
+              formData.familyMembers.map((member, index) => (
+                <div className="member-card" key={member.id || member.email || index}>
                   <div className="member-info">
                     <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
                     <p>{member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'} Member</p>
@@ -2324,6 +2331,7 @@ function EnrollmentForm() {
                   onClick={() => {
                     // Add a single empty child form
                     setChildForms([{
+                      id: Date.now() + Math.random(),
                       firstName: "",
                       lastName: "",
                       dateOfBirth: "",
@@ -2353,7 +2361,8 @@ function EnrollmentForm() {
                     <h4>Child Information</h4>
                     <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
                     
-                    <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
+                    {/* Add Another Child button for New Mexico unlimited child addon */}
+                    {selectedClub?.state === 'NM' && selectedChildAddons.some(addon => addon.invtr_desc === 'Child Addon') && (
                       <button 
                         type="button" 
                         className="add-child-button"
@@ -2365,15 +2374,16 @@ function EnrollmentForm() {
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '14px'
+                          fontSize: '14px',
+                          marginBottom: '20px'
                         }}
                       >
                         Add Another Child
                       </button>
-                    </div>
+                    )}
                     
-                    {childForms.map((child, index) => (
-                      <div key={index} className="child-form" style={{ 
+                    {childForms.filter(child => child && child.id).map((child, index) => (
+                      <div key={child.id} className="child-form" style={{ 
                         backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
                         padding: '20px',
                         marginBottom: '20px',
@@ -2560,8 +2570,8 @@ function EnrollmentForm() {
                     <h4>Child Information</h4>
                     <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
                     
-                    {childForms.map((child, index) => (
-                      <div key={index} className="child-form" style={{ 
+                    {childForms.filter(child => child && child.id).map((child, index) => (
+                      <div key={child.id} className="child-form" style={{ 
                         backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
                         padding: '20px',
                         marginBottom: '20px',
@@ -3096,7 +3106,7 @@ function EnrollmentForm() {
       <h1>{selectedClub.name} Membership Enrollment Form</h1>
 
       <p className="form-instructions">
-        Please fill out the form below to enroll in our fitness facility. 
+        Please fill out the form below to become a member at the club. 
         Fields marked with an asterisk (*) are required.
       </p>
 
@@ -3156,9 +3166,9 @@ function EnrollmentForm() {
           
           {isJuniorMembership ? (
             <>
-              <h2>Youth Information</h2>
+              <h2>Junior (12-17) Information</h2>
               <p className="guardian-notice">
-                As this is a Junior membership (under 18), please provide information about the youth member.
+                As this is a Junior membership (under 18), please provide information about the Junior member.
               </p>
             </>
           ) : (

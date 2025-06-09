@@ -606,10 +606,7 @@ const ContractPage = () => {
                  formData.dateOfBirth ? formatDateWithoutTimezoneShift(formData.dateOfBirth) : ''}
               </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">Gender</div>
-              <div className="info-value">{formData.gender}</div>
-            </div>
+
  
           </div>
         </div>
@@ -810,7 +807,7 @@ const ContractPage = () => {
           <div className="info-header">Financial Details</div>
           <div className="info-row">
             <div className="info-column financial-item">
-              <div className="info-label">Initiation Fee</div>
+              <div className="info-label">Enrollment Fee</div>
               <div className="info-value">${formData.initiationFee || '0.00'}</div>
             </div>
           </div>
@@ -828,7 +825,7 @@ const ContractPage = () => {
           </div>
           <div className="info-row">
             <div className="info-column financial-item">
-              <div className="info-label">Packages</div>
+              <div className="info-label">Service Add-ons</div>
               <div className="info-value">${formData.packagesFee || '0.00'}</div>
             </div>
           </div>
@@ -922,7 +919,7 @@ const ContractPage = () => {
         <h2>Signature Selector</h2>
         <div className="signature-fields">
           <div className="signature-field">
-            <label><i>please select a signature style to be used throughout this legal document</i> <span className="required">*</span></label>
+            <label><i>Please select a signature style to be used throughout this document</i> <span className="required">*</span></label>
             {formData.specialtyMembership === 'J' ? (
               <>
                 <p className="guardian-signature-note">
