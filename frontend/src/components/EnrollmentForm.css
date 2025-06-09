@@ -1192,42 +1192,41 @@ button:focus-visible {
   background-color: var(--primary-dark);
 }
 
-/* Form row for birthdate, gender, and email */
-.form-row.birthdate-gender-email {
+/* Form row for DOB, Gender, and Phone */
+.form-row.dob-gender-phone-row {
   display: flex;
-  flex-wrap: nowrap;  /* Prevent wrapping to a new line */
+  flex-wrap: nowrap;
   gap: 1rem;
   margin-bottom: 0.75rem;
 }
 
-.form-row.birthdate-gender-email .form-group {
-  flex: 1;  /* All fields share equal space by default */
-  /* Remove min-width if it's causing the items to wrap */
+.form-row.dob-gender-phone-row .form-group {
+  flex: 1;
 }
 
-.form-row.birthdate-gender-email .form-group.dob-field {
-  flex: 0 0 110px; /* Prevents growing and sets a flex-basis of 150px */
+.form-row.dob-gender-phone-row .form-group.dob-field {
+  flex: 0 0 150px;
+  min-width: 150px;
 }
 
-.form-row.birthdate-gender-email .form-group.gender-field {
-  flex: 0 0 150px; /* Prevents growing and sets a flex-basis of 150px */
+.form-row.dob-gender-phone-row .form-group.gender-field {
+  flex: 0 0 170px;
+  min-width: 170px;
 }
 
-.email-field {
-  flex: 2;  /* Give email more space if needed */
-}
-
-/* Form row for phone numbers */
-.form-row.phone-numbers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.form-row.phone-numbers .form-group {
+.form-row.dob-gender-phone-row .form-group.phone-field {
   flex: 1;
   min-width: 200px;
+}
+
+/* Form row for email */
+.form-row.email-row {
+  margin-bottom: 0.75rem;
+}
+
+.form-row.email-row .form-group.email-field {
+  width: 100%;
+  max-width: 100%;
 }
 
 /* Addon Grid Styles */

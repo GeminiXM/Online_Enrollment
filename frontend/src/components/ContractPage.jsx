@@ -825,7 +825,7 @@ const ContractPage = () => {
           </div>
           <div className="info-row">
             <div className="info-column financial-item">
-              <div className="info-label">Service Add-ons</div>
+              <div className="info-label">Service Add-Ons</div>
               <div className="info-value">${formData.packagesFee || '0.00'}</div>
             </div>
           </div>
