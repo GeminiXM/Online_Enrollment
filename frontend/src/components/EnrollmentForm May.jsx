@@ -12,7 +12,6 @@ import MembershipTypeModal from "./MembershipTypeModal";
 import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 import AddonButtons from "./AddonButtons";
 import ServiceAddonButtons from './ServiceAddonButtons';
-import PersonalTrainingModal from './PersonalTrainingModal';
 
 // Add this near the top of the file with other constants
 const SPECIALTY_MEMBERSHIP_MAP = {
@@ -98,33 +97,6 @@ const validateYouthAge = (dateOfBirth) => {
   return age >= 12 && age <= 20;
 };
 
-// Utility function to format dates without timezone shifts
-const formatDateWithoutTimezoneShift = (dateString) => {
-  if (!dateString) return '';
-  
-  // Parse the date string - avoid timezone shifts by handling parts manually
-  const parts = dateString.split(/[-T]/);
-  if (parts.length >= 3) {
-    const year = parseInt(parts[0], 10);
-    // JavaScript months are 0-based, so subtract 1 from the month
-    const month = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    
-    // Create date with specific year, month, day in local timezone
-    const date = new Date(year, month, day);
-    
-    // Format to mm/dd/yyyy
-    return date.toLocaleDateString('en-US', {
-      month: '2-digit',
-      day: '2-digit',
-      year: 'numeric'
-    });
-  }
-  
-  // Fallback for unexpected format
-  return dateString;
-};
-
 function EnrollmentForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -153,14 +125,6 @@ function EnrollmentForm() {
   const [proratedPrice, setProratedPrice] = useState(0);
   // Store the determined membership type (I/D/F)
   const [determinedMembershipType, setDeterminedMembershipType] = useState("I");
-  // Tax rate state - default value in case API call fails
-  const [taxRate, setTaxRate] = useState(0.07625);
-  const [taxAmount, setTaxAmount] = useState(0);
-  const [proratedTaxAmount, setProratedTaxAmount] = useState(0);
-
-  const [showPTModal, setShowPTModal] = useState(false);
-  const [hasPTAddon, setHasPTAddon] = useState(false);
-  const [formSubmissionData, setFormSubmissionData] = useState(null);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -375,11 +339,6 @@ function EnrollmentForm() {
 
   // Get today's date in YYYY-MM-DD format for the min attribute of date inputs
   const today = new Date().toISOString().split('T')[0];
-  
-  // Calculate date 7 days from today for max attribute of date inputs
-  const sevenDaysFromToday = new Date();
-  sevenDaysFromToday.setDate(sevenDaysFromToday.getDate() + 7);
-  const maxDate = sevenDaysFromToday.toISOString().split('T')[0];
   
   // State for active tab
   const [activeTab, setActiveTab] = useState('members');
@@ -647,45 +606,9 @@ function EnrollmentForm() {
     if (formData.requestedStartDate && membershipPrice) {
       const prorated = calculateProratedPrice(formData.requestedStartDate, membershipPrice);
       setProratedPrice(prorated);
-      
-      // Only apply tax for New Mexico clubs (state is NM)
-      const isNewMexicoClub = selectedClub?.state === 'NM';
-      const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
-      
-      // Calculate tax amount for prorated price
-      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
-      setProratedTaxAmount(proratedTax);
-      
-      // Calculate tax for full membership price
-      const fullTax = Number((membershipPrice * effectiveTaxRate).toFixed(2));
-      setTaxAmount(fullTax);
-      
-      console.log(`Tax calculation: isNewMexicoClub=${isNewMexicoClub}, effectiveTaxRate=${effectiveTaxRate}, fullTax=${fullTax}`);
     }
-  }, [formData.requestedStartDate, membershipPrice, taxRate, selectedClub]);
+  }, [formData.requestedStartDate, membershipPrice]);
   
-  // Fetch tax rate when club changes
-  useEffect(() => {
-    const fetchTaxRate = async () => {
-      if (!selectedClub) return;
-      
-      try {
-        const response = await api.getTaxRate(selectedClub.id);
-        
-        if (response.success) {
-          console.log("Tax rate fetched:", response.taxRate);
-          setTaxRate(response.taxRate);
-        } else {
-          console.error("Failed to fetch tax rate:", response.message);
-        }
-      } catch (error) {
-        console.error("Error fetching tax rate:", error);
-      }
-    };
-    
-    fetchTaxRate();
-  }, [selectedClub]);
-
   // State for form submission status
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -823,10 +746,7 @@ function EnrollmentForm() {
         upcCode: membershipUpcCode,
         taxCode: membershipTaxCode,
         proratedDuesInfo: proratedDuesInfo,
-        proratedPrice: proratedPrice,
-        taxRate: taxRate,
-        taxAmount: taxAmount,
-        proratedTaxAmount: proratedTaxAmount
+        proratedPrice: proratedPrice
       },
       // Additional information for tracking
       agreementType: 'M', // Always monthly as per requirements
@@ -880,7 +800,6 @@ function EnrollmentForm() {
     
     // Add guardian information for Junior memberships
     if (isJuniorMembership) {
-      // Store guardian info in a nested object for backend processing
       submissionData.guardian = {
         firstName: formData.guardianFirstName,
         lastName: formData.guardianLastName,
@@ -893,16 +812,6 @@ function EnrollmentForm() {
         homePhone: formData.homePhone ? formData.homePhone.replace(/\D/g, '') : '',
         workPhone: formData.workPhone ? formData.workPhone.replace(/\D/g, '') : ''
       };
-      
-      // Also add guardian fields directly to the main object for ContractPage display
-      submissionData.guardianFirstName = formData.guardianFirstName;
-      submissionData.guardianLastName = formData.guardianLastName;
-      submissionData.guardianMiddleInitial = formData.guardianMiddleInitial || '';
-      submissionData.guardianDateOfBirth = formData.guardianDateOfBirth;
-      submissionData.guardianGender = formData.guardianGender === "default" ? "" : formData.guardianGender;
-      submissionData.guardianEmail = formData.guardianEmail;
-      submissionData.guardianRelationship = formData.guardianRelationship;
-      submissionData.guardianPhone = formData.mobilePhone; // Use mobile as primary guardian phone
     }
     
     return submissionData;
@@ -1262,6 +1171,7 @@ function EnrollmentForm() {
     // Clear any previous error
     setSubmitError("");
     
+    // FORCE DIRECT NAVIGATION: Always transform data and navigate to contract page
     try {
       // Do minimal validation for primary fields only
       const newErrors = {};
@@ -1312,59 +1222,10 @@ function EnrollmentForm() {
         newErrors.mobilePhone = "At least one phone number is required";
       }
       
-      // Add validation for Junior memberships - check guardian fields
-      if (isJuniorMembership) {
-        if (!formData.guardianFirstName) {
-          newErrors.guardianFirstName = "Guardian first name is required";
-        }
-        
-        if (!formData.guardianLastName) {
-          newErrors.guardianLastName = "Guardian last name is required";
-        }
-        
-        if (!formData.guardianDateOfBirth) {
-          newErrors.guardianDateOfBirth = "Guardian date of birth is required";
-        }
-
-        if (!formData.guardianDateOfBirth) {
-          newErrors.guardianGender = "Guardian gender is required";
-        }
-        
-        if (!formData.guardianEmail) {
-          newErrors.guardianEmail = "Guardian email is required";
-        } else if (!isValidEmail(formData.guardianEmail)) {
-          newErrors.guardianEmail = "Please enter a valid guardian email address";
-        }
-        
-        if (!formData.guardianRelationship) {
-          newErrors.guardianRelationship = "Guardian relationship is required";
-        }
-        
-        if (!formData.guardianConsent) {
-          newErrors.guardianConsent = "You must confirm that you are the legal guardian";
-        }
-      }
-      
       // Show errors if any required fields are missing
       if (Object.keys(newErrors).length > 0) {
         setErrors(newErrors);
-        
-        // Set appropriate error message based on the types of errors
-        let errorMessage = "Please provide at least a first and last name to continue.";
-        
-        // If there are guardian errors for Junior membership, show a specific message
-        if (isJuniorMembership && (
-          newErrors.guardianFirstName || 
-          newErrors.guardianLastName || 
-          newErrors.guardianDateOfBirth || 
-          newErrors.guardianGender || 
-          newErrors.guardianEmail || 
-          newErrors.guardianRelationship || 
-          newErrors.guardianConsent
-        )) {
-          errorMessage = "Please complete all required guardian information fields before continuing.";
-        }
-        
+        const errorMessage = "Please provide at least a first and last name to continue.";
         setSubmitError(errorMessage);
         
         // Focus on the first missing field
@@ -1375,57 +1236,22 @@ function EnrollmentForm() {
       
       // Transform form data for submission
       const submissionData = transformFormDataForSubmission();
-      console.log("Preparing to show PT modal with data", submissionData);
+      console.log("FORCE NAVIGATING to contract page with data", submissionData);
       
-      // Store the submission data and show PT modal
-      setFormSubmissionData(submissionData);
-      setShowPTModal(true);
+      // DIRECT NAVIGATE - no validation checks will block this
+      navigate('/contract', { 
+        state: { 
+          formData: submissionData
+        } 
+      });
     } catch (error) {
-      console.error("Error during form submission:", error);
+      console.error("Error during navigation:", error);
       setSubmitError("An unexpected error occurred. Please try again.");
-    }
-  };
-
-  const handlePTAccept = () => {
-    setHasPTAddon(true);
-    setShowPTModal(false);
-    // Add the PT addon to your selected addons
-    const ptAddon = {
-      id: 'pt-sessions',
-      name: 'Personal Training Sessions',
-      price: 149,
-      description: '4 Personal Training Sessions'
-    };
-    setSelectedServiceAddons(prev => [...prev, ptAddon]);
-    
-    // Navigate to contract page with the stored submission data
-    if (formSubmissionData) {
-      navigate('/contract', { 
-        state: { 
-          formData: formSubmissionData
-        } 
-      });
-    }
-  };
-
-  const handlePTDecline = () => {
-    setShowPTModal(false);
-    // Navigate to contract page with the stored submission data
-    if (formSubmissionData) {
-      navigate('/contract', { 
-        state: { 
-          formData: formSubmissionData
-        } 
-      });
     }
   };
 
   // Handle membership type selection
   const handleMembershipTypeSelect = (type) => {
-    // Store the previous membership type for comparison
-    const previousType = membershipType;
-    
-    // Update the membership type
     selectMembershipType(type);
     setShowMembershipTypeModal(false);
     
@@ -1445,146 +1271,74 @@ function EnrollmentForm() {
         }));
       }
     }
-
-    // Handle existing family members based on the new membership type
-    if (formData.familyMembers.length > 0) {
-      // If changing to Junior or SYP membership
-      if (type.id === 'junior' || type.id === 'young-professional') {
-        // Clear all family members as Junior and SYP memberships can't have additional members
-        setFormData(prev => ({
-          ...prev,
-          familyMembers: []
-        }));
-        // Clear any child forms
-        setChildForms([]);
-        // Clear selected addons
-        setSelectedChildAddons([]);
-        setSelectedServiceAddons([]);
-        
-        // Show alert for SYP membership change
-        if (type.id === 'young-professional') {
-          alert("Student/Young Professional memberships cannot have family members. All family members have been removed.");
-        }
-      }
-      // If changing from Junior or SYP to any other type
-      else if (previousType?.id === 'junior' || previousType?.id === 'young-professional') {
-        // Keep the form data but allow adding new members
-        // No need to clear anything as these memberships don't have family members
-      }
-      // For all other membership type changes
-      else {
-        // Keep existing family members but validate their ages against the new membership type
-        const updatedFamilyMembers = formData.familyMembers.map(member => {
-          if (member.dateOfBirth) {
-            const ageError = validateAgeForMembershipType(member.dateOfBirth, type);
-            if (ageError) {
-              // If the member's age is invalid for the new membership type, remove them
-              return null;
-            }
-          }
-          return member;
-        }).filter(Boolean); // Remove any null entries
-
-        setFormData(prev => ({
-          ...prev,
-          familyMembers: updatedFamilyMembers
-        }));
-
-        // If any members were removed due to age validation, show a message
-        if (updatedFamilyMembers.length < formData.familyMembers.length) {
-          alert("Some family members were removed because they don't meet the age requirements for the selected membership type.");
-        }
-      }
-    }
   };
 
 
   //ADDONS
   // Update the handleChildAddonClick function
   const handleChildAddonClick = (addon) => {
-    const isAlreadySelected = selectedChildAddons.some(
-      selected => selected.invtr_desc === addon.invtr_desc
-    );
-
+    // Check if this is a New Mexico club
     const isNewMexicoClub = selectedClub?.state === 'NM';
-    const isUnlimitedChild = addon.invtr_desc?.toLowerCase().includes('unlimited');
-
-    if (isAlreadySelected) {
-      setSelectedChildAddons(prev => 
-        prev.filter(a => a.invtr_desc !== addon.invtr_desc)
-      );
-      setChildForms([]);
-    } else {
-      if (isNewMexicoClub && isUnlimitedChild) {
-        setChildForms([{
-          id: Date.now() + Math.random(),
+    
+    setSelectedChildAddons(prev => {
+      // If the clicked addon is already selected, clear the selection
+      if (prev.some(item => item.invtr_desc === addon.invtr_desc)) {
+        setChildForms([]); // Clear child forms when deselecting
+        return [];
+      }
+      
+      // First check if we need to reset incomplete child forms
+      // This prevents incorrect Family membership type when no children are actually added
+      if (childForms.length > 0) {
+        // Check if any childForm data has been entered 
+        const hasEnteredChildData = childForms.some(form => 
+          form.firstName || form.lastName || form.dateOfBirth || form.gender);
+          
+        if (!hasEnteredChildData) {
+          // If no data was entered, reset the child forms
+          setChildForms([]);
+        }
+      }
+      
+      // For New Mexico clubs, start with just 1 child form as they allow unlimited children
+      if (isNewMexicoClub && determinedMembershipType === 'I') {
+        const newChildForms = [{
           firstName: "",
           lastName: "",
           dateOfBirth: "",
           gender: "",
           mobile: "",
           home: "",
-          email: ""
-        }]);
+          email: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+        }];
+        
+        setChildForms(newChildForms);
       } else {
+        // For Colorado clubs, use the existing behavior of creating forms based on count
         const childCount = extractChildCount(addon.invtr_desc);
-        if (childCount > 0) {
-          const newChildForms = Array(childCount).fill().map(() => ({
-            id: Date.now() + Math.random(),
-            firstName: "",
-            lastName: "",
-            dateOfBirth: "",
-            gender: "",
-            mobile: "",
-            home: "",
-            email: ""
-          }));
-          setChildForms(newChildForms);
-        }
+        
+        // Initialize child forms based on the count
+        const newChildForms = Array(childCount).fill().map(() => ({
+          firstName: "",
+          lastName: "",
+          dateOfBirth: "",
+          gender: "",
+          mobile: "",
+          home: "",
+          email: "",
+          emergencyContactName: "",
+          emergencyContactPhone: "",
+        }));
+        
+        setChildForms(newChildForms);
       }
-      setSelectedChildAddons(prev => {
-        const filteredAddons = prev.filter(a => !a.invtr_desc.toLowerCase().includes('child'));
-        return [...filteredAddons, addon];
-      });
-    }
+      
+      return [addon];
+    });
   };
-
-  // ... existing code ...
-
-  // Keep only this version of extractChildCount
-  const extractChildCount = (description) => {
-    // Handle different formats of child count in description
-    const lowerDesc = description.toLowerCase();
-    
-    // Match patterns like "2 children", "2 child", "two children", etc.
-    const numberMatch = description.match(/(\d+)\s*(?:child|children)/i);
-    if (numberMatch) {
-      return parseInt(numberMatch[1], 10);
-    }
-    
-    // Match word numbers like "two", "three", etc.
-    const wordNumbers = {
-      'one': 1,
-      'two': 2,
-      'three': 3,
-      'four': 4,
-      'five': 5
-    };
-    
-    for (const [word, number] of Object.entries(wordNumbers)) {
-      if (lowerDesc.includes(word)) {
-        return number;
-      }
-    }
-    
-    // Default to 1 if no count is found
-    return 1;
-  };
-
-  // ... existing code ...
-
-  // Remove the duplicate extractChildCount function that was here
-
+  
   // Function to handle changes to a specific child form
   const handleChildFormChange = (index, field, value) => {
     setChildForms(prev => {
@@ -1602,14 +1356,15 @@ function EnrollmentForm() {
     setChildForms(prev => [
       ...prev,
       {
-        id: Date.now() + Math.random(),
         firstName: "",
         lastName: "",
         dateOfBirth: "",
         gender: "",
         mobile: "",
         home: "",
-        email: ""
+        email: "",
+        emergencyContactName: "",
+        emergencyContactPhone: "",
       }
     ]);
   };
@@ -1762,6 +1517,32 @@ function EnrollmentForm() {
       }
     });
   };
+
+  // Function to extract number of children from addon description
+  const extractChildCount = (description) => {
+    if (!description) return 0;
+    
+    // Check for Denver format (CAC prefix)
+    const denverRegex = /CAC\s+(\d+)\s+(?:child|children)/i;
+    const denverMatch = description.match(denverRegex);
+    
+    if (denverMatch && denverMatch[1]) {
+      return parseInt(denverMatch[1], 10);
+    }
+    
+    // Check for NMSW format (2020 prefix)
+    const nmswRegex = /2020\s+(\d+)\s+(?:child|children)/i;
+    const nmswMatch = description.match(nmswRegex);
+    
+    if (nmswMatch && nmswMatch[1]) {
+      return parseInt(nmswMatch[1], 10);
+    }
+    
+    // Default to 1 if no number is found
+    return 1;
+  };
+
+
 
   // Render the tabs based on membership type
   const renderTabs = () => {
@@ -1945,7 +1726,6 @@ function EnrollmentForm() {
         guardianFirstName: "",
         guardianLastName: "",
         guardianEmail: "",
-        guardianGender: "",
         guardianPhone: "",
         guardianRelationship: ""
       });
@@ -2028,15 +1808,12 @@ function EnrollmentForm() {
             </div>
             
             {formData.familyMembers.length > 0 ? (
-              formData.familyMembers.map((member, index) => (
-                <div className="member-card" key={member.id || member.email || index}>
+              formData.familyMembers.map(member => (
+                <div className="member-card" key={member.id}>
                   <div className="member-info">
                     <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
                     <p>{member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'} Member</p>
-                  <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p>
-                  {member.dateOfBirth && (
-                    <p><strong>Birthday:</strong> {formatDateWithoutTimezoneShift(member.dateOfBirth)}</p>
-                  )}
+                    <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p>
                   </div>
                   <button 
                     type="button" 
@@ -2066,19 +1843,6 @@ function EnrollmentForm() {
         );
       
       case 'new_adult':
-        // Check if there's already an additional adult
-        const hasAdditionalAdult = formData.familyMembers.some(member => member.memberType === 'adult');
-        
-        if (hasAdditionalAdult) {
-          return (
-            <div className="tab-panel">
-              <h3>Add Adult Family Member</h3>
-              <p className="no-more-adults-message">One Adult successfully Added to this Membership.<br /><br />
-                Any additional adults must purchase their own membership. No further adults can be added to this membership.</p>
-            </div>
-          );
-        }
-        
         return (
           <div className="tab-panel">
             <h3>Add Adult Family Member</h3>
@@ -2145,8 +1909,8 @@ function EnrollmentForm() {
               </div>
             </div>
             
-            <div className="form-row">
-              <div className="form-group">
+            <div className="form-row birthdate-gender-email">
+              <div className="form-group dob-field">
                 <label htmlFor="tempDateOfBirth">
                   Date of Birth <span className="required">*</span>
                 </label>
@@ -2156,6 +1920,7 @@ function EnrollmentForm() {
                   name="dateOfBirth"
                   value={adultMember.dateOfBirth}
                   onChange={handleTempMemberChange}
+                  max={today}
                   aria-required="true"
                   aria-invalid={!!errors.tempDateOfBirth}
                   aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
@@ -2166,7 +1931,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-
+              
               <div className="form-group gender-field">
                 <label htmlFor="tempGender">
                   Gender <span className="required">*</span>
@@ -2214,8 +1979,8 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-            
-            <div className="form-row">
+
+            <div className="form-row phone-numbers">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
                   Cell Phone
@@ -2226,7 +1991,7 @@ function EnrollmentForm() {
                   name="cellPhone"
                   value={adultMember.cellPhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter cell phone number"
+                  placeholder="Enter mobile phone"
                   aria-invalid={!!errors.tempCellPhone}
                   aria-describedby={errors.tempCellPhone ? "tempCellPhone-error" : undefined}
                 />
@@ -2247,7 +2012,7 @@ function EnrollmentForm() {
                   name="homePhone"
                   value={adultMember.homePhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter home phone number"
+                  placeholder="Enter home phone"
                   aria-invalid={!!errors.tempHomePhone}
                   aria-describedby={errors.tempHomePhone ? "tempHomePhone-error" : undefined}
                 />
@@ -2268,7 +2033,7 @@ function EnrollmentForm() {
                   name="workPhone"
                   value={adultMember.workPhone}
                   onChange={handleTempMemberChange}
-                  placeholder="Enter work phone number"
+                  placeholder="Enter work phone"
                   aria-invalid={!!errors.tempWorkPhone}
                   aria-describedby={errors.tempWorkPhone ? "tempWorkPhone-error" : undefined}
                 />
@@ -2281,8 +2046,8 @@ function EnrollmentForm() {
             </div>
             
             <div className="form-actions">
-              <button
-                type="button"
+              <button 
+                type="button" 
                 className="add-member-button"
                 onClick={() => addFamilyMember('adult')}
               >
@@ -2331,14 +2096,15 @@ function EnrollmentForm() {
                   onClick={() => {
                     // Add a single empty child form
                     setChildForms([{
-                      id: Date.now() + Math.random(),
                       firstName: "",
                       lastName: "",
                       dateOfBirth: "",
                       gender: "",
                       mobile: "",
                       home: "",
-                      email: ""
+                      email: "",
+                      emergencyContactName: "",
+                      emergencyContactPhone: "",
                     }]);
                   }}
                   style={{
@@ -2361,8 +2127,7 @@ function EnrollmentForm() {
                     <h4>Child Information</h4>
                     <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
                     
-                    {/* Add Another Child button for New Mexico unlimited child addon */}
-                    {selectedClub?.state === 'NM' && selectedChildAddons.some(addon => addon.invtr_desc === 'Child Addon') && (
+                    <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
                       <button 
                         type="button" 
                         className="add-child-button"
@@ -2374,16 +2139,15 @@ function EnrollmentForm() {
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer',
-                          fontSize: '14px',
-                          marginBottom: '20px'
+                          fontSize: '14px'
                         }}
                       >
                         Add Another Child
                       </button>
-                    )}
+                    </div>
                     
-                    {childForms.filter(child => child && child.id).map((child, index) => (
-                      <div key={child.id} className="child-form" style={{ 
+                    {childForms.map((child, index) => (
+                      <div key={index} className="child-form" style={{ 
                         backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
                         padding: '20px',
                         marginBottom: '20px',
@@ -2558,228 +2322,271 @@ function EnrollmentForm() {
                 )}
               </div>
             ) : (
-              <div className="child-addon-section">
-                <AddonButtons
+              <>
+                {/* Show normal Child Addon buttons for all other cases */}
+                <AddonButtons 
                   addons={addons}
                   selectedAddons={selectedChildAddons}
                   onAddonClick={handleChildAddonClick}
+                  membershipTypeValue={determinedMembershipType}
                 />
                 
-                {childForms.length > 0 && (
-                  <div className="child-forms-container">
-                    <h4>Child Information</h4>
-                    <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
-                    
-                    {childForms.filter(child => child && child.id).map((child, index) => (
-                      <div key={child.id} className="child-form" style={{ 
-                        backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
-                        padding: '20px',
-                        marginBottom: '20px',
-                        borderRadius: '8px',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                      }}>
-                        <h5 style={{ 
-                          color: '#2c3e50',
-                          marginBottom: '15px',
-                          paddingBottom: '10px',
-                          borderBottom: '2px solid #e9ecef'
-                        }}>Child {index + 1}</h5>
-                        <div className="form-row name-row">
-                          <div className="form-group">
-                            <label htmlFor={`child${index}FirstName`}>
-                              First Name <span className="required">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              id={`child${index}FirstName`}
-                              value={child.firstName}
-                              onChange={(e) => handleChildFormChange(index, 'firstName', e.target.value)}
-                              placeholder="Enter first name"
-                              required
-                            />
-                            {errors[`child${index}FirstName`] && (
-                              <span className="error-message">{errors[`child${index}FirstName`]}</span>
-                            )}
-                          </div>
-                          
-                          <div className="form-group middle-initial">
-                            <label htmlFor={`child${index}MiddleInitial`}>
-                              Initial
-                            </label>
-                            <input
-                              type="text"
-                              id={`child${index}MiddleInitial`}
-                              value={child.middleInitial || ""}
-                              onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
-                              placeholder="M.I."
-                              maxLength="1"
-                            />
-                          </div>
-                          
-                          <div className="form-group">
-                            <label htmlFor={`child${index}LastName`}>
-                              Last Name <span className="required">*</span>
-                            </label>
-                            <input
-                              type="text"
-                              id={`child${index}LastName`}
-                              value={child.lastName}
-                              onChange={(e) => handleChildFormChange(index, 'lastName', e.target.value)}
-                              placeholder="Enter last name"
-                              required
-                            />
-                            {errors[`child${index}LastName`] && (
-                              <span className="error-message">{errors[`child${index}LastName`]}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="form-row birthdate-gender-email">
-                          <div className="form-group dob-field">
-                            <label htmlFor={`child${index}DateOfBirth`}>
-                              Date of Birth <span className="required">*</span>
-                            </label>
-                            <input
-                              type="date"
-                              id={`child${index}DateOfBirth`}
-                              value={child.dateOfBirth}
-                              onChange={(e) => handleChildFormChange(index, 'dateOfBirth', e.target.value)}
-                              onBlur={(e) => {
-                                if (e.target.value) {
-                                  const ageError = validateChildAge(e.target.value);
-                                  if (ageError) {
-                                    setErrors(prev => {
-                                      const newErrors = {...prev};
-                                      newErrors[`child${index}DateOfBirth`] = ageError;
-                                      return newErrors;
-                                    });
-                                  }
-                                }
-                              }}
-                              required
-                            />
-                            {errors[`child${index}DateOfBirth`] && (
-                              <span className="error-message">{errors[`child${index}DateOfBirth`]}</span>
-                            )}
-                          </div>
-                          <div className="form-group gender-field">
-                            <label htmlFor={`child${index}Gender`}>
-                              Gender <span className="required">*</span>
-                            </label>
-                            <select
-                              id={`child${index}Gender`}
-                              value={child.gender}
-                              onChange={(e) => handleChildFormChange(index, 'gender', e.target.value)}
-                              required
-                            >
-                              <option value="">Select gender</option>
-                              <option value="M">Male</option>
-                              <option value="F">Female</option>
-                              <option value="N">Prefer not to say</option>
-                            </select>
-                            {errors[`child${index}Gender`] && (
-                              <span className="error-message">{errors[`child${index}Gender`]}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="form-row contact-info">
-                          <div className="form-group">
-                            <label htmlFor={`child${index}Mobile`}>
-                              Mobile Phone
-                            </label>
-                            <input
-                              type="tel"
-                              id={`child${index}Mobile`}
-                              value={child.mobile}
-                              onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
-                              placeholder="(555) 555-5555"
-                            />
-                            {errors[`child${index}Mobile`] && (
-                              <span className="error-message">{errors[`child${index}Mobile`]}</span>
-                            )}
-                          </div>
-                          
-                          <div className="form-group">
-                            <label htmlFor={`child${index}Home`}>
-                              Home Phone
-                            </label>
-                            <input
-                              type="tel"
-                              id={`child${index}Home`}
-                              value={child.home}
-                              onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
-                              placeholder="(555) 555-5555"
-                            />
-                            {errors[`child${index}Home`] && (
-                              <span className="error-message">{errors[`child${index}Home`]}</span>
-                            )}
-                          </div>
-                          
-                          <div className="form-group">
-                            <label htmlFor={`child${index}Email`}>
-                              Email
-                            </label>
-                            <input
-                              type="email"
-                              id={`child${index}Email`}
-                              value={child.email}
-                              onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
-                              placeholder="email@example.com"
-                            />
-                            {errors[`child${index}Email`] && (
-                              <span className="error-message">{errors[`child${index}Email`]}</span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    <button
-                      type="button"
-                      className="add-child-member-button"
-                      onClick={handleAddChildMember}
+                {selectedChildAddons.length > 0 && childForms.length > 0 && (
+              <div className="child-forms-container">
+                <h4>Child Information</h4>
+                <p>Please provide information for {childForms.length} {childForms.length === 1 ? 'child' : 'children'}.</p>
+                
+                {/* New Mexico clubs with Individual membership type can add unlimited children */}
+                {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
+                  <div className="nm-add-child-container" style={{ marginBottom: '20px' }}>
+                    <button 
+                      type="button" 
+                      className="add-child-button"
+                      onClick={addAnotherChildForm}
                       style={{
-                        padding: '10px 20px',
+                        padding: '8px 16px',
                         backgroundColor: '#4CAF50',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
                         cursor: 'pointer',
-                        fontSize: '16px',
-                        marginTop: '20px'
+                        fontSize: '14px'
                       }}
                     >
-                      Add Child Member
+                      Add Another Child
                     </button>
+                    <p style={{ marginTop: '8px', fontSize: '14px', color: '#666' }}>
+                      New Mexico clubs allow you to add any number of children with the Child Addon.
+                    </p>
                   </div>
                 )}
+                
+                {childForms.map((child, index) => (
+                  <div key={index} className="child-form" style={{ 
+                    backgroundColor: index % 2 === 0 ? '#f8f9fa' : '#ffffff',
+                    padding: '20px',
+                    marginBottom: '20px',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                  }}>
+                    <h5 style={{ 
+                      color: '#2c3e50',
+                      marginBottom: '15px',
+                      paddingBottom: '10px',
+                      borderBottom: '2px solid #e9ecef'
+                    }}>Child {index + 1}</h5>
+                    <div className="form-row name-row">
+                      <div className="form-group">
+                        <label htmlFor={`child${index}FirstName`}>
+                          First Name <span className="required">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id={`child${index}FirstName`}
+                          value={child.firstName}
+                          onChange={(e) => handleChildFormChange(index, 'firstName', e.target.value)}
+                          placeholder="Enter first name"
+                          required
+                        />
+                        {errors[`child${index}FirstName`] && (
+                          <span className="error-message">{errors[`child${index}FirstName`]}</span>
+                        )}
+                      </div>
+                      
+                      <div className="form-group middle-initial">
+                        <label htmlFor={`child${index}MiddleInitial`}>
+                          Initial
+                        </label>
+                        <input
+                          type="text"
+                          id={`child${index}MiddleInitial`}
+                          value={child.middleInitial || ""}
+                          onChange={(e) => handleChildFormChange(index, 'middleInitial', e.target.value)}
+                          placeholder="M.I."
+                          maxLength="1"
+                        />
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor={`child${index}LastName`}>
+                          Last Name <span className="required">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id={`child${index}LastName`}
+                          value={child.lastName}
+                          onChange={(e) => handleChildFormChange(index, 'lastName', e.target.value)}
+                          placeholder="Enter last name"
+                          required
+                        />
+                        {errors[`child${index}LastName`] && (
+                          <span className="error-message">{errors[`child${index}LastName`]}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="form-row birthdate-gender-email">
+                      <div className="form-group dob-field">
+                        <label htmlFor={`child${index}DateOfBirth`}>
+                          Date of Birth <span className="required">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          id={`child${index}DateOfBirth`}
+                          value={child.dateOfBirth}
+                          onChange={(e) => handleChildFormChange(index, 'dateOfBirth', e.target.value)}
+                          onBlur={(e) => {
+                            if (e.target.value) {
+                              const ageError = validateChildAge(e.target.value);
+                              if (ageError) {
+                                setErrors(prev => {
+                                  const newErrors = {...prev};
+                                  newErrors[`child${index}DateOfBirth`] = ageError;
+                                  return newErrors;
+                                });
+                              }
+                            }
+                          }}
+                          required
+                        />
+                        {errors[`child${index}DateOfBirth`] && (
+                          <span className="error-message">{errors[`child${index}DateOfBirth`]}</span>
+                        )}
+                      </div>
+                      <div className="form-group gender-field">
+                        <label htmlFor={`child${index}Gender`}>
+                          Gender <span className="required">*</span>
+                        </label>
+                        <select
+                          id={`child${index}Gender`}
+                          value={child.gender}
+                          onChange={(e) => handleChildFormChange(index, 'gender', e.target.value)}
+                          required
+                        >
+                          <option value="">Select gender</option>
+                          <option value="M">Male</option>
+                          <option value="F">Female</option>
+                          <option value="N">Prefer not to say</option>
+                        </select>
+                        {errors[`child${index}Gender`] && (
+                          <span className="error-message">{errors[`child${index}Gender`]}</span>
+                        )}
+                      </div>
+                                          
+                      <div className="form-group email-field">
+                        <label htmlFor={`child${index}Email`}>
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          id={`child${index}Email`}
+                          value={child.email}
+                          onChange={(e) => handleChildFormChange(index, 'email', e.target.value)}
+                          placeholder="Enter email address"
+                        />
+                      
+                    </div>
+                    </div>
+
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor={`child${index}Mobile`}>
+                          Cell Phone
+                        </label>
+                        <input
+                          type="tel"
+                          id={`child${index}Mobile`}
+                          value={child.mobile}
+                          onChange={(e) => handleChildFormChange(index, 'mobile', e.target.value)}
+                          placeholder="Enter 10-digit phone number"
+                          required
+                        />
+                        {errors[`child${index}Mobile`] && (
+                          <span className="error-message">{errors[`child${index}Mobile`]}</span>
+                        )}
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor={`child${index}Home`}>
+                          Home Phone
+                        </label>
+                        <input
+                          type="tel"
+                          id={`child${index}Home`}
+                          value={child.home}
+                          onChange={(e) => handleChildFormChange(index, 'home', e.target.value)}
+                          placeholder="Enter 10-digit phone number"
+                        />
+                        {errors[`child${index}Home`] && (
+                          <span className="error-message">{errors[`child${index}Home`]}</span>
+                        )}
+                      </div>
+                    </div>
+
+
+                  </div>
+                ))}
+                
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="add-member-button"
+                    onClick={handleAddChildMember}
+                  >
+                    Add {childForms.length} {childForms.length === 1 ? 'Child' : 'Children'}
+                  </button>
+                </div>
               </div>
+            )}
+              </>
             )}
           </div>
         );
       
       case 'youth':
         return (
-          <div className="youth-tab">
-            {allowsFamilyMembers && (
-              <div
-                style={{
-                  backgroundColor: '#f8f9fa',
-                  border: '1px solid #dee2e6',
-                  borderRadius: '4px',
-                  padding: '12px',
-                  marginBottom: '20px',
-                }}
-              >
-                <p>
-                  Youth memberships are included with your Family membership at no
-                  additional cost.
-                </p>
+          <div className="tab-panel">
+            <h3>Add Youth Family Member</h3>
+            <p>Add a youth family member (12-20 years) to your membership.</p>
+            
+            {/* New Mexico club specific messages */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Important:</strong> Adding a Youth member to an Individual membership will convert it to a Dual membership.</p>
               </div>
             )}
-
-            {/* Name Row */}
+            
+            {/* Message for Dual memberships */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'D' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p><strong>Note:</strong> Adding a youth to a Dual membership in New Mexico will convert it to a Family membership.</p>
+              </div>
+            )}
+            
+            {/* Message for Family memberships */}
+            {selectedClub?.state === 'NM' && determinedMembershipType === 'F' && (
+              <div className="info-message" style={{
+                backgroundColor: '#e6f7ff',
+                border: '1px solid #91d5ff',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '20px'
+              }}>
+                <p>Youth memberships are included with your Family membership at no additional cost.</p>
+              </div>
+            )}
+            
             <div className="form-row name-row">
               <div className="form-group">
                 <label htmlFor="firstName">
@@ -2794,7 +2601,7 @@ function EnrollmentForm() {
                   placeholder="Enter first name"
                   aria-required="true"
                   aria-invalid={!!errors.firstName}
-                  aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+                  aria-describedby={errors.firstName ? "firstName-error" : undefined}
                 />
                 {errors.firstName && (
                   <div id="firstName-error" className="error-message">
@@ -2802,9 +2609,11 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-
+              
               <div className="form-group middle-initial">
-                <label htmlFor="middleInitial">Initial</label>
+                <label htmlFor="middleInitial">
+                  Initial
+                </label>
                 <input
                   type="text"
                   id="middleInitial"
@@ -2815,7 +2624,7 @@ function EnrollmentForm() {
                   maxLength="1"
                 />
               </div>
-
+              
               <div className="form-group">
                 <label htmlFor="lastName">
                   Last Name <span className="required">*</span>
@@ -2829,7 +2638,7 @@ function EnrollmentForm() {
                   placeholder="Enter last name"
                   aria-required="true"
                   aria-invalid={!!errors.lastName}
-                  aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+                  aria-describedby={errors.lastName ? "lastName-error" : undefined}
                 />
                 {errors.lastName && (
                   <div id="lastName-error" className="error-message">
@@ -2838,9 +2647,8 @@ function EnrollmentForm() {
                 )}
               </div>
             </div>
-
-            {/* DOB & Gender Row */}
-            <div className="form-row dob-gender-row">
+            
+            <div className="form-row birthdate-gender-email">
               <div className="form-group dob-field">
                 <label htmlFor="dateOfBirth">
                   Date of Birth <span className="required">*</span>
@@ -2851,9 +2659,22 @@ function EnrollmentForm() {
                   name="dateOfBirth"
                   value={youthMember.dateOfBirth}
                   onChange={handleTempMemberChange}
+                  onBlur={(e) => {
+                    if (e.target.value) {
+                      if (!validateYouthAge(e.target.value)) {
+                        const age = calculateAge(e.target.value);
+                        const ageError = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+                        setErrors(prev => ({
+                          ...prev,
+                          dateOfBirth: ageError
+                        }));
+                      }
+                    }
+                  }}
+                  placeholder="MM/DD/YYYY"
                   aria-required="true"
                   aria-invalid={!!errors.dateOfBirth}
-                  aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
+                  aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
                 />
                 {errors.dateOfBirth && (
                   <div id="dateOfBirth-error" className="error-message">
@@ -2861,7 +2682,7 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
-
+              
               <div className="form-group gender-field">
                 <label htmlFor="gender">
                   Gender <span className="required">*</span>
@@ -3113,7 +2934,6 @@ function EnrollmentForm() {
                 value={formData.requestedStartDate}
                 onChange={handleChange}
                 min={today}
-                max={maxDate}
                 aria-required="true"
                 aria-invalid={!!errors.requestedStartDate}
                 aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
@@ -3910,59 +3730,21 @@ function EnrollmentForm() {
             <div className="cart-total">
               <div className="due-now-total">
                 <h3>Total Due Now</h3>
-                <div className="price-breakdown">
-                  <div className="price-row">
-                    <span>Subtotal</span>
-                    <span>${calculateTotalProratedCost().toFixed(2)}</span>
-                  </div>
-                  <div className="price-row">
-                    {selectedClub?.state === 'NM' ? (
-                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
-                    ) : (
-                      <span>Tax</span>
-                    )}
-                    <span>${proratedTaxAmount.toFixed(2)}</span>
-                  </div>
-                  <div className="price-row total">
-                    <span><strong>Total with Tax</strong></span>
-                    <span><strong>${(calculateTotalProratedCost() + proratedTaxAmount).toFixed(2)}</strong></span>
-                  </div>
-                </div>
+                <p className="total-price">
+                  ${calculateTotalProratedCost().toFixed(2)}
+                </p>
                 <p className="price-detail">
                   Prorated from {formData.requestedStartDate ? formData.requestedStartDate.replace(/(\d{4})-(\d{2})-(\d{2})/, '$2/$3/$1') : 'selected date'} to end of month
                 </p>
               </div>
               <div className="monthly-total">
                 <h3>Monthly Cost Going Forward</h3>
-                <div className="price-breakdown">
-                  <div className="price-row">
-                    <span>Subtotal</span>
-                    <span>${calculateTotalCost().toFixed(2)}/month</span>
-                  </div>
-                  <div className="price-row">
-                    {selectedClub?.state === 'NM' ? (
-                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
-                    ) : (
-                      <span>Tax</span>
-                    )}
-                    <span>${taxAmount.toFixed(2)}/month</span>
-                  </div>
-                  <div className="price-row total">
-                    <span><strong>Total with Tax</strong></span>
-                    <span><strong>${(calculateTotalCost() + taxAmount).toFixed(2)}/month</strong></span>
-                  </div>
-                </div>
+                <p className="total-price">${calculateTotalCost().toFixed(2)}/month</p>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <PersonalTrainingModal 
-        isOpen={showPTModal}
-        onClose={handlePTDecline}
-        onAccept={handlePTAccept}
-      />
     </div>
   );
 }

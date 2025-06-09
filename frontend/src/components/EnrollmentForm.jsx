@@ -1129,8 +1129,8 @@ function EnrollmentForm() {
           newErrors.tempDateOfBirth = `You are ${age} years old. Child members must be under 12 years old.`;
         }
       } else if (memberType === 'youth') {
-        if (!validateYouthAge(memberData.dateOfBirth)) {
-          const age = calculateAge(memberData.dateOfBirth);
+        const age = calculateAge(memberData.dateOfBirth);
+        if (age < 12 || age > 20) {
           newErrors.tempDateOfBirth = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
         }
       }
@@ -1150,14 +1150,6 @@ function EnrollmentForm() {
     if (memberData.cellPhone && !/^\d{10}$/.test(memberData.cellPhone.replace(/\D/g, ''))) {
       newErrors.tempCellPhone = "Please enter a valid phone number";
     }
-    
-    // if (memberData.homePhone && !/^\d{10}$/.test(memberData.homePhone.replace(/\D/g, ''))) {
-    //   newErrors.tempHomePhone = "Please enter a valid home phone number";
-    // }
-    
-    // if (memberData.workPhone && !/^\d{10}$/.test(memberData.workPhone.replace(/\D/g, ''))) {
-    //   newErrors.tempWorkPhone = "Please enter a valid work phone number";
-    // }
     
     // If there are errors, update the errors state and return
     if (Object.keys(newErrors).length > 0) {
@@ -1195,8 +1187,6 @@ function EnrollmentForm() {
         gender: 'default',
         email: '',
         cellPhone: ''
-        // homePhone: '',
-        // workPhone: ''
       });
     } else if (memberType === 'child') {
       setChildMember({
@@ -1207,8 +1197,6 @@ function EnrollmentForm() {
         gender: 'default',
         email: '',
         cellPhone: ''
-        // homePhone: '',
-        // workPhone: ''
       });
     } else {
       setYouthMember({
@@ -1219,8 +1207,6 @@ function EnrollmentForm() {
         gender: 'default',
         email: '',
         cellPhone: ''
-        // homePhone: '',
-        // workPhone: ''
       });
     }
     
@@ -2763,7 +2749,7 @@ function EnrollmentForm() {
       
  case 'youth':
   return (
-    <div className="tab-panel">
+    <div className="youth-tab">
       <h3>Add Youth Family Member</h3>
       <p>Add a youth family member (12–20 years) to your membership.</p>
 
@@ -2822,7 +2808,6 @@ function EnrollmentForm() {
         </div>
       )}
 
-      {/* Name Row */}
       <div className="form-row name-row">
         <div className="form-group">
           <label htmlFor="firstName">
@@ -2892,13 +2877,11 @@ function EnrollmentForm() {
             type="date"
             id="dateOfBirth"
             name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
+            value={youthMember.dateOfBirth}
+            onChange={handleTempMemberChange}
             aria-required="true"
             aria-invalid={!!errors.dateOfBirth}
-            aria-describedby={
-              errors.dateOfBirth ? 'dateOfBirth-error' : undefined
-            }
+            aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
           />
           {errors.dateOfBirth && (
             <div id="dateOfBirth-error" className="error-message">
@@ -2914,17 +2897,16 @@ function EnrollmentForm() {
           <select
             id="gender"
             name="gender"
-            value={formData.gender}
-            onChange={handleChange}
+            value={youthMember.gender}
+            onChange={handleTempMemberChange}
             aria-required="true"
             aria-invalid={!!errors.gender}
-            aria-describedby={errors.gender ? 'gender-error' : undefined}
+            aria-describedby={errors.gender ? "gender-error" : undefined}
           >
-            {genderOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
+            <option value="">Select gender</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="N">Prefer not to say</option>
           </select>
           {errors.gender && (
             <div id="gender-error" className="error-message">
@@ -2932,47 +2914,20 @@ function EnrollmentForm() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Phone Row */}
-      <div className="form-row phone-numbers">
         <div className="form-group">
-          <label htmlFor="cellPhone">Phone</label>
-          <input
-            type="tel"
-            id="cellPhone"
-            name="cellPhone"
-            value={youthMember.cellPhone}
-            onChange={handleTempMemberChange}
-            placeholder="Enter mobile phone"
-            aria-required="true"
-            aria-invalid={!!errors.cellPhone}
-            aria-describedby={errors.cellPhone ? 'cellPhone-error' : undefined}
-          />
-          {errors.cellPhone && (
-            <div id="cellPhone-error" className="error-message">
-              {errors.cellPhone}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Email Row */}
-      <div className="form-row email-row">
-        <div className="form-group email-field">
           <label htmlFor="email">
-            Email <span className="required">*</span>
+            Email
           </label>
           <input
             type="email"
             id="email"
             name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@email.com"
-            aria-required="true"
+            value={youthMember.email}
+            onChange={handleTempMemberChange}
+            placeholder="Enter email address"
             aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
           {errors.email && (
             <div id="email-error" className="error-message">
@@ -2982,21 +2937,69 @@ function EnrollmentForm() {
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="form-actions">
-        <button
-          type="button"
-          className="add-member-button"
-          onClick={() => addFamilyMember('youth')}
-        >
-          Add Youth Member
-        </button>
+      <div className="form-row phone-numbers">
+        <div className="form-group">
+          <label htmlFor="cellPhone">
+            Cell Phone
+          </label>
+          <input
+            type="tel"
+            id="cellPhone"
+            name="cellPhone"
+            value={youthMember.cellPhone}
+            onChange={handleTempMemberChange}
+            placeholder="Enter mobile phone"
+            aria-required="true"
+            aria-invalid={!!errors.cellPhone}
+            aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
+          />
+          {errors.cellPhone && (
+            <div id="cellPhone-error" className="error-message">
+              {errors.cellPhone}
+            </div>
+          )}
+        </div>
+        
+        {/* <div className="form-group">
+          <label htmlFor="homePhone">
+            Home Phone
+          </label>
+          <input
+            type="tel"
+            id="homePhone"
+            name="homePhone"
+            value={youthMember.homePhone}
+            onChange={handleTempMemberChange}
+            placeholder="Enter home phone"
+            aria-invalid={!!errors.homePhone}
+            aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
+          />
+          {errors.homePhone && (
+            <div id="homePhone-error" className="error-message">
+              {errors.homePhone}
+            </div>
+          )}
+        </div> */}
+      </div>
+      
+      {/* Add Youth Member Button */}
+      <div className="form-row">
+        <div className="form-group">
+          <button
+            type="button"
+            className="add-member-button"
+            onClick={() => addFamilyMember('youth')}
+            aria-label="Add youth family member"
+          >
+            Add Youth Member
+          </button>
+        </div>
       </div>
     </div>
   );
 
-default:
-  return null;
+      default:
+        return null;
     }
   };
 
