@@ -1445,7 +1445,7 @@ function EnrollmentForm() {
 
         // If any members were removed due to age validation, show a message
         if (updatedFamilyMembers.length < formData.familyMembers.length) {
-          alert("Some family members were removed because they don't meet the age requirements for the selected membership type.");
+          alert("Some additional members were removed because they don't meet the age requirements for the selected membership type.");
         }
       }
     }
@@ -2001,7 +2001,7 @@ function EnrollmentForm() {
                 </div>
               ))
             ) : (
-              <p className="no-members-message">No additional family members added yet.</p>
+              <p className="no-members-message">No additional members added yet.</p>
             )}
           </div>
         );
@@ -2025,7 +2025,7 @@ function EnrollmentForm() {
         if (hasAdditionalAdult) {
           return (
             <div className="tab-panel">
-              <h3>Add Adult Family Member</h3>
+              <h3>Add Additional Adult  Member</h3>
               <p className="no-more-adults-message">One Adult successfully Added to this Membership.<br /><br />
                 Any additional adults must purchase their own membership. No further adults can be added to this membership.</p>
             </div>
@@ -2034,8 +2034,8 @@ function EnrollmentForm() {
         
         return (
           <div className="tab-panel">
-            <h3>Add Adult Family Member</h3>
-            <p>Add an adult family member to your membership.</p>
+            <h3>Add Additional Adult Member</h3>
+            <p>Add an adult member to your membership.</p>
             
             <div className="form-row name-row">
               <div className="form-group">
@@ -2248,7 +2248,7 @@ function EnrollmentForm() {
       case 'child':
         return (
           <div className="tab-panel">
-            <h3>Add Child Family Member</h3>
+            <h3>Add Child Member</h3>
             
             {/* Add message for Dual membership in New Mexico */}
             {selectedClub?.state === 'NM' && determinedMembershipType === 'D' && (
@@ -2263,7 +2263,7 @@ function EnrollmentForm() {
               </div>
             )}
             
-            <p>Add a child family member (0-11 years) to your membership.</p>
+            <p>Add a child member (0-11 years) to your membership.</p>
             
             {/* For New Mexico Family memberships, show direct child entry without requiring addon */}
             {selectedClub?.state === 'NM' && determinedMembershipType === 'F' ? (
@@ -2717,8 +2717,8 @@ function EnrollmentForm() {
  case 'youth':
   return (
     <div className="youth-tab">
-      <h3>Add Youth Family Member</h3>
-      <p>Add a youth family member (12–20 years) to your membership.</p>
+      <h3>Add Youth Member</h3>
+      <p>Add a youth member (12–20 years) to your membership.</p>
 
       {/* New Mexico club specific messages */}
       {selectedClub?.state === 'NM' && determinedMembershipType === 'I' && (
@@ -2907,7 +2907,7 @@ function EnrollmentForm() {
       <div className="form-row phone-numbers">
         <div className="form-group">
           <label htmlFor="cellPhone">
-            Cell Phone
+            Phone Number
           </label>
           <input
             type="tel"
