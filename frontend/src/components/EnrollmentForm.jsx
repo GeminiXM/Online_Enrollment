@@ -3103,8 +3103,9 @@ function EnrollmentForm() {
         Fields marked with an asterisk (*) are required.
       </p>
 
+     
       {/* Display selected membership type if available */}
-      {membershipType && (
+{/*       {membershipType && (
         <div className="selected-membership-type">
           <span className="membership-type-badge">
             {membershipType.title} Membership
@@ -3119,7 +3120,8 @@ function EnrollmentForm() {
             </button>
           </p>
         </div>
-      )}
+      )}  */}
+    
 
       {/* Display submission error if any */}
       {submitError && (
@@ -3842,7 +3844,7 @@ function EnrollmentForm() {
               
               {/* Due Now (Prorated) */}
               <div className="price-section prorated-price">
-                <h4>Due Now (Prorated):</h4>
+                <h4>Due Now (Prorated Dues):</h4>
                 <p className="price">
                   {isLoadingPrice ? (
                     <span>Loading price...</span>
@@ -3857,7 +3859,7 @@ function EnrollmentForm() {
               
               {/* Monthly Price Going Forward */}
               <div className="price-section monthly-price">
-                <h4>Monthly Fee Going Forward:</h4>
+                <h4>Monthly Dues Going Forward:</h4>
                 <p className="price">
                   {isLoadingPrice ? (
                     <span>Loading price...</span>
@@ -3944,6 +3946,11 @@ function EnrollmentForm() {
                 <h3>Total Due Now</h3>
                 <div className="price-breakdown">
                   <div className="price-row">
+                    <span>Enrollment Fee</span>
+                    <span>$0.00</span>
+                  </div>
+                  <div className="price-row">
+                    
                     <span>Subtotal</span>
                     <span>${calculateTotalProratedCost().toFixed(2)}</span>
                   </div>

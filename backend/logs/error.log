@@ -578,3 +578,24 @@
 2025-06-09 17:32:35:3235 [31merror[39m: [31mError executing query:[39m
 2025-06-09 17:32:35:3235 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-06-09 17:32:35:3235 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError executing query:[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError executing query:[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-09 17:39:26:3926 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-10 10:25:32:2532 [31merror[39m: [31mError executing query:[39m
+2025-06-10 10:25:32:2532 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-10 10:25:32:2532 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError executing query:[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError executing query:[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-10 11:51:19:5119 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-10 11:59:24:5924 [31merror[39m: [31mError executing query:[39m
+2025-06-10 11:59:24:5924 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-10 11:59:24:5924 [31merror[39m: [31mError in getTaxRate:[39m
+2025-06-10 11:59:25:5925 [31merror[39m: [31mError executing query:[39m
+2025-06-10 11:59:25:5925 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-06-10 11:59:25:5925 [31merror[39m: [31mError in getTaxRate:[39m
