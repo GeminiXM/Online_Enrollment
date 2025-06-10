@@ -8,7 +8,6 @@ import api from "../services/api.js";
 import "./EnrollmentForm.css";
 import { useClub } from "../context/ClubContext";
 import { useMembership } from "../context/MembershipContext";
-import MembershipTypeModal from "./MembershipTypeModal";
 import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 import AddonButtons from "./AddonButtons";
 import ServiceAddonButtons from './ServiceAddonButtons';
@@ -125,14 +124,48 @@ const formatDateWithoutTimezoneShift = (dateString) => {
   return dateString;
 };
 
+// Add this function near the other utility functions at the top of the file
+const determineMembershipTypeByAge = (dateOfBirth) => {
+  const age = calculateAge(dateOfBirth);
+  if (age === null) return null;
+
+  // Define membership types based on age ranges
+  if (age < 18) {
+    return {
+      id: 'junior',
+      title: 'Junior',
+      description: 'For members under 18 years old',
+      price: 0
+    };
+  } else if (age >= 18 && age <= 29) {
+    return {
+      id: 'young-professional',
+      title: 'Student/Young Professional',
+      description: 'For members between 18-29 years old',
+      price: 0
+    };
+  } else if (age >= 65) {
+    return {
+      id: 'senior',
+      title: 'Senior',
+      description: 'For members 65 years and older',
+      price: 0
+    };
+  } else {
+    return {
+      id: 'standard',
+      title: 'Standard',
+      description: 'For members between 30-64 years old',
+      price: 0
+    };
+  }
+};
+
 function EnrollmentForm() {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
   const { membershipType, selectMembershipType } = useMembership();
-  
-  // State for membership type modal
-  const [showMembershipTypeModal, setShowMembershipTypeModal] = useState(!membershipType);
   
   // State for addons
   const [addons, setAddons] = useState([]);
@@ -167,7 +200,6 @@ function EnrollmentForm() {
     // Check for membership type
     if (location.state && location.state.membershipType) {
       selectMembershipType(location.state.membershipType);
-      setShowMembershipTypeModal(false);
     }
     
     // Check for form data when returning from contract page
@@ -910,72 +942,27 @@ function EnrollmentForm() {
 
   // Handle input changes for the main form
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     
-    // Handle checkbox inputs differently
-    if (type === 'checkbox' && name.startsWith('services.')) {
-      const serviceName = name.split('.')[1];
-      setFormData({
-        ...formData,
-        services: {
-          ...formData.services,
-          [serviceName]: checked
-        }
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [name]: value
-      });
-      
-      // Validate age only when date of birth is complete
-      if (name === 'dateOfBirth' && value) {
-        // Only validate if we have a complete date (YYYY-MM-DD)
-        const dateParts = value.split('-');
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // If this is a date of birth change, determine membership type
+    if (name === 'dateOfBirth') {
+      const newMembershipType = determineMembershipTypeByAge(value);
+      if (newMembershipType) {
+        selectMembershipType(newMembershipType);
         
-        // Check if we have all parts and they're the right length
-        const hasAllParts = dateParts.length === 3 && 
-                           dateParts[0].length === 4 && 
-                           dateParts[1].length === 2 && 
-                           dateParts[2].length === 2;
-        
-        if (hasAllParts) {
-          // Convert to numbers and validate ranges
-          const year = parseInt(dateParts[0]);
-          const month = parseInt(dateParts[1]);
-          const day = parseInt(dateParts[2]);
-          
-          // Only validate if we have a valid date (real year, valid month and day)
-          const isValidDate = year > 1920 && year <= new Date().getFullYear() &&
-                             month >= 1 && month <= 12 &&
-                             day >= 1 && day <= 31;
-          
-          if (isValidDate) {
-            // Use the membershipType from context, not from formData
-            const ageError = validateAgeForMembershipType(value, membershipType);
-            if (ageError) {
-              setErrors(prevErrors => ({
-                ...prevErrors,
-                dateOfBirth: ageError
-              }));
-              
-              // Store the error message in the window object for the modal to access
-              window.dateOfBirthError = ageError;
-              
-              // Only show membership type modal if we have a complete date and membership type
-              if (membershipType) {
-                setShowMembershipTypeModal(true);
-              }
-            } else {
-              // Clear the error if validation passes
-              setErrors(prevErrors => ({
-                ...prevErrors,
-                dateOfBirth: null
-              }));
-            }
-          }
+        // Validate the age for the new membership type
+        const ageError = validateAgeForMembershipType(value, newMembershipType);
+        if (ageError) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: ageError
+          }));
         } else {
-          // Clear any existing errors while the user is still typing
           setErrors(prevErrors => ({
             ...prevErrors,
             dateOfBirth: null
@@ -983,13 +970,13 @@ function EnrollmentForm() {
         }
       }
     }
-    
-    // Clear errors for fields other than dateOfBirth
-    if (errors[name] && name !== 'dateOfBirth') {
-      setErrors({
-        ...errors,
+
+    // Clear errors when field is changed
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
         [name]: null
-      });
+      }));
     }
   };
   
@@ -1037,10 +1024,10 @@ function EnrollmentForm() {
       
       // Check if we have all parts and they're the right length
       const hasAllParts = dateParts.length === 3 && 
-                          dateParts[0].length === 4 && 
-                          dateParts[1].length === 2 && 
-                          dateParts[2].length === 2;
-                         
+                         dateParts[0].length === 4 && 
+                         dateParts[1].length === 2 && 
+                         dateParts[2].length === 2;
+      
       if (hasAllParts) {
         // Convert to numbers and validate ranges
         const year = parseInt(dateParts[0]);
@@ -1048,39 +1035,20 @@ function EnrollmentForm() {
         const day = parseInt(dateParts[2]);
         
         // Only validate if we have a valid date (real year, valid month and day)
-        const isValidDate = year > 1900 && year <= new Date().getFullYear() &&
+        const isValidDate = year > 1920 && year <= new Date().getFullYear() &&
                            month >= 1 && month <= 12 &&
                            day >= 1 && day <= 31;
-
-        if (value && isValidDate) {
-          let ageError = null;
-          
-          // Determine which validation function to use based on the active tab
-          switch (activeTab) {
-            case 'new_adult':
-              ageError = validateAdultAge(value);
-              break;
-            case 'child':
-              ageError = validateChildAge(value);
-              break;
-            case 'youth':
-              // For youth, we need to handle the boolean return value differently
-              if (!validateYouthAge(value)) {
-                const age = calculateAge(value);
-                ageError = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
-              }
-              break;
-            default:
-              break;
-          }
-          
+        
+        if (isValidDate) {
+          // Use the membershipType from context, not from formData
+          const ageError = validateAgeForMembershipType(value, membershipType);
           if (ageError) {
             setErrors(prevErrors => ({
               ...prevErrors,
               tempDateOfBirth: ageError
             }));
           } else {
-            // Only clear the date of birth error if validation passes
+            // Clear the error if validation passes
             setErrors(prevErrors => ({
               ...prevErrors,
               tempDateOfBirth: null
@@ -1413,7 +1381,6 @@ function EnrollmentForm() {
     
     // Update the membership type
     selectMembershipType(type);
-    setShowMembershipTypeModal(false);
     
     // Re-validate date of birth with the newly selected membership type
     if (formData.dateOfBirth) {
@@ -3087,15 +3054,18 @@ function EnrollmentForm() {
     return Math.round(total * 100) / 100;
   };
 
+  // Add this effect to set initial membership type
+  useEffect(() => {
+    if (formData.dateOfBirth && !membershipType) {
+      const initialMembershipType = determineMembershipTypeByAge(formData.dateOfBirth);
+      if (initialMembershipType) {
+        selectMembershipType(initialMembershipType);
+      }
+    }
+  }, [formData.dateOfBirth]);
+
   return (
     <div className="enrollment-container">
-      {/* Membership Type Modal */}
-      <MembershipTypeModal 
-        isOpen={showMembershipTypeModal} 
-        onClose={() => setShowMembershipTypeModal(false)}
-        onSelectMembershipType={handleMembershipTypeSelect}
-      />
-
       <h1>{selectedClub.name} Membership Enrollment Form</h1>
 
       <p className="form-instructions">
@@ -3103,26 +3073,19 @@ function EnrollmentForm() {
         Fields marked with an asterisk (*) are required.
       </p>
 
-     
-      {/* Display selected membership type if available */}
-{/*       {membershipType && (
+      {/* Add this after the form instructions paragraph */}
+      {membershipType && (
         <div className="selected-membership-type">
           <span className="membership-type-badge">
             {membershipType.title} Membership
           </span>
           <p className="membership-type-description">
-            You've selected the {membershipType.title} membership type. {membershipType.description}
-            <button 
-              onClick={() => setShowMembershipTypeModal(true)} 
-              className="change-type-button"
-            >
-              Change Type
-            </button>
+            {membershipType.description}
           </p>
         </div>
-      )}  */}
-    
+      )}
 
+     
       {/* Display submission error if any */}
       {submitError && (
         <div className="error-message form-error">
