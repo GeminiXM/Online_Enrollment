@@ -1960,7 +1960,7 @@ function EnrollmentForm() {
       return (
         <RestrictedMembershipMessage 
           membershipType={membershipType} 
-          onChangeMembershipType={() => setShowMembershipTypeModal(true)} 
+          onChangeMembershipType={() => {}} 
         />
       );
     }
@@ -1971,12 +1971,12 @@ function EnrollmentForm() {
         return (
           <div className="tab-panel">
             <h3>Current Members</h3>
-            <p>You are the primary member. {allowsFamilyMembers ? 'Add family members using the tabs above.' : ''}</p>
+            <p>You are the primary member. {allowsFamilyMembers ? 'Add additional members using the tabs above.' : ''}</p>
             <div className="member-card">
               <div className="member-info">
                 <h4>Primary Member</h4>
                 <p>Your membership includes access to all basic facilities.</p>
-                <p><strong>Gender:</strong> {formData.gender === "" ? "Prefer not to say" : formData.gender}</p>
+                {/* <p><strong>Gender:</strong> {formData.gender === "" ? "Prefer not to say" : formData.gender}</p> */}
               </div>
             </div>
             
@@ -1986,7 +1986,7 @@ function EnrollmentForm() {
                   <div className="member-info">
                     <h4>{member.firstName} {member.middleInitial ? member.middleInitial + '. ' : ''}{member.lastName}</h4>
                     <p>{member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth'} Member</p>
-                  <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p>
+                  {/* <p><strong>Gender:</strong> {member.gender === "" ? "Prefer not to say" : member.gender}</p> */}
                   {member.dateOfBirth && (
                     <p><strong>Birthday:</strong> {formatDateWithoutTimezoneShift(member.dateOfBirth)}</p>
                   )}
@@ -3056,13 +3056,14 @@ function EnrollmentForm() {
 
   // Add this effect to set initial membership type
   useEffect(() => {
+    // Always run this effect, but only act if needed
     if (formData.dateOfBirth && !membershipType) {
       const initialMembershipType = determineMembershipTypeByAge(formData.dateOfBirth);
       if (initialMembershipType) {
         selectMembershipType(initialMembershipType);
       }
     }
-  }, [formData.dateOfBirth]);
+  }, [formData.dateOfBirth, membershipType, selectMembershipType]);
 
   return (
     <div className="enrollment-container">
@@ -3074,7 +3075,7 @@ function EnrollmentForm() {
       </p>
 
       {/* Add this after the form instructions paragraph */}
-      {membershipType && (
+ {/*      {membershipType && (
         <div className="selected-membership-type">
           <span className="membership-type-badge">
             {membershipType.title} Membership
@@ -3083,7 +3084,7 @@ function EnrollmentForm() {
             {membershipType.description}
           </p>
         </div>
-      )}
+      )} */}
 
      
       {/* Display submission error if any */}
@@ -3250,6 +3251,29 @@ function EnrollmentForm() {
                   </div>
                 )}
               </div>
+
+                                <div className="form-group">
+                    <label htmlFor="mobilePhone">
+                      Phone Number<span className="required">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      id="mobilePhone"
+                      name="mobilePhone"
+                      value={formData.mobilePhone}
+                      onChange={handleChange}
+                      placeholder="Enter 10-digit phone number"
+                      aria-required="true"
+                      aria-invalid={!!errors.mobilePhone}
+                      aria-describedby={errors.mobilePhone ? "mobilePhone-error" : undefined}
+                    />
+                    
+                    {errors.mobilePhone && (
+                      <div id="mobilePhone-error" className="error-message">
+                        {errors.mobilePhone}
+                      </div>
+                    )}
+                  </div>
               
               <div className="form-group email-field">
                 <label htmlFor="email">
@@ -3561,29 +3585,8 @@ function EnrollmentForm() {
                   </div>
                 </div>
                 
-                <div className="form-row phone-row">
-                  <div className="form-group">
-                    <label htmlFor="mobilePhone">
-                      Phone Number<span className="required">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="mobilePhone"
-                      name="mobilePhone"
-                      value={formData.mobilePhone}
-                      onChange={handleChange}
-                      placeholder="Enter 10-digit phone number"
-                      aria-required="true"
-                      aria-invalid={!!errors.mobilePhone}
-                      aria-describedby={errors.mobilePhone ? "mobilePhone-error" : undefined}
-                    />
-                    
-                    {errors.mobilePhone && (
-                      <div id="mobilePhone-error" className="error-message">
-                        {errors.mobilePhone}
-                      </div>
-                    )}
-                  </div>
+              
+
                   
 {/*                   <div className="form-group">
                     <label htmlFor="homePhone">Home Phone</label>
@@ -3622,7 +3625,7 @@ function EnrollmentForm() {
                       </div>
                     )}
                   </div> */}
-                </div>
+               
                 
                 <div className="form-row">
                   <div className="form-group consent-checkbox">
@@ -3654,76 +3657,10 @@ function EnrollmentForm() {
               </div>
             </>
           )}
-          
+           
           {!isJuniorMembership && (
             <>
-              <div className="contact-info-section">
-                <div className="form-row phone-row">
-                  <div className="form-group">
-                    <label htmlFor="mobilePhone">
-                      Phone Number<span className="required">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="mobilePhone"
-                      name="mobilePhone"
-                      value={formData.mobilePhone}
-                      onChange={handleChange}
-                      placeholder="Enter 10-digit phone number"
-                      aria-required="true"
-                      aria-invalid={!!errors.mobilePhone}
-                      aria-describedby={errors.mobilePhone ? "mobilePhone-error" : undefined}
-                    />
-                    {/* <span className="message">*(one phone is required)</span> */}
-                    {errors.mobilePhone && (
-                      <div id="mobilePhone-error" className="error-message">
-                        {errors.mobilePhone}
-                      </div>
-                    )}
-                  </div>
-                  
-{/*                   <div className="form-group">
-                    <label htmlFor="homePhone">Home Phone</label>
-                    <input
-                      type="tel"
-                      id="homePhone"
-                      name="homePhone"
-                      value={formData.homePhone}
-                      onChange={handleChange}
-                      placeholder="Enter 10-digit phone number"
-                      aria-invalid={!!errors.homePhone}
-                      aria-describedby={errors.homePhone ? "homePhone-error" : undefined}
-                    />
-                    {errors.homePhone && (
-                      <div id="homePhone-error" className="error-message">
-                        {errors.homePhone}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="workPhone">Work Phone</label>
-                    <input
-                      type="tel"
-                      id="workPhone"
-                      name="workPhone"
-                      value={formData.workPhone}
-                      onChange={handleChange}
-                      placeholder="Enter 10-digit phone number"
-                      aria-invalid={!!errors.workPhone}
-                      aria-describedby={errors.workPhone ? "workPhone-error" : undefined}
-                    />
-                    {errors.workPhone && (
-                      <div id="workPhone-error" className="error-message">
-                        {errors.workPhone}
-                      </div>
-                    )}
-                  </div> */}
-                </div>
-              </div>
-
               <h2>Additional Members & Services</h2>
-              
               <div className="tabs-container">
                 <div className="tab-list" role="tablist">
                   <button
@@ -3733,7 +3670,7 @@ function EnrollmentForm() {
                     aria-selected={activeTab === 'members'}
                     type="button"
                   >
-                    Members
+                    Current Members
                   </button>
                   <button
                     className={`tab ${activeTab === 'new_adult' ? 'active' : ''}`}
@@ -3742,7 +3679,7 @@ function EnrollmentForm() {
                     aria-selected={activeTab === 'new_adult'}
                     type="button"
                   >
-                    Add Adult
+                    Add Adult (18+)
                   </button>
                   <button
                     className={`tab ${activeTab === 'child' ? 'active' : ''}`}
@@ -3751,7 +3688,7 @@ function EnrollmentForm() {
                     aria-selected={activeTab === 'child'}
                     type="button"
                   >
-                    Add Child
+                    Add Child (0-11)
                   </button>
                   <button
                     className={`tab ${activeTab === 'youth' ? 'active' : ''}`}
@@ -3760,7 +3697,7 @@ function EnrollmentForm() {
                     aria-selected={activeTab === 'youth'}
                     type="button"
                   >
-                    Add Youth
+                    Add Youth (12-20)
                   </button>
                   <button
                     className={`tab ${activeTab === 'services' ? 'active' : ''}`}
@@ -3772,7 +3709,6 @@ function EnrollmentForm() {
                     Additional Services
                   </button>
                 </div>
-                
                 <div className="tab-content">
                   {renderTabContent()}
                 </div>

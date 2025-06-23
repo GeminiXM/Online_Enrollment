@@ -73,7 +73,7 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
     <div className="enrollment-confirmation">
       <div className="confirmation-container">
         <div className="confirmation-header">
-          <h1>Enrollment Confirmation</h1>
+          <h1>Membership Enrollment Confirmation</h1>
           <div className="success-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
@@ -83,30 +83,39 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
 
         <div className="confirmation-message">
           <h2>{successMessage || `Thank you for enrolling, ${memberName || 'new member'}!`}</h2>
-          <p>Your enrollment has been successfully submitted to {selectedClub.name}.</p>
+          {/* <p>Your enrollment has been successfully submitted to {selectedClub.name}.</p> */}
         </div>
 
         <div className="confirmation-details">
+          {selectedClub && (
+            <div className="club-info">
+              <h3>Club Location</h3>
+              <p>
+                <strong>{selectedClub.name}</strong><br />
+                {selectedClub.address}
+              </p>
+            </div>
+          )}
           {paymentResponse && (
             <div className="payment-confirmation">
               <h3>Payment Information</h3>
               <div className="payment-receipt">
-                <div className="receipt-row">
+                {/* <div className="receipt-row">
                   <span className="receipt-label">Payment Processor:</span>
                   <span className="receipt-value">{paymentResponse.processor || 'Credit Card Processor'}</span>
-                </div>
+                </div> */}
                 <div className="receipt-row">
                   <span className="receipt-label">Card:</span>
                   <span className="receipt-value">{getCardType()} ending in {getLastFour()}</span>
                 </div>
-                <div className="receipt-row">
+                {/* <div className="receipt-row">
                   <span className="receipt-label">Transaction ID:</span>
                   <span className="receipt-value">{getTransactionId()}</span>
                 </div>
                 <div className="receipt-row">
                   <span className="receipt-label">Authorization Code:</span>
                   <span className="receipt-value">{getAuthCode()}</span>
-                </div>
+                </div> */}
                 <div className="receipt-row">
                   <span className="receipt-label">Date:</span>
                   <span className="receipt-value">{formatTimestamp()}</span>

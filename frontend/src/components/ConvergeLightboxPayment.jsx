@@ -608,7 +608,7 @@ console.log('  initialedSections:', initialedSections);
         state: { 
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
+          successMessage: `Welcome ${formData.firstName} ${formData.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.membershipNumber} to take the next steps in your membership journey.`,
           paymentResponse: paymentResult,
           formData: formData,
           signatureData: signatureData,
