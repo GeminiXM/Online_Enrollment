@@ -22,9 +22,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2rem;
+  margin-bottom: .5rem;
   position: relative;
+  color: #0056b3;
 }
+
+.club-name {
+  margin-bottom: 1rem; /* adjust spacing as desired */
+}
+
 
 .success-icon {
   position: absolute;
@@ -46,9 +52,14 @@
 
 .confirmation-message {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   border-bottom: 1px solid #eee;
   padding-bottom: 2rem;
+}
+
+.confirmation-message h1 {
+  color: #0056b3;
+  margin-bottom: 1rem;
 }
 
 .confirmation-message h2 {
@@ -80,8 +91,9 @@
   margin-bottom: 2rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 1.5rem;
-  background-color: #f9f9f9;
+  padding: .5rem;
+  background-color: #e3e3e3;
+  
 }
 
 .payment-receipt {
@@ -111,15 +123,15 @@
 }
 
 .receipt-value.success {
-  color: #28a745;
-  font-weight: 600;
+  color: #208738;
+  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
 .receipt-value.success svg {
-  color: #28a745;
+  color: #208738
 }
 
 /* Contract Download Section */

@@ -6,7 +6,7 @@ import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections } = location.state || {};
+  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections, email, amountBilled } = location.state || {};
   const { selectedClub } = useClub();
   
 // Debug logging
@@ -45,40 +45,44 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
     }
   };
   
-  // Get transaction ID
-  const getTransactionId = () => {
-    if (!paymentResponse) return '';
+  // // Get transaction ID
+  // const getTransactionId = () => {
+  //   if (!paymentResponse) return '';
     
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.transaction_id || '';
-    } else {
-      // Handle CONVERGE
-      return paymentResponse.ssl_txn_id || '';
-    }
-  };
+  //   if (paymentResponse.processor === 'FLUIDPAY') {
+  //     return paymentResponse.transaction_id || '';
+  //   } else {
+  //     // Handle CONVERGE
+  //     return paymentResponse.ssl_txn_id || '';
+  //   }
+  // };
   
-  // Get authorization code
-  const getAuthCode = () => {
-    if (!paymentResponse) return '';
+  // // Get authorization code
+  // const getAuthCode = () => {
+  //   if (!paymentResponse) return '';
     
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.authorization_code || '';
-    } else {
-      // Handle CONVERGE
-      return paymentResponse.ssl_approval_code || '';
-    }
-  };
+  //   if (paymentResponse.processor === 'FLUIDPAY') {
+  //     return paymentResponse.authorization_code || '';
+  //   } else {
+  //     // Handle CONVERGE
+  //     return paymentResponse.ssl_approval_code || '';
+  //   }
+  // };
 
   return (
     <div className="enrollment-confirmation">
       <div className="confirmation-container">
-        <div className="confirmation-header">
+                       
+                <h1 className="club-name">{selectedClub.name}</h1>
+                
+             <div className="confirmation-header">
           <h1>Membership Enrollment Confirmation</h1>
           <div className="success-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
             </svg>
-          </div>
+            </div>
+            
         </div>
 
         <div className="confirmation-message">
@@ -89,21 +93,24 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
         <div className="confirmation-details">
           {selectedClub && (
             <div className="club-info">
-              <h3>Club Location</h3>
+              {/* <h3>Club Location</h3>
               <p>
                 <strong>{selectedClub.name}</strong><br />
                 {selectedClub.address}
-              </p>
+              </p> */}
             </div>
           )}
+          
           {paymentResponse && (
             <div className="payment-confirmation">
-              <h3>Payment Information</h3>
+              <h3 style={{ textDecoration: 'underline' }}>Payment Receipt</h3>
               <div className="payment-receipt">
-                {/* <div className="receipt-row">
-                  <span className="receipt-label">Payment Processor:</span>
-                  <span className="receipt-value">{paymentResponse.processor || 'Credit Card Processor'}</span>
-                </div> */}
+                {amountBilled !== undefined && (
+                  <div className="receipt-row">
+                    <span className="receipt-label">Amount Billed:</span>
+                    <span className="receipt-value">${Number(amountBilled).toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="receipt-row">
                   <span className="receipt-label">Card:</span>
                   <span className="receipt-value">{getCardType()} ending in {getLastFour()}</span>
@@ -136,8 +143,8 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
           
           <h3>What's Next?</h3>
           <ul>
-            <li>You will receive a confirmation email with your enrollment details.</li>
-            <li>Visit your selected club location to complete the enrollment process.</li>
+            <li>You will receive a confirmation email{email ? ` at ${email}` : ''} with your enrollment details.</li>
+            <li>Visit your selected club location, {selectedClub.address} to complete the enrollment process.</li>
             <li>Bring a valid photo ID and any required documentation.</li>
           </ul>
         </div>
