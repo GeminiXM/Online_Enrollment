@@ -815,7 +815,7 @@ const additionalAuthText =
       
       pdf.setFont('helvetica', 'normal');
       pdf.text('A.', 20, currentYPos);
-      const feeStructureAText = "The Member is required to immediately pay an Initiation Fee which is due and owing separate " +
+      const feeStructureAText = "The Member is required to immediately pay any applicable start up costs which are due and owing separate " +
         "and apart from the monthly dues stated on this membership agreement.";
       const splitFeeStructureAText = pdf.splitTextToSize(feeStructureAText, 160);
       pdf.text(splitFeeStructureAText, 30, currentYPos);
@@ -1212,7 +1212,7 @@ written notice. Cancellation shall be effective on the 1st of the month that is 
 least one (1) month after the date the notice is delivered. Notice can be provided by
 first class mail (Certified with Return Receipt Recommended), personal delivery of
 cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and
-facsimile transmission of cancellation form to 303-813-4197. Concurrently with the
+contact with the club to obtain the current, digital form of cancellation. Concurrently with the
 delivery of written notice, Member must pay the club any amounts due on the account as
 of the cancellation date and on or before the cancellation date member must return all
 membership cards. Those who have signed on an Extended Plan agreement are subject to the
@@ -1353,14 +1353,14 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
 
 // ——— 6. MEMBERSHIP CARDS  ———
 pdf.setFont('helvetica', 'bold');
-pdf.text('6. MEMBERSHIP CARDS', 20, currentYPos);
+pdf.text('6. MEMBERSHIP ENTRY', 20, currentYPos);
 // 2) Small gap after header - removing this lays the header on top of the text paragraph
 currentYPos += 5;
 
 pdf.setFont('helvetica', 'normal');
 const mbrCardText =
-`I understand cards are mandatory and must be presented prior to entering ${getClubAbbreviation()}. ` +
-  `Cards are not transferable to another person. There will be a replacement fee for each ` +
+`I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented prior to entering ${getClubAbbreviation()}. ` +
+  `These forms of entry are not transferable to another person. There will be a replacement fee for each ` +
   `lost card. I acknowledge that I am responsible for all charges incurred on my membership card.`;
 const splitmbrCardText = pdf.splitTextToSize(mbrCardText, 160);
 currentYPos = drawPagedText(pdf, splitmbrCardText, 20, currentYPos);
