@@ -304,7 +304,7 @@ pdf.text(prefix, xStart, y);
 const prefixWidth = pdf.getTextWidth(prefix);
 
 // 2) Draw the club name larger
-const clubName = selectedClub?.name || selectedClub?.locationName || '';
+const clubName = selectedClub?.shortName || selectedClub?.locationName || '';
 const clubFontSize = 14;      // or whatever size you like
 pdf.setFontSize(clubFontSize);
 pdf.text(clubName, xStart + prefixWidth, y);
@@ -321,13 +321,13 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
       // Primary Member details table - matches ContractPage layout
       autoTable(pdf, {
         startY: 50,
-        head: [['Last Name', 'First Name', 'DOB', 'Gender']],
+        head: [['Last Name', 'First Name', 'DOB']],
         body: [
           [
             formData.lastName || '',
             formData.firstName || '',
-            formatDate(formData.dob || formData.dateOfBirth) || '',
-            formData.gender || ''
+            formatDate(formData.dob || formData.dateOfBirth) || ''
+            
           ]
         ],
         theme: 'grid',
@@ -343,9 +343,12 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
       // Email row
       autoTable(pdf, {
         startY: memberTableEndY + 2,
-        head: [['Email']],
+        head: [['Phone Number','Email']],
         body: [
-          [formData.email || '']
+          [
+            formData.mobilePhone || formData.cellPhone || '',
+            formData.email || ''
+          ]
         ],
         theme: 'grid',
         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
@@ -369,24 +372,7 @@ pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
         margin: { left: 20, right: 20 }
       });
-      
-       // Phone information
-       const addressTableEndY = pdf.lastAutoTable.finalY;
-       autoTable(pdf, {
-         startY: addressTableEndY + 2,
-         head: [['Cell Phone', 'Home Phone', 'Work Phone']],
-         body: [
-           [
-             formData.mobilePhone || formData.cellPhone || '',
-             formData.homePhone || '',
-             formData.workPhone || ''
-           ]
-         ],
-         theme: 'grid',
-         headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
-         margin: { left: 20, right: 20 }
-       });
- 
+
        // Legal Guardian Information Section - Only show for Junior Memberships
        const phoneTableEndY = pdf.lastAutoTable.finalY;
        let currentTableEndY = phoneTableEndY;
@@ -1922,7 +1908,7 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
         // Apply signature font for the actual signature
         applySignatureFont(pdf);
         pdf.setFontSize(22);
-        pdf.text(signatureData.signature.text, 60, currentYPos);
+        pdf.text(signatureData.signature.text, 50, currentYPos);
         
         // Reset to normal font
         pdf.setFont('helvetica', 'normal');
@@ -1931,25 +1917,24 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
         // Fixed 5 pt gap before signature line
         currentYPos += 5;
         // Draw the signature line
-        pdf.line(20, currentYPos, 100, currentYPos);
+        pdf.line(40, currentYPos, 100, currentYPos);
         pdf.text('Member Signature', 60, currentYPos + 5);
       } else {
         // Draw the signature line
-        pdf.line(20, currentYPos, 100, currentYPos);
+        pdf.line(40, currentYPos, 100, currentYPos);
         pdf.setFontSize(10);
         pdf.text('Member Signature', 60, currentYPos + 5);
       }
       
       // Date field for member signature
       if (signatureDate) {
-        pdf.text(signatureDate, 150, currentYPos);
-                // Draw the signature line
-        pdf.line(20, currentYPos, 100, currentYPos);
-        pdf.setFontSize(10);
-        pdf.text('Member Signature', 60, currentYPos + 5);
+        pdf.text(signatureDate, 150, currentYPos-3);
+       
+
       } else {
-        pdf.line(120, currentYPos, 180, currentYPos);
+        pdf.line(140, currentYPos, 180, currentYPos);
       }
+      pdf.line(140, currentYPos, 180, currentYPos);
       pdf.text('Date', 150, currentYPos + 5);
       
 
