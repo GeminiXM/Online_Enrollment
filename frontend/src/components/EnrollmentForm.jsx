@@ -195,6 +195,8 @@ function EnrollmentForm() {
   const [hasPTAddon, setHasPTAddon] = useState(false);
   const [formSubmissionData, setFormSubmissionData] = useState(null);
 
+  const [showStartDateInfo, setShowStartDateInfo] = useState(false);
+
   // Check if data is passed in location state
   useEffect(() => {
     // Check for membership type
@@ -3100,21 +3102,75 @@ function EnrollmentForm() {
           {/* Primary member form fields */}
           <div className="form-row start-date-row">
             <div className="form-group date-field">
-              <label htmlFor="requestedStartDate">
+              <label htmlFor="requestedStartDate" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 Requested Start Date <span className="required">*</span>
+               
               </label>
-              <input
-                type="date"
-                id="requestedStartDate"
-                name="requestedStartDate"
-                value={formData.requestedStartDate}
-                onChange={handleChange}
-                min={today}
-                max={maxDate}
-                aria-required="true"
-                aria-invalid={!!errors.requestedStartDate}
-                aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input
+                  type="date"
+                  id="requestedStartDate"
+                  name="requestedStartDate"
+                  value={formData.requestedStartDate}
+                  onChange={handleChange}
+                  min={today}
+                  max={maxDate}
+                  aria-required="true"
+                  aria-invalid={!!errors.requestedStartDate}
+                  aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
+                />
+                <button
+                  type="button"
+                  tabIndex={0}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    background: '#e0e7ef',
+                    color: '#2a3b5e',
+                    fontWeight: 700,
+                    fontSize: 14,
+                    cursor: 'pointer',
+                    border: '1px solid #bfc8d6',
+                    marginLeft: 4,
+                    position: 'relative',
+                    padding: 0,
+                  }}
+                  onClick={e => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowStartDateInfo(prev => !prev);
+                  }}
+                  onBlur={() => setTimeout(() => setShowStartDateInfo(false), 150)}
+                  aria-label="Requested Start Date Info"
+                >
+                  i
+                  {showStartDateInfo && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 28,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#fff',
+                      color: '#2a3b5e',
+                      border: '1px solid #bfc8d6',
+                      borderRadius: 6,
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                      padding: '10px 14px',
+                      zIndex: 10,
+                      minWidth: 260,
+                      fontSize: 13,
+                      fontWeight: 400,
+                      whiteSpace: 'normal',
+                    }}>
+                      This online joining tool is only intended for those wishing to start their membership within the next 7 days. See the Club for other requests.
+                    </div>
+                  )}
+                </button>
+              </div>
               {errors.requestedStartDate && (
                 <div id="requestedStartDate-error" className="error-message">
                   {errors.requestedStartDate}
