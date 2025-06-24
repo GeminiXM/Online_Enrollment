@@ -616,11 +616,14 @@ const ContractPage = () => {
         <div className="info-section contact-section" style={{ marginTop: '-8px' }}>
           <div className="info-row">
             <div className="info-column">
+              <div className="info-label">Phone Number</div>
+              <div className="info-value">{formData.mobilePhone || formData.cellPhone || ''}</div>
+            </div>
+            <div className="info-column">
               <div className="info-label">E-mail</div>
               <div className="info-value">{formData.email}</div>
             </div>
           </div>
-          
           <div className="info-row">
             <div className="info-column">
               <div className="info-label">Home Address</div>
@@ -637,21 +640,6 @@ const ContractPage = () => {
             <div className="info-column">
               <div className="info-label">ZIP Code</div>
               <div className="info-value">{formData.zipCode}</div>
-            </div>
-          </div>
-          
-          <div className="info-row">
-            <div className="info-column">
-              <div className="info-label">Cell Phone</div>
-              <div className="info-value">{formData.mobilePhone || formData.cellPhone || ''}</div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">Home Phone</div>
-              <div className="info-value">{formData.homePhone || ''}</div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">Work Phone</div>
-              <div className="info-value">{formData.workPhone || ''}</div>
             </div>
           </div>
         </div>
