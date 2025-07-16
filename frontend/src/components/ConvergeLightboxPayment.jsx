@@ -182,6 +182,14 @@ const ConvergeLightboxPayment = () => {
       setIsSubmitting(true);
       setErrorMessage('');
       
+      console.log('Fetching transaction token with data:', {
+        clubId: formData.club || selectedClub?.id || "001",
+        amount: formData.membershipDetails?.price || "50.00",
+        invoiceNumber: `INV-${Date.now()}`,
+        membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
+        customerInfo: customerInfo
+      });
+      
       // PRODUCTION DATA REQUIRED:
       // For production, implement a secure backend endpoint that generates a real transaction token
       // This endpoint should communicate with Converge securely, using proper authentication
@@ -195,11 +203,14 @@ const ConvergeLightboxPayment = () => {
         customerInfo: customerInfo
       });
       
+      console.log('Transaction token response:', response);
+      
       // PRODUCTION: Remove simulation code and implement proper error handling
       if (!response || !response.success) {
         throw new Error(response?.message || 'Failed to get transaction token');
       }
       
+      console.log('Returning token:', response.ssl_txn_auth_token);
       return response.ssl_txn_auth_token;
     } catch (error) {
       console.error('Error fetching token:', error);
@@ -414,9 +425,16 @@ const ConvergeLightboxPayment = () => {
   
 // Function to launch the Converge Lightbox
 const launchLightbox = async () => {
+  console.log('Launching Converge Lightbox...');
+  
   // Get a transaction token from your server
   const token = await fetchTransactionToken();
-  if (!token) return;
+  console.log('Got token:', token);
+  
+  if (!token) {
+    console.log('No token received, returning early');
+    return;
+  }
   
   try {
     // Payment fields including billing information
@@ -432,6 +450,9 @@ const launchLightbox = async () => {
       ssl_email: customerInfo.email
     };
     
+    console.log('Payment fields:', paymentFields);
+    console.log('Demo mode:', demoMode);
+    
     if (demoMode) {
       console.log('Using demo/simulation mode for Converge Lightbox');
       
@@ -439,9 +460,11 @@ const launchLightbox = async () => {
       window.addEventListener('message', handleLightboxResponse, false);
       
       // Launch simulation
+      console.log('Calling simulateConvergeLightbox...');
       window.simulateConvergeLightbox({
         paymentFields: paymentFields,
         onCancel: () => {
+          console.log('Payment cancelled');
           setErrorMessage('Payment was cancelled.');
           setIsSubmitting(false);
         }
@@ -500,7 +523,7 @@ const launchLightbox = async () => {
     setErrorMessage('Unable to launch payment form. Please try again later.');
     setIsSubmitting(false);
   }
-  };
+};
   
 
 // Handle the response from the Lightbox (DEMO MODE ONLY)
@@ -570,6 +593,61 @@ const handleLightboxResponse = (event) => {
     setIsSubmitting(false);
   }
 };
+
+// DEMO MODE: Simulate Converge Lightbox popup
+const simulateConvergeLightbox = (config) => {
+  // Create a modal popup for demo purposes
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  const content = document.createElement('div');
+  content.style.cssText = `
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  `;
+  
+  content.innerHTML = `
+    <h3>Converge Lightbox Payment (Demo)</h3>
+    <p>Processing payment with Converge...</p>
+    <div style="margin: 20px 0;">
+      <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
+    <p><strong>Amount:</strong> $${formData?.membershipDetails?.price || "50.00"}</p>
+    <p><strong>Customer:</strong> ${customerInfo.firstName} ${customerInfo.lastName}</p>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve Payment</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '1', ssl_result_message: 'Card declined'}, '*');" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Decline Payment</button>
+    <button onclick="this.parentElement.parentElement.remove(); config.onCancel();" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Cancel</button>
+  `;
+  
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  
+  // Add CSS animation
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+};
+
+// Add the simulation function to window for demo mode
+if (typeof window !== 'undefined') {
+  window.simulateConvergeLightbox = simulateConvergeLightbox;
+}
   
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {

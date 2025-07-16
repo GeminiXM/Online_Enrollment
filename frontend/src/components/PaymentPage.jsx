@@ -434,7 +434,7 @@ const PaymentPage = () => {
         processorName: processorName
       };
       
-      // Show payment processor demo
+      // Show payment processing popup
       setShowProcessorDemo(true);
       
       // Process payment
@@ -707,19 +707,45 @@ const PaymentPage = () => {
           )}
           
           {showProcessorDemo ? (
-            <div className="processor-demo-container">
-              <h3>Processing Payment with {processorName === 'FLUIDPAY' ? 'Fluidpay' : 'Converge'}</h3>
-              <PaymentProcessorDemo 
-                processor={processorName.toLowerCase()} 
-                paymentData={paymentFormData}
-                processorInfo={processorInfo}
-                paymentResponse={paymentResponse}
-              />
-              {submitError && (
-                <div className="error-message payment-error">
-                  {submitError}
-                </div>
-              )}
+            <div className="payment-processing-popup">
+              <div className="payment-processing-content">
+                <h3>Processing Payment</h3>
+                
+                {!paymentResponse ? (
+                  <div className="processing-loading">
+                    <div className="spinner"></div>
+                    <p>Processing your payment with {processorName === 'FLUIDPAY' ? 'FluidPay' : 'Converge'}...</p>
+                    <p className="processing-details">
+                      Amount: ${formData.membershipDetails?.price || "50.00"}<br/>
+                      Card: **** **** **** {paymentFormData.cardNumber.slice(-4)}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="payment-result">
+                    <div className={`result-icon ${paymentResponse.success ? 'success' : 'error'}`}>
+                      {paymentResponse.success ? '✓' : '✗'}
+                    </div>
+                    <h4>{paymentResponse.success ? 'Payment Successful!' : 'Payment Failed'}</h4>
+                    <p>{paymentResponse.message || (paymentResponse.success ? 'Your payment has been processed successfully.' : 'There was an error processing your payment.')}</p>
+                    
+                    {paymentResponse.success && (
+                      <div className="payment-details">
+                        <p><strong>Transaction ID:</strong> {paymentResponse.transaction_id || paymentResponse.ssl_txn_id || 'N/A'}</p>
+                        <p><strong>Authorization Code:</strong> {paymentResponse.authorization_code || paymentResponse.ssl_approval_code || 'N/A'}</p>
+                        <p><strong>Last 4 Digits:</strong> {paymentResponse.card_info?.last_four || paymentResponse.ssl_card_number?.slice(-4) || 'N/A'}</p>
+                      </div>
+                    )}
+                    
+                    <p className="redirecting-message">Redirecting to confirmation page...</p>
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="error-message payment-error">
+                    {submitError}
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <form className="payment-form" onSubmit={handleSubmit}>

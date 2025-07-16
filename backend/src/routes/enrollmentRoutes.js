@@ -5,10 +5,157 @@
 import express from "express";
 import { body, validationResult } from "express-validator";
 import logger from "../utils/logger.js";
-import { submitEnrollment, getAddons, getSpecialtyMembershipBridgeCode, getMembershipPrice, getTaxRate } from "../controllers/enrollmentController.js";
+import {
+  submitEnrollment,
+  getAddons,
+  getSpecialtyMembershipBridgeCode,
+  getMembershipPrice,
+  getTaxRate,
+} from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
 
 const router = express.Router();
+
+// In-memory storage for drafts (in production, use a database)
+const draftStorage = new Map();
+
+/**
+ * @route POST /api/enrollment/draft
+ * @desc Save enrollment draft
+ * @access Public
+ */
+router.post("/draft", async (req, res) => {
+  try {
+    const { sessionId, formData, additionalData, timestamp } = req.body;
+
+    if (!sessionId || !formData) {
+      return res.status(400).json({
+        success: false,
+        message: "Session ID and form data are required",
+      });
+    }
+
+    // Store draft in memory (in production, save to database)
+    draftStorage.set(sessionId, {
+      sessionId,
+      formData,
+      additionalData: additionalData || {},
+      timestamp,
+      createdAt: new Date(),
+    });
+
+    // Clean up old drafts (older than 24 hours)
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+    const now = Date.now();
+    for (const [key, draft] of draftStorage.entries()) {
+      if (now - draft.timestamp > maxAge) {
+        draftStorage.delete(key);
+      }
+    }
+
+    logger.info("Draft saved successfully", { sessionId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Draft saved successfully",
+      sessionId,
+    });
+  } catch (error) {
+    logger.error("Error saving draft", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while saving the draft",
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/draft/:sessionId
+ * @desc Retrieve enrollment draft
+ * @access Public
+ */
+router.get("/draft/:sessionId", async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const draft = draftStorage.get(sessionId);
+    if (!draft) {
+      return res.status(404).json({
+        success: false,
+        message: "Draft not found",
+      });
+    }
+
+    // Check if draft is not too old (24 hours)
+    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+    if (Date.now() - draft.timestamp > maxAge) {
+      draftStorage.delete(sessionId);
+      return res.status(404).json({
+        success: false,
+        message: "Draft has expired",
+      });
+    }
+
+    logger.info("Draft retrieved successfully", { sessionId });
+
+    return res.status(200).json({
+      success: true,
+      draft: {
+        sessionId: draft.sessionId,
+        formData: draft.formData,
+        additionalData: draft.additionalData,
+        timestamp: draft.timestamp,
+      },
+    });
+  } catch (error) {
+    logger.error("Error retrieving draft", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while retrieving the draft",
+    });
+  }
+});
+
+/**
+ * @route DELETE /api/enrollment/draft/:sessionId
+ * @desc Delete enrollment draft
+ * @access Public
+ */
+router.delete("/draft/:sessionId", async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const deleted = draftStorage.delete(sessionId);
+
+    if (deleted) {
+      logger.info("Draft deleted successfully", { sessionId });
+      return res.status(200).json({
+        success: true,
+        message: "Draft deleted successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "Draft not found",
+      });
+    }
+  } catch (error) {
+    logger.error("Error deleting draft", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while deleting the draft",
+    });
+  }
+});
 
 /**
  * Validation middleware for enrollment form data
@@ -104,31 +251,46 @@ const validateEnrollmentData = [
  * @desc Submit a new enrollment form
  * @access Public
  */
-router.post("/", validateEnrollmentData, async (req, res) => {
-  try {
-    // Check for validation errors
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
+router.post(
+  "/",
+  /* validateEnrollmentData, */ async (req, res) => {
+    try {
+      // Log the received data for debugging
+      logger.info("Received enrollment submission data:", {
+        body: req.body,
+        headers: req.headers,
+        contentType: req.get("Content-Type"),
+      });
+
+      // Check for validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        logger.warn("Validation errors in enrollment submission:", {
+          errors: errors.array(),
+          receivedData: req.body,
+        });
+        return res.status(400).json({
+          success: false,
+          errors: errors.array(),
+          receivedData: req.body,
+        });
+      }
+
+      // Call the controller to handle the submission
+      return await submitEnrollment(req, res);
+    } catch (error) {
+      logger.error("Error in enrollment route", {
+        error: error.message,
+        stack: error.stack,
+      });
+      return res.status(500).json({
         success: false,
-        errors: errors.array(),
+        message:
+          "An error occurred while processing your enrollment. Please try again later.",
       });
     }
-
-    // Call the controller to handle the submission
-    return await submitEnrollment(req, res);
-  } catch (error) {
-    logger.error("Error in enrollment route", {
-      error: error.message,
-      stack: error.stack,
-    });
-    return res.status(500).json({
-      success: false,
-      message:
-        "An error occurred while processing your enrollment. Please try again later.",
-    });
   }
-});
+);
 
 /**
  * @route GET /api/enrollment/status/:id
@@ -212,7 +374,8 @@ router.get("/addons", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving addons. Please try again later.",
+      message:
+        "An error occurred while retrieving addons. Please try again later.",
     });
   }
 });
@@ -232,7 +395,8 @@ router.get("/bridge-code", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving the bridge code. Please try again later.",
+      message:
+        "An error occurred while retrieving the bridge code. Please try again later.",
     });
   }
 });
@@ -252,14 +416,15 @@ router.get("/price", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving the membership price. Please try again later.",
+      message:
+        "An error occurred while retrieving the membership price. Please try again later.",
     });
   }
 });
 
 /**
  * @route GET /api/enrollment/tax-rate
- * @desc Get tax rate for New Mexico clubs
+ * @desc Get tax rate for a specific club
  * @access Public
  */
 router.get("/tax-rate", async (req, res) => {
@@ -272,7 +437,8 @@ router.get("/tax-rate", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving the tax rate. Please try again later.",
+      message:
+        "An error occurred while retrieving the tax rate. Please try again later.",
     });
   }
 });

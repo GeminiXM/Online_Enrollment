@@ -8,6 +8,7 @@ import {
   getCCProcessorName, 
   getFluidPayInfo, 
   getConvergeInfo, 
+  getConvergeToken,
   processPaymentDemo 
 } from "../controllers/paymentController.js";
 
@@ -97,6 +98,26 @@ router.get("/converge-info", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while retrieving Converge information. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route POST /api/payment/converge-token
+ * @desc Get Converge transaction token for payment processing
+ * @access Public
+ */
+router.post("/converge-token", async (req, res) => {
+  try {
+    return await getConvergeToken(req, res);
+  } catch (error) {
+    logger.error("Error in converge-token route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while generating the Converge token. Please try again later.",
     });
   }
 });

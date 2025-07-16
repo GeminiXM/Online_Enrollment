@@ -23,12 +23,15 @@ export default defineConfig({
     // This middleware ensures SPA routes work correctly when accessed directly
     middlewares: [
       {
-        name: 'spa-fallback',
+        name: "spa-fallback",
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
             // If request is for the root path of the app
-            if (req.url === '/online-enrollment/' || req.url === '/online-enrollment') {
-              req.url = '/index.html';
+            if (
+              req.url === "/online-enrollment/" ||
+              req.url === "/online-enrollment"
+            ) {
+              req.url = "/index.html";
             }
             next();
           });

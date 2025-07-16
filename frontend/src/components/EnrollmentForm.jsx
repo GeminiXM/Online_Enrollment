@@ -12,6 +12,15 @@ import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 import AddonButtons from "./AddonButtons";
 import ServiceAddonButtons from './ServiceAddonButtons';
 import PersonalTrainingModal from './PersonalTrainingModal';
+import { 
+  autoSaveFormData, 
+  restoreFormData, 
+  saveDraftToBackend, 
+  restoreDraftFromBackend, 
+  clearSavedData, 
+  hasSavedData, 
+  getSessionInfo 
+} from "../services/dataPersistence.js";
 
 // Add this near the top of the file with other constants
 const SPECIALTY_MEMBERSHIP_MAP = {
@@ -161,6 +170,11 @@ const determineMembershipTypeByAge = (dateOfBirth) => {
   }
 };
 
+// Session management (if needed in the future)
+// const [sessionId] = useState(() => {
+//   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+// });
+
 function EnrollmentForm() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -196,6 +210,11 @@ function EnrollmentForm() {
   const [formSubmissionData, setFormSubmissionData] = useState(null);
 
   const [showStartDateInfo, setShowStartDateInfo] = useState(false);
+
+  // Auto-save functionality
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
+  const [lastSaved, setLastSaved] = useState(null);
+  const [showRestorePrompt, setShowRestorePrompt] = useState(false);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -1211,7 +1230,7 @@ function EnrollmentForm() {
 
   
   // Handle form submission - COMPLETELY REDESIGNED to work in all cases
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submission started - USING DIRECT NAVIGATION");
 
@@ -1336,6 +1355,9 @@ function EnrollmentForm() {
       // Store the submission data and show PT modal
       setFormSubmissionData(submissionData);
       setShowPTModal(true);
+      
+      // Clear saved data since we're proceeding with submission
+      await clearSavedData();
     } catch (error) {
       console.error("Error during form submission:", error);
       setSubmitError("An unexpected error occurred. Please try again.");
@@ -3067,14 +3089,237 @@ function EnrollmentForm() {
     }
   }, [formData.dateOfBirth, membershipType, selectMembershipType]);
 
+  // Auto-save form data when it changes
+  useEffect(() => {
+    if (autoSaveEnabled && formData && Object.keys(formData).length > 0) {
+      // Only auto-save if we have meaningful data (not just empty form)
+      const hasMainFormData = Object.values(formData).some(value => 
+        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      );
+      
+      // Check for meaningful data in tab forms
+      const hasTabData = childForms.some(form => 
+        Object.values(form).some(value => 
+          value && (typeof value === 'string' ? value.trim() !== '' : true)
+        )
+      ) || 
+      Object.values(adultMember).some(value => 
+        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      ) ||
+      Object.values(childMember).some(value => 
+        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      ) ||
+      Object.values(youthMember).some(value => 
+        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      );
+      
+      const hasData = hasMainFormData || hasTabData;
+      
+      console.log("Checking if form has meaningful data:", hasData);
+      console.log("Main form data:", hasMainFormData);
+      console.log("Tab data:", hasTabData);
+      console.log("Form data values:", Object.values(formData));
+      console.log("Child forms:", childForms);
+      console.log("Adult member:", adultMember);
+      console.log("Child member:", childMember);
+      console.log("Youth member:", youthMember);
+      
+      if (hasData) {
+        const timeoutId = setTimeout(() => {
+                  const additionalData = {
+          selectedChildAddons,
+          selectedServiceAddons,
+          membershipType: membershipType?.id,
+          club: selectedClub?.id,
+          // Include tab data
+          childForms,
+          adultMember,
+          childMember,
+          youthMember,
+          activeTab
+        };
+        
+        console.log("Tab data being saved:", {
+          childForms: childForms.length,
+          adultMember,
+          childMember,
+          youthMember,
+          activeTab
+        });
+          
+                  console.log("Auto-saving form data...");
+        console.log("Form data to save:", formData);
+        console.log("Additional data to save:", additionalData);
+        
+        const saved = autoSaveFormData(formData, additionalData);
+        if (saved) {
+          setLastSaved(new Date());
+          // Also save to backend as backup (don't await to avoid blocking)
+          saveDraftToBackend(formData, additionalData).catch(error => {
+            console.warn("Backend save failed, but localStorage save succeeded:", error);
+          });
+        }
+        }, 3000); // Auto-save after 3 seconds of inactivity
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [formData, selectedChildAddons, selectedServiceAddons, membershipType, selectedClub, autoSaveEnabled, childForms, adultMember, childMember, youthMember, activeTab]);
+
+  // Restore data on component mount
+  useEffect(() => {
+    const restoreData = async () => {
+      // First try to restore from localStorage
+      let restoredData = restoreFormData();
+      
+      if (!restoredData) {
+        // If no localStorage data, try backend
+        restoredData = await restoreDraftFromBackend();
+      }
+      
+      if (restoredData && !location.state?.formData) {
+        setShowRestorePrompt(true);
+      }
+    };
+    
+    restoreData();
+  }, [location.state?.formData]);
+
+  // Handle restore prompt
+  const handleRestoreData = async () => {
+    console.log("Attempting to restore data...");
+    
+    // Try localStorage first
+    let restoredData = restoreFormData();
+    console.log("localStorage restore result:", restoredData);
+    
+    // If no localStorage data, try backend
+    if (!restoredData) {
+      restoredData = await restoreDraftFromBackend();
+      console.log("Backend restore result:", restoredData);
+    }
+    
+          if (restoredData && restoredData.formData) {
+        console.log("Restoring form data:", restoredData.formData);
+        setFormData(restoredData.formData);
+        
+        if (restoredData.additionalData) {
+          const { 
+            selectedChildAddons, 
+            selectedServiceAddons, 
+            membershipType, 
+            club,
+            childForms,
+            adultMember,
+            childMember,
+            youthMember,
+            activeTab
+          } = restoredData.additionalData;
+          console.log("Restoring additional data:", restoredData.additionalData);
+          
+          if (selectedChildAddons) setSelectedChildAddons(selectedChildAddons);
+          if (selectedServiceAddons) setSelectedServiceAddons(selectedServiceAddons);
+          if (membershipType) {
+            // Find and set membership type
+            const membershipTypes = [
+              { id: 'standard', title: 'Standard Adult', description: 'For adults between 30-64 years old' },
+              { id: 'senior', title: 'Senior', description: 'For adults 65 and older' },
+              { id: 'young-professional', title: 'Student/Young Professional', description: 'For adults between 18-29 years old' },
+              { id: 'junior', title: 'Junior', description: 'For children under 18 years old' }
+            ];
+            const type = membershipTypes.find(t => t.id === membershipType);
+            if (type) selectMembershipType(type);
+          }
+          
+          // Restore tab data
+          console.log("Restoring tab data:", {
+            childForms: childForms?.length || 0,
+            adultMember,
+            childMember,
+            youthMember,
+            activeTab
+          });
+          
+          if (childForms) setChildForms(childForms);
+          if (adultMember) setAdultMember(adultMember);
+          if (childMember) setChildMember(childMember);
+          if (youthMember) setYouthMember(youthMember);
+          if (activeTab) setActiveTab(activeTab);
+        }
+        setShowRestorePrompt(false);
+      } else {
+        console.log("No data to restore");
+        setShowRestorePrompt(false);
+      }
+  };
+
+  const handleDiscardData = () => {
+    clearSavedData();
+    setShowRestorePrompt(false);
+  };
+
   return (
     <div className="enrollment-container">
+      {/* Restore Data Prompt */}
+      {showRestorePrompt && (
+        <div className="restore-prompt-overlay">
+          <div className="restore-prompt-modal">
+            <h3>📋 Restore Previous Session</h3>
+            <p>We found saved data from a previous session. Would you like to restore it?</p>
+            <div className="restore-prompt-actions">
+              <button 
+                type="button" 
+                className="btn-primary"
+                onClick={handleRestoreData}
+              >
+                Restore Data
+              </button>
+              <button 
+                type="button" 
+                className="btn-secondary"
+                onClick={handleDiscardData}
+              >
+                Start Fresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1>{selectedClub.name} Membership Enrollment Form</h1>
 
       <p className="form-instructions">
         Please fill out the form below to become a member at the club. 
         Fields marked with an asterisk (*) are required.
       </p>
+
+      {/* Privacy Notice */}
+      <div className="privacy-notice">
+        <p>
+          <strong>Privacy Notice:</strong> Your form data is automatically saved to your browser to prevent data loss. 
+          This information is stored locally and is not shared with third parties. 
+          Data expires after 24 hours and is cleared upon successful submission.
+        </p>
+        <div className="auto-save-toggle">
+          <label>
+            <input
+              type="checkbox"
+              checked={autoSaveEnabled}
+              onChange={(e) => setAutoSaveEnabled(e.target.checked)}
+            />
+            Enable auto-save to prevent data loss
+          </label>
+        </div>
+      </div>
+
+      {/* Auto-save status indicator */}
+      {autoSaveEnabled && lastSaved && (
+        <div className="auto-save-status">
+          <span className="auto-save-indicator">
+            💾 Auto-saved at {lastSaved.toLocaleTimeString()}
+          </span>
+        </div>
+      )}
 
       {/* Add this after the form instructions paragraph */}
  {/*      {membershipType && (
