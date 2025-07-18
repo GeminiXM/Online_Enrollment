@@ -12,6 +12,70 @@ const __dirname = path.dirname(__filename);
 const SQL_PROCEDURES_DIR = path.resolve(__dirname, "../sql/procedures");
 
 /**
+ * Formats expiration date from MMYY to YYYY-MM-DD format
+ * @param {string} expDate - Expiration date in MMYY format (e.g., "1225")
+ * @returns {string} - Formatted date in YYYY-MM-DD format
+ */
+const formatExpirationDate = (expDate) => {
+  if (!expDate || expDate.length !== 4) return "";
+
+  const month = expDate.substring(0, 2);
+  const year = "20" + expDate.substring(2, 4);
+
+  // Validate month and year
+  const monthNum = parseInt(month, 10);
+  const yearNum = parseInt(year, 10);
+
+  if (monthNum < 1 || monthNum > 12 || yearNum < 2000 || yearNum > 2099) {
+    return "";
+  }
+
+  // Return in YYYY-MM-DD format (last day of the month)
+  const lastDay = new Date(yearNum, monthNum, 0).getDate();
+  return `${year}-${month.padStart(2, "0")}-${lastDay
+    .toString()
+    .padStart(2, "0")}`;
+};
+
+/**
+ * Formats card number with proper asterisk masking
+ * @param {string} last4 - Last 4 digits of the card
+ * @returns {string} - Formatted card number with asterisks
+ */
+const formatCardNumber = (last4) => {
+  if (!last4 || last4.length !== 4) return "";
+  return `************${last4}`;
+};
+
+/**
+ * Formats card type to proper case-sensitive values
+ * @param {string} cardType - Raw card type from payment processor
+ * @returns {string} - Properly formatted card type
+ */
+const formatCardType = (cardType) => {
+  if (!cardType) return "";
+
+  const upperCardType = cardType.toUpperCase();
+
+  // Map common card type variations to proper format
+  switch (upperCardType) {
+    case "VISA":
+      return "Visa";
+    case "MASTERCARD":
+    case "MC":
+      return "MC";
+    case "DISCOVER":
+    case "DISC":
+      return "Disc";
+    case "AMERICAN EXPRESS":
+    case "AMEX":
+      return "AMEX";
+    default:
+      return cardType; // Return as-is if not recognized
+  }
+};
+
+/**
  * Reads a SQL procedure file and executes it
  * @param {string} procedureName - The name of the procedure file (without .sql extension)
  * @param {string} clubId - The club ID to execute the procedure on
@@ -22,32 +86,42 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
   try {
     // Construct the file path
     const filePath = path.join(SQL_PROCEDURES_DIR, `${procedureName}.sql`);
-    
+
     // Read the file content
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    
+    const fileContent = fs.readFileSync(filePath, "utf8");
+
     // Extract procedure name from the file (assumes format "execute procedure NAME(params)")
-    const procedureNameMatch = fileContent.match(/execute\s+procedure\s+([^\s(]+)/i);
-    
+    const procedureNameMatch = fileContent.match(
+      /execute\s+procedure\s+([^\s(]+)/i
+    );
+
     if (!procedureNameMatch) {
-      throw new Error(`Could not parse procedure name from file: ${procedureName}.sql`);
+      throw new Error(
+        `Could not parse procedure name from file: ${procedureName}.sql`
+      );
     }
-    
+
     const actualProcedureName = procedureNameMatch[1];
-    
+
     // Log the procedure execution
     logger.info(`Executing SQL procedure: ${actualProcedureName}`, {
       club: clubId,
-      params: params.map(p => typeof p === 'string' ? p.substring(0, 20) : p)
+      params: params.map((p) =>
+        typeof p === "string" ? p.substring(0, 20) : p
+      ),
     });
-    
+
     // Execute the procedure
-    const query = `EXECUTE PROCEDURE ${actualProcedureName}(${Array(params.length).fill('?').join(', ')})`;
+    const query = `EXECUTE PROCEDURE ${actualProcedureName}(${Array(
+      params.length
+    )
+      .fill("?")
+      .join(", ")})`;
     return await pool.query(clubId, query, params);
   } catch (error) {
     logger.error(`Error executing SQL procedure: ${procedureName}`, {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
     });
     throw error;
   }
@@ -67,12 +141,14 @@ export const getSpecialtyMembershipBridgeCode = async (req, res) => {
     const clubId = req.query.clubId || "001"; // Default to "001" if not provided
     const specialtyMembership = req.query.specialtyMembership || ""; // Default to empty string if not provided
 
-    logger.info(`Fetching bridge code for club ID: ${clubId}, specialty membership: ${specialtyMembership}`);
+    logger.info(
+      `Fetching bridge code for club ID: ${clubId}, specialty membership: ${specialtyMembership}`
+    );
 
     // Execute the stored procedure
     const result = await executeSqlProcedure(
-      "web_proc_GetSpecialtyMembershipBridgeCode", 
-      clubId, 
+      "web_proc_GetSpecialtyMembershipBridgeCode",
+      clubId,
       [clubId, specialtyMembership]
     );
 
@@ -97,12 +173,12 @@ export const getSpecialtyMembershipBridgeCode = async (req, res) => {
     logger.info("Bridge code retrieved successfully", {
       clubId,
       specialtyMembership,
-      bridgeCode
+      bridgeCode,
     });
 
     res.status(200).json({
       success: true,
-      bridgeCode
+      bridgeCode,
     });
   } catch (error) {
     logger.error("Error in getSpecialtyMembershipBridgeCode:", {
@@ -129,11 +205,13 @@ export const getTaxRate = async (req, res) => {
 
     // Get the club ID from query parameters - used only for database connection
     const clubId = req.query.clubId || "001"; // Default to "001" if not provided
-    
+
     // The club ID itself might not contain 'NM', so we can't rely on that
     // We'll get the tax rate from the database, then check in the frontend
     // if we should apply it (only for New Mexico clubs)
-    logger.info(`Fetching tax rate using club ID ${clubId} for database connection`);
+    logger.info(
+      `Fetching tax rate using club ID ${clubId} for database connection`
+    );
 
     // For New Mexico clubs, execute the stored procedure to get tax rate
     const result = await executeSqlProcedure("web_proc_GetTaxRate", clubId, []);
@@ -157,12 +235,12 @@ export const getTaxRate = async (req, res) => {
     }
 
     logger.info("Tax rate retrieved successfully", {
-      taxRate
+      taxRate,
     });
 
     res.status(200).json({
       success: true,
-      taxRate
+      taxRate,
     });
   } catch (error) {
     logger.error("Error in getTaxRate:", {
@@ -194,12 +272,14 @@ export const getMembershipPrice = async (req, res) => {
     const specialtyMembership = req.query.specialtyMembership || ""; // Default to empty string if not provided
     const bridgeCode = req.query.bridgeCode || ""; // Default to empty string if not provided
 
-    logger.info(`Fetching price for club ID: ${clubId}, membership type: ${membershipType}, agreement type: ${agreementType}, specialty membership: ${specialtyMembership}, bridge code: ${bridgeCode}`);
+    logger.info(
+      `Fetching price for club ID: ${clubId}, membership type: ${membershipType}, agreement type: ${agreementType}, specialty membership: ${specialtyMembership}, bridge code: ${bridgeCode}`
+    );
 
     // Execute the stored procedure
     const result = await executeSqlProcedure(
-      "procInventoryDuesPriceListSelect1", 
-      clubId, 
+      "procInventoryDuesPriceListSelect1",
+      clubId,
       [clubId, membershipType, agreementType, specialtyMembership, bridgeCode]
     );
 
@@ -218,23 +298,23 @@ export const getMembershipPrice = async (req, res) => {
         if (firstRow.invtr_price !== undefined) {
           price = parseFloat(firstRow.invtr_price) || 0;
         }
-        
+
         if (firstRow.invtr_desc !== undefined) {
           description = firstRow.invtr_desc.trim() || "";
         }
-        
+
         if (firstRow.invtr_upccode !== undefined) {
           upcCode = firstRow.invtr_upccode.trim() || "";
         }
-        
+
         if (firstRow.classr_tax_code !== undefined) {
           taxCode = firstRow.classr_tax_code.trim() || "";
         }
-        
+
         if (firstRow.prorated_dues_upccode !== undefined) {
           proratedDuesUpcCode = firstRow.prorated_dues_upccode.trim() || "";
         }
-        
+
         if (firstRow.prorated_dues_taxable !== undefined) {
           proratedDuesTaxable = firstRow.prorated_dues_taxable.trim() || "";
         }
@@ -253,8 +333,8 @@ export const getMembershipPrice = async (req, res) => {
       taxCode,
       proratedDuesInfo: {
         upcCode: proratedDuesUpcCode,
-        taxable: proratedDuesTaxable
-      }
+        taxable: proratedDuesTaxable,
+      },
     });
 
     res.status(200).json({
@@ -265,8 +345,8 @@ export const getMembershipPrice = async (req, res) => {
       taxCode,
       proratedDuesInfo: {
         upcCode: proratedDuesUpcCode,
-        taxable: proratedDuesTaxable
-      }
+        taxable: proratedDuesTaxable,
+      },
     });
   } catch (error) {
     logger.error("Error in getMembershipPrice:", {
@@ -324,222 +404,21 @@ export const submitEnrollment = async (req, res) => {
       club,
       familyMembers,
       guardian,
+      paymentInfo, // Extract payment information
     } = req.body;
 
-    // Check for required fields
-    const requiredFields = [
-      "firstName",
-      "lastName",
-      "address",
-      "city",
-      "state",
-      "zipCode",
-      "email",
-      "dateOfBirth",
-      "gender",
-      "requestedStartDate",
-      "club",
-    ];
+    // Extract payment data for database insertion
+    const paymentData = {
+      token: paymentInfo?.transactionId || "",
+      cardExpDate: paymentInfo?.expirationDate
+        ? formatExpirationDate(paymentInfo.expirationDate)
+        : "",
+      cardNumber: paymentInfo?.last4 ? formatCardNumber(paymentInfo.last4) : "",
+      cardType: formatCardType(paymentInfo?.cardType || ""),
+      processorName: paymentInfo?.processorName || "",
+    };
 
-    const missingFields = requiredFields.filter((field) => !req.body[field]);
-    if (missingFields.length > 0) {
-      logger.warn("Missing required fields:", missingFields);
-      return res.status(400).json({
-        error: "Missing required fields",
-        missingFields,
-        receivedFields: Object.keys(req.body),
-        validationDetails: {
-          firstName: !!firstName,
-          lastName: !!lastName,
-          address: !!address,
-          city: !!city,
-          state: !!state,
-          zipCode: !!zipCode,
-          email: !!email,
-          dateOfBirth: !!dateOfBirth,
-          gender: !!gender,
-          requestedStartDate: !!requestedStartDate,
-          club: !!club,
-        },
-      });
-    }
-
-    // Validate club ID
-    if (!club || !/^\d{3}$/.test(club)) {
-      logger.warn("Invalid club ID:", { club, type: typeof club });
-      return res.status(400).json({
-        error: "Invalid club ID format",
-        details: {
-          club,
-          type: typeof club,
-          length: club ? club.length : 0,
-          isValid: club ? /^\d{3}$/.test(club) : false,
-        },
-      });
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      logger.warn("Invalid email format:", email);
-      return res.status(400).json({
-        error: "Invalid email format",
-        details: {
-          email,
-          isValid: emailRegex.test(email),
-        },
-      });
-    }
-
-    // Validate date formats
-    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!dateRegex.test(dateOfBirth) || !dateRegex.test(requestedStartDate)) {
-      logger.warn("Invalid date format:", { dateOfBirth, requestedStartDate });
-      return res.status(400).json({
-        error: "Invalid date format",
-        details: {
-          dateOfBirth: {
-            value: dateOfBirth,
-            isValid: dateRegex.test(dateOfBirth),
-          },
-          requestedStartDate: {
-            value: requestedStartDate,
-            isValid: dateRegex.test(requestedStartDate),
-          },
-        },
-      });
-    }
-
-    // Validate that at least one phone number is provided
-    if (!cellPhone && !homePhone && !workPhone) {
-      logger.warn("No phone numbers provided");
-      return res.status(400).json({
-        error: "At least one phone number is required",
-        details: {
-          cellPhone,
-          homePhone,
-          workPhone,
-        },
-      });
-    }
-
-    // Validate family members if present
-    if (familyMembers && familyMembers.length > 0) {
-      for (let i = 0; i < familyMembers.length; i++) {
-        const member = familyMembers[i];
-
-        // Check required fields for each member
-        const memberRequiredFields = [
-          "firstName",
-          "lastName",
-          "dateOfBirth",
-          "gender",
-        ];
-        const missingMemberFields = memberRequiredFields.filter(
-          (field) => !member[field]
-        );
-
-        if (missingMemberFields.length > 0) {
-          logger.warn("Missing required fields for family member:", {
-            index: i,
-            member: `${member.firstName || ""} ${member.lastName || ""}`,
-            missingFields: missingMemberFields,
-          });
-
-          return res.status(400).json({
-            error: `Missing required fields for family member ${i + 1}`,
-            missingFields: missingMemberFields,
-            member: `${member.firstName || ""} ${member.lastName || ""}`,
-          });
-        }
-
-        // Validate member date format
-        if (!dateRegex.test(member.dateOfBirth)) {
-          logger.warn("Invalid date format for family member:", {
-            index: i,
-            member: `${member.firstName} ${member.lastName}`,
-            dateOfBirth: member.dateOfBirth,
-          });
-
-          return res.status(400).json({
-            error: `Invalid date format for family member ${i + 1}`,
-            member: `${member.firstName} ${member.lastName}`,
-            dateOfBirth: member.dateOfBirth,
-          });
-        }
-      }
-    }
-
-    // Validate guardian if present (for junior memberships)
-    if (guardian) {
-      const guardianRequiredFields = [
-        "firstName",
-        "lastName",
-        "dateOfBirth",
-        "gender",
-        "email",
-      ];
-      const missingGuardianFields = guardianRequiredFields.filter(
-        (field) => !guardian[field]
-      );
-
-      if (missingGuardianFields.length > 0) {
-        logger.warn("Missing required fields for guardian:", {
-          missingFields: missingGuardianFields,
-        });
-
-        return res.status(400).json({
-          error: "Missing required fields for guardian",
-          missingFields: missingGuardianFields,
-        });
-      }
-
-      // Validate guardian date format
-      if (!dateRegex.test(guardian.dateOfBirth)) {
-        logger.warn("Invalid date format for guardian:", {
-          dateOfBirth: guardian.dateOfBirth,
-        });
-
-        return res.status(400).json({
-          error: "Invalid date format for guardian",
-          dateOfBirth: guardian.dateOfBirth,
-        });
-      }
-
-      // Validate guardian email
-      if (!emailRegex.test(guardian.email)) {
-        logger.warn("Invalid email format for guardian:", {
-          email: guardian.email,
-        });
-
-        return res.status(400).json({
-          error: "Invalid email format for guardian",
-          email: guardian.email,
-        });
-      }
-    }
-
-    // Log family members data if present
-    if (familyMembers) {
-      logger.info("Family members data:", {
-        count: familyMembers.length,
-        members: familyMembers.map((m) => ({
-          firstName: m.firstName,
-          lastName: m.lastName,
-          role: m.role,
-          memberType: m.memberType,
-        })),
-      });
-    }
-
-    // Log guardian data if present
-    if (guardian) {
-      logger.info("Guardian data:", {
-        firstName: guardian.firstName,
-        lastName: guardian.lastName,
-        relationship: guardian.relationship,
-      });
-    }
+    logger.info("Payment data extracted:", paymentData);
 
     // Prepare common data
     const busName = `${firstName} ${
@@ -553,16 +432,20 @@ export const submitEnrollment = async (req, res) => {
 
     // 1. Generate a customer code
     let custCode;
-    
+
     try {
       // Attempt to use the new procedure
-      const nextIdResult = await executeSqlProcedure("procNextMembershipId", club);
-      
+      const nextIdResult = await executeSqlProcedure(
+        "procNextMembershipId",
+        club
+      );
+
       // Log the entire result to see its structure
-      logger.info("Raw result from procNextMembershipId:", 
+      logger.info(
+        "Raw result from procNextMembershipId:",
         JSON.stringify(nextIdResult, null, 2)
       );
-      
+
       // Access the result properly based on the procedure's output
       if (nextIdResult && nextIdResult.length > 0) {
         // Try different possible property names or get first column value
@@ -579,71 +462,21 @@ export const submitEnrollment = async (req, res) => {
     } catch (procedureError) {
       logger.error("Error calling procNextMembershipId:", {
         error: procedureError.message,
-        stack: procedureError.stack
+        stack: procedureError.stack,
       });
       // We'll fall back to the original method below
     }
-    
+
     // If we couldn't get a valid customer code from the procedure, fall back to the original method
     if (!custCode) {
-      logger.warn("Couldn't get valid customer code from procedure, using fallback method");
-      
+      logger.warn(
+        "Couldn't get valid customer code from procedure, using fallback method"
+      );
+
       // First insert with blank code
       await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
-          "", // parCustCode - leaving blank for now
-          "", // parBridgeCode
-          busName, // parBusName
-          "", // parCreditRep
-          phone, // parPhone
-          address, // parAddress1
-          address2 || "", // parAddress2
-          city, // parCity
-          state, // parState
-          zipCode, // parPostCode
-          requestedStartDate, // parObtainedDate
-          "", // parCcExpDate
-          "", // parCardNo
-          "", // parExpDate
-          "", // parCardHolder
-          "", // parCcMethod
-          "ONLINE", // parCreatedBy
-          "ONLINE", // parSalesPersnCode
-          email, // parEmail
-          club, // parClub
-          "", // parOrigPosTrans
-          "", // parPin
-          "", // parToken
-          membershipType || "", // parSpecialtyMembership
-          "", // parNewPt
-      ]);
-      
-      // Then retrieve the generated code
-      const custCodeResult = await pool.query(
-        club,
-        `SELECT MAX(cust_code) AS cust_code FROM web_strcustr WHERE bus_name = ? AND email = ?`,
-        [busName, email]
-      );
-      
-      custCode = custCodeResult[0].cust_code;
-      logger.info("Generated customer code using fallback method:", { custCode });
-      
-      return res.status(200).json({
-        success: true,
-        message: "Enrollment submitted successfully using fallback method",
-        custCode: custCode
-      });
-    }
-    
-    // Ensure the cust code is properly formatted as a string
-    custCode = String(custCode).trim();
-    logger.info("Using customer code:", { custCode });
-
-    // 2. Insert primary membership record using web_proc_InsertWebStrcustr
-    logger.info("Inserting primary membership record:", { busName, club, custCode });
-
-    await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
-        custCode, // parCustCode - using generated ID
-        custCode, // parBridgeCode - using same ID for bridge code
+        "", // parCustCode - leaving blank for now
+        "", // parBridgeCode
         busName, // parBusName
         "", // parCreditRep
         phone, // parPhone
@@ -667,6 +500,74 @@ export const submitEnrollment = async (req, res) => {
         "", // parToken
         membershipType || "", // parSpecialtyMembership
         "", // parNewPt
+      ]);
+
+      // Then retrieve the generated code
+      const custCodeResult = await pool.query(
+        club,
+        `SELECT MAX(cust_code) AS cust_code FROM web_strcustr WHERE bus_name = ? AND email = ?`,
+        [busName, email]
+      );
+
+      custCode = custCodeResult[0].cust_code;
+      logger.info("Generated customer code using fallback method:", {
+        custCode,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Enrollment submitted successfully using fallback method",
+        custCode: custCode,
+      });
+    }
+
+    // Ensure the cust code is properly formatted as a string
+    custCode = String(custCode).trim();
+    logger.info("Using customer code:", { custCode });
+
+    // 2. Insert primary membership record using web_proc_InsertWebStrcustr
+    logger.info("Inserting primary membership record:", {
+      busName,
+      club,
+      custCode,
+      paymentData,
+    });
+
+    logger.info("Payment data details:", {
+      token: paymentData.token,
+      cardExpDate: paymentData.cardExpDate,
+      cardNumber: paymentData.cardNumber,
+      cardType: paymentData.cardType,
+      originalExpDate: req.body.paymentInfo?.expirationDate,
+      originalCardType: req.body.paymentInfo?.cardType,
+    });
+
+    await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
+      custCode, // parCustCode - using generated ID
+      custCode, // parBridgeCode - using same ID for bridge code
+      busName, // parBusName
+      "", // parCreditRep
+      phone, // parPhone
+      address, // parAddress1
+      address2 || "", // parAddress2
+      city, // parCity
+      state, // parState
+      zipCode, // parPostCode
+      requestedStartDate, // parObtainedDate
+      paymentData.cardExpDate, // parCcExpDate - from payment processor
+      paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
+      paymentData.cardExpDate, // parExpDate - same as parCcExpDate
+      "", // parCardHolder
+      paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
+      "ONLINE", // parCreatedBy
+      "ONLINE", // parSalesPersnCode
+      email, // parEmail
+      club, // parClub
+      "", // parOrigPosTrans
+      "", // parPin
+      paymentData.token, // parToken - transaction token from payment processor
+      membershipType || "", // parSpecialtyMembership
+      "", // parNewPt
     ]);
 
     logger.info("Primary membership record inserted successfully");
@@ -675,19 +576,19 @@ export const submitEnrollment = async (req, res) => {
     logger.info("Inserting primary member record");
 
     await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
-        custCode, // parCustCode
-        0, // parMbrCode (0 for primary)
-        firstName, // parFname
-        middleInitial || "", // parMname
-        lastName, // parLname
-        convertGenderValue(gender), // parSex - Apply conversion here
-        dateOfBirth, // parBdate
-        homePhone || "", // parHomePhone
-        workPhone || "", // parWorkPhone
-        "", // parWorkExtension
-        cellPhone || "", // parMobilePhone
-        email, // parEmail
-        "P", // parRole (P for primary)
+      custCode, // parCustCode
+      0, // parMbrCode (0 for primary)
+      firstName, // parFname
+      middleInitial || "", // parMname
+      lastName, // parLname
+      convertGenderValue(gender), // parSex - Apply conversion here
+      dateOfBirth, // parBdate
+      homePhone || "", // parHomePhone
+      workPhone || "", // parWorkPhone
+      "", // parWorkExtension
+      cellPhone || "", // parMobilePhone
+      email, // parEmail
+      "P", // parRole (P for primary)
     ]);
 
     logger.info("Primary member record inserted successfully");
@@ -696,6 +597,30 @@ export const submitEnrollment = async (req, res) => {
     if (familyMembers && familyMembers.length > 0) {
       logger.info("Processing family members:", {
         count: familyMembers.length,
+        familyMembers: familyMembers.map((m) => ({
+          firstName: m.firstName,
+          lastName: m.lastName,
+          memberType: m.memberType,
+          role: m.role,
+          gender: m.gender,
+          dateOfBirth: m.dateOfBirth,
+        })),
+      });
+
+      // Log each family member individually for debugging
+      familyMembers.forEach((member, index) => {
+        logger.info(`Family member ${index + 1}:`, {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          memberType: member.memberType,
+          role: member.role,
+          gender: member.gender,
+          dateOfBirth: member.dateOfBirth,
+          // Add more detailed logging
+          memberTypeCheck: member.memberType === "adult",
+          roleCheck: member.role === "S",
+          isAdult: member.memberType === "adult" || member.role === "S",
+        });
       });
 
       // Track the next member code to use
@@ -705,25 +630,36 @@ export const submitEnrollment = async (req, res) => {
       const adultMembers = familyMembers.filter(
         (m) => m.memberType === "adult" || m.role === "S"
       );
+
+      logger.info("Adult members found:", {
+        count: adultMembers.length,
+        adultMembers: adultMembers.map((m) => ({
+          firstName: m.firstName,
+          lastName: m.lastName,
+          memberType: m.memberType,
+          role: m.role,
+        })),
+      });
+
       for (const member of adultMembers) {
         logger.info("Inserting adult family member:", {
           name: `${member.firstName} ${member.lastName}`,
         });
 
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
-            custCode, // parCustCode
-            nextMbrCode, // parMbrCode (Sequential)
-            member.firstName, // parFname
-            member.middleInitial || "", // parMname
-            member.lastName, // parLname
-            convertGenderValue(member.gender), // parSex - Apply conversion here
-            member.dateOfBirth, // parBdate
-            member.homePhone || "", // parHomePhone
-            member.workPhone || "", // parWorkPhone
-            "", // parWorkExtension
-            member.cellPhone || "", // parMobilePhone
-            member.email || "", // parEmail
-            "S", // parRole (S for secondary adult)
+          custCode, // parCustCode
+          nextMbrCode, // parMbrCode (Sequential)
+          member.firstName, // parFname
+          member.middleInitial || "", // parMname
+          member.lastName, // parLname
+          convertGenderValue(member.gender), // parSex - Apply conversion here
+          member.dateOfBirth, // parBdate
+          member.homePhone || "", // parHomePhone
+          member.workPhone || "", // parWorkPhone
+          "", // parWorkExtension
+          member.cellPhone || "", // parMobilePhone
+          member.email || "", // parEmail
+          "S", // parRole (S for secondary adult)
         ]);
 
         nextMbrCode++;
@@ -736,6 +672,16 @@ export const submitEnrollment = async (req, res) => {
           m.memberType === "child" || m.memberType === "youth" || m.role === "D"
       );
 
+      logger.info("Dependent members found:", {
+        count: dependentMembers.length,
+        dependentMembers: dependentMembers.map((m) => ({
+          firstName: m.firstName,
+          lastName: m.lastName,
+          memberType: m.memberType,
+          role: m.role,
+        })),
+      });
+
       for (const member of dependentMembers) {
         logger.info("Inserting dependent family member:", {
           name: `${member.firstName} ${member.lastName}`,
@@ -743,24 +689,26 @@ export const submitEnrollment = async (req, res) => {
         });
 
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
-            custCode, // parCustCode
-            nextMbrCode, // parMbrCode (Sequential)
-            member.firstName, // parFname
-            member.middleInitial || "", // parMname
-            member.lastName, // parLname
-            convertGenderValue(member.gender), // parSex - Apply conversion here
-            member.dateOfBirth, // parBdate
-            member.homePhone || "", // parHomePhone
-            member.workPhone || "", // parWorkPhone
-            "", // parWorkExtension
-            member.cellPhone || "", // parMobilePhone
-            member.email || "", // parEmail
-            "D", // parRole (D for dependent)
+          custCode, // parCustCode
+          nextMbrCode, // parMbrCode (Sequential)
+          member.firstName, // parFname
+          member.middleInitial || "", // parMname
+          member.lastName, // parLname
+          convertGenderValue(member.gender), // parSex - Apply conversion here
+          member.dateOfBirth, // parBdate
+          member.homePhone || "", // parHomePhone
+          member.workPhone || "", // parWorkPhone
+          "", // parWorkExtension
+          member.cellPhone || "", // parMobilePhone
+          member.email || "", // parEmail
+          "D", // parRole (D for dependent)
         ]);
 
         nextMbrCode++;
         logger.info("Dependent family member inserted successfully");
       }
+    } else {
+      logger.info("No family members to process");
     }
 
     // 4. Process guardian information if present
@@ -770,19 +718,19 @@ export const submitEnrollment = async (req, res) => {
       });
 
       await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
-          custCode, // parCustCode
-          1, // parMbrCode (1 for guardian)
-          guardian.firstName, // parFname
-          guardian.middleInitial || "", // parMname
-          guardian.lastName, // parLname
-          convertGenderValue(guardian.gender), // parSex - Apply conversion here
-          guardian.dateOfBirth, // parBdate
-          guardian.homePhone || "", // parHomePhone
-          guardian.workPhone || "", // parWorkPhone
-          "", // parWorkExtension
-          guardian.cellPhone || "", // parMobilePhone
-          guardian.email || "", // parEmail
-          "G", // parRole (G for guardian)
+        custCode, // parCustCode
+        1, // parMbrCode (1 for guardian)
+        guardian.firstName, // parFname
+        guardian.middleInitial || "", // parMname
+        guardian.lastName, // parLname
+        convertGenderValue(guardian.gender), // parSex - Apply conversion here
+        guardian.dateOfBirth, // parBdate
+        guardian.homePhone || "", // parHomePhone
+        guardian.workPhone || "", // parWorkPhone
+        "", // parWorkExtension
+        guardian.cellPhone || "", // parMobilePhone
+        guardian.email || "", // parEmail
+        "G", // parRole (G for guardian)
       ]);
 
       logger.info("Guardian inserted successfully");
@@ -790,47 +738,50 @@ export const submitEnrollment = async (req, res) => {
 
     // 5. Insert message information using web_proc_InsertWebAsamessag
     logger.info("Inserting message information");
-    
+
     // Format the date from YYYY-MM-DD to MM/DD/YYYY
-    const dateParts = requestedStartDate.split('-');
-    const formattedDate = dateParts.length === 3 ? 
-        `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}` : 
-        requestedStartDate;
-    
+    const dateParts = requestedStartDate.split("-");
+    const formattedDate =
+      dateParts.length === 3
+        ? `${dateParts[1]}/${dateParts[2]}/${dateParts[0]}`
+        : requestedStartDate;
+
     // Get the monthly dues amount from the request body
     // It might be in different locations depending on the frontend implementation
     let monthlyDues = "0.00";
     if (req.body.membershipDetails && req.body.membershipDetails.price) {
-        monthlyDues = req.body.membershipDetails.price.toFixed(2);
+      monthlyDues = req.body.membershipDetails.price.toFixed(2);
     } else if (req.body.membershipPrice) {
-        monthlyDues = req.body.membershipPrice.toFixed(2);
+      monthlyDues = req.body.membershipPrice.toFixed(2);
     } else if (req.body.monthlyDues) {
-        monthlyDues = req.body.monthlyDues;
+      monthlyDues = req.body.monthlyDues;
     }
-    
+
     // Format the message text as specified: 'Join: [requested start date] Net: [monthly dues only no additional services]'
     const messageText = `Join: ${formattedDate} Net: $${monthlyDues}`;
-    
+
     await executeSqlProcedure("web_proc_InsertWebAsamessag", club, [
-        custCode, // parCustCode
-        messageText, // parMessageText
-        requestedStartDate // parCreateDate
+      custCode, // parCustCode
+      messageText, // parMessageText
+      requestedStartDate, // parCreateDate
     ]);
 
     logger.info("Message information inserted successfully");
 
     // 6. Insert contract information using web_proc_InsertWebAsacontr
     logger.info("Inserting contract information");
-    
+
     // Use membership type from the request (I, D, or F)
     // This already comes properly determined from the frontend
     const membershipTypeCode = membershipType || "I"; // Default to Individual if not provided
-    
+
     // Log the specialty membership type if present
     if (req.body.specialtyMembership) {
-      logger.info(`Using specialty membership type: ${req.body.specialtyMembership}`);
+      logger.info(
+        `Using specialty membership type: ${req.body.specialtyMembership}`
+      );
     }
-    
+
     // Calculate gross dues (total monthly payment including addons)
     let grossDues = 0;
     // Use membership price from request if available
@@ -841,72 +792,83 @@ export const submitEnrollment = async (req, res) => {
     } else if (req.body.monthlyDues) {
       grossDues = parseFloat(req.body.monthlyDues);
     }
-    
+
     // Add service addon prices if any
     if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons)) {
-      req.body.serviceAddons.forEach(addon => {
+      req.body.serviceAddons.forEach((addon) => {
         if (addon.price) {
           grossDues += parseFloat(addon.price);
         }
       });
     }
-    
+
     // Calculate net dues (just the monthly dues for the membership, no addons)
-    const netDues = req.body.membershipDetails && req.body.membershipDetails.price 
-      ? parseFloat(req.body.membershipDetails.price) 
-      : grossDues; // Default to gross dues if no specific membership price
-    
+    const netDues =
+      req.body.membershipDetails && req.body.membershipDetails.price
+        ? parseFloat(req.body.membershipDetails.price)
+        : grossDues; // Default to gross dues if no specific membership price
+
     await executeSqlProcedure("web_proc_InsertWebAsacontr", club, [
-      custCode,                // parCustCode
-      membershipTypeCode,      // parMbrshipType
-      requestedStartDate,      // parBeginDate
-      grossDues.toFixed(2),    // parGrossDues
-      netDues.toFixed(2),      // parNetDues
-      requestedStartDate       // parContractEffDate
+      custCode, // parCustCode
+      membershipTypeCode, // parMbrshipType
+      requestedStartDate, // parBeginDate
+      grossDues.toFixed(2), // parGrossDues
+      netDues.toFixed(2), // parNetDues
+      requestedStartDate, // parContractEffDate
     ]);
-    
+
     logger.info("Contract information inserted successfully");
 
     // 7. Insert receipt documents for membership dues and addons
     logger.info("Inserting receipt document for membership dues");
-    
+
     // Insert receipt document for membership dues
     await executeSqlProcedure("web_proc_InsertWebAsprecdoc", club, [
-      custCode,                // parCustCode
-      custCode,                // parDocNo (use custCode for dues)
-      custCode,                // parBillTo
-      netDues.toFixed(2),      // parAmt (dues price)
-      'D',                     // parBillable ('D' for dues)
+      custCode, // parCustCode
+      custCode, // parDocNo (use custCode for dues)
+      custCode, // parBillTo
+      netDues.toFixed(2), // parAmt (dues price)
+      "D", // parBillable ('D' for dues)
       req.body.membershipDetails?.upcCode || "", // parUpcCode
-      requestedStartDate,      // parBeginDate
+      requestedStartDate, // parBeginDate
       req.body.membershipDetails?.description || "MONTHLY DUES", // parStmtText
-      club,                    // parStore
-      null                     // parEndDate
+      club, // parStore
+      null, // parEndDate
     ]);
-    
+
     logger.info("Membership dues receipt document inserted successfully");
-    
+
     // Insert receipt documents for each service addon
-    if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons) && req.body.serviceAddons.length > 0) {
-      logger.info(`Processing ${req.body.serviceAddons.length} service addons for receipt documents`);
-      
+    if (
+      req.body.serviceAddons &&
+      Array.isArray(req.body.serviceAddons) &&
+      req.body.serviceAddons.length > 0
+    ) {
+      logger.info(
+        `Processing ${req.body.serviceAddons.length} service addons for receipt documents`
+      );
+
       for (const addon of req.body.serviceAddons) {
-        logger.info(`Inserting receipt document for addon: ${addon.description}`);
-        
+        logger.info(
+          `Inserting receipt document for addon: ${addon.description}`
+        );
+
         await executeSqlProcedure("web_proc_InsertWebAsprecdoc", club, [
-          custCode,                // parCustCode
-          'ADDON',                 // parDocNo (use 'ADDON' for addons)
-          custCode,                // parBillTo
+          custCode, // parCustCode
+          "ADDON", // parDocNo (use 'ADDON' for addons)
+          custCode, // parBillTo
           parseFloat(addon.price).toFixed(2), // parAmt (addon price)
-          'B',                     // parBillable ('B' for billable addon)
-          addon.upcCode || "",     // parUpcCode
-          requestedStartDate,      // parBeginDate
+          "B", // parBillable ('B' for billable addon)
+          addon.upcCode || "", // parUpcCode
+          requestedStartDate, // parBeginDate
           addon.description || "", // parStmtText
-          club,                    // parStore
-          null                     // parEndDate
+          club, // parStore
+          null, // parEndDate
         ]);
-        
-        logger.info(`Receipt document for addon ${addon.description} inserted successfully`);
+
+        logger.info(
+          `Receipt document for addon ${addon.description} inserted successfully`
+        );
       }
     }
 
@@ -928,7 +890,6 @@ export const submitEnrollment = async (req, res) => {
     });
   }
 };
-
 
 /**
  * @desc Get addons from the database

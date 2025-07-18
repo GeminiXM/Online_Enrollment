@@ -262,20 +262,6 @@ router.post(
         contentType: req.get("Content-Type"),
       });
 
-      // Check for validation errors
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        logger.warn("Validation errors in enrollment submission:", {
-          errors: errors.array(),
-          receivedData: req.body,
-        });
-        return res.status(400).json({
-          success: false,
-          errors: errors.array(),
-          receivedData: req.body,
-        });
-      }
-
       // Call the controller to handle the submission
       return await submitEnrollment(req, res);
     } catch (error) {

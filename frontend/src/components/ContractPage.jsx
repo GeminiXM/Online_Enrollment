@@ -205,12 +205,25 @@ const ContractPage = () => {
         'J': 'Junior'
       };
       
-      // Process family members
+      // Process family members - preserve original structure for backend submission
       const familyMembers = data.familyMembers?.map(member => ({
+        // Preserve original fields for backend
+        firstName: member.firstName,
+        lastName: member.lastName,
+        middleInitial: member.middleInitial || '',
+        dateOfBirth: member.dateOfBirth,
+        gender: member.gender,
+        email: member.email || '',
+        cellPhone: member.cellPhone || '',
+        homePhone: member.homePhone || '',
+        workPhone: member.workPhone || '',
+        memberType: member.memberType,
+        role: member.role,
+        // Add display fields for contract display
         name: `${member.firstName} ${member.lastName}`,
         type: member.memberType === 'adult' ? 'Adult' : member.memberType === 'child' ? 'Child' : 'Youth',
-        gender: member.gender || '',
-        dateOfBirth: member.dateOfBirth || ''
+        // Keep any other properties
+        ...member
       })) || [];
       
       // Extract add-ons from serviceAddons
@@ -999,22 +1012,20 @@ const ContractPage = () => {
               ...formData,
               // Add a specific flag to indicate we're returning from the contract page
               isReturningFromContract: true,
-              // Original family members with all details
+              // Original family members with all details - preserve original structure
               familyMembers: formData.familyMembers && formData.familyMembers.map(member => ({
                 id: member.id || Date.now() + Math.random(),
-                firstName: member.firstName || (member.name ? member.name.split(' ')[0] : ''),
-                lastName: member.lastName || (member.name ? member.name.split(' ').slice(1).join(' ') : ''),
+                firstName: member.firstName,
+                lastName: member.lastName,
                 middleInitial: member.middleInitial || '',
-                dateOfBirth: member.dateOfBirth || '',
-                gender: member.gender || '',
+                dateOfBirth: member.dateOfBirth,
+                gender: member.gender,
                 email: member.email || '',
-                cellPhone: member.cellPhone || member.mobilePhone || '',
+                cellPhone: member.cellPhone || '',
                 homePhone: member.homePhone || '',
                 workPhone: member.workPhone || '',
-                memberType: member.memberType || (member.type === 'Adult' ? 'adult' : 
-                                                 member.type === 'Child' ? 'child' : 
-                                                 member.type === 'Youth' ? 'youth' : 'adult'),
-                role: member.role || 'S',
+                memberType: member.memberType,
+                role: member.role,
                 // Keep any other properties that might be there
                 ...member
               })),

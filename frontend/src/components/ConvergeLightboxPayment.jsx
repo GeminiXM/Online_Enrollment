@@ -104,76 +104,150 @@ const ConvergeLightboxPayment = () => {
   
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
-    if (location.state) {
-      const { formData, signatureData, initialedSections } = location.state;
-      
-      if (formData) {
-        setFormData(formData);
-        
-        // Set customer info from form data
-        setCustomerInfo({
-          firstName: formData.firstName || '',
-          lastName: formData.lastName || '',
-          email: formData.email || '',
-          phone: formData.phone || '',
-          address: formData.address || '',
-          city: formData.city || '',
-          state: formData.state || '',
-          zipCode: formData.zipCode || ''
-        });
-        
-            // Fetch the Converge processor info
-            const fetchConvergeInfo = async () => {
-              try {
-                const clubId = formData.club || selectedClub?.id || "001";
-                console.log('Fetching Converge info for club:', clubId);
-                
-                // PRODUCTION DATA REQUIRED: 
-                // This API call should retrieve real Converge credentials from your secure backend
-                // These credentials should be stored securely and never exposed in client-side code
-                const convergeResult = await api.getConvergeInfo(clubId);
-                console.log('Converge API result:', convergeResult);
-                
-                if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
-                  console.log('Setting Converge processor info:', convergeResult.convergeInfo);
-                  setProcessorInfo(convergeResult.convergeInfo);
-                } else {
-                  // PRODUCTION DATA REQUIRED: 
-                  // Replace these demo values with actual Converge credentials
-                  // For production, this fallback should either be removed or use environment-specific values
-                  setProcessorInfo({
-                    merchant_id: 'Demo Converge Merchant', // PRODUCTION: Your actual Converge Merchant ID
-                    converge_user_id: 'webuser',           // PRODUCTION: Your actual Converge User ID
-                    converge_pin: 'DEMO',                  // PRODUCTION: Your actual Converge PIN (keep secure)
-                    converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
-                  });
-                }
-              } catch (error) {
-                console.error('Error fetching Converge info:', error);
-                // PRODUCTION: In production, consider more robust error handling or retry logic
-                // These fallback values should be replaced with environment-specific values
-                setProcessorInfo({
-                  merchant_id: 'Demo Converge Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
-                  converge_user_id: 'webuser',                      // PRODUCTION: Your actual User ID
-                  converge_pin: 'DEMO',                             // PRODUCTION: Your actual PIN (keep secure)
-                  converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
-                });
-              }
-            };
-        
-        fetchConvergeInfo();
-      }
-      
-      if (signatureData) {
-        setSignatureData(signatureData);
-      }
-      if (initialedSections) {
-        setInitialedSections(initialedSections);
-      }
-    } else {
-      // If no data, go back to enrollment form
-      navigate('/enrollment');
+    let currentFormData = null;
+    
+    // First, try to get data from location state (this should be the transformed data)
+    if (location.state && location.state.formData) {
+      currentFormData = location.state.formData;
+      console.log('Using form data from location state');
+      console.log('Location state family members:', currentFormData.familyMembers);
     }
+    
+    // If no location state data, try to get from localStorage (auto-saved data)
+    if (!currentFormData) {
+      try {
+        const savedData = localStorage.getItem('enrollment_draft');
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          if (parsedData.formData) {
+            // For localStorage data, we need to transform it to include family members
+            currentFormData = parsedData.formData;
+            console.log('Using form data from localStorage (auto-saved)');
+            
+            // If this is raw form data from localStorage, we need to transform it
+            // to include family members from the additional data
+            if (parsedData.additionalData) {
+              const familyMembers = [];
+              
+              // Add adult member if present
+              if (parsedData.additionalData.adultMember && 
+                  parsedData.additionalData.adultMember.firstName && 
+                  parsedData.additionalData.adultMember.lastName) {
+                familyMembers.push({
+                  ...parsedData.additionalData.adultMember,
+                  memberType: 'adult',
+                  role: 'S'
+                });
+                console.log('Added adult member from additionalData:', parsedData.additionalData.adultMember.firstName);
+              }
+              
+              // Add child member if present
+              if (parsedData.additionalData.childMember && 
+                  parsedData.additionalData.childMember.firstName && 
+                  parsedData.additionalData.childMember.lastName) {
+                familyMembers.push({
+                  ...parsedData.additionalData.childMember,
+                  memberType: 'child',
+                  role: 'D'
+                });
+                console.log('Added child member from additionalData:', parsedData.additionalData.childMember.firstName);
+              }
+              
+              // Add youth member if present
+              if (parsedData.additionalData.youthMember && 
+                  parsedData.additionalData.youthMember.firstName && 
+                  parsedData.additionalData.youthMember.lastName) {
+                familyMembers.push({
+                  ...parsedData.additionalData.youthMember,
+                  memberType: 'youth',
+                  role: 'D'
+                });
+                console.log('Added youth member from additionalData:', parsedData.additionalData.youthMember.firstName);
+              }
+              
+              // Add family members to the form data
+              if (familyMembers.length > 0) {
+                currentFormData.familyMembers = familyMembers;
+                console.log('Added family members from additionalData:', familyMembers.length);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error reading from localStorage:', error);
+      }
+    }
+    
+    // If still no data, redirect to enrollment form
+    if (!currentFormData) {
+      console.log('No form data found, redirecting to enrollment form');
+      navigate('/enrollment');
+      return;
+    }
+    
+    // Set the form data
+    setFormData(currentFormData);
+    
+    // Set customer info from form data
+    setCustomerInfo({
+      firstName: currentFormData.firstName || '',
+      lastName: currentFormData.lastName || '',
+      email: currentFormData.email || '',
+      phone: currentFormData.phone || '',
+      address: currentFormData.address || '',
+      city: currentFormData.city || '',
+      state: currentFormData.state || '',
+      zipCode: currentFormData.zipCode || ''
+    });
+    
+    // Set signature data if available
+    if (location.state && location.state.signatureData) {
+      setSignatureData(location.state.signatureData);
+    }
+    if (location.state && location.state.initialedSections) {
+      setInitialedSections(location.state.initialedSections);
+    }
+    
+    // Fetch the Converge processor info
+    const fetchConvergeInfo = async () => {
+      try {
+        const clubId = currentFormData.club || selectedClub?.id || "001";
+        console.log('Fetching Converge info for club:', clubId);
+        
+        // PRODUCTION DATA REQUIRED: 
+        // This API call should retrieve real Converge credentials from your secure backend
+        // These credentials should be stored securely and never exposed in client-side code
+        const convergeResult = await api.getConvergeInfo(clubId);
+        console.log('Converge API result:', convergeResult);
+        
+        if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
+          console.log('Setting Converge processor info:', convergeResult.convergeInfo);
+          setProcessorInfo(convergeResult.convergeInfo);
+        } else {
+          // PRODUCTION DATA REQUIRED: 
+          // Replace these demo values with actual Converge credentials
+          // For production, this fallback should either be removed or use environment-specific values
+          setProcessorInfo({
+            merchant_id: 'Demo Converge Merchant', // PRODUCTION: Your actual Converge Merchant ID
+            converge_user_id: 'webuser',           // PRODUCTION: Your actual Converge User ID
+            converge_pin: 'DEMO',                  // PRODUCTION: Your actual Converge PIN (keep secure)
+            converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching Converge info:', error);
+        // PRODUCTION: In production, consider more robust error handling or retry logic
+        // These fallback values should be replaced with environment-specific values
+        setProcessorInfo({
+          merchant_id: 'Demo Converge Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
+          converge_user_id: 'webuser',                      // PRODUCTION: Your actual User ID
+          converge_pin: 'DEMO',                             // PRODUCTION: Your actual PIN (keep secure)
+          converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+        });
+      }
+    };
+    
+    fetchConvergeInfo();
   }, [location, navigate, selectedClub]);
   
   // Function to fetch a transaction token from the backend
@@ -223,6 +297,13 @@ const ConvergeLightboxPayment = () => {
   // Demo mode state - true when in demo/simulation mode
   // PRODUCTION: Remove this demoMode state in production - always use the real integration
   const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
+
+  // Cleanup event listener on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('message', handleLightboxResponse);
+    };
+  }, []);
 
   // Load the Converge script
   useEffect(() => {
@@ -363,7 +444,8 @@ const ConvergeLightboxPayment = () => {
               ssl_txn_id: `TXN-${Date.now()}`,
               ssl_approval_code: 'AUTH12345',
               ssl_card_number: '411111******1111',
-              ssl_card_type: 'VISA'
+              ssl_card_type: 'VISA',
+              ssl_exp_date: '1225'
             },
             origin: 'https://api.convergepay.com'
           });
@@ -457,6 +539,8 @@ const launchLightbox = async () => {
       console.log('Using demo/simulation mode for Converge Lightbox');
       
       // DEMO MODE: Set up postMessage listener for simulation
+      // Remove any existing listener first to prevent duplicates
+      window.removeEventListener('message', handleLightboxResponse);
       window.addEventListener('message', handleLightboxResponse, false);
       
       // Launch simulation
@@ -557,6 +641,14 @@ const handleLightboxResponse = (event) => {
         cardType: response.ssl_card_type
       };
       
+      console.log('Payment successful! Data to be sent to backend:', {
+        transactionId: response.ssl_txn_id,
+        authorizationCode: response.ssl_approval_code,
+        last4: response.ssl_card_number?.slice(-4),
+        cardType: response.ssl_card_type,
+        expirationDate: response.ssl_exp_date || '1225'
+      });
+      
       setPaymentResult(successResult);
       setPopupType('success');
       setPopupMessage(`Payment successful! Transaction ID: ${response.ssl_txn_id}`);
@@ -630,7 +722,9 @@ const simulateConvergeLightbox = (config) => {
     </div>
     <p><strong>Amount:</strong> $${formData?.membershipDetails?.price || "50.00"}</p>
     <p><strong>Customer:</strong> ${customerInfo.firstName} ${customerInfo.lastName}</p>
-    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve Payment</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA', ssl_exp_date: '1225'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve VISA</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****2222', ssl_card_type: 'MASTERCARD', ssl_exp_date: '1230'}, '*');" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve MC</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****3333', ssl_card_type: 'AMEX', ssl_exp_date: '1228'}, '*');" style="background-color: #6f42c1; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve AMEX</button>
     <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '1', ssl_result_message: 'Card declined'}, '*');" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Decline Payment</button>
     <button onclick="this.parentElement.parentElement.remove(); config.onCancel();" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Cancel</button>
   `;
@@ -652,6 +746,15 @@ if (typeof window !== 'undefined') {
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {
     try {
+      // Extract card information from payment result
+      const cardNumber = paymentResult.ssl_card_number || "";
+      const last4 = cardNumber.slice(-4);
+      const cardType = paymentResult.ssl_card_type || "";
+      
+      // For demo mode, we'll use a mock expiration date
+      // In production, this would come from the actual payment response
+      const expirationDate = paymentResult.ssl_exp_date || "1225"; // Demo: December 2025
+      
       // Combine all data for submission
       const submissionData = {
         ...formData,
@@ -662,12 +765,42 @@ if (typeof window !== 'undefined') {
           processorName: 'CONVERGE',
           transactionId: paymentResult.ssl_txn_id,
           authorizationCode: paymentResult.ssl_approval_code,
-          last4: paymentResult.ssl_card_number?.slice(-4),
-          cardType: paymentResult.ssl_card_type
+          last4: last4,
+          cardType: cardType,
+          expirationDate: expirationDate
         }
       };
       
       console.log('Submitting enrollment data:', submissionData);
+      
+      // Log detailed information about what's being sent
+      console.log('Enrollment submission details:', {
+        primaryMember: {
+          firstName: submissionData.firstName,
+          lastName: submissionData.lastName,
+          email: submissionData.email
+        },
+        familyMembers: submissionData.familyMembers ? submissionData.familyMembers.length : 0,
+        guardian: submissionData.guardian ? 'Present' : 'None',
+        paymentInfo: submissionData.paymentInfo,
+        membershipDetails: submissionData.membershipDetails
+      });
+      
+      if (submissionData.familyMembers && submissionData.familyMembers.length > 0) {
+        console.log('Family members being submitted:', submissionData.familyMembers.map(m => ({
+          name: `${m.firstName} ${m.lastName}`,
+          role: m.role,
+          memberType: m.memberType
+        })));
+        console.log('Raw family members data:', submissionData.familyMembers);
+      }
+      
+      if (submissionData.guardian) {
+        console.log('Guardian being submitted:', {
+          name: `${submissionData.guardian.firstName} ${submissionData.guardian.lastName}`,
+          relationship: submissionData.guardian.relationship
+        });
+      }
       
       // PRODUCTION DATA REQUIRED:
       // Ensure this posts to your actual production API endpoint

@@ -907,6 +907,7 @@ function EnrollmentForm() {
     
     // Transform family members
     if (!isJuniorMembership && formData.familyMembers.length > 0) {
+      console.log('Original family members in formData:', formData.familyMembers);
       submissionData.familyMembers = formData.familyMembers.map(member => {
         // Determine role based on member type
         const role = member.memberType === 'adult' ? 'S' : 'D';
@@ -915,7 +916,7 @@ function EnrollmentForm() {
     // You can adjust this to any value that makes sense in your system
     const genderValue = member.gender === "" ? "N" : member.gender;
 
-        return {
+        const transformedMember = {
           firstName: member.firstName,
           lastName: member.lastName,
           middleInitial: member.middleInitial || '',
@@ -928,7 +929,10 @@ function EnrollmentForm() {
           role: role,
           memberType: member.memberType
         };
+        console.log('Transformed member:', transformedMember);
+        return transformedMember;
       });
+      console.log('Final family members in submissionData:', submissionData.familyMembers);
     }
     
     // Add guardian information for Junior memberships
