@@ -35,7 +35,8 @@ CREATE PROCEDURE web_proc_InsertWebAsprecdoc(
     parBeginDate DATE,
     parStmtText CHAR(100),
     parStore CHAR(3),
-    parEndDate DATE
+    parEndDate DATE,
+    parCreatedDate DATE
 )
 
 DEFINE v_create_date DATE;
@@ -105,5 +106,6 @@ execute procedure web_proc_InsertWebAsprecdoc(parCustCode,
             parBeginDate,
             parStmtText,
             parStore,
-            parEndDate
+            parEndDate,
+            parCreatedDate
         );

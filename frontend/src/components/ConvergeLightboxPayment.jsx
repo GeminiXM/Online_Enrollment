@@ -819,13 +819,15 @@ console.log('  initialedSections:', initialedSections);
         state: { 
           enrollmentData: response.data,
           memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: `Welcome ${formData.firstName} ${formData.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.membershipNumber} to take the next steps in your membership journey.`,
+          successMessage: `Welcome ${formData.firstName} ${formData.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.custCode} to take the next steps in your membership journey.`,
           paymentResponse: paymentResult,
           formData: formData,
           signatureData: signatureData,
           initialedSections: initialedSections,
           email: formData.email,
-          amountBilled: (formData.membershipDetails?.proratedPrice || 0) + (formData.membershipDetails?.proratedTaxAmount || 0)
+          amountBilled: (formData.membershipDetails?.proratedPrice || 0) + (formData.membershipDetails?.proratedTaxAmount || 0),
+          membershipNumber: response.data.custCode,
+          transactionId: response.data.transactionId
         } 
       });
     } catch (error) {

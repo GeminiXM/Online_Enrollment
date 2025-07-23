@@ -4,5 +4,6 @@ execute procedure web_proc_InsertWebAsacontr(parCustCode,
             parBeginDate,
             parGrossDues,
             parNetDues,
-            parContractEffDate
+            parContractEffDate,
+            parCreatedDate
         );

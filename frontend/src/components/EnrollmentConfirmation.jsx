@@ -6,7 +6,7 @@ import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections, email, amountBilled } = location.state || {};
+  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections, email, amountBilled, membershipNumber, transactionId } = location.state || {};
   const { selectedClub } = useClub();
   
 // Debug logging
@@ -115,14 +115,12 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
                   <span className="receipt-label">Card:</span>
                   <span className="receipt-value">{getCardType()} ending in {getLastFour()}</span>
                 </div>
-                {/* <div className="receipt-row">
-                  <span className="receipt-label">Transaction ID:</span>
-                  <span className="receipt-value">{getTransactionId()}</span>
-                </div>
-                <div className="receipt-row">
-                  <span className="receipt-label">Authorization Code:</span>
-                  <span className="receipt-value">{getAuthCode()}</span>
-                </div> */}
+                {transactionId && (
+                  <div className="receipt-row">
+                    <span className="receipt-label">Transaction ID:</span>
+                    <span className="receipt-value">{transactionId}</span>
+                  </div>
+                )}
                 <div className="receipt-row">
                   <span className="receipt-label">Date:</span>
                   <span className="receipt-value">{formatTimestamp()}</span>
@@ -137,6 +135,24 @@ console.log('EnrollmentConfirmation - signatureData:', signatureData);
                     Approved
                   </span>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {membershipNumber && (
+            <div className="membership-info">
+              <h3 style={{ textDecoration: 'underline' }}>Membership Information</h3>
+              <div className="membership-details">
+                <div className="membership-row">
+                  <span className="membership-label">Membership Number:</span>
+                  <span className="membership-value">{membershipNumber}</span>
+                </div>
+                {transactionId && (
+                  <div className="membership-row">
+                    <span className="membership-label">Transaction ID:</span>
+                    <span className="membership-value">{transactionId}</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

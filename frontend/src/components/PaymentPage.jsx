@@ -493,7 +493,9 @@ const PaymentPage = () => {
           paymentResponse: paymentResult,
           formData: formData,              
           signatureData: signatureData,     
-          initialedSections: initialedSections  
+          initialedSections: initialedSections,
+          membershipNumber: response.data.custCode,
+          transactionId: response.data.transactionId
         } 
       });
     } catch (error) {

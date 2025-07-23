@@ -96,6 +96,45 @@
   
 }
 
+/* Membership Information Styles */
+.membership-info {
+  margin-bottom: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: .5rem;
+  background-color: #f8f9fa;
+}
+
+.membership-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.membership-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.membership-row:last-child {
+  border-bottom: none;
+}
+
+.membership-label {
+  font-weight: 600;
+  color: #333;
+  min-width: 120px;
+}
+
+.membership-value {
+  font-weight: 500;
+  color: #0056b3;
+  text-align: right;
+}
+
 .payment-receipt {
   display: flex;
   flex-direction: column;
