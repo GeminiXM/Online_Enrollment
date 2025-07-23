@@ -940,12 +940,48 @@ export const submitEnrollment = async (req, res) => {
     let errorMessage = "";
 
     try {
+      // Format dates to MM/DD/YYYY format for database compatibility
+      const startDateParts = requestedStartDate.split("-");
+      const formattedStartDate =
+        startDateParts.length === 3
+          ? `${startDateParts[1]}/${startDateParts[2]}/${startDateParts[0]}`
+          : requestedStartDate;
+
+      const today = new Date();
+      const formattedCreatedDate = `${(today.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}/${today
+        .getDate()
+        .toString()
+        .padStart(2, "0")}/${today.getFullYear()}`;
+
+      logger.info("About to call web_proc_InsertProduction with parameters:", {
+        custCode,
+        formattedStartDate,
+        formattedCreatedDate,
+        grossDues: grossDues.toFixed(2),
+        totalTaxAmount: totalTaxAmount.toFixed(2),
+        club,
+        cardType: paymentData.cardType,
+        cardExpDate: paymentData.cardExpDate,
+        cardNumber: paymentData.cardNumber,
+        netDues: netDues.toFixed(2),
+        duesTaxAmount: duesTaxAmount.toFixed(2),
+        addonsTotal: addonsTotal.toFixed(2),
+        addonsTaxAmount: addonsTaxAmount.toFixed(2),
+        initiationFee: initiationFee.toFixed(2),
+        initiationFeeTax: initiationFeeTax.toFixed(2),
+        prorateAmount: prorateAmount.toFixed(2),
+        prorateTaxAmount: prorateTaxAmount.toFixed(2),
+      });
+
       const productionResult = await executeSqlProcedure(
         "web_proc_InsertProduction",
         club,
         [
           custCode, // parCustCode
-          requestedStartDate, // parStartDate (when membership starts)
+          formattedStartDate, // parStartDate (when membership starts) - formatted to MM/DD/YYYY
+          formattedCreatedDate, // parCreatedDate - current date in MM/DD/YYYY format
           grossDues.toFixed(2), // parPrice
           totalTaxAmount.toFixed(2), // parTax (total tax from enrollment form)
           club, // parClub
@@ -960,27 +996,92 @@ export const submitEnrollment = async (req, res) => {
           initiationFeeTax.toFixed(2), // parIfeeTax
           prorateAmount.toFixed(2), // parProrateAmt
           prorateTaxAmount.toFixed(2), // parProrateTax
-          new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
         ]
       );
 
-      logger.info("Production migration completed", { productionResult });
+      logger.info("Production migration completed", {
+        productionResult,
+        productionResultType: typeof productionResult,
+        productionResultLength: productionResult?.length,
+        productionResultKeys:
+          productionResult && productionResult.length > 0
+            ? Object.keys(productionResult[0])
+            : null,
+      });
 
       if (productionResult && productionResult.length > 0) {
         const result = productionResult[0];
-        resultCode = result.result || 0;
-        updatedCustCode = result.rsUpdatedCustCode || custCode;
-        transactionId = result.rsTrans || "";
-        errorMessage = result.error_msg || "";
+
+        // Log the entire result object to see all available properties
+        logger.info("Raw production result object:", {
+          result,
+          resultKeys: Object.keys(result),
+          resultValues: Object.values(result),
+        });
+
+        // Extract values based on the RETURN statement: result, sql_error, isam_error, error_msg, rsUpdatedCustCode, rsTrans
+        // The procedure returns numbered properties: "1"=result, "2"=sql_error, "3"=isam_error, "4"=error_msg, "5"=rsUpdatedCustCode, "6"=rsTrans
+        resultCode = result["1"] || result.result || 0;
+        const sqlError = result["2"] || result.sql_error || 0;
+        const isamError = result["3"] || result.isam_error || 0;
+        errorMessage = result["4"] || result.error_msg || "";
+        updatedCustCode = (result["5"] || result.rsUpdatedCustCode || custCode).toString().trim();
+        transactionId = result["6"] || result.rsTrans || "";
 
         logger.info("Production procedure result details:", {
           resultCode,
+          sqlError,
+          isamError,
           updatedCustCode,
           transactionId,
           errorMessage,
           resultKeys: Object.keys(result),
           fullResult: result,
         });
+
+        // Additional debugging for transaction ID
+        if (!transactionId) {
+          logger.warn(
+            "Transaction ID is empty, checking alternative property names:",
+            {
+              rsTrans: result.rsTrans,
+              rsTransValue: result.rsTrans,
+              trans: result.trans,
+              transaction: result.transaction,
+              transactionId: result.transactionId,
+              allKeys: Object.keys(result),
+            }
+          );
+
+          // Try to find transaction ID in any property that might contain it
+          for (const [key, value] of Object.entries(result)) {
+            if (
+              typeof value === "string" &&
+              value.length > 0 &&
+              (key.toLowerCase().includes("trans") ||
+                key.toLowerCase().includes("tran"))
+            ) {
+              logger.info(
+                `Found potential transaction ID in property '${key}': ${value}`
+              );
+              transactionId = value;
+              break;
+            }
+          }
+
+          // If still no transaction ID, generate a temporary one for the item inserts
+          if (!transactionId) {
+            logger.warn(
+              "No transaction ID found in procedure result, generating temporary ID for item inserts"
+            );
+            transactionId = `TEMP_${Date.now()}`;
+          } else {
+            // Ensure transaction ID is treated as a number if it's numeric
+            if (!isNaN(transactionId)) {
+              transactionId = parseInt(transactionId);
+            }
+          }
+        }
       } else {
         logger.warn("Production procedure returned no results or empty array", {
           productionResult,
@@ -1008,7 +1109,7 @@ export const submitEnrollment = async (req, res) => {
             "Inserting membership dues item with UPC code:",
             membershipUpcCode
           );
-          await executeSqlProcedure("web_proc_InsertWebAsptitemd", club, [
+          await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             membershipUpcCode, // parUPC
             netDues.toFixed(2), // parPrice
@@ -1028,7 +1129,7 @@ export const submitEnrollment = async (req, res) => {
               );
 
               logger.info("Inserting addon item with UPC code:", addon.upcCode);
-              await executeSqlProcedure("web_proc_InsertWebAsptitemd", club, [
+              await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
                 transactionId, // parTrans
                 addon.upcCode, // parUPC
                 parseFloat(addon.price).toFixed(2), // parPrice
