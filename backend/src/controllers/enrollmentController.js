@@ -428,10 +428,14 @@ export const submitEnrollment = async (req, res) => {
       note: "membershipType should be (I,D,F), specialtyMembership should be (J,S,Y) if applicable",
     });
 
-    // Prepare common data
-    const busName = `${firstName} ${
-      middleInitial ? middleInitial + ". " : ""
-    }${lastName}`;
+    // Prepare common data - convert names to uppercase for Informix database
+    const firstNameUpper = firstName.toUpperCase();
+    const lastNameUpper = lastName.toUpperCase();
+    const middleInitialUpper = middleInitial ? middleInitial.toUpperCase() : "";
+    
+    const busName = `${firstNameUpper} ${
+      middleInitialUpper ? middleInitialUpper + ". " : ""
+    }${lastNameUpper}`;
 
     // First, determine which phone number to use (priority: cellPhone > homePhone > workPhone)
     const phone = cellPhone || homePhone || workPhone || "";
@@ -485,7 +489,7 @@ export const submitEnrollment = async (req, res) => {
       await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
         "", // parCustCode - leaving blank for now
         "", // parBridgeCode
-        busName, // parBusName
+        busName, // parBusName (already uppercase)
         "", // parCreditRep
         phone, // parPhone
         address, // parAddress1
@@ -550,33 +554,33 @@ export const submitEnrollment = async (req, res) => {
       originalCardType: req.body.paymentInfo?.cardType,
     });
 
-    await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
-      custCode, // parCustCode - using generated ID
-      custCode, // parBridgeCode - using same ID for bridge code
-      busName, // parBusName
-      "", // parCreditRep
-      phone, // parPhone
-      address, // parAddress1
-      address2 || "", // parAddress2
-      city, // parCity
-      state, // parState
-      zipCode, // parPostCode
-      requestedStartDate, // parObtainedDate
-      paymentData.cardExpDate, // parCcExpDate - from payment processor
-      paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
-      paymentData.cardExpDate, // parExpDate - same as parCcExpDate
-      "", // parCardHolder
-      paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
-      "ONLINE", // parCreatedBy
-      "ONLINE", // parSalesPersnCode
-      email, // parEmail
-      club, // parClub
-      "", // parOrigPosTrans
-      "", // parPin
-      paymentData.token, // parToken - transaction token from payment processor
-      specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
-      "", // parNewPt
-    ]);
+          await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
+        custCode, // parCustCode - using generated ID
+        custCode, // parBridgeCode - using same ID for bridge code
+        busName, // parBusName (already uppercase)
+        "", // parCreditRep
+        phone, // parPhone
+        address, // parAddress1
+        address2 || "", // parAddress2
+        city, // parCity
+        state, // parState
+        zipCode, // parPostCode
+        requestedStartDate, // parObtainedDate
+        paymentData.cardExpDate, // parCcExpDate - from payment processor
+        paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
+        paymentData.cardExpDate, // parExpDate - same as parCcExpDate
+        "", // parCardHolder
+        paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
+        "ONLINE", // parCreatedBy
+        "ONLINE", // parSalesPersnCode
+        email, // parEmail
+        club, // parClub
+        "", // parOrigPosTrans
+        "", // parPin
+        paymentData.token, // parToken - transaction token from payment processor
+        specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
+        "", // parNewPt
+      ]);
 
     logger.info("Primary membership record inserted successfully");
 
@@ -586,9 +590,9 @@ export const submitEnrollment = async (req, res) => {
     await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
       custCode, // parCustCode
       0, // parMbrCode (0 for primary)
-      firstName, // parFname
-      middleInitial || "", // parMname
-      lastName, // parLname
+      firstNameUpper, // parFname (uppercase)
+      middleInitialUpper || "", // parMname (uppercase)
+      lastNameUpper, // parLname (uppercase)
       convertGenderValue(gender), // parSex - Apply conversion here
       dateOfBirth, // parBdate
       homePhone || "", // parHomePhone
@@ -658,9 +662,9 @@ export const submitEnrollment = async (req, res) => {
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
           custCode, // parCustCode
           nextMbrCode, // parMbrCode (Sequential)
-          member.firstName, // parFname
-          member.middleInitial || "", // parMname
-          member.lastName, // parLname
+          member.firstName.toUpperCase(), // parFname (uppercase)
+          (member.middleInitial || "").toUpperCase(), // parMname (uppercase)
+          member.lastName.toUpperCase(), // parLname (uppercase)
           convertGenderValue(member.gender), // parSex - Apply conversion here
           member.dateOfBirth, // parBdate
           member.homePhone || "", // parHomePhone
@@ -731,9 +735,9 @@ export const submitEnrollment = async (req, res) => {
       await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
         custCode, // parCustCode
         1, // parMbrCode (1 for guardian)
-        guardian.firstName, // parFname
-        guardian.middleInitial || "", // parMname
-        guardian.lastName, // parLname
+        guardian.firstName.toUpperCase(), // parFname (uppercase)
+        (guardian.middleInitial || "").toUpperCase(), // parMname (uppercase)
+        guardian.lastName.toUpperCase(), // parLname (uppercase)
         convertGenderValue(guardian.gender), // parSex - Apply conversion here
         guardian.dateOfBirth, // parBdate
         guardian.homePhone || "", // parHomePhone
