@@ -432,7 +432,7 @@ export const submitEnrollment = async (req, res) => {
     const firstNameUpper = firstName.toUpperCase();
     const lastNameUpper = lastName.toUpperCase();
     const middleInitialUpper = middleInitial ? middleInitial.toUpperCase() : "";
-    
+
     const busName = `${firstNameUpper} ${
       middleInitialUpper ? middleInitialUpper + ". " : ""
     }${lastNameUpper}`;
@@ -554,33 +554,33 @@ export const submitEnrollment = async (req, res) => {
       originalCardType: req.body.paymentInfo?.cardType,
     });
 
-          await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
-        custCode, // parCustCode - using generated ID
-        custCode, // parBridgeCode - using same ID for bridge code
-        busName, // parBusName (already uppercase)
-        "", // parCreditRep
-        phone, // parPhone
-        address, // parAddress1
-        address2 || "", // parAddress2
-        city, // parCity
-        state, // parState
-        zipCode, // parPostCode
-        requestedStartDate, // parObtainedDate
-        paymentData.cardExpDate, // parCcExpDate - from payment processor
-        paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
-        paymentData.cardExpDate, // parExpDate - same as parCcExpDate
-        "", // parCardHolder
-        paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
-        "ONLINE", // parCreatedBy
-        "ONLINE", // parSalesPersnCode
-        email, // parEmail
-        club, // parClub
-        "", // parOrigPosTrans
-        "", // parPin
-        paymentData.token, // parToken - transaction token from payment processor
-        specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
-        "", // parNewPt
-      ]);
+    await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
+      custCode, // parCustCode - using generated ID
+      custCode, // parBridgeCode - using same ID for bridge code
+      busName, // parBusName (already uppercase)
+      "", // parCreditRep
+      phone, // parPhone
+      address, // parAddress1
+      address2 || "", // parAddress2
+      city, // parCity
+      state, // parState
+      zipCode, // parPostCode
+      requestedStartDate, // parObtainedDate
+      paymentData.cardExpDate, // parCcExpDate - from payment processor
+      paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
+      paymentData.cardExpDate, // parExpDate - same as parCcExpDate
+      "", // parCardHolder
+      paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
+      "ONLINE", // parCreatedBy
+      "ONLINE", // parSalesPersnCode
+      email, // parEmail
+      club, // parClub
+      "", // parOrigPosTrans
+      "", // parPin
+      paymentData.token, // parToken - transaction token from payment processor
+      specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
+      "", // parNewPt
+    ]);
 
     logger.info("Primary membership record inserted successfully");
 
@@ -601,7 +601,7 @@ export const submitEnrollment = async (req, res) => {
       cellPhone || "", // parMobilePhone
       email, // parEmail
       "P", // parRole (P for primary)
-      new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+      new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
     ]);
 
     logger.info("Primary member record inserted successfully");
@@ -673,7 +673,9 @@ export const submitEnrollment = async (req, res) => {
           member.cellPhone || "", // parMobilePhone
           member.email || "", // parEmail
           "S", // parRole (S for secondary adult)
-          new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+          new Date().toLocaleDateString("en-CA", {
+            timeZone: "America/Denver",
+          }), // parCreatedDate - current date in YYYY-MM-DD format
         ]);
 
         nextMbrCode++;
@@ -716,7 +718,9 @@ export const submitEnrollment = async (req, res) => {
           member.cellPhone || "", // parMobilePhone
           member.email || "", // parEmail
           "D", // parRole (D for dependent)
-          new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+          new Date().toLocaleDateString("en-CA", {
+            timeZone: "America/Denver",
+          }), // parCreatedDate - current date in YYYY-MM-DD format
         ]);
 
         nextMbrCode++;
@@ -746,7 +750,7 @@ export const submitEnrollment = async (req, res) => {
         guardian.cellPhone || "", // parMobilePhone
         guardian.email || "", // parEmail
         "G", // parRole (G for guardian)
-        new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+        new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
       ]);
 
       logger.info("Guardian inserted successfully");
@@ -779,7 +783,7 @@ export const submitEnrollment = async (req, res) => {
     await executeSqlProcedure("web_proc_InsertWebAsamessag", club, [
       custCode, // parCustCode
       messageText, // parMessageText
-      new Date().toISOString().split("T")[0], // parCreateDate - current date in YYYY-MM-DD format
+      new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreateDate - current date in YYYY-MM-DD format
     ]);
 
     logger.info("Message information inserted successfully");
@@ -831,7 +835,7 @@ export const submitEnrollment = async (req, res) => {
       grossDues.toFixed(2), // parGrossDues
       netDues.toFixed(2), // parNetDues
       requestedStartDate, // parContractEffDate
-      new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+      new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
     ]);
 
     logger.info("Contract information inserted successfully");
@@ -851,7 +855,7 @@ export const submitEnrollment = async (req, res) => {
       req.body.membershipDetails?.description || "MONTHLY DUES", // parStmtText
       club, // parStore
       null, // parEndDate
-      new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+      new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
     ]);
 
     logger.info("Membership dues receipt document inserted successfully");
@@ -882,7 +886,9 @@ export const submitEnrollment = async (req, res) => {
           addon.description || "", // parStmtText
           club, // parStore
           null, // parEndDate
-          new Date().toISOString().split("T")[0], // parCreatedDate - current date in YYYY-MM-DD format
+          new Date().toLocaleDateString("en-CA", {
+            timeZone: "America/Denver",
+          }), // parCreatedDate - current date in YYYY-MM-DD format
         ]);
 
         logger.info(
@@ -1029,7 +1035,9 @@ export const submitEnrollment = async (req, res) => {
         const sqlError = result["2"] || result.sql_error || 0;
         const isamError = result["3"] || result.isam_error || 0;
         errorMessage = result["4"] || result.error_msg || "";
-        updatedCustCode = (result["5"] || result.rsUpdatedCustCode || custCode).toString().trim();
+        updatedCustCode = (result["5"] || result.rsUpdatedCustCode || custCode)
+          .toString()
+          .trim();
         transactionId = result["6"] || result.rsTrans || "";
 
         logger.info("Production procedure result details:", {
@@ -1116,8 +1124,8 @@ export const submitEnrollment = async (req, res) => {
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             membershipUpcCode, // parUPC
-            netDues.toFixed(2), // parPrice
-            duesTaxAmount.toFixed(2), // parTax
+            prorateAmount.toFixed(2), // parPrice - prorated amount
+            prorateTaxAmount.toFixed(2), // parTax - prorated tax amount
             1, // parQty
           ]);
           logger.info("Membership dues item inserted successfully");
@@ -1127,23 +1135,28 @@ export const submitEnrollment = async (req, res) => {
         if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons)) {
           for (const addon of req.body.serviceAddons) {
             if (addon.upcCode) {
-              // Calculate tax for this addon using the same method as asprecdoc
-              const addonTaxAmount = Number(
-                (parseFloat(addon.price) * taxRate).toFixed(2)
+              // Calculate prorated amount and tax for this addon
+              const proratedAddonPrice = Number(
+                (parseFloat(addon.price) * (prorateAmount / netDues)).toFixed(2)
+              );
+              const proratedAddonTax = Number(
+                (proratedAddonPrice * taxRate).toFixed(2)
               );
 
               logger.info("Inserting addon item with UPC code:", addon.upcCode);
               await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
                 transactionId, // parTrans
                 addon.upcCode, // parUPC
-                parseFloat(addon.price).toFixed(2), // parPrice
-                addonTaxAmount.toFixed(2), // parTax (calculated from addon price * tax rate)
+                proratedAddonPrice.toFixed(2), // parPrice - prorated amount
+                proratedAddonTax.toFixed(2), // parTax - prorated tax amount
                 1, // parQty
               ]);
               logger.info(
                 `Addon item ${
                   addon.description
-                } inserted successfully with tax: ${addonTaxAmount.toFixed(2)}`
+                } inserted successfully with prorated price: ${proratedAddonPrice.toFixed(
+                  2
+                )}, prorated tax: ${proratedAddonTax.toFixed(2)}`
               );
             }
           }

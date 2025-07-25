@@ -398,7 +398,48 @@ const PaymentPage = () => {
   const calculateProratedAmount = () => {
     if (!formData || !formData.membershipDetails) return 0;
     
-    return formData.membershipDetails.proratedPrice || 0;
+    // Get the prorated dues
+    const proratedDues = formData.membershipDetails.proratedPrice || 0;
+    
+    // Get the prorated taxes
+    const proratedTaxes = formData.membershipDetails.proratedTaxAmount || 0;
+    
+    // Calculate prorated addons from the service addons
+    let proratedAddons = 0;
+    if (formData.serviceAddons && formData.serviceAddons.length > 0) {
+      formData.serviceAddons.forEach(addon => {
+        if (addon.price) {
+          // Calculate prorated factor based on start date
+          const startDate = new Date(formData.requestedStartDate);
+          const today = new Date();
+          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+          const daysRemaining = daysInMonth - startDate.getDate() + 1;
+          const proratedFactor = daysRemaining / daysInMonth;
+          
+          proratedAddons += parseFloat(addon.price) * proratedFactor;
+        }
+      });
+    }
+    
+    // Calculate prorated addons from the child addons
+    if (formData.childAddons && formData.childAddons.length > 0) {
+      formData.childAddons.forEach(addon => {
+        if (addon.price) {
+          // Calculate prorated factor based on start date
+          const startDate = new Date(formData.requestedStartDate);
+          const today = new Date();
+          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+          const daysRemaining = daysInMonth - startDate.getDate() + 1;
+          const proratedFactor = daysRemaining / daysInMonth;
+          
+          proratedAddons += parseFloat(addon.price) * proratedFactor;
+        }
+      });
+    }
+    
+    // Round to 2 decimal places
+    const total = proratedDues + proratedAddons + proratedTaxes;
+    return Math.round(total * 100) / 100;
   };
   
   // Calculate monthly amount going forward
@@ -429,7 +470,7 @@ const PaymentPage = () => {
         cvv: paymentFormData.cvv,
         nameOnCard: paymentFormData.nameOnCard,
         billingZipCode: paymentFormData.billingZipCode,
-        amount: formData.membershipDetails?.price || "50.00",
+        amount: calculateProratedAmount().toFixed(2) || "50.00",
         membershipDetails: formData.membershipDetails,
         processorName: processorName
       };
@@ -718,7 +759,7 @@ const PaymentPage = () => {
                     <div className="spinner"></div>
                     <p>Processing your payment with {processorName === 'FLUIDPAY' ? 'FluidPay' : 'Converge'}...</p>
                     <p className="processing-details">
-                      Amount: ${formData.membershipDetails?.price || "50.00"}<br/>
+                      Amount: ${calculateProratedAmount().toFixed(2) || "50.00"}<br/>
                       Card: **** **** **** {paymentFormData.cardNumber.slice(-4)}
                     </p>
                   </div>

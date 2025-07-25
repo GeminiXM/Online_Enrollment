@@ -747,7 +747,7 @@ const additionalAuthText =
         `YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND ` +
         `DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE ` +
         `POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE ` +
-        `YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, ` +
+        `YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM MT) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, ` +
         `YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
       
       const splitCancellationText = pdf.splitTextToSize(cancellationText, 170);

@@ -888,6 +888,12 @@ function EnrollmentForm() {
         description: addon.invtr_desc || '',
         price: addon.invtr_price ? parseFloat(addon.invtr_price) : 0,
         upcCode: addon.invtr_upccode || ''
+      })),
+      childAddons: selectedChildAddons.map(addon => ({
+        id: addon.invtr_id || '',
+        description: addon.invtr_desc || '',
+        price: addon.invtr_price ? parseFloat(addon.invtr_price) : 0,
+        upcCode: addon.invtr_upccode || ''
       }))
     };
    
@@ -3262,6 +3268,63 @@ function EnrollmentForm() {
     setShowRestorePrompt(false);
   };
 
+  // Update prorated price and tax when start date, full price, tax rate, or addons change
+  useEffect(() => {
+    if (formData.requestedStartDate && membershipPrice) {
+      // Calculate prorated factor
+      const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+
+      // Calculate base prorated dues
+      let prorated = proratedPrice !== undefined ? proratedPrice : 0;
+
+      // Add prorated service addons
+      if (selectedServiceAddons.length > 0) {
+        selectedServiceAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            prorated += parseFloat(addon.invtr_price) * proratedFactor;
+          }
+        });
+      }
+      // Add prorated child addons
+      if (selectedChildAddons.length > 0) {
+        selectedChildAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            prorated += parseFloat(addon.invtr_price) * proratedFactor;
+          }
+        });
+      }
+
+      // Only apply tax for New Mexico clubs (state is NM)
+      const isNewMexicoClub = selectedClub?.state === 'NM';
+      const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
+
+      // Calculate tax amount for prorated price (due now)
+      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
+      setProratedTaxAmount(proratedTax);
+
+      // Calculate monthly total (going forward)
+      let monthlyTotal = membershipPrice !== undefined ? membershipPrice : 0;
+      if (selectedServiceAddons.length > 0) {
+        selectedServiceAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            monthlyTotal += parseFloat(addon.invtr_price);
+          }
+        });
+      }
+      if (selectedChildAddons.length > 0) {
+        selectedChildAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            monthlyTotal += parseFloat(addon.invtr_price);
+          }
+        });
+      }
+      const fullTax = Number((monthlyTotal * effectiveTaxRate).toFixed(2));
+      setTaxAmount(fullTax);
+
+      console.log(`Tax calculation: isNewMexicoClub=${isNewMexicoClub}, effectiveTaxRate=${effectiveTaxRate}, proratedTax=${proratedTax}, fullTax=${fullTax}`);
+    }
+  }, [formData.requestedStartDate, membershipPrice, taxRate, selectedClub, selectedServiceAddons, selectedChildAddons, proratedPrice]);
+
   return (
     <div className="enrollment-container">
       {/* Restore Data Prompt */}
@@ -3297,7 +3360,7 @@ function EnrollmentForm() {
         Fields marked with an asterisk (*) are required.
       </p>
 
-      {/* Privacy Notice */}
+      {/* Privacy Notice 
       <div className="privacy-notice">
         <p>
           <strong>Privacy Notice:</strong> Your form data is automatically saved to your browser to prevent data loss. 
@@ -3315,8 +3378,9 @@ function EnrollmentForm() {
           </label>
         </div>
       </div>
-
-      {/* Auto-save status indicator */}
+*/}
+      
+      {/* Auto-save status indicator 
       {autoSaveEnabled && lastSaved && (
         <div className="auto-save-status">
           <span className="auto-save-indicator">
@@ -3324,7 +3388,9 @@ function EnrollmentForm() {
           </span>
         </div>
       )}
+*/}
 
+      
       {/* Add this after the form instructions paragraph */}
  {/*      {membershipType && (
         <div className="selected-membership-type">

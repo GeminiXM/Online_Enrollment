@@ -13,6 +13,8 @@ function EnrollmentConfirmation() {
 console.log('EnrollmentConfirmation - location.state:', location.state);
 console.log('EnrollmentConfirmation - initialedSections:', initialedSections);
 console.log('EnrollmentConfirmation - signatureData:', signatureData);
+console.log('EnrollmentConfirmation - amountBilled:', amountBilled);
+console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
 
   // Format the payment timestamp
   const formatTimestamp = () => {

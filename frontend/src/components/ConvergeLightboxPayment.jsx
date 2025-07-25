@@ -258,7 +258,7 @@ const ConvergeLightboxPayment = () => {
       
       console.log('Fetching transaction token with data:', {
         clubId: formData.club || selectedClub?.id || "001",
-        amount: formData.membershipDetails?.price || "50.00",
+        amount: calculateProratedAmount().toFixed(2),
         invoiceNumber: `INV-${Date.now()}`,
         membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
         customerInfo: customerInfo
@@ -270,7 +270,7 @@ const ConvergeLightboxPayment = () => {
       // The token generation should NEVER be done directly in the client-side code
       const response = await api.getConvergeToken({
         clubId: formData.club || selectedClub?.id || "001",
-        amount: formData.membershipDetails?.price || "50.00",
+        amount: calculateProratedAmount().toFixed(2),
         // PRODUCTION: Generate a real invoice number, potentially from your database/ERP system
         invoiceNumber: `INV-${Date.now()}`, 
         membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
@@ -688,6 +688,13 @@ const handleLightboxResponse = (event) => {
 
 // DEMO MODE: Simulate Converge Lightbox popup
 const simulateConvergeLightbox = (config) => {
+  console.log('simulateConvergeLightbox called with config:', config);
+  console.log('simulateConvergeLightbox - formData:', formData);
+  
+  // Calculate the prorated amount before creating the modal
+  const proratedAmount = calculateProratedAmount();
+  console.log('simulateConvergeLightbox - calculated proratedAmount:', proratedAmount);
+  
   // Create a modal popup for demo purposes
   const modal = document.createElement('div');
   modal.style.cssText = `
@@ -720,7 +727,7 @@ const simulateConvergeLightbox = (config) => {
     <div style="margin: 20px 0;">
       <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
     </div>
-    <p><strong>Amount:</strong> $${formData?.membershipDetails?.price || "50.00"}</p>
+    <p><strong>Amount:</strong> $${proratedAmount.toFixed(2)}</p>
     <p><strong>Customer:</strong> ${customerInfo.firstName} ${customerInfo.lastName}</p>
     <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA', ssl_exp_date: '1225'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve VISA</button>
     <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****2222', ssl_card_type: 'MASTERCARD', ssl_exp_date: '1230'}, '*');" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve MC</button>
@@ -814,6 +821,10 @@ console.log('  formData:', formData);
 console.log('  signatureData:', signatureData);
 console.log('  initialedSections:', initialedSections);
 
+// Calculate the amount being billed
+const amountBilled = calculateProratedAmount();
+console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation:', amountBilled);
+
       // Navigate to confirmation page
       navigate('/enrollment-confirmation', { 
         state: { 
@@ -825,7 +836,7 @@ console.log('  initialedSections:', initialedSections);
           signatureData: signatureData,
           initialedSections: initialedSections,
           email: formData.email,
-          amountBilled: (formData.membershipDetails?.proratedPrice || 0) + (formData.membershipDetails?.proratedTaxAmount || 0),
+          amountBilled: amountBilled,
           membershipNumber: response.data.custCode,
           transactionId: response.data.transactionId
         } 
@@ -845,9 +856,64 @@ console.log('  initialedSections:', initialedSections);
   
   // Calculate prorated amount due now
   const calculateProratedAmount = () => {
-    if (!formData || !formData.membershipDetails) return 0;
+    console.log('calculateProratedAmount called with formData:', formData);
+    if (!formData || !formData.membershipDetails) {
+      console.log('calculateProratedAmount: formData or membershipDetails is missing');
+      console.log('formData:', formData);
+      console.log('membershipDetails:', formData?.membershipDetails);
+      return 0;
+    }
     
-    return formData.membershipDetails.proratedPrice || 0;
+    // Get the prorated dues
+    const proratedDues = formData.membershipDetails.proratedPrice || 0;
+    
+    // Get the prorated taxes
+    const proratedTaxes = formData.membershipDetails.proratedTaxAmount || 0;
+    
+    // Calculate prorated addons from the service addons
+    let proratedAddons = 0;
+    if (formData.serviceAddons && formData.serviceAddons.length > 0) {
+      formData.serviceAddons.forEach(addon => {
+        if (addon.price) {
+          // Calculate prorated factor based on start date
+          const startDate = new Date(formData.requestedStartDate);
+          const today = new Date();
+          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+          const daysRemaining = daysInMonth - startDate.getDate() + 1;
+          const proratedFactor = daysRemaining / daysInMonth;
+          
+          proratedAddons += parseFloat(addon.price) * proratedFactor;
+        }
+      });
+    }
+    
+    // Calculate prorated addons from the child addons
+    if (formData.childAddons && formData.childAddons.length > 0) {
+      formData.childAddons.forEach(addon => {
+        if (addon.price) {
+          // Calculate prorated factor based on start date
+          const startDate = new Date(formData.requestedStartDate);
+          const today = new Date();
+          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+          const daysRemaining = daysInMonth - startDate.getDate() + 1;
+          const proratedFactor = daysRemaining / daysInMonth;
+          
+          proratedAddons += parseFloat(addon.price) * proratedFactor;
+        }
+      });
+    }
+    
+    // Round to 2 decimal places
+    const total = proratedDues + proratedAddons + proratedTaxes;
+    
+    console.log('calculateProratedAmount breakdown:', {
+      proratedDues,
+      proratedAddons,
+      proratedTaxes,
+      total: Math.round(total * 100) / 100
+    });
+    
+    return Math.round(total * 100) / 100;
   };
   
   // Calculate monthly amount going forward
