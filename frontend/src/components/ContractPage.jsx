@@ -152,11 +152,11 @@ const ContractPage = () => {
       const day = parseInt(parts[2], 10);
       
       // Create date with specific year, month, day in local timezone
-      const startDate = new Date(year, month, day);
+      const date = new Date(year, month, day);
       
       // Add 14 days to the start date
-      const cancellationDate = new Date(startDate);
-      cancellationDate.setDate(startDate.getDate() + 14);
+      const cancellationDate = new Date(date);
+      cancellationDate.setDate(date.getDate() + 14);
       
       // Format to mm/dd/yyyy
       return cancellationDate.toLocaleDateString('en-US', {
@@ -168,6 +168,27 @@ const ContractPage = () => {
     
     // Fallback for unexpected format
     return startDateString;
+  };
+
+  // Calculate prorated factor (percentage of month remaining) - copied from EnrollmentForm
+  const calculateProratedFactor = (startDate) => {
+    if (!startDate) return 1; // Default to full price if no start date
+    
+    const start = new Date(startDate);
+    const today = new Date();
+    
+    // Use requested start date if it's in the future, otherwise use today
+    const effectiveDate = start > today ? start : today;
+    
+    // Get the last day of the month
+    const lastDay = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Calculate days remaining in the month (including the start date)
+    const daysRemaining = lastDay.getDate() - effectiveDate.getDate() + 1;
+    
+    // Calculate prorated factor (percentage of month remaining)
+    return daysRemaining / daysInMonth;
   };
 
   // Get enrollment data passed from previous page
@@ -231,67 +252,46 @@ const ContractPage = () => {
       
       // Process child programs and add-ons
       let additionalServiceDetails = [];
-  let childPrograms = '';
-  let childProgramsMonthly = '';
-  let childProgramsDueNow = '';
-  
-  // Calculate prorated factor (percentage of month remaining) - copied from EnrollmentForm
-  const calculateProratedFactor = (startDate) => {
-    if (!startDate) return 1; // Default to full price if no start date
-    
-    const start = new Date(startDate);
-    const today = new Date();
-    
-    // Use requested start date if it's in the future, otherwise use today
-    const effectiveDate = start > today ? start : today;
-    
-    // Get the last day of the month
-    const lastDay = new Date(effectiveDate.getFullYear(), effectiveDate.getMonth() + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    
-    // Calculate days remaining in the month (including the start date)
-    const daysRemaining = lastDay.getDate() - effectiveDate.getDate() + 1;
-    
-    // Calculate prorated factor (percentage of month remaining)
-    return daysRemaining / daysInMonth;
-  };
-  
-  // Get the proration factor based on the requested start date
-  const proratedFactor = calculateProratedFactor(data.requestedStartDate);
-  
-  if (data.serviceAddons && data.serviceAddons.length > 0) {
-    // Check if club is in New Mexico
-    const isNewMexicoClub = data.club?.toString().includes('NM') || false;
-    
-    // Map only valid service addons to additionalServiceDetails
-    // Filter out any service addons without a description or with empty description
-    additionalServiceDetails = data.serviceAddons
-      .filter(addon => addon.description && addon.description.trim() !== '')
-      .map(addon => ({
-        name: addon.description,
-        dueNow: addon.price ? (addon.price * proratedFactor).toFixed(2) : '0.00', // Use correct proration factor
-        monthly: addon.price ? addon.price.toFixed(2) : '0.00'
-      }));
-    
-    // For Child Programs section, only include CAC child programs (Colorado only)
-    // Exclude "Unlimited" options (2020) which should only appear in Additional Services
-    if (!isNewMexicoClub) {
-      // For Colorado, only look for CAC child programs
-      const childProgramAddon = data.serviceAddons.find(addon => 
-        addon.description && 
-        addon.description.includes('CAC') && 
-        addon.description.includes('child')
-      );
+      let childPrograms = '';
+      let childProgramsMonthly = '';
+      let childProgramsDueNow = '';
       
-      if (childProgramAddon) {
-        childPrograms = childProgramAddon.description;
-        childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
-        childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * proratedFactor).toFixed(2) : '0.00';
+      // Get the proration factor based on the requested start date
+      const proratedFactor = calculateProratedFactor(data.requestedStartDate);
+      
+      if (data.serviceAddons && data.serviceAddons.length > 0) {
+        // Check if club is in New Mexico
+        const isNewMexicoClub = data.club?.toString().includes('NM') || false;
+        
+        // Map only valid service addons to additionalServiceDetails
+        // Filter out any service addons without a description or with empty description
+        additionalServiceDetails = data.serviceAddons
+          .filter(addon => addon.description && addon.description.trim() !== '')
+          .map(addon => ({
+            name: addon.description,
+            dueNow: addon.price ? (addon.price * proratedFactor).toFixed(2) : '0.00', // Use correct proration factor
+            monthly: addon.price ? addon.price.toFixed(2) : '0.00'
+          }));
+        
+        // For Child Programs section, only include CAC child programs (Colorado only)
+        // Exclude "Unlimited" options (2020) which should only appear in Additional Services
+        if (!isNewMexicoClub) {
+          // For Colorado, only look for CAC child programs
+          const childProgramAddon = data.serviceAddons.find(addon => 
+            addon.description && 
+            addon.description.includes('CAC') && 
+            addon.description.includes('child')
+          );
+          
+          if (childProgramAddon) {
+            childPrograms = childProgramAddon.description;
+            childProgramsMonthly = childProgramAddon.price ? childProgramAddon.price.toFixed(2) : '0.00';
+            childProgramsDueNow = childProgramAddon.price ? (childProgramAddon.price * proratedFactor).toFixed(2) : '0.00';
+          }
+        }
+        // For New Mexico clubs, we don't show anything in the Child Programs section
+        // All "Unlimited" options (2020) will only appear in Additional Services
       }
-    }
-    // For New Mexico clubs, we don't show anything in the Child Programs section
-    // All "Unlimited" options (2020) will only appear in Additional Services
-  }
       
       // Compile list of add-ons from multiple sources
       let addOns = [...serviceAddOns];
@@ -336,14 +336,16 @@ const ContractPage = () => {
       // Check if club is in New Mexico by state property
       const isNewMexicoClub = selectedClub?.state === 'NM' || false;
       
-      // Get tax rate from membershipDetails or use a default (only for New Mexico)
-      const taxRate = isNewMexicoClub ? (data.membershipDetails?.taxRate || 0.08) : 0; // Only apply tax for NM
+      // Get tax rate from membershipDetails or use the actual tax rate from form data
+      const taxRate = isNewMexicoClub ? (data.membershipDetails?.taxRate || data.taxRate || 0.07625) : 0; // Use actual tax rate from database
+      
+      // Use pre-calculated tax values from form data to ensure consistency
+      const proratedDuesTax = parseFloat(data.proratedDuesTax || 0);
+      const proratedAddonsTax = parseFloat(data.proratedAddOnsTax || 0);
+      const totalTaxAmount = proratedDuesTax + proratedAddonsTax;
       
       // Calculate tax amount (will be 0 for non-NM clubs)
-      const taxAmount = isNewMexicoClub ? 
-                      (data.membershipDetails?.proratedTaxAmount || 
-                       ((parseFloat(proratedDues) + parseFloat(proratedAddOns)) * taxRate).toFixed(2)) : 
-                      '0.00'; // Zero tax for non-NM clubs
+      const taxAmount = isNewMexicoClub ? totalTaxAmount.toFixed(2) : '0.00';
       
       const totalCollected = (
         parseFloat(initiationFee) + 
@@ -365,7 +367,7 @@ const ContractPage = () => {
         displaySpecialtyMembership: specialtyMembershipMap[data.specialtyMembership] || data.specialtyMembership || 'None',
         addOns: uniqueAddOns,
         familyMembers,
-        additionalServicesDetails: additionalServiceDetails,
+        additionalServiceDetails,
         childPrograms,
         childProgramsMonthly,
         childProgramsDueNow,
@@ -583,9 +585,179 @@ const ContractPage = () => {
     }
   };
 
+  // Function to extract all dollar amounts from the shopping cart
+  const extractAllDollarAmounts = () => {
+    if (!formData) return null;
+    
+    const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+    const monthlyDues = parseFloat(formData.monthlyDues || 0);
+    const proratedDues = parseFloat(formData.proratedDues || 0);
+    const initiationFee = parseFloat(formData.initiationFee || 0);
+    
+    // Calculate service addons totals
+    const serviceAddons = formData.serviceAddons || [];
+    const addonsTotal = serviceAddons.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
+    const proratedAddonsTotal = addonsTotal * proratedFactor;
+    
+    // Calculate tax amounts using the correct tax rate
+    const isNewMexicoClub = selectedClub?.state === 'NM';
+    const taxRate = isNewMexicoClub ? (formData.taxRate || 0.07625) : 0; // Use actual tax rate from database
+    
+    // Use pre-calculated tax values from form data to ensure consistency
+    const proratedDuesTax = parseFloat(formData.proratedDuesTax || 0);
+    const proratedAddonsTax = parseFloat(formData.proratedAddOnsTax || 0);
+    const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
+    
+    // Calculate monthly tax amounts
+    const duesTax = isNewMexicoClub ? Number((monthlyDues * taxRate).toFixed(2)) : 0;
+    const addonsTax = isNewMexicoClub ? Number((addonsTotal * taxRate).toFixed(2)) : 0;
+    
+    // Calculate totals
+    const proratedDuesAddon = proratedDues + proratedAddonsTotal;
+    const totalProrateBilled = proratedDuesAddon + proratedDuesAddonTax;
+    const grossMonthlyTotal = monthlyDues + addonsTotal;
+    
+    const amounts = {
+      // Database Parameters Mapping
+      databaseParameters: {
+        // Prorated Dues
+        parProrateDues: {
+          value: proratedDues,
+          description: "Prorated membership dues",
+          tableFields: ["asptitemd.titemd_orig_price", "asptitemd.titemd_mod_price", "asptitemd.titemd_sale_price", "asptitemd.titemd_ext_price"]
+        },
+        
+        // Prorated Dues Tax
+        parProrateDuesTax: {
+          value: proratedDuesTax,
+          description: "Tax on prorated dues",
+          tableFields: ["asptitemd.titemd_tax_amt"]
+        },
+        
+        // Prorated Addons Total
+        parProrateAddonsTotal: {
+          value: proratedAddonsTotal,
+          description: "Prorated add-ons total",
+          tableFields: ["asptitemd.titemd_orig_price", "asptitemd.titemd_mod_price", "asptitemd.titemd_sale_price", "asptitemd.titemd_ext_price"]
+        },
+        
+        // Prorated Addons Tax
+        parProrateAddonsTax: {
+          value: proratedAddonsTax,
+          description: "Tax on prorated add-ons",
+          tableFields: ["asptitemd.titemd_tax_amt"]
+        },
+        
+        // Prorated Dues + Addons
+        parProrateDuesAddon: {
+          value: proratedDuesAddon,
+          description: "Prorated dues + add-ons",
+          tableFields: ["asacontrpos.prorate_amt", "asptheade.theade_sub_total"]
+        },
+        
+        // Prorated Dues + Addons Tax
+        parProrateDuesAddonTax: {
+          value: proratedDuesAddonTax,
+          description: "Tax on prorated dues + add-ons",
+          tableFields: ["asacontrpos.prorate_tax", "asptheade.theade_tax_total"]
+        },
+        
+        // Initiation Fee
+        parlfee: {
+          value: initiationFee,
+          description: "Initiation fee",
+          tableFields: ["asacontrpos.ifee", "asptitemd.titemd_orig_price", "asptitemd.titemd_mod_price", "asptitemd.titemd_sale_price", "asptitemd.titemd_ext_price"]
+        },
+        
+        // Initiation Fee Tax
+        parIfeeTax: {
+          value: 0, // Initiation fee tax is always 0 since initiation fee is 0
+          description: "Initiation fee Tax",
+          tableFields: ["asacontrpos.ifee_tax"]
+        },
+        
+        // Total Prorated Billed
+        parTotalProrateBilled: {
+          value: totalProrateBilled,
+          description: "Total prorated amount billed",
+          tableFields: ["asptheade.theade_grand_total", "aspttendd.ttendd_amt"]
+        },
+        
+        // Original Monthly Dues
+        parOrigDues: {
+          value: monthlyDues,
+          description: "Original monthly dues",
+          tableFields: ["asacontrpos.orig_dues", "asacontr.net_dues", "asprecdoc.amt"]
+        },
+        
+        // Addons Tax
+        parAddonsTax: {
+          value: addonsTax,
+          description: "Tax on add-ons",
+          tableFields: ["asacontrpos.addons_tax"]
+        },
+        
+        // Addons Total
+        parAddonsTotal: {
+          value: addonsTotal,
+          description: "Total add-ons amount",
+          tableFields: ["asacontrpos.addons_total", "asacontr.bill_amt", "asprecdoc.amt"]
+        },
+        
+        // Dues Tax
+        parDuesTax: {
+          value: duesTax,
+          description: "Tax on dues",
+          tableFields: ["asacontrpos.dues_tax"]
+        },
+        
+        // Gross Monthly Total
+        parGrossMonthlyTotal: {
+          value: grossMonthlyTotal,
+          description: "Gross monthly total",
+          tableFields: ["asacontr.gross_dues"]
+        }
+      },
+      
+      // Tax Rate Information
+      taxInfo: {
+        taxRate: taxRate,
+        isNewMexicoClub: isNewMexicoClub,
+        taxRatePercentage: (taxRate * 100).toFixed(2) + '%'
+      },
+      
+      // Service Addons Breakdown
+      serviceAddons: serviceAddons.map(addon => ({
+        description: addon.description || addon.name,
+        monthly: parseFloat(addon.price || 0),
+        prorated: parseFloat(addon.price || 0) * proratedFactor,
+        upcCode: addon.upcCode || '',
+        taxCode: addon.taxCode || ''
+      })),
+      
+      // Child Programs Breakdown
+      childPrograms: formData.selectedChildAddons?.map(addon => ({
+        description: addon.description || addon.name,
+        monthly: parseFloat(addon.price || 0),
+        prorated: parseFloat(addon.price || 0) * proratedFactor,
+        upcCode: addon.upcCode || '',
+        taxCode: addon.taxCode || ''
+      })) || []
+    };
+    
+    return amounts;
+  };
+
+  // Extract current amounts
+  const currentAmounts = extractAllDollarAmounts();
+
   if (!formData) {
+    console.log("ContractPage: formData is null, showing loading...");
     return <div className="loading">Loading...</div>;
   }
+
+  console.log("ContractPage: Rendering with formData:", formData);
+  console.log("ContractPage: currentAmounts:", currentAmounts);
 
   return (
     <div className="contract-container">
@@ -776,11 +948,11 @@ const ContractPage = () => {
         )}
         
         {/* Additional Services Detail Section */}
-        {formData.additionalServicesDetails && formData.additionalServicesDetails.length > 0 && (
+        {formData.additionalServiceDetails && formData.additionalServiceDetails.length > 0 && (
           <div className="info-section additional-services-section">
             <div className="info-header">Additional Services</div>
             <div className="info-content">
-              {formData.additionalServicesDetails.map((service, index) => (
+              {formData.additionalServiceDetails.map((service, index) => (
                 <div key={index} className="service-item">
                   <div>{service.name}</div>
                   {service.dueNow && <div>Due now: ${service.dueNow}</div>}
@@ -911,6 +1083,139 @@ const ContractPage = () => {
             </div>
           </div>
         </div>
+        
+        {/* DEBUG: All Dollar Amounts Section */}
+        {currentAmounts && (
+          <div className="info-section debug-amounts-section" style={{backgroundColor: '#f0f8ff', border: '2px dashed #007bff', marginTop: '2rem'}}>
+            <div className="info-header" style={{color: '#007bff', fontSize: '1.2rem', fontWeight: 'bold'}}>🔍 DEBUG: Database Parameter Mapping</div>
+            
+            {/* Database Parameters Table */}
+            <div className="info-row">
+              <div className="info-column" style={{width: '100%'}}>
+                <div className="info-label">Database Parameters & Table Fields</div>
+                <div className="info-value">
+                  <table style={{width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem'}}>
+                    <thead>
+                      <tr style={{backgroundColor: '#e3f2fd'}}>
+                        <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>Parameter Name</th>
+                        <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>Value</th>
+                        <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>Description</th>
+                        <th style={{border: '1px solid #ddd', padding: '8px', textAlign: 'left'}}>Table Fields</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(currentAmounts.databaseParameters).map(([paramName, paramData]) => (
+                        <tr key={paramName} style={{backgroundColor: paramData.value === 0 ? '#fff3cd' : '#fff'}}>
+                          <td style={{border: '1px solid #ddd', padding: '8px', fontWeight: 'bold', fontFamily: 'monospace'}}>{paramName}</td>
+                          <td style={{border: '1px solid #ddd', padding: '8px', fontFamily: 'monospace', color: paramData.value === 0 ? '#856404' : '#000'}}>
+                            ${paramData.value.toFixed(2)}
+                          </td>
+                          <td style={{border: '1px solid #ddd', padding: '8px'}}>{paramData.description}</td>
+                          <td style={{border: '1px solid #ddd', padding: '8px', fontSize: '0.8rem', fontFamily: 'monospace'}}>
+                            {paramData.tableFields.join(', ')}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            
+            {/* Summary Section */}
+            <div className="info-row">
+              <div className="info-column">
+                <div className="info-label">Summary</div>
+                <div className="info-value">
+                  <div style={{marginBottom: '1rem'}}>
+                    <strong>Key Totals:</strong><br/>
+                    • Total Due Now: <span style={{color: '#28a745', fontWeight: 'bold'}}>${currentAmounts.databaseParameters.parTotalProrateBilled.value.toFixed(2)}</span><br/>
+                    • Gross Monthly Total: <span style={{color: '#007bff', fontWeight: 'bold'}}>${currentAmounts.databaseParameters.parGrossMonthlyTotal.value.toFixed(2)}</span><br/>
+                    • Tax Rate: {(currentAmounts.taxInfo.taxRatePercentage)}
+                  </div>
+                  
+                  <div>
+                    <strong>Zero Values (Highlighted in Yellow):</strong><br/>
+                    {Object.entries(currentAmounts.databaseParameters)
+                      .filter(([_, paramData]) => paramData.value === 0)
+                      .map(([paramName, paramData]) => (
+                        <span key={paramName} style={{display: 'inline-block', margin: '2px', padding: '2px 6px', backgroundColor: '#fff3cd', borderRadius: '3px', fontSize: '0.8rem'}}>
+                          {paramName}: ${paramData.value.toFixed(2)}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Individual Components (for reference) */}
+            <div className="info-row">
+              <div className="info-column">
+                <div className="info-label">Individual Components</div>
+                <div className="info-value">
+                  <div style={{marginBottom: '0.5rem'}}>
+                    <strong>Membership:</strong> {formData.displayMembershipType || 'Individual'} Membership<br/>
+                    Monthly: ${parseFloat(formData.monthlyDues || 0).toFixed(2)} | 
+                    Prorated: ${parseFloat(formData.proratedDues || 0).toFixed(2)}
+                  </div>
+                  
+                  <div style={{marginBottom: '0.5rem'}}>
+                    <strong>Initiation Fee:</strong> ${parseFloat(formData.initiationFee || 0).toFixed(2)}
+                  </div>
+                  
+                  {currentAmounts.serviceAddons.length > 0 && (
+                    <div style={{marginBottom: '0.5rem'}}>
+                      <strong>Service Add-ons ({currentAmounts.serviceAddons.length}):</strong><br/>
+                      {currentAmounts.serviceAddons.map((addon, index) => (
+                        <div key={index} style={{marginLeft: '1rem', fontSize: '0.9rem'}}>
+                          • {addon.description}: ${addon.monthly.toFixed(2)}/month (${addon.prorated.toFixed(2)} prorated)
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {currentAmounts.childPrograms.length > 0 && (
+                    <div style={{marginBottom: '0.5rem'}}>
+                      <strong>Child Programs:</strong><br/>
+                      {currentAmounts.childPrograms.map((program, index) => (
+                        <div key={index} style={{marginLeft: '1rem', fontSize: '0.9rem'}}>
+                          • {program.description}: ${program.monthly.toFixed(2)}/month (${program.prorated.toFixed(2)} prorated)
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <div style={{marginBottom: '0.5rem'}}>
+                    <strong>Tax Information:</strong><br/>
+                    • Tax Rate: {currentAmounts.taxInfo.taxRatePercentage}<br/>
+                    • New Mexico Club: {currentAmounts.taxInfo.isNewMexicoClub ? 'Yes' : 'No'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Raw Form Data */}
+            <div className="info-row">
+              <div className="info-column">
+                <div className="info-label">Raw Form Data</div>
+                <div className="info-value" style={{fontSize: '0.8rem', fontFamily: 'monospace', backgroundColor: '#f8f9fa', padding: '0.5rem', borderRadius: '4px'}}>
+                  <pre>{JSON.stringify({
+                    monthlyDues: formData.monthlyDues,
+                    proratedDues: formData.proratedDues,
+                    proratedAddOns: formData.proratedAddOns,
+                    totalCollected: formData.totalCollected,
+                    totalMonthlyRate: formData.totalMonthlyRate,
+                    taxAmount: formData.taxAmount,
+                    initiationFee: formData.initiationFee,
+                    serviceAddons: formData.serviceAddons?.length || 0,
+                    childPrograms: formData.childPrograms,
+                    taxRate: formData.taxRate
+                  }, null, 2)}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
 
@@ -1040,7 +1345,7 @@ const ContractPage = () => {
                 ...addon
               })) || [],
               // Preserve any additional service details
-              additionalServicesDetails: formData.additionalServicesDetails || []
+              additionalServiceDetails: formData.additionalServiceDetails || []
             };
             navigate('/enrollment', { state: { formData: completeFormData } });
           }}

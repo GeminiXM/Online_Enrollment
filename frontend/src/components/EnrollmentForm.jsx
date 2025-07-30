@@ -894,7 +894,13 @@ function EnrollmentForm() {
         description: addon.invtr_desc || '',
         price: addon.invtr_price ? parseFloat(addon.invtr_price) : 0,
         upcCode: addon.invtr_upccode || ''
-      }))
+      })),
+      // Add prorated addon values for backend calculation
+      proratedAddOns: formData.proratedAddOns || 0,
+      proratedAddOnsTax: formData.proratedAddOnsTax || 0,
+      // Add prorated dues values for backend calculation
+      proratedDues: formData.proratedDues || 0,
+      proratedDuesTax: formData.proratedDuesTax || 0
     };
    
       // ADD THIS SECTION to create a prioritized phone field
@@ -3324,6 +3330,44 @@ function EnrollmentForm() {
       console.log(`Tax calculation: isNewMexicoClub=${isNewMexicoClub}, effectiveTaxRate=${effectiveTaxRate}, proratedTax=${proratedTax}, fullTax=${fullTax}`);
     }
   }, [formData.requestedStartDate, membershipPrice, taxRate, selectedClub, selectedServiceAddons, selectedChildAddons, proratedPrice]);
+
+  // Calculate and store prorated addon values
+  useEffect(() => {
+    if (formData.requestedStartDate) {
+      const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+      
+      // Calculate prorated addon total
+      let proratedAddOnsTotal = 0;
+      if (selectedServiceAddons.length > 0) {
+        selectedServiceAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            proratedAddOnsTotal += parseFloat(addon.invtr_price) * proratedFactor;
+          }
+        });
+      }
+      if (selectedChildAddons.length > 0) {
+        selectedChildAddons.forEach(addon => {
+          if (addon.invtr_price) {
+            proratedAddOnsTotal += parseFloat(addon.invtr_price) * proratedFactor;
+          }
+        });
+      }
+      
+      // Calculate prorated addon tax
+      const isNewMexicoClub = selectedClub?.state === 'NM';
+      const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
+      const proratedAddOnsTax = Number((proratedAddOnsTotal * effectiveTaxRate).toFixed(2));
+      
+      // Store in form data
+      setFormData(prev => ({
+        ...prev,
+        proratedAddOns: Math.round(proratedAddOnsTotal * 100) / 100,
+        proratedAddOnsTax: proratedAddOnsTax,
+        proratedDues: proratedPrice || 0,
+        proratedDuesTax: proratedTaxAmount || 0
+      }));
+    }
+  }, [formData.requestedStartDate, selectedServiceAddons, selectedChildAddons, selectedClub, taxRate]);
 
   return (
     <div className="enrollment-container">

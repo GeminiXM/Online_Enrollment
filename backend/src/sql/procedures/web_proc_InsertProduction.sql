@@ -37,12 +37,18 @@ EXECUTE PROCEDURE web_proc_InsertProduction (
 	parCC_Exp, 
 	parCC,
 	--asacontrpos
-    parOrigDues,
-    parDuesTax,
-    parAddonsTotal,
-    parAddonsTax,
-    parIfee,
-    parIfeeTax,
-    parProrateAmt,
-    parProrateTax
+	parProrateDues,
+	parProrateDuesTax,
+	parProrateAddonsTotal,
+	parProrateAddonsTax,
+	parProrateDuesAddon,
+	parProrateDuesAddonTax,
+	parIfee,
+	parIfeeTax,
+	parTotalProrateBilled,
+	parOrigDues,
+	parAddonsTax,
+	parAddonsTotal,
+	parDuesTax,
+	parGrossMonthlyTotal
 )

@@ -857,60 +857,28 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
   // Calculate prorated amount due now
   const calculateProratedAmount = () => {
     console.log('calculateProratedAmount called with formData:', formData);
-    if (!formData || !formData.membershipDetails) {
-      console.log('calculateProratedAmount: formData or membershipDetails is missing');
-      console.log('formData:', formData);
-      console.log('membershipDetails:', formData?.membershipDetails);
+    if (!formData) {
+      console.log('calculateProratedAmount: formData is missing');
       return 0;
     }
     
-    // Get the prorated dues
-    const proratedDues = formData.membershipDetails.proratedPrice || 0;
+    // Use the exact pre-calculated values from formData
+    const proratedDues = parseFloat(formData.proratedDues || 0);
+    const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
+    const taxAmount = parseFloat(formData.taxAmount || 0);
     
-    // Get the prorated taxes
-    const proratedTaxes = formData.membershipDetails.proratedTaxAmount || 0;
+    // Calculate total using the exact values from formData
+    const total = proratedDues + proratedAddOns + taxAmount;
     
-    // Calculate prorated addons from the service addons
-    let proratedAddons = 0;
-    if (formData.serviceAddons && formData.serviceAddons.length > 0) {
-      formData.serviceAddons.forEach(addon => {
-        if (addon.price) {
-          // Calculate prorated factor based on start date
-          const startDate = new Date(formData.requestedStartDate);
-          const today = new Date();
-          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-          const daysRemaining = daysInMonth - startDate.getDate() + 1;
-          const proratedFactor = daysRemaining / daysInMonth;
-          
-          proratedAddons += parseFloat(addon.price) * proratedFactor;
-        }
-      });
-    }
-    
-    // Calculate prorated addons from the child addons
-    if (formData.childAddons && formData.childAddons.length > 0) {
-      formData.childAddons.forEach(addon => {
-        if (addon.price) {
-          // Calculate prorated factor based on start date
-          const startDate = new Date(formData.requestedStartDate);
-          const today = new Date();
-          const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-          const daysRemaining = daysInMonth - startDate.getDate() + 1;
-          const proratedFactor = daysRemaining / daysInMonth;
-          
-          proratedAddons += parseFloat(addon.price) * proratedFactor;
-        }
-      });
-    }
-    
-    // Round to 2 decimal places
-    const total = proratedDues + proratedAddons + proratedTaxes;
-    
-    console.log('calculateProratedAmount breakdown:', {
+    console.log('calculateProratedAmount using formData values:', {
       proratedDues,
-      proratedAddons,
-      proratedTaxes,
-      total: Math.round(total * 100) / 100
+      proratedAddOns,
+      taxAmount,
+      total: Math.round(total * 100) / 100,
+      formDataTotalCollected: formData.totalCollected,
+      formDataProratedDues: formData.proratedDues,
+      formDataProratedAddOns: formData.proratedAddOns,
+      formDataTaxAmount: formData.taxAmount
     });
     
     return Math.round(total * 100) / 100;

@@ -1152,3 +1152,54 @@
 2025-07-24 18:39:38:3938 [31merror[39m: [31mError executing query:[39m
 2025-07-24 18:39:38:3938 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-07-24 18:39:38:3938 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError executing query:[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError executing query:[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-24 18:55:27:5527 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-24 21:11:43:1143 [31merror[39m: [31mError executing query:[39m
+2025-07-24 21:11:43:1143 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-24 21:11:43:1143 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError executing query:[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError executing query:[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 10:57:32:5732 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError executing query:[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError executing query:[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 12:20:24:2024 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError executing query:[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError executing query:[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 12:28:47:2847 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:34:13:3413 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:41:53:4153 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError executing query:[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 14:59:05:595 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError executing query:[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError in getTaxRate:[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError executing query:[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-07-30 15:31:57:3157 [31merror[39m: [31mError in getTaxRate:[39m
