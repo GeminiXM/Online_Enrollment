@@ -141,23 +141,6 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             </div>
           )}
 
-          {membershipNumber && (
-            <div className="membership-info">
-              <h3 style={{ textDecoration: 'underline' }}>Membership Information</h3>
-              <div className="membership-details">
-                <div className="membership-row">
-                  <span className="membership-label">Membership Number:</span>
-                  <span className="membership-value">{membershipNumber}</span>
-                </div>
-                {transactionId && (
-                  <div className="membership-row">
-                    <span className="membership-label">Transaction ID:</span>
-                    <span className="membership-value">{transactionId}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
           
           <h3>What's Next?</h3>
           <ul>
