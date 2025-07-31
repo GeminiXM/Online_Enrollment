@@ -109,6 +109,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
         </div>
       )}
       
+      {/* Child Care Options section temporarily removed until later phase
       {unlimitedAddons.length > 0 && (
         <>
           <div className="addon-section-separator">
@@ -146,6 +147,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
           </div>
         </>
       )}
+      */}
     </div>
   );
 };

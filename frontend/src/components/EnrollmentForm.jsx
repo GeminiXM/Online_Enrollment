@@ -1077,8 +1077,27 @@ function EnrollmentForm() {
                            day >= 1 && day <= 31;
         
         if (isValidDate) {
-          // Use the membershipType from context, not from formData
-          const ageError = validateAgeForMembershipType(value, membershipType);
+          let ageError = null;
+          
+          // Determine which validation function to use based on the active tab
+          switch (activeTab) {
+            case 'new_adult':
+              ageError = validateAdultAge(value);
+              break;
+            case 'child':
+              ageError = validateChildAge(value);
+              break;
+            case 'youth':
+              // For youth, we need to handle the boolean return value differently
+              if (!validateYouthAge(value)) {
+                const age = calculateAge(value);
+                ageError = `You are ${age} years old. Youth members must be between 12 and 20 years old.`;
+              }
+              break;
+            default:
+              break;
+          }
+          
           if (ageError) {
             setErrors(prevErrors => ({
               ...prevErrors,
@@ -1341,7 +1360,7 @@ function EnrollmentForm() {
         setErrors(newErrors);
         
         // Set appropriate error message based on the types of errors
-        let errorMessage = "Please provide at least a first and last name to continue.";
+        let errorMessage = "";
         
         // If there are guardian errors for Junior membership, show a specific message
         if (isJuniorMembership && (
@@ -1354,6 +1373,33 @@ function EnrollmentForm() {
           newErrors.guardianConsent
         )) {
           errorMessage = "Please complete all required guardian information fields before continuing.";
+        } else {
+          // Create a dynamic error message based on the actual missing fields
+          const missingFields = [];
+          
+          if (newErrors.firstName) missingFields.push("first name");
+          if (newErrors.lastName) missingFields.push("last name");
+          if (newErrors.dateOfBirth) missingFields.push("date of birth");
+          if (newErrors.gender) missingFields.push("gender");
+          if (newErrors.email) missingFields.push("email");
+          if (newErrors.address1) missingFields.push("address");
+          if (newErrors.city) missingFields.push("city");
+          if (newErrors.state) missingFields.push("state");
+          if (newErrors.zipCode) missingFields.push("ZIP code");
+          if (newErrors.mobilePhone) missingFields.push("phone number");
+          
+          if (missingFields.length > 0) {
+            if (missingFields.length === 1) {
+              errorMessage = `Please provide your ${missingFields[0]} to continue.`;
+            } else if (missingFields.length === 2) {
+              errorMessage = `Please provide your ${missingFields[0]} and ${missingFields[1]} to continue.`;
+            } else {
+              const lastField = missingFields.pop();
+              errorMessage = `Please provide your ${missingFields.join(', ')}, and ${lastField} to continue.`;
+            }
+          } else {
+            errorMessage = "Please complete all required fields before continuing.";
+          }
         }
         
         setSubmitError(errorMessage);
@@ -1984,9 +2030,11 @@ function EnrollmentForm() {
     if (formData.services.groupClasses) {
       total += 25; // Assuming $25 per month
     }
+    {/* Child care calculation temporarily removed until later phase
     if (formData.services.childcare) {
       total += 15; // Assuming $15 per month
     }
+    */}
     if (formData.services.locker) {
       total += 10; // Assuming $10 per month
     }
@@ -2828,12 +2876,12 @@ function EnrollmentForm() {
             onChange={handleTempMemberChange}
             placeholder="Enter first name"
             aria-required="true"
-            aria-invalid={!!errors.firstName}
-            aria-describedby={errors.firstName ? 'firstName-error' : undefined}
+            aria-invalid={!!errors.tempFirstName}
+            aria-describedby={errors.tempFirstName ? 'firstName-error' : undefined}
           />
-          {errors.firstName && (
+          {errors.tempFirstName && (
             <div id="firstName-error" className="error-message">
-              {errors.firstName}
+              {errors.tempFirstName}
             </div>
           )}
         </div>
@@ -2863,12 +2911,12 @@ function EnrollmentForm() {
             onChange={handleTempMemberChange}
             placeholder="Enter last name"
             aria-required="true"
-            aria-invalid={!!errors.lastName}
-            aria-describedby={errors.lastName ? 'lastName-error' : undefined}
+            aria-invalid={!!errors.tempLastName}
+            aria-describedby={errors.tempLastName ? 'lastName-error' : undefined}
           />
-          {errors.lastName && (
+          {errors.tempLastName && (
             <div id="lastName-error" className="error-message">
-              {errors.lastName}
+              {errors.tempLastName}
             </div>
           )}
         </div>
@@ -2887,12 +2935,12 @@ function EnrollmentForm() {
             value={youthMember.dateOfBirth}
             onChange={handleTempMemberChange}
             aria-required="true"
-            aria-invalid={!!errors.dateOfBirth}
-            aria-describedby={errors.dateOfBirth ? 'dateOfBirth-error' : undefined}
+            aria-invalid={!!errors.tempDateOfBirth}
+            aria-describedby={errors.tempDateOfBirth ? 'dateOfBirth-error' : undefined}
           />
-          {errors.dateOfBirth && (
+          {errors.tempDateOfBirth && (
             <div id="dateOfBirth-error" className="error-message">
-              {errors.dateOfBirth}
+              {errors.tempDateOfBirth}
             </div>
           )}
         </div>
@@ -2907,17 +2955,17 @@ function EnrollmentForm() {
             value={youthMember.gender}
             onChange={handleTempMemberChange}
             aria-required="true"
-            aria-invalid={!!errors.gender}
-            aria-describedby={errors.gender ? "gender-error" : undefined}
+            aria-invalid={!!errors.tempGender}
+            aria-describedby={errors.tempGender ? "gender-error" : undefined}
           >
             <option value="">Select gender</option>
             <option value="M">Male</option>
             <option value="F">Female</option>
             <option value="N">Prefer not to say</option>
           </select>
-          {errors.gender && (
+          {errors.tempGender && (
             <div id="gender-error" className="error-message">
-              {errors.gender}
+              {errors.tempGender}
             </div>
           )}
         </div>
@@ -2933,12 +2981,12 @@ function EnrollmentForm() {
             value={youthMember.email}
             onChange={handleTempMemberChange}
             placeholder="Enter email address"
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
+            aria-invalid={!!errors.tempEmail}
+            aria-describedby={errors.tempEmail ? "email-error" : undefined}
           />
-          {errors.email && (
+          {errors.tempEmail && (
             <div id="email-error" className="error-message">
-              {errors.email}
+              {errors.tempEmail}
             </div>
           )}
         </div>
@@ -2957,12 +3005,12 @@ function EnrollmentForm() {
             onChange={handleTempMemberChange}
             placeholder="Enter mobile phone"
             aria-required="true"
-            aria-invalid={!!errors.cellPhone}
-            aria-describedby={errors.cellPhone ? "cellPhone-error" : undefined}
+            aria-invalid={!!errors.tempCellPhone}
+            aria-describedby={errors.tempCellPhone ? "cellPhone-error" : undefined}
           />
-          {errors.cellPhone && (
+          {errors.tempCellPhone && (
             <div id="cellPhone-error" className="error-message">
-              {errors.cellPhone}
+              {errors.tempCellPhone}
             </div>
           )}
         </div>

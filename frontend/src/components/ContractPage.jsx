@@ -308,7 +308,7 @@ const ContractPage = () => {
         {key: 'racquetball', label: 'Racquetball'},
         {key: 'squash', label: 'Squash'},
         {key: 'tennis', label: 'Tennis'},
-        {key: 'childCare', label: 'Child Care'},
+        // {key: 'childCare', label: 'Child Care'}, // Temporarily removed until later phase
         {key: 'promoAllInclusive', label: 'Promo All Inclusive'}
       ];
       
@@ -1401,7 +1401,7 @@ const DenverContract = ({
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
           <p className="cancellation-text">COLORADO ATHLETIC CLUB (CAC) MONEY BACK GUARANTEE:</p>
-          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS ( MT) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
           <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of Colorado Athletic Club. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>
