@@ -542,8 +542,24 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Continue to payment page with all data
-      navigate('/payment', {
+      // Determine which payment processor to use based on club location
+      const isNewMexicoClub = selectedClub?.state === 'NM' || false;
+      const isColoradoClub = selectedClub?.state === 'CO' || selectedClub?.city?.toLowerCase().includes('denver') || false;
+      
+      let paymentRoute = '/payment'; // Default to standard payment
+      
+      if (isColoradoClub) {
+        // Route to FluidPay for Colorado/Denver clubs
+        paymentRoute = '/payment-fluidpay';
+      } else if (isNewMexicoClub) {
+        // Route to Converge for New Mexico clubs
+        paymentRoute = '/payment-converge';
+      }
+      
+      console.log(`Routing to ${paymentRoute} for club in ${selectedClub?.state} (${selectedClub?.city})`);
+      
+      // Continue to appropriate payment page with all data
+      navigate(paymentRoute, {
         state: {
           formData: formData,
           signatureData: signatureData,

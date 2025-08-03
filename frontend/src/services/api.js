@@ -46,34 +46,40 @@ const apiService = {
   // Get specialty membership bridge code
   getSpecialtyMembershipBridgeCode: async (clubId, specialtyMembership) => {
     try {
-      const response = await api.get('/enrollment/bridge-code', {
+      const response = await api.get("/enrollment/bridge-code", {
         params: {
           clubId,
-          specialtyMembership
-        }
+          specialtyMembership,
+        },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching bridge code:', error);
+      console.error("Error fetching bridge code:", error);
       throw error;
     }
   },
 
   // Get membership price
-  getMembershipPrice: async (clubId, membershipType, agreementType, specialtyMembership, bridgeCode) => {
+  getMembershipPrice: async (
+    clubId,
+    membershipType,
+    agreementType,
+    specialtyMembership,
+    bridgeCode
+  ) => {
     try {
-      const response = await api.get('/enrollment/price', {
+      const response = await api.get("/enrollment/price", {
         params: {
           clubId,
           membershipType,
           agreementType,
           specialtyMembership,
-          bridgeCode
-        }
+          bridgeCode,
+        },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching membership price:', error);
+      console.error("Error fetching membership price:", error);
       throw error;
     }
   },
@@ -81,12 +87,12 @@ const apiService = {
   // Get addons
   getAddons: async (clubId) => {
     try {
-      const response = await api.get('/enrollment/addons', {
-        params: { clubId }
+      const response = await api.get("/enrollment/addons", {
+        params: { clubId },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching addons:', error);
+      console.error("Error fetching addons:", error);
       throw error;
     }
   },
@@ -94,38 +100,46 @@ const apiService = {
   // Get credit card processor name for a club
   getCCProcessorName: async (clubId) => {
     try {
-      const response = await api.get('/payment/cc-processor', {
-        params: { clubId }
+      const response = await api.get("/payment/cc-processor", {
+        params: { clubId },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching CC processor name:', error);
+      console.error("Error fetching CC processor name:", error);
       throw error;
     }
   },
 
-  // Get FluidPay payment processor information
+  // Get FluidPay processor information for a club
   getFluidPayInfo: async (clubId) => {
     try {
-      const response = await api.get('/payment/fluidpay-info', {
-        params: { clubId }
+      const response = await api.get("/payment/fluidpay-info", {
+        params: { clubId },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching FluidPay info:', error);
-      throw error;
+      console.error("Error fetching FluidPay info:", error);
+      // Return fallback data for demo purposes
+      return {
+        success: true,
+        fluidPayInfo: {
+          merchant_id: "Demo FluidPay Merchant",
+          fluidpay_base_url: "https://api-sandbox.fluidpay.com",
+          fluidpay_api_key: "✓ Configured",
+        },
+      };
     }
   },
 
   // Get Converge payment processor information
   getConvergeInfo: async (clubId) => {
     try {
-      const response = await api.get('/payment/converge-info', {
-        params: { clubId }
+      const response = await api.get("/payment/converge-info", {
+        params: { clubId },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching Converge info:', error);
+      console.error("Error fetching Converge info:", error);
       throw error;
     }
   },
@@ -133,10 +147,10 @@ const apiService = {
   // Process a demo payment
   processPaymentDemo: async (paymentData) => {
     try {
-      const response = await api.post('/payment/process-demo', paymentData);
+      const response = await api.post("/payment/process-demo", paymentData);
       return response.data;
     } catch (error) {
-      console.error('Error processing demo payment:', error);
+      console.error("Error processing demo payment:", error);
       throw error;
     }
   },
@@ -144,12 +158,12 @@ const apiService = {
   // Get tax rate for New Mexico clubs
   getTaxRate: async (clubId) => {
     try {
-      const response = await api.get('/enrollment/tax-rate', {
-        params: { clubId }
+      const response = await api.get("/enrollment/tax-rate", {
+        params: { clubId },
       });
       return response.data;
     } catch (error) {
-      console.error('Error fetching tax rate:', error);
+      console.error("Error fetching tax rate:", error);
       throw error;
     }
   },
@@ -157,25 +171,25 @@ const apiService = {
   // Get a transaction token for Converge Lightbox
   getConvergeToken: async (tokenData) => {
     try {
-      const response = await api.post('/payment/converge-token', tokenData);
+      const response = await api.post("/payment/converge-token", tokenData);
       return response.data;
     } catch (error) {
-      console.error('Error getting Converge token:', error);
-      
+      console.error("Error getting Converge token:", error);
+
       // For demo purposes, simulate a token response
       // In production, you would never do this - tokens should only come from a secure backend
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn('DEMO MODE: Returning mock token for development');
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("DEMO MODE: Returning mock token for development");
         return {
           success: true,
           ssl_txn_auth_token: `DEMO_TOKEN_${Date.now()}`,
-          message: 'This is a simulated token for demonstration purposes only'
+          message: "This is a simulated token for demonstration purposes only",
         };
       }
-      
+
       throw error;
     }
-  }
+  },
 };
 
 export default apiService;

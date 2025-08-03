@@ -297,6 +297,8 @@ const ConvergeLightboxPayment = () => {
   // Demo mode state - true when in demo/simulation mode
   // PRODUCTION: Remove this demoMode state in production - always use the real integration
   const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
+  const [iframeUrl, setIframeUrl] = useState(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   // Cleanup event listener on unmount
   useEffect(() => {
@@ -538,21 +540,14 @@ const launchLightbox = async () => {
     if (demoMode) {
       console.log('Using demo/simulation mode for Converge Lightbox');
       
-      // DEMO MODE: Set up postMessage listener for simulation
-      // Remove any existing listener first to prevent duplicates
+      // Generate iframe URL for demo mode
+      const iframeUrl = `/converge-demo-iframe.html?token=${token}&amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
+      setIframeUrl(iframeUrl);
+      setIframeLoaded(true);
+      
+      // Set up postMessage listener for simulation
       window.removeEventListener('message', handleLightboxResponse);
       window.addEventListener('message', handleLightboxResponse, false);
-      
-      // Launch simulation
-      console.log('Calling simulateConvergeLightbox...');
-      window.simulateConvergeLightbox({
-        paymentFields: paymentFields,
-        onCancel: () => {
-          console.log('Payment cancelled');
-          setErrorMessage('Payment was cancelled.');
-          setIsSubmitting(false);
-        }
-      });
     } else {
       console.log('Using real Converge Lightbox integration');
       
@@ -885,10 +880,24 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
   };
   
   // Calculate monthly amount going forward
+  // Calculate monthly amount going forward (including addons and taxes)
   const calculateMonthlyAmount = () => {
-    if (!formData || !formData.membershipDetails) return 0;
+    if (!formData) return 0;
     
-    return formData.membershipDetails.price || 0;
+    const monthlyDues = parseFloat(formData.monthlyDues || 0);
+    const serviceAddons = formData.serviceAddons || [];
+    const addonsTotal = serviceAddons.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
+    
+    // Calculate tax if applicable (New Mexico clubs)
+    const isNewMexicoClub = selectedClub?.state === 'NM';
+    const taxRate = isNewMexicoClub ? (formData.taxRate || 0.07625) : 0;
+    const duesTax = isNewMexicoClub ? Number((monthlyDues * taxRate).toFixed(2)) : 0;
+    const addonsTax = isNewMexicoClub ? Number((addonsTotal * taxRate).toFixed(2)) : 0;
+    
+    // Gross monthly total includes dues + addons + taxes
+    const grossMonthlyTotal = monthlyDues + addonsTotal + duesTax + addonsTax;
+    
+    return grossMonthlyTotal;
   };
   
   if (!formData) {
@@ -939,8 +948,6 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
           </div>
         </div>
       )}
-      
-      <h1>Complete Your Membership with Converge</h1>
       
       {/* REMOVE THIS LINE - script is loaded dynamically */}
       {/* <script src="https://api.convergepay.com/hosted-payments/presentation.js"></script> */}
@@ -1095,6 +1102,19 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
               </p>
             </div>
           </div>
+          
+          {/* Iframe Container */}
+          {iframeLoaded && iframeUrl && (
+            <div className="converge-iframe-container">
+              <h3>Secure Payment Form</h3>
+              <iframe
+                src={iframeUrl}
+                title="Converge Payment Form"
+                onLoad={() => setIframeLoaded(true)}
+                style={{ width: '100%', height: '600px', border: '1px solid #ddd', borderRadius: '6px' }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>

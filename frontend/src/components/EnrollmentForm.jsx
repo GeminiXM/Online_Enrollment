@@ -2500,13 +2500,16 @@ function EnrollmentForm() {
                               onBlur={(e) => {
                                 if (e.target.value) {
                                   const ageError = validateChildAge(e.target.value);
-                                  if (ageError) {
-                                    setErrors(prev => {
-                                      const newErrors = {...prev};
+                                  setErrors(prev => {
+                                    const newErrors = {...prev};
+                                    if (ageError) {
                                       newErrors[`child${index}DateOfBirth`] = ageError;
-                                      return newErrors;
-                                    });
-                                  }
+                                    } else {
+                                      // Clear the error if validation passes
+                                      delete newErrors[`child${index}DateOfBirth`];
+                                    }
+                                    return newErrors;
+                                  });
                                 }
                               }}
                               required
@@ -2690,13 +2693,16 @@ function EnrollmentForm() {
                               onBlur={(e) => {
                                 if (e.target.value) {
                                   const ageError = validateChildAge(e.target.value);
-                                  if (ageError) {
-                                    setErrors(prev => {
-                                      const newErrors = {...prev};
+                                  setErrors(prev => {
+                                    const newErrors = {...prev};
+                                    if (ageError) {
                                       newErrors[`child${index}DateOfBirth`] = ageError;
-                                      return newErrors;
-                                    });
-                                  }
+                                    } else {
+                                      // Clear the error if validation passes
+                                      delete newErrors[`child${index}DateOfBirth`];
+                                    }
+                                    return newErrors;
+                                  });
                                 }
                               }}
                               required

@@ -8,6 +8,7 @@ import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
 import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
+import FluidPayPayment from "./components/FluidPayPayment.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 
@@ -85,21 +86,26 @@ function AppContent() {
         </div>
       </header>
       <main>
-      <Routes>
-        {/* Define your routes here */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/index.html" element={<LandingPage />} /> {/* Add explicit index.html route */}
-        <Route path="/enrollment" element={<EnrollmentForm />} />
-        <Route path="/contract" element={<ContractPage />} />
-        <Route path="/payment" element={<PaymentPage />} />
-        <Route path="/payment-converge" element={<ConvergeLightboxPayment />} />
-        <Route
-          path="/enrollment-confirmation"
-          element={<EnrollmentConfirmation />}
-        />
-        <Route path="/payment-demo" element={<PaymentProcessorDemo />} />
-        {/* Add more routes as needed */}
-      </Routes>
+        <Routes>
+          {/* Define your routes here */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/index.html" element={<LandingPage />} />{" "}
+          {/* Add explicit index.html route */}
+          <Route path="/enrollment" element={<EnrollmentForm />} />
+          <Route path="/contract" element={<ContractPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route
+            path="/payment-converge"
+            element={<ConvergeLightboxPayment />}
+          />
+          <Route path="/payment-fluidpay" element={<FluidPayPayment />} />
+          <Route
+            path="/enrollment-confirmation"
+            element={<EnrollmentConfirmation />}
+          />
+          <Route path="/payment-demo" element={<PaymentProcessorDemo />} />
+          {/* Add more routes as needed */}
+        </Routes>
       </main>
       <footer>
         <p>&copy; {new Date().getFullYear()} Wellbridge Enrollment System</p>
