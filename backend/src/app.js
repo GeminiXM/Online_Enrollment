@@ -18,26 +18,27 @@ dotenv.config();
 const app = express();
 
 // Set port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // Middleware
 app.use(helmet()); // Security headers
 app.use(
   cors({
     // Allow specific origins in production, or all origins in development
-    origin: process.env.NODE_ENV === 'production' 
-      ? function(origin, callback) {
-          const allowedOrigins = process.env.CORS_ORIGIN.split(',');
-          // Allow requests with no origin (like mobile apps or curl requests)
-          if(!origin) return callback(null, true);
-          if(allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-          } else {
-            callback(new Error('Not allowed by CORS'));
+    origin:
+      process.env.NODE_ENV === "production"
+        ? function (origin, callback) {
+            const allowedOrigins = process.env.CORS_ORIGIN.split(",");
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.indexOf(origin) !== -1) {
+              callback(null, true);
+            } else {
+              callback(new Error("Not allowed by CORS"));
+            }
           }
-        }
-      : true,
-    credentials: true
+        : true,
+    credentials: true,
   })
 );
 app.use(express.json()); // Parse JSON bodies

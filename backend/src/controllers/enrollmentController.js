@@ -3,6 +3,7 @@ import logger from "../utils/logger.js";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import emailService from "../services/emailService.js";
 
 // Get the current file's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -1255,6 +1256,46 @@ export const submitEnrollment = async (req, res) => {
       errorMessage = isRstransError
         ? "Production migration pending - procedure needs internal variable fix"
         : "Production migration pending - procedure not yet created in database";
+    }
+
+    // Send welcome email with contract PDF
+    try {
+      // Convert the contract PDF buffer from frontend
+      let contractPDFBuffer = null;
+      if (req.body.contractPDF) {
+        // Convert ArrayBuffer to Buffer
+        contractPDFBuffer = Buffer.from(req.body.contractPDF);
+      }
+
+      const emailSent = await emailService.sendWelcomeEmail(
+        {
+          custCode: updatedCustCode,
+          transactionId: transactionId,
+          amountBilled: req.body.amountBilled || 0,
+        },
+        req.body,
+        req.body.signatureData || {},
+        contractPDFBuffer,
+        req.body.selectedClub || null
+      );
+
+      if (emailSent) {
+        logger.info(
+          "Welcome email sent successfully for membership:",
+          updatedCustCode
+        );
+      } else {
+        logger.warn(
+          "Failed to send welcome email for membership:",
+          updatedCustCode
+        );
+      }
+    } catch (emailError) {
+      logger.error("Error sending welcome email:", {
+        error: emailError.message,
+        membershipNumber: updatedCustCode,
+      });
+      // Don't fail the enrollment if email fails
     }
 
     res.status(200).json({

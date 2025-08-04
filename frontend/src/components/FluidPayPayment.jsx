@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
+import CanvasContractPDF from './CanvasContractPDF.jsx';
 import './FluidPayPayment.css';
 
 // Credit Card Logo SVGs
@@ -84,6 +85,15 @@ const FluidPayPayment = () => {
   // Demo mode state
   const [demoMode, setDemoMode] = useState(true);
   
+  // Use ref to track current formData value
+  const formDataRef = useRef(null);
+  
+  // Monitor formData changes
+  useEffect(() => {
+    console.log('formData changed in FluidPayPayment:', formData);
+    formDataRef.current = formData;
+  }, [formData]);
+  
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
     let currentFormData = null;
@@ -157,6 +167,7 @@ const FluidPayPayment = () => {
     }
     
     // Set the form data
+    console.log('Setting formData in FluidPayPayment:', currentFormData);
     setFormData(currentFormData);
     
     // Set customer info from form data
@@ -262,7 +273,7 @@ const FluidPayPayment = () => {
       // In production, this would call your backend to generate a secure iframe URL
       // For demo purposes, we'll simulate the iframe URL generation
       const iframeUrl = demoMode 
-        ? `/fluidpay-demo-iframe.html?amount=${amount.toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`
+        ? `/online-enrollment/fluidpay-demo-iframe.html?amount=${amount.toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`
         : `${processorInfo?.fluidpay_base_url}/payment-form?token=${Date.now()}&amount=${amount.toFixed(2)}`;
       
       setIframeUrl(iframeUrl);
@@ -283,6 +294,7 @@ const FluidPayPayment = () => {
   
   // Handle iframe message (for demo mode)
   const handleIframeMessage = (event) => {
+    console.log('Iframe message received:', event.data);
     if (demoMode && event.data && event.data.type === 'fluidpay-payment') {
       const { success, transactionId, error } = event.data;
       
@@ -298,7 +310,21 @@ const FluidPayPayment = () => {
         
         setTimeout(() => {
           setShowResultPopup(false);
-          finishEnrollment({ transactionId, processor: 'FLUIDPAY' });
+          // Ensure formData is available before calling finishEnrollment
+          if (formDataRef.current) {
+            finishEnrollment({ transactionId, processor: 'FLUIDPAY' });
+          } else {
+            console.error('formData not available, retrying in 1 second...');
+            setTimeout(() => {
+              if (formDataRef.current) {
+                finishEnrollment({ transactionId, processor: 'FLUIDPAY' });
+              } else {
+                console.error('formData still not available after retry');
+                setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+                setIsSubmitting(false);
+              }
+            }, 1000);
+          }
         }, 3000);
       } else {
         setPaymentResult({
@@ -317,9 +343,24 @@ const FluidPayPayment = () => {
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {
     try {
+      console.log('finishEnrollment called with paymentResult:', paymentResult);
+      console.log('formData:', formDataRef.current);
+      
+      // Check if formData is available
+      if (!formDataRef.current) {
+        console.error('formData is null, cannot complete enrollment');
+        setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // For now, let's skip the PDF generation to focus on the enrollment form issue
+      const contractPDFBuffer = null;
+
       const submissionData = {
-        ...formData,
+        ...formDataRef.current,
         signatureData: signatureData,
+        contractPDF: contractPDFBuffer, // Include the PDF buffer
         paymentInfo: {
           processorName: 'FLUIDPAY',
           transactionId: paymentResult.transactionId,
@@ -328,7 +369,7 @@ const FluidPayPayment = () => {
         }
       };
       
-      console.log('Submitting enrollment data:', submissionData);
+      console.log('Submitting enrollment data with contract PDF');
       
       const response = await api.post('/enrollment', submissionData);
       
@@ -337,13 +378,13 @@ const FluidPayPayment = () => {
       navigate('/enrollment-confirmation', { 
         state: { 
           enrollmentData: response.data,
-          memberName: `${formData.firstName} ${formData.lastName}`,
-          successMessage: `Welcome ${formData.firstName} ${formData.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.custCode} to take the next steps in your membership journey.`,
+          memberName: `${formDataRef.current.firstName} ${formDataRef.current.lastName}`,
+          successMessage: `Welcome ${formDataRef.current.firstName} ${formDataRef.current.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.custCode} to take the next steps in your membership journey.`,
           paymentResponse: paymentResult,
-          formData: formData,
+          formData: formDataRef.current,
           signatureData: signatureData,
           initialedSections: initialedSections,
-          email: formData.email,
+          email: formDataRef.current.email,
           amountBilled: amountBilled,
           membershipNumber: response.data.custCode,
           transactionId: response.data.transactionId
@@ -351,7 +392,14 @@ const FluidPayPayment = () => {
       });
     } catch (error) {
       console.error('Enrollment submission error:', error);
-      setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
+      
+      // Check if it's a backend error (500 status)
+      if (error.response && error.response.status === 500) {
+        setErrorMessage('Payment was processed successfully, but there was a server error saving your enrollment. Please contact customer support with your transaction ID: ' + paymentResult.transactionId);
+      } else {
+        setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
+      }
+      
       setIsSubmitting(false);
     }
   };

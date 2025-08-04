@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
+import CanvasContractPDF from './CanvasContractPDF.jsx';
 import './ConvergeLightboxPayment.css';
 import './SignatureSelector.css'; // Import Google Fonts for signatures
 
@@ -541,7 +542,7 @@ const launchLightbox = async () => {
       console.log('Using demo/simulation mode for Converge Lightbox');
       
       // Generate iframe URL for demo mode
-      const iframeUrl = `/converge-demo-iframe.html?token=${token}&amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
+      const iframeUrl = `/online-enrollment/converge-demo-iframe.html?token=${token}&amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
       setIframeUrl(iframeUrl);
       setIframeLoaded(true);
       
@@ -652,7 +653,21 @@ const handleLightboxResponse = (event) => {
       // Wait a moment then process enrollment
       setTimeout(() => {
         setShowResultPopup(false);
-        finishEnrollment(response);
+        // Ensure formData is available before calling finishEnrollment
+        if (formData) {
+          finishEnrollment(response);
+        } else {
+          console.error('formData not available, retrying in 1 second...');
+          setTimeout(() => {
+            if (formData) {
+              finishEnrollment(response);
+            } else {
+              console.error('formData still not available after retry');
+              setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+              setIsSubmitting(false);
+            }
+          }, 1000);
+        }
       }, 3000);
       
     } else {
@@ -748,6 +763,17 @@ if (typeof window !== 'undefined') {
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {
     try {
+      // Check if formData is available
+      if (!formData) {
+        console.error('formData is null, cannot complete enrollment');
+        setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // For now, let's skip the PDF generation to focus on the enrollment form issue
+      const contractPDFBuffer = null;
+
       // Extract card information from payment result
       const cardNumber = paymentResult.ssl_card_number || "";
       const last4 = cardNumber.slice(-4);
@@ -762,6 +788,8 @@ if (typeof window !== 'undefined') {
         ...formData,
         // Add signature data
         signatureData: signatureData,
+        // Add contract PDF
+        contractPDF: contractPDFBuffer,
         // Add payment data
         paymentInfo: {
           processorName: 'CONVERGE',

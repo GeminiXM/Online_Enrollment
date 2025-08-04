@@ -13,6 +13,7 @@ import {
   getTaxRate,
 } from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
+import emailService from "../services/emailService.js";
 
 const router = express.Router();
 
@@ -425,6 +426,83 @@ router.get("/tax-rate", async (req, res) => {
       success: false,
       message:
         "An error occurred while retrieving the tax rate. Please try again later.",
+    });
+  }
+});
+
+// Test email route (for development only)
+router.post("/test-email", async (req, res) => {
+  try {
+    const testData = {
+      custCode: "TEST123456",
+      transactionId: "TXN789012",
+      amountBilled: 99.99,
+    };
+
+    const testFormData = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "mmoore@wellbridge.com",
+      membershipType: "Basic Membership",
+      club: "Wellbridge Test Club",
+      address: "123 Test St",
+      city: "Denver",
+      state: "CO",
+      zipCode: "80202",
+      cellPhone: "555-123-4567",
+      dateOfBirth: "1990-01-01",
+      monthlyDues: 49.99,
+      serviceAddons: [
+        { name: "Personal Training", price: 25.0 },
+        { name: "Group Classes", price: 15.0 },
+      ],
+      paymentInfo: {
+        processorName: "FLUIDPAY",
+      },
+    };
+
+    const testSignatureData = {
+      signature: { text: "John Doe" },
+      initials: { text: "JD" },
+      selectedFont: { font: "'Great Vibes', cursive" },
+    };
+
+    const testSelectedClub = {
+      name: "Wellbridge Test Club",
+      state: "CO",
+      city: "Denver",
+    };
+
+    // Create a simple mock PDF buffer for testing
+    const mockPdfBuffer = Buffer.from(
+      "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n72 720 Td\n(Test PDF) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000204 00000 n \ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n297\n%%EOF\n",
+      "binary"
+    );
+
+    const emailSent = await emailService.sendWelcomeEmail(
+      testData,
+      testFormData,
+      testSignatureData,
+      mockPdfBuffer, // Include mock PDF for testing
+      testSelectedClub
+    );
+
+    if (emailSent) {
+      res.status(200).json({
+        success: true,
+        message: "Test email sent successfully",
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: "Failed to send test email",
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error sending test email",
+      error: error.message,
     });
   }
 });

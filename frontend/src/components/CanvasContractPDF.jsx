@@ -267,6 +267,33 @@ function formatFirstOfNextMonthMMDDYYYY(dateString) {
     try {
       setIsGenerating(true);
       
+      const pdfBuffer = await generatePDFBuffer();
+      
+      // Save the PDF file
+      const fileName = `${formData.lastName || 'Member'}_${formData.firstName || ''}_membership_agreement.pdf`;
+      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      setIsGenerating(false);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      setIsGenerating(false);
+      alert(`Canvas PDF Generation Error: ${error.message || 'Unknown error'}`);
+    }
+  };
+
+  const generatePDFBuffer = async () => {
+    if (!formData || !signatureData) {
+      throw new Error("Missing required data for PDF generation");
+    }
+    
+    try {
+      
       // Create new jsPDF instance
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -1950,15 +1977,12 @@ if (currentYPos > pdf.internal.pageSize.getHeight() - 20) {
           // Debug output to see what's in familyMembers
           console.log("Family members data for PDF:", formData.familyMembers);
           
-          // Save the PDF file
-          const fileName = `${formData.lastName || 'Member'}_${formData.firstName || ''}_membership_agreement.pdf`;
-      pdf.save(fileName);
-      
-      setIsGenerating(false);
+          // Return the PDF as a buffer
+          return pdf.output('arraybuffer');
+          
     } catch (error) {
       console.error('Error generating PDF:', error);
-      setIsGenerating(false);
-      alert(`Canvas PDF Generation Error: ${error.message || 'Unknown error'}`);
+      throw new Error(`Canvas PDF Generation Error: ${error.message || 'Unknown error'}`);
     }
   };
   
