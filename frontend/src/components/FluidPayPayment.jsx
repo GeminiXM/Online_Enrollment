@@ -227,6 +227,11 @@ const FluidPayPayment = () => {
   const calculateProratedAmount = () => {
     if (!formData) return 0;
     
+    // Use the totalCollected field if available, otherwise calculate from components
+    if (formData.totalCollected) {
+      return parseFloat(formData.totalCollected);
+    }
+    
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
@@ -360,6 +365,7 @@ const FluidPayPayment = () => {
       const submissionData = {
         ...formDataRef.current,
         signatureData: signatureData,
+        selectedClub: selectedClub,
         contractPDF: contractPDFBuffer, // Include the PDF buffer
         paymentInfo: {
           processorName: 'FLUIDPAY',

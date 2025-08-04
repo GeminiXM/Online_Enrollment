@@ -78,6 +78,13 @@ class EmailService {
     selectedClub
   ) {
     try {
+      // Log the selectedClub data for debugging
+      logger.info("Email service received selectedClub:", {
+        selectedClub: selectedClub,
+        clubName: selectedClub?.name,
+        clubAddress: selectedClub?.address,
+        clubId: selectedClub?.id,
+      });
       // Use the contract PDF buffer from frontend
       let pdfBuffer = null;
       if (contractPDFBuffer) {
@@ -108,7 +115,7 @@ class EmailService {
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background-color: #f8f9fa; padding: 20px; text-align: center;">
             <h1 style="color: #2c3e50; margin: 0;">Welcome to ${
-              formData.club || selectedClub?.name || "Wellbridge"
+              selectedClub?.name || formData.club || "Wellbridge"
             }!</h1>
           </div>
           
@@ -135,10 +142,10 @@ class EmailService {
                   formData.requestedStartDate || new Date().toLocaleDateString()
                 }</li>
                 <li><strong>Home Club:</strong> ${
-                  formData.club || selectedClub?.name || "Wellbridge"
+                  selectedClub?.name || formData.club || "Wellbridge"
                 }</li>
-                <li><strong>Payment Processor:</strong> ${
-                  formData.paymentInfo?.processorName || "N/A"
+                <li><strong>Club Address:</strong> ${
+                  selectedClub?.address || "Address not available"
                 }</li>
                 <li><strong>Amount Paid:</strong> $${
                   enrollmentData.amountBilled || 0
@@ -158,9 +165,11 @@ class EmailService {
             
             <h3>What's Next?</h3>
             <ol>
-              <li><strong>Visit the Club:</strong> Bring a photo ID and your membership number to complete your registration.</li>
+              <li><strong>Visit the Club:</strong> Bring a photo ID and your membership number to complete your registration at ${
+                selectedClub?.address || "our club location"
+              }.</li>
               <li><strong>Orientation:</strong> Schedule a free orientation session to learn about our facilities and programs.</li>
-              <li><strong>Download Our App:</strong> Access your membership details, book classes, and track your progress.</li>
+              
             </ol>
             
             <h3>Important Information</h3>
@@ -168,7 +177,10 @@ class EmailService {
               <li>Your membership agreement is attached to this email for your records.</li>
               <li>Monthly dues will be automatically charged to your payment method.</li>
               <li>Please review our club rules and policies available on our website.</li>
-              <li>For any questions, contact us at support@wellbridge.com or call (555) 123-4567.</li>
+              <li>For any questions, contact us at ma@wellbridge.com or call (303) 866-0800.</li>
+              <li>Club Location: ${
+                selectedClub?.address || "Address not available"
+              }</li>
             </ul>
             
             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
@@ -180,7 +192,7 @@ class EmailService {
             <p>We look forward to helping you achieve your fitness goals!</p>
             
             <p>Best regards,<br>
-            The ${formData.club || selectedClub?.name || "Wellbridge"} Team</p>
+            The ${selectedClub?.name || formData.club || "Wellbridge"} Team</p>
           </div>
           
           <div style="background-color: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 12px;">
@@ -195,9 +207,9 @@ class EmailService {
       const mailOptions = {
         from: process.env.SMTP_FROM || "noreply@yourclub.com",
         to: formData.email,
-        subject: `Welcome to ${formData.club || "Our Club"} - Membership #${
-          enrollmentData.custCode
-        }`,
+        subject: `Welcome to ${
+          selectedClub?.name || formData.club || "Our Club"
+        } - Membership #${enrollmentData.custCode}`,
         html: emailContent,
         attachments: pdfBuffer
           ? [

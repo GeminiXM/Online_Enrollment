@@ -473,6 +473,8 @@ const PaymentPage = () => {
         ...formData,
         // Add signature data
         signatureData: signatureData,
+        // Add selected club data
+        selectedClub: selectedClub,
         // Add payment data
         paymentInfo: {
           ...paymentFormData,

@@ -1267,6 +1267,14 @@ export const submitEnrollment = async (req, res) => {
         contractPDFBuffer = Buffer.from(req.body.contractPDF);
       }
 
+      // Log the selectedClub data for debugging
+      logger.info("Selected club data for email:", {
+        selectedClub: req.body.selectedClub,
+        clubName: req.body.selectedClub?.name,
+        clubAddress: req.body.selectedClub?.address,
+        clubId: req.body.selectedClub?.id,
+      });
+
       const emailSent = await emailService.sendWelcomeEmail(
         {
           custCode: updatedCustCode,

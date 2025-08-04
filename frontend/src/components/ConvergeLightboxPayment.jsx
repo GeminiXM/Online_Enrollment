@@ -788,6 +788,8 @@ if (typeof window !== 'undefined') {
         ...formData,
         // Add signature data
         signatureData: signatureData,
+        // Add selected club data
+        selectedClub: selectedClub,
         // Add contract PDF
         contractPDF: contractPDFBuffer,
         // Add payment data
