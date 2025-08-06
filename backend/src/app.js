@@ -147,13 +147,17 @@ app.post("/api/save-contract", uploadAny.any(), (req, res) => {
       filesCount: req.files.length,
     });
 
-    // Generate proper filename
+    // Generate proper filename: mm-dd-yyyy member# first name last name ONLINE.pdf
     const memberId = req.body.memberId || "unknown";
     const firstName = req.body.firstName || "";
     const lastName = req.body.lastName || "";
     const date = req.body.date || new Date().toISOString().split("T")[0];
 
-    const properFileName = `${memberId}_${firstName}_${lastName}_${date}.pdf`;
+    // Convert date from YYYY-MM-DD to MM-DD-YYYY format
+    const dateParts = date.split("-");
+    const formattedDate = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
+
+    const properFileName = `${formattedDate} ${memberId} ${firstName} ${lastName} ONLINE.pdf`;
 
     // Rename the uploaded file
     const uploadedFile = req.files[0];

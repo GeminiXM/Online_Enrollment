@@ -192,9 +192,39 @@ class EmailService {
         clubId: selectedClub?.id,
       });
 
-      // Contract PDF is now saved in EnrollmentConfirmation.jsx with proper naming
-      // Removed contract saving from here to avoid duplicate files
+      // Find the contract PDF file that was created in the backend contracts folder
       let contractFilePath = null;
+      try {
+        const contractsDir = path.join(__dirname, "../contracts");
+        const memberId = enrollmentData.custCode;
+        const firstName = formData.firstName || "";
+        const lastName = formData.lastName || "";
+        const date = new Date().toISOString().split("T")[0];
+
+        // Convert date from YYYY-MM-DD to MM-DD-YYYY format
+        const dateParts = date.split("-");
+        const formattedDate = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
+
+        // Look for the contract file with the new naming format
+        const expectedFileName = `${formattedDate} ${memberId} ${firstName} ${lastName} ONLINE.pdf`;
+        const expectedFilePath = path.join(contractsDir, expectedFileName);
+
+        if (fs.existsSync(expectedFilePath)) {
+          contractFilePath = expectedFilePath;
+          logger.info("Found contract file for email attachment:", {
+            filepath: contractFilePath,
+            memberName: `${formData.firstName} ${formData.lastName}`,
+          });
+        } else {
+          logger.warn("Contract file not found for email attachment:", {
+            expectedFilePath,
+            memberId,
+            memberName: `${formData.firstName} ${formData.lastName}`,
+          });
+        }
+      } catch (error) {
+        logger.error("Error finding contract file for email:", error);
+      }
 
       // Email content
       const emailContent = `
@@ -300,7 +330,7 @@ class EmailService {
         attachments: contractFilePath
           ? [
               {
-                filename: `Membership_Agreement_${enrollmentData.custCode}.pdf`,
+                filename: `${formData.firstName} ${formData.lastName} - Membership Agreement.pdf`,
                 path: contractFilePath,
                 contentType: "application/pdf",
               },

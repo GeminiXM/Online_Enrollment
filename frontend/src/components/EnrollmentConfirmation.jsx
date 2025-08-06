@@ -134,6 +134,31 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
 
         if (response.ok) {
           console.log('Contract saved successfully to server');
+          
+          // Send welcome email with contract attachment
+          try {
+            const emailResponse = await fetch('/api/enrollment/send-welcome-email', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                membershipNumber,
+                firstName,
+                lastName,
+                email: formData.email,
+                selectedClub
+              }),
+            });
+            
+            if (emailResponse.ok) {
+              console.log('Welcome email sent successfully');
+            } else {
+              console.error('Failed to send welcome email');
+            }
+          } catch (emailError) {
+            console.error('Error sending welcome email:', emailError);
+          }
         } else {
           console.error('Failed to save contract to server');
         }

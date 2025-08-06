@@ -444,6 +444,78 @@ router.post("/save-contract", async (req, res) => {
   });
 });
 
+// Send welcome email with contract attachment
+router.post("/send-welcome-email", async (req, res) => {
+  try {
+    const { membershipNumber, firstName, lastName, email, selectedClub } =
+      req.body;
+
+    if (!membershipNumber || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "Membership number and email are required",
+      });
+    }
+
+    // Create mock enrollment data for email
+    const enrollmentData = {
+      custCode: membershipNumber,
+      transactionId: `TXN${Date.now()}`,
+      amountBilled: 0, // This will be calculated from the form data
+    };
+
+    // Create mock form data for email
+    const formData = {
+      firstName,
+      lastName,
+      email,
+      membershipType: "Individual Membership",
+      club: selectedClub?.name || "Wellbridge",
+      requestedStartDate: new Date().toLocaleDateString(),
+      monthlyDues: 0, // This will be calculated
+    };
+
+    // Send welcome email with contract attachment
+    const emailSent = await emailService.sendWelcomeEmail(
+      enrollmentData,
+      formData,
+      {}, // signatureData (not needed for email)
+      null, // contractPDFBuffer (will be found from file)
+      selectedClub
+    );
+
+    if (emailSent) {
+      logger.info("Welcome email sent successfully from confirmation page:", {
+        membershipNumber,
+        email,
+      });
+      return res.status(200).json({
+        success: true,
+        message: "Welcome email sent successfully",
+      });
+    } else {
+      logger.error("Failed to send welcome email from confirmation page:", {
+        membershipNumber,
+        email,
+      });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send welcome email",
+      });
+    }
+  } catch (error) {
+    logger.error("Error sending welcome email from confirmation page:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while sending the welcome email",
+      error: error.message,
+    });
+  }
+});
+
 // Test email route (for development only)
 router.post("/test-email", async (req, res) => {
   try {

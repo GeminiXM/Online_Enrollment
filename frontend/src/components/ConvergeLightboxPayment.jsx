@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import CanvasContractPDF from './CanvasContractPDF.jsx';
-import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
+// import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './ConvergeLightboxPayment.css';
 import './SignatureSelector.css'; // Import Google Fonts for signatures
 
@@ -772,36 +772,9 @@ if (typeof window !== 'undefined') {
         return;
       }
       
-      // Generate contract PDF buffer
-      let contractPDFBuffer = null;
-      try {
-        const signatureDate = new Date().toLocaleDateString();
-        const membershipPrice = formData.membershipDetails?.price || formData.monthlyDues;
-        
-        contractPDFBuffer = await generateContractPDFBuffer(
-          formData,
-          signatureData,
-          signatureDate,
-          initialedSections,
-          selectedClub,
-          membershipPrice
-        );
-        
-        console.log('Contract PDF generated successfully');
-        console.log('PDF buffer type:', typeof contractPDFBuffer);
-        console.log('PDF buffer length:', contractPDFBuffer?.byteLength || 0);
-      } catch (pdfError) {
-        console.error('Error generating contract PDF:', pdfError);
-        // Continue without PDF if generation fails
-      }
-
-      // Convert ArrayBuffer to array for JSON serialization
+      // Contract PDF is now generated in EnrollmentConfirmation.jsx with proper naming
+      // Removed contract generation from here to speed up navigation
       let contractPDFArray = null;
-      if (contractPDFBuffer) {
-        const uint8Array = new Uint8Array(contractPDFBuffer);
-        contractPDFArray = Array.from(uint8Array);
-        console.log('Converted to array, length:', contractPDFArray.length);
-      }
 
       // Extract card information from payment result
       const cardNumber = paymentResult.ssl_card_number || "";
@@ -819,8 +792,7 @@ if (typeof window !== 'undefined') {
         signatureData: signatureData,
         // Add selected club data
         selectedClub: selectedClub,
-        // Add contract PDF as array
-        contractPDF: contractPDFArray,
+        // Contract PDF is now generated in EnrollmentConfirmation.jsx
         // Add payment data
         paymentInfo: {
           processorName: 'CONVERGE',

@@ -1283,52 +1283,8 @@ export const submitEnrollment = async (req, res) => {
       // Don't fail the enrollment if contract saving fails
     }
 
-    // Send welcome email with contract PDF (optional - can be disabled)
-    try {
-      // Get the contract PDF buffer from frontend (reuse the same buffer)
-      let contractPDFBuffer = null;
-      if (req.body.contractPDF) {
-        contractPDFBuffer = req.body.contractPDF;
-      }
-
-      // Log the selectedClub data for debugging
-      logger.info("Selected club data for email:", {
-        selectedClub: req.body.selectedClub,
-        clubName: req.body.selectedClub?.name,
-        clubAddress: req.body.selectedClub?.address,
-        clubId: req.body.selectedClub?.id,
-      });
-
-      const emailSent = await emailService.sendWelcomeEmail(
-        {
-          custCode: updatedCustCode,
-          transactionId: transactionId,
-          amountBilled: req.body.amountBilled || 0,
-        },
-        req.body,
-        req.body.signatureData || {},
-        contractPDFBuffer,
-        req.body.selectedClub || null
-      );
-
-      if (emailSent) {
-        logger.info(
-          "Welcome email sent successfully for membership:",
-          updatedCustCode
-        );
-      } else {
-        logger.warn(
-          "Failed to send welcome email for membership:",
-          updatedCustCode
-        );
-      }
-    } catch (emailError) {
-      logger.error("Error sending welcome email:", {
-        error: emailError.message,
-        membershipNumber: updatedCustCode,
-      });
-      // Don't fail the enrollment if email fails
-    }
+    // Welcome email is now sent from EnrollmentConfirmation.jsx after contract is created
+    // Removed email sending from here to ensure contract file exists before sending email
 
     res.status(200).json({
       success: true,
