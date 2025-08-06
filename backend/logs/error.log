@@ -1530,3 +1530,137 @@
 2025-08-04 15:22:47:2247 [31merror[39m: [31mError connecting to database:[39m
 2025-08-04 15:22:47:2247 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
 2025-08-04 15:22:47:2247 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:30:33:3033 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:39:44:3944 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:41:41:4141 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:46:51:4651 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:47:55:4755 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError executing query:[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 15:55:15:5515 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 15:56:08:568 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:02:34:234 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:02:56:256 [31merror[39m: [31mError connecting to database:[39m
+2025-08-04 16:02:56:256 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-04 16:02:56:256 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-04 16:03:41:341 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:07:04:74 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:07:55:755 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:11:33:1133 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:12:22:1222 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:22:19:2219 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:23:39:2339 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:32:10:3210 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:33:28:3328 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:34:20:3420 [31merror[39m: [31mGenerated buffer does not appear to be a valid PDF[39m
+2025-08-04 16:34:21:3421 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:36:32:3632 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:37:30:3730 [31merror[39m: [31mGenerated buffer does not appear to be a valid PDF[39m
+2025-08-04 16:37:31:3731 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError executing query:[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 16:55:19:5519 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 16:57:20:5720 [31merror[39m: [31mGenerated buffer does not appear to be a valid PDF[39m
+2025-08-04 16:59:25:5925 [31merror[39m: [31mrequest entity too large[39m
+2025-08-04 17:01:00:10 [31merror[39m: [31mrequest entity too large[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError executing query:[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError executing query:[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 17:10:43:1043 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 17:11:47:1147 [31merror[39m: [31mGenerated buffer does not appear to be a valid PDF[39m
+2025-08-04 17:11:48:1148 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError executing query:[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError executing query:[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-04 17:15:32:1532 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-04 17:17:47:1747 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-04 17:27:11:2711 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:00:15:015 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:00:32:032 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:02:18:218 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError executing query:[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-05 17:08:23:823 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-05 17:12:38:1238 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 19:22:08:228 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 20:03:10:310 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 20:21:35:2135 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 20:36:42:3642 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 20:44:24:4424 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 20:55:27:5527 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 21:01:18:118 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 21:07:18:718 [31merror[39m: [31mError sending welcome email:[39m
+2025-08-05 21:14:44:1444 [31merror[39m: [31mError sending welcome email:[39m

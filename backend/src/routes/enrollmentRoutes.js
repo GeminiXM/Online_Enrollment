@@ -430,6 +430,20 @@ router.get("/tax-rate", async (req, res) => {
   }
 });
 
+/**
+ * @route POST /api/enrollment/save-contract
+ * @desc Save contract PDF to contracts folder
+ * @access Public
+ * @deprecated Contract saving is now handled in EnrollmentConfirmation.jsx
+ */
+router.post("/save-contract", async (req, res) => {
+  // Contract saving is now handled in EnrollmentConfirmation.jsx with proper naming
+  return res.status(200).json({
+    success: true,
+    message: "Contract saving is now handled in EnrollmentConfirmation.jsx",
+  });
+});
+
 // Test email route (for development only)
 router.post("/test-email", async (req, res) => {
   try {

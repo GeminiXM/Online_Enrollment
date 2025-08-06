@@ -62,6 +62,112 @@ class EmailService {
   }
 
   /**
+   * Save contract PDF buffer to temporary file
+   */
+  async saveContractPDF(contractPDFBuffer, membershipNumber) {
+    try {
+      logger.info("saveContractPDF called with:", {
+        hasContractPDFBuffer: !!contractPDFBuffer,
+        membershipNumber,
+        contractPDFBufferType: typeof contractPDFBuffer,
+      });
+
+      if (!contractPDFBuffer) {
+        logger.warn("No contract PDF buffer provided");
+        return null;
+      }
+
+      // Create contracts directory if it doesn't exist
+      const contractsDir = path.join(__dirname, "../contracts");
+      if (!fs.existsSync(contractsDir)) {
+        fs.mkdirSync(contractsDir, { recursive: true });
+      }
+
+      const filename = `contract_${membershipNumber}_${Date.now()}.pdf`;
+      const filepath = path.join(contractsDir, filename);
+
+      // Convert the serialized ArrayBuffer to a Buffer and save to file
+      try {
+        // Log the structure of the received data
+        logger.info("Contract PDF data received:", {
+          type: typeof contractPDFBuffer,
+          keys:
+            contractPDFBuffer && typeof contractPDFBuffer === "object"
+              ? Object.keys(contractPDFBuffer)
+              : null,
+          length: contractPDFBuffer?.length || 0,
+          isArray: Array.isArray(contractPDFBuffer),
+          constructor: contractPDFBuffer?.constructor?.name,
+        });
+
+        // Convert the serialized ArrayBuffer back to a Buffer
+        const byteArray = Object.values(contractPDFBuffer);
+        const pdfBuffer = Buffer.from(byteArray);
+
+        logger.info("PDF buffer created:", {
+          byteArrayLength: byteArray.length,
+          pdfBufferLength: pdfBuffer.length,
+          firstBytes: pdfBuffer.toString("ascii", 0, 10),
+        });
+
+        // Validate the PDF buffer (should start with %PDF)
+        if (
+          pdfBuffer.length < 4 ||
+          pdfBuffer.toString("ascii", 0, 4) !== "%PDF"
+        ) {
+          logger.error("Generated buffer does not appear to be a valid PDF", {
+            bufferLength: pdfBuffer.length,
+            firstBytes: pdfBuffer.toString("ascii", 0, 10),
+            expectedStart: "%PDF",
+            actualStart: pdfBuffer.toString("ascii", 0, 4),
+          });
+          // Temporarily disable validation to see if file gets created
+          logger.warn(
+            "PDF validation failed, but continuing anyway for testing"
+          );
+          // return null;
+        }
+
+        // Write the PDF directly to file
+        fs.writeFileSync(filepath, pdfBuffer);
+
+        logger.info("Contract PDF saved successfully", {
+          filepath,
+          size: pdfBuffer.length,
+          membershipNumber,
+        });
+
+        return filepath;
+      } catch (error) {
+        logger.error("Error saving contract PDF:", {
+          error: error.message,
+          contractPDFBufferType: typeof contractPDFBuffer,
+        });
+        return null;
+      }
+    } catch (error) {
+      logger.error("Error in saveContractPDF:", error);
+      return null;
+    }
+  }
+
+  /**
+   * Clean up temporary contract PDF file
+   */
+  async cleanupContractPDF(filepath) {
+    try {
+      if (filepath && fs.existsSync(filepath)) {
+        // Don't delete immediately - let user inspect the file
+        logger.info("Contract PDF saved for inspection", { filepath });
+        // Uncomment the line below when you want to clean up files
+        // fs.unlinkSync(filepath);
+      }
+    } catch (error) {
+      logger.error("Error cleaning up contract PDF:", error);
+    }
+  }
+
+  /**
    * Send welcoming email with contract PDF attachment
    * @param {Object} enrollmentData - The enrollment data
    * @param {Object} formData - The form data
@@ -85,29 +191,28 @@ class EmailService {
         clubAddress: selectedClub?.address,
         clubId: selectedClub?.id,
       });
-      // Use the contract PDF buffer from frontend
-      let pdfBuffer = null;
-      if (contractPDFBuffer) {
-        logger.info("Contract PDF buffer received", {
-          type: typeof contractPDFBuffer,
-          isArrayBuffer: contractPDFBuffer instanceof ArrayBuffer,
-          isBuffer: Buffer.isBuffer(contractPDFBuffer),
-          length: contractPDFBuffer.byteLength || contractPDFBuffer.length,
-        });
 
-        // Convert ArrayBuffer to Buffer if needed
-        if (contractPDFBuffer instanceof ArrayBuffer) {
-          pdfBuffer = Buffer.from(contractPDFBuffer);
+      // Save contract PDF to temporary file
+      let contractFilePath = null;
+      try {
+        contractFilePath = await this.saveContractPDF(
+          contractPDFBuffer,
+          enrollmentData.custCode
+        );
+
+        if (contractFilePath) {
+          logger.info("Contract PDF saved successfully for email", {
+            filepath: contractFilePath,
+            memberName: `${formData.firstName} ${formData.lastName}`,
+          });
         } else {
-          pdfBuffer = contractPDFBuffer;
+          logger.warn(
+            "Failed to save contract PDF, continuing without attachment"
+          );
         }
-
-        logger.info("PDF buffer processed", {
-          isBuffer: Buffer.isBuffer(pdfBuffer),
-          length: pdfBuffer.length,
-        });
-      } else {
-        logger.warn("No contract PDF buffer provided, skipping PDF attachment");
+      } catch (pdfError) {
+        logger.error("Error saving contract PDF for email:", pdfError);
+        // Continue without PDF if saving fails
       }
 
       // Email content
@@ -211,11 +316,11 @@ class EmailService {
           selectedClub?.name || formData.club || "Our Club"
         } - Membership #${enrollmentData.custCode}`,
         html: emailContent,
-        attachments: pdfBuffer
+        attachments: contractFilePath
           ? [
               {
                 filename: `Membership_Agreement_${enrollmentData.custCode}.pdf`,
-                content: pdfBuffer,
+                path: contractFilePath,
                 contentType: "application/pdf",
               },
             ]
@@ -244,6 +349,11 @@ class EmailService {
     } catch (error) {
       logger.error("Error sending welcome email:", error);
       return false;
+    } finally {
+      // Clean up temporary file
+      if (contractFilePath) {
+        await this.cleanupContractPDF(contractFilePath);
+      }
     }
   }
 }

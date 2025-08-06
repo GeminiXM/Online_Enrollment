@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import CanvasContractPDF from './CanvasContractPDF.jsx';
+import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './FluidPayPayment.css';
 
 // Credit Card Logo SVGs
@@ -359,14 +360,42 @@ const FluidPayPayment = () => {
         return;
       }
       
-      // For now, let's skip the PDF generation to focus on the enrollment form issue
-      const contractPDFBuffer = null;
+      // Generate contract PDF buffer
+      let contractPDFBuffer = null;
+      try {
+        const signatureDate = new Date().toLocaleDateString();
+        const membershipPrice = formDataRef.current.membershipDetails?.price || formDataRef.current.monthlyDues;
+        
+        contractPDFBuffer = await generateContractPDFBuffer(
+          formDataRef.current,
+          signatureData,
+          signatureDate,
+          initialedSections,
+          selectedClub,
+          membershipPrice
+        );
+        
+        console.log('Contract PDF generated successfully');
+        console.log('PDF buffer type:', typeof contractPDFBuffer);
+        console.log('PDF buffer length:', contractPDFBuffer?.byteLength || 0);
+      } catch (pdfError) {
+        console.error('Error generating contract PDF:', pdfError);
+        // Continue without PDF if generation fails
+      }
+
+      // Convert ArrayBuffer to array for JSON serialization
+      let contractPDFArray = null;
+      if (contractPDFBuffer) {
+        const uint8Array = new Uint8Array(contractPDFBuffer);
+        contractPDFArray = Array.from(uint8Array);
+        console.log('Converted to array, length:', contractPDFArray.length);
+      }
 
       const submissionData = {
         ...formDataRef.current,
         signatureData: signatureData,
         selectedClub: selectedClub,
-        contractPDF: contractPDFBuffer, // Include the PDF buffer
+        contractPDF: contractPDFArray, // Include the PDF buffer as array
         paymentInfo: {
           processorName: 'FLUIDPAY',
           transactionId: paymentResult.transactionId,

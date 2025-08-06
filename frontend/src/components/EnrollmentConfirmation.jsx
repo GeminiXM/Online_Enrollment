@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import CanvasContractPDF from './CanvasContractPDF';
+import { generatePDFBuffer } from './CanvasContractPDF';
 import './EnrollmentConfirmation.css';
+
 
 function EnrollmentConfirmation() {
   const location = useLocation();
@@ -70,6 +72,78 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
   //     return paymentResponse.ssl_approval_code || '';
   //   }
   // };
+
+  const hasSavedRef = useRef(false);
+  
+  useEffect(() => {
+    const saveContractToServer = async () => {
+      if (!formData || !signatureData || !membershipNumber || hasSavedRef.current) return;
+      hasSavedRef.current = true;
+
+      try {
+        const pdfBuffer = await generatePDFBuffer(
+          formData,
+          signatureData,
+          formatTimestamp(),
+          initialedSections,
+          selectedClub,
+          formData.membershipDetails?.price || formData.monthlyDues
+        );
+        const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+        const formDataToSend = new FormData();
+        formDataToSend.append('contract', blob, 'contract.pdf');
+        // Debug logging
+        console.log('Saving contract with data:', {
+          membershipNumber,
+          firstName: formData.primaryMember?.firstName,
+          lastName: formData.primaryMember?.lastName,
+          formDataKeys: Object.keys(formData || {}),
+          primaryMemberKeys: Object.keys(formData?.primaryMember || {}),
+          fullFormData: formData
+        });
+        
+        // Try different ways to access the member data
+        const firstName = formData.primaryMember?.firstName || 
+                         formData.member?.firstName || 
+                         formData.firstName || 
+                         '';
+        const lastName = formData.primaryMember?.lastName || 
+                        formData.member?.lastName || 
+                        formData.lastName || 
+                        '';
+        
+        console.log('Extracted member data:', { firstName, lastName, membershipNumber });
+        
+        formDataToSend.append('memberId', membershipNumber);
+        formDataToSend.append('firstName', firstName);
+        formDataToSend.append('lastName', lastName);
+        formDataToSend.append('date', new Date().toISOString().split('T')[0]); // YYYY-MM-DD format
+
+        // Debug: Log what we're sending
+        console.log('Sending FormData with:', {
+          memberId: membershipNumber,
+          firstName,
+          lastName,
+          date: new Date().toISOString().split('T')[0]
+        });
+
+        const response = await fetch('/api/save-contract', {
+          method: 'POST',
+          body: formDataToSend,
+        });
+
+        if (response.ok) {
+          console.log('Contract saved successfully to server');
+        } else {
+          console.error('Failed to save contract to server');
+        }
+      } catch (error) {
+        console.error('Error saving contract to server:', error);
+      }
+    };
+
+    saveContractToServer();
+  }, [formData, signatureData, initialedSections, selectedClub, membershipNumber]);
 
   return (
     <div className="enrollment-confirmation">

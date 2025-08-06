@@ -1258,13 +1258,37 @@ export const submitEnrollment = async (req, res) => {
         : "Production migration pending - procedure not yet created in database";
     }
 
-    // Send welcome email with contract PDF
+    // Save contract PDF to contracts folder
     try {
-      // Convert the contract PDF buffer from frontend
+      // Get the contract PDF buffer from frontend
       let contractPDFBuffer = null;
       if (req.body.contractPDF) {
-        // Convert ArrayBuffer to Buffer
-        contractPDFBuffer = Buffer.from(req.body.contractPDF);
+        // The contractPDF is already the buffer data from frontend
+        contractPDFBuffer = req.body.contractPDF;
+        logger.info("Contract PDF buffer received from frontend:", {
+          type: typeof contractPDFBuffer,
+          hasData: !!contractPDFBuffer,
+        });
+      } else {
+        logger.warn("No contract PDF buffer received from frontend");
+      }
+
+      // Contract PDF is now saved in EnrollmentConfirmation.jsx with proper naming
+      // Removed contract saving from here to avoid duplicate files
+    } catch (contractError) {
+      logger.error("Error saving contract PDF after payment:", {
+        error: contractError.message,
+        membershipNumber: updatedCustCode,
+      });
+      // Don't fail the enrollment if contract saving fails
+    }
+
+    // Send welcome email with contract PDF (optional - can be disabled)
+    try {
+      // Get the contract PDF buffer from frontend (reuse the same buffer)
+      let contractPDFBuffer = null;
+      if (req.body.contractPDF) {
+        contractPDFBuffer = req.body.contractPDF;
       }
 
       // Log the selectedClub data for debugging

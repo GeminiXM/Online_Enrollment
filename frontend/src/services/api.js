@@ -190,6 +190,21 @@ const apiService = {
       throw error;
     }
   },
+
+  // Save contract PDF to contracts folder
+  saveContractPDF: async (contractPDF, membershipNumber, memberName) => {
+    try {
+      const response = await api.post("/enrollment/save-contract", {
+        contractPDF,
+        membershipNumber,
+        memberName,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error saving contract PDF:", error);
+      throw error;
+    }
+  },
 };
 
 export default apiService;

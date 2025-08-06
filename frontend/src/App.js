@@ -9,6 +9,7 @@ import PaymentPage from "./components/PaymentPage.jsx";
 import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
+// import ContractSaveTest from "./components/ContractSaveTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 
@@ -80,6 +81,9 @@ function AppContent() {
                 <li>
                   <Link to="/enrollment">Enrollment</Link>
                 </li>
+                <li>
+                  <Link to="/contract-save-test">Contract Save Test</Link>
+                </li>
               </ul>
             </nav>
           </div>
@@ -104,6 +108,7 @@ function AppContent() {
             element={<EnrollmentConfirmation />}
           />
           <Route path="/payment-demo" element={<PaymentProcessorDemo />} />
+          {/* <Route path="/contract-save-test" element={<ContractSaveTest />} /> */}
           {/* Add more routes as needed */}
         </Routes>
       </main>

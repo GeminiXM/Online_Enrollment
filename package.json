@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.3.0",
+    "multer": "^2.0.2",
     "online-enrollment": "file:",
     "react-credit-cards": "^0.8.3"
   }
