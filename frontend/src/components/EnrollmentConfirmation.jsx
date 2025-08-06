@@ -135,7 +135,9 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
               lastName,
               email: formData.email,
               selectedClub,
-              transactionId
+              transactionId,
+              amountBilled,
+              formData
             }),
           });
           

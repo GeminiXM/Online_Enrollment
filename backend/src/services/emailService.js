@@ -33,6 +33,50 @@ class EmailService {
   }
 
   /**
+   * Format date consistently for email display
+   */
+  formatDateForEmail(dateString) {
+    if (!dateString) return new Date().toLocaleDateString();
+
+    // If it's already in MM/DD/YYYY format, return as-is
+    if (dateString.includes("/")) {
+      return dateString;
+    }
+
+    // If it's in YYYY-MM-DD format, convert to MM/DD/YYYY
+    if (dateString.includes("-")) {
+      const parts = dateString.split("-");
+      if (parts.length === 3) {
+        const year = parts[0];
+        const month = parts[1];
+        const day = parts[2];
+        return `${month}/${day}/${year}`;
+      }
+    }
+
+    // Fallback to current date
+    return new Date().toLocaleDateString();
+  }
+
+  /**
+   * Convert membership type codes to readable names
+   */
+  getMembershipTypeDisplay(membershipType, selectedClub) {
+    // For New Mexico clubs, convert codes to readable names
+    if (selectedClub?.state === "NM") {
+      const membershipTypeMap = {
+        I: "Individual Membership",
+        D: "Dual Membership",
+        F: "Family Membership",
+      };
+      return membershipTypeMap[membershipType] || membershipType;
+    }
+
+    // For Colorado clubs, return as-is (should already be readable)
+    return membershipType;
+  }
+
+  /**
    * Calculate monthly amount including dues, addons, and taxes
    */
   calculateMonthlyAmount(formData, selectedClub) {
@@ -57,6 +101,20 @@ class EmailService {
 
     // Gross monthly total includes dues + addons + taxes
     const grossMonthlyTotal = monthlyDues + addonsTotal + duesTax + addonsTax;
+
+    // Log the calculation for debugging
+    logger.info("calculateMonthlyAmount calculation:", {
+      monthlyDues,
+      serviceAddons: serviceAddons.length,
+      addonsTotal,
+      isNewMexicoClub,
+      taxRate,
+      duesTax,
+      addonsTax,
+      grossMonthlyTotal: grossMonthlyTotal.toFixed(2),
+      formDataKeys: Object.keys(formData || {}),
+      selectedClubState: selectedClub?.state,
+    });
 
     return grossMonthlyTotal.toFixed(2);
   }
@@ -184,12 +242,27 @@ class EmailService {
     selectedClub
   ) {
     try {
-      // Log the selectedClub data for debugging
-      logger.info("Email service received selectedClub:", {
-        selectedClub: selectedClub,
-        clubName: selectedClub?.name,
-        clubAddress: selectedClub?.address,
-        clubId: selectedClub?.id,
+      // Log the received data for debugging
+      logger.info("Email service received data:", {
+        enrollmentData: {
+          custCode: enrollmentData?.custCode,
+          transactionId: enrollmentData?.transactionId,
+          amountBilled: enrollmentData?.amountBilled,
+        },
+        formData: {
+          firstName: formData?.firstName,
+          lastName: formData?.lastName,
+          email: formData?.email,
+          monthlyDues: formData?.monthlyDues,
+          serviceAddons: formData?.serviceAddons?.length || 0,
+          membershipType: formData?.membershipType,
+        },
+        selectedClub: {
+          name: selectedClub?.name,
+          state: selectedClub?.state,
+          address: selectedClub?.address,
+          id: selectedClub?.id,
+        },
       });
 
       // Find the contract PDF file that was created in the backend contracts folder
@@ -248,15 +321,16 @@ class EmailService {
                 <li><strong>Membership Number:</strong> ${
                   enrollmentData.custCode
                 }</li>
-                <li><strong>Membership Type:</strong> ${
-                  formData.membershipType
-                }</li>
+                <li><strong>Membership Type:</strong> ${this.getMembershipTypeDisplay(
+                  formData.membershipType,
+                  selectedClub
+                )}</li>
                 <li><strong>Transaction ID:</strong> ${
                   enrollmentData.transactionId
                 }</li>
-                <li><strong>Start Date:</strong> ${
-                  formData.requestedStartDate || new Date().toLocaleDateString()
-                }</li>
+                <li><strong>Start Date:</strong> ${this.formatDateForEmail(
+                  formData.requestedStartDate
+                )}</li>
                 <li><strong>Home Club:</strong> ${
                   selectedClub?.name || formData.club || "Wellbridge"
                 }</li>

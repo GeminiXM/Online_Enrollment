@@ -454,6 +454,8 @@ router.post("/send-welcome-email", async (req, res) => {
       email,
       selectedClub,
       transactionId,
+      amountBilled,
+      formData: actualFormData,
     } = req.body;
 
     if (!membershipNumber || !email) {
@@ -463,22 +465,22 @@ router.post("/send-welcome-email", async (req, res) => {
       });
     }
 
-    // Create enrollment data for email using the real transaction ID
+    // Create enrollment data for email using the real transaction ID and amount
     const enrollmentData = {
       custCode: membershipNumber,
       transactionId: transactionId || `TXN${Date.now()}`, // Use real transaction ID if available
-      amountBilled: 0, // This will be calculated from the form data
+      amountBilled: amountBilled || 0, // Use the actual amount billed from frontend
     };
 
-    // Create mock form data for email
-    const formData = {
+    // Use the actual form data from frontend instead of creating mock data
+    const formData = actualFormData || {
       firstName,
       lastName,
       email,
       membershipType: "Individual Membership",
       club: selectedClub?.name || "Wellbridge",
       requestedStartDate: new Date().toLocaleDateString(),
-      monthlyDues: 0, // This will be calculated
+      monthlyDues: 0,
     };
 
     // Send welcome email with contract attachment
