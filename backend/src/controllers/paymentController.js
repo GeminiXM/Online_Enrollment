@@ -592,3 +592,58 @@ export const getConvergeToken = async (req, res) => {
     });
   }
 };
+
+/**
+ * @desc Get FluidPay transaction token for payment processing
+ * @route POST /api/payment/fluidpay-token
+ * @access Public
+ */
+export const getFluidPayToken = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for FluidPay transaction token");
+
+    // Get the club ID from the request body
+    const { clubId, amount, orderId } = req.body;
+
+    if (!clubId) {
+      return res.status(400).json({
+        success: false,
+        message: "Club ID is required",
+      });
+    }
+
+    logger.info(
+      `Generating FluidPay token for club ID: ${clubId}, amount: ${amount}, orderId: ${orderId}`
+    );
+
+    // In a real implementation, this would call FluidPay's API to get a transaction token
+    // For now, we'll return a mock token for development/demo purposes
+    const mockToken = `demo_fluidpay_token_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+
+    logger.info("FluidPay token generated successfully", {
+      clubId,
+      token: mockToken.substring(0, 20) + "...", // Don't log the full token
+      isDemo: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      ssl_txn_auth_token: mockToken,
+      isDemo: true,
+      message: "Demo FluidPay token generated for development",
+    });
+  } catch (error) {
+    logger.error("Error in getFluidPayToken:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error generating FluidPay token",
+      error: error.message,
+    });
+  }
+};

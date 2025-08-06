@@ -1,27 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
-import CanvasContractPDF from './CanvasContractPDF.jsx';
 import CanvasContractDenverPDF from './CanvasContractDenverPDF.jsx';
-import { generatePDFBuffer as generatePDFBufferNM } from './CanvasContractPDF.jsx';
 import { generatePDFBuffer as generatePDFBufferDenver } from './CanvasContractDenverPDF.jsx';
 // import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './FluidPayPayment.css';
+import './SignatureSelector.css'; // Import Google Fonts for signatures
 
 // Credit Card Logo SVGs
 const CardLogos = {
   Visa: () => (
-    <svg width="36" height="36" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg" aria-label="Visa">
+    <svg
+      width="36"
+      height="36"
+      viewBox="0 0 24 24"
+      role="img"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-label="Visa"
+    >
       <title>Visa</title>
       <path d="M17.445 8.623c-.387-.146-.99-.301-1.74-.301-1.92 0-3.275.968-3.285 2.355-.012 1.02.964 1.594 1.701 1.936.757.35 1.01.57 1.008.885-.005.477-.605.693-1.162.693-.766 0-1.186-.107-1.831-.375l-.239-.111-.271 1.598c.466.195 1.306.362 2.175.375 2.041 0 3.375-.961 3.391-2.439.016-.813-.51-1.43-1.621-1.938-.674-.33-1.094-.551-1.094-.886 0-.296.359-.612 1.109-.612.645-.01 1.096.129 1.455.273l.18.081.271-1.544-.047.01zm4.983-.17h-1.5c-.467 0-.816.127-1.021.591l-2.885 6.534h2.041l.408-1.07 2.49.002c.061.25.24 1.068.24 1.068H24l-1.572-7.125zM9.66 8.393h1.943l-1.215 7.129H8.444L9.66 8.391v.002zm-4.939 3.929l.202.99 1.901-4.859h2.059l-3.061 7.115H3.768l-1.68-6.026c-.035-.103-.078-.173-.18-.237C1.34 9.008.705 8.766 0 8.598l.025-.15h3.131c.424.016.766.15.883.604l.682 3.273v-.003zm15.308.727l.775-1.994c-.01.02.16-.412.258-.68l.133.615.449 2.057h-1.615v.002z"/>
     </svg>
   ),
   Mastercard: () => (
-    <svg width="36" height="36" viewBox="0 -54.25 482.51 482.51" xmlns="http://www.w3.org/2000/svg">
+    <svg 
+      width="36" 
+      height="36" 
+      viewBox="0 -54.25 482.51 482.51" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <title>Mastercard</title>
       <g>
-        <path d="M220.13,421.67V396.82c0-9.53-5.8-15.74-15.32-15.74-5,0-10.35,1.66-14.08,7-2.9-4.56-7-7-13.25-7a14.07,14.07,0,0,0-12,5.8v-5h-7.87v39.76h7.87V398.89c0-7,4.14-10.35,9.94-10.35s9.11,3.73,9.11,10.35v22.78h7.87V398.89c0-7,4.14-10.35,9.94-10.35s9.11,3.73,9.11,10.35v22.78Zm129.22-39.35h-14.5v-12H327v12h-8.28v7H327V408c0,9.11,3.31,14.5,13.25,14.5A23.17,23.17,0,0,0,351,419.6l-2.49-7a13.63,13.63,0,0,1-7.46,2.07c-4.14,0-6.21-2.49-6.21-6.63V389h14.5v-6.63Zm73.72-1.24a12.39,12.39,0,0,0-10.77,5.8v-5h-7.87v39.76h7.87V399.31c0-6.63,3.31-10.77,8.7-10.77a24.24,24.24,0,0,1,5.38.83l2.49-7.46a28,28,0,0,0-5.8-.83Zm-111.41,4.14c-4.14-2.9-9.94-4.14-16.15-4.14-9.94,0-16.15,4.56-16.15,12.43,0,6.63,4.56,10.35,13.25,11.6l4.14.41c4.56.83,7.46,2.49,7.46,4.56,0,2.9-3.31,5-9.53,5a21.84,21.84,0,0,1-13.25-4.14l-4.14,6.21c5.8,4.14,12.84,5,17,5,11.6,0,17.81-5.38,17.81-12.84,0-7-5-10.35-13.67-11.6l-4.14-.41c-3.73-.41-7-1.66-7-4.14,0-2.9,3.31-5,7.87-5,5,0,9.94,2.07,12.43,3.31Zm120.11,16.57c0,12,7.87,20.71,20.71,20.71,5.8,0,9.94-1.24,14.08-4.56l-4.14-6.21a16.74,16.74,0,0,1-10.35,3.73c-7,0-12.43-5.38-12.43-13.25S445,389,452.07,389a16.74,16.74,0,0,1,10.35,3.73l4.14-6.21c-4.14-3.31-8.28-4.56-14.08-4.56-12.43-.83-20.71,7.87-20.71,19.88h0Zm-55.5-20.71c-11.6,0-19.47,8.28-19.47,20.71s8.28,20.71,20.29,20.71a25.33,25.33,0,0,0,16.15-5.38l-4.14-5.8a19.79,19.79,0,0,1-11.6,4.14c-5.38,0-11.18-3.31-12-10.35h29.41v-3.31c0-12.43-7.46-20.71-18.64-20.71h0Zm-.41,7.46c5.8,0,9.94,3.73,10.35,9.94H364.68c1.24-5.8,5-9.94,11.18-9.94ZM268.59,401.79V381.91h-7.87v5c-2.9-3.73-7-5.8-12.84-5.8-11.18,0-19.47,8.7-19.47,20.71s8.28,20.71,19.47,20.71c5.8,0,9.94-2.07,12.84-5.8v5h7.87V401.79Zm-31.89,0c0-7.46,4.56-13.25,12.43-13.25,7.46,0,12,5.8,12,13.25,0,7.87-5,13.25-12,13.25-7.87.41-12.43-5.8-12.43-13.25Zm306.08-20.71a12.39,12.39,0,0,0-10.77,5.8v-5h-7.87v39.76H532V399.31c0-6.63,3.31-10.77,8.7-10.77a24.24,24.24,0,0,1,5.38.83l2.49-7.46a28,28,0,0,0-5.8-.83Zm-30.65,20.71V381.91h-7.87v5c-2.9-3.73-7-5.8-12.84-5.8-11.18,0-19.47,8.7-19.47,20.71s8.28,20.71,19.47,20.71c5.8,0,9.94-2.07,12.84-5.8v5h7.87V401.79Zm-31.89,0c0-7.46,4.56-13.25,12.43-13.25,7.46,0,12,5.8,12,13.25,0,7.87-5,13.25-12,13.25C564.73,415.46,560.17,409.25,560.17,401.79Zm111.83,0V366.17h-7.87v20.71c-2.9-3.73-7-5.8-12.84-5.8-11.18,0-19.47,8.7-19.47,20.71s8.28,20.71,19.47,20.71c5.8,0,9.94-2.07,12.84-5.8v5h7.87V401.79Zm-31.89,0c0-7.46,4.56-13.25,12.43-13.25,7.46,0,12,5.8,12,13.25,0,7.87-5,13.25-12,13.25C564.73,415.46,560.17,409.25,560.17,401.79Z" transform="translate(-132.74 -48.5)"/>
+        <path d="M220.13,421.67V396.82c0-9.53-5.8-15.74-15.32-15.74-5,0-10.35,1.66-14.08,7-2.9-4.56-7-7-13.25-7a14.07,14.07,0,0,0-12,5.8v-5h-7.87v39.76h7.87V398.89c0-7,4.14-10.35,9.94-10.35s9.11,3.73,9.11,10.35v22.78h7.87V398.89c0-7,4.14-10.35,9.94-10.35s9.11,3.73,9.11,10.35v22.78Zm129.22-39.35h-14.5v-12H327v12h-8.28v7H327V408c0,9.11,3.31,14.5,13.25,14.5A23.17,23.17,0,0,0,351,419.6l-2.49-7a13.63,13.63,0,0,1-7.46,2.07c-4.14,0-6.21-2.49-6.21-6.63V389h14.5v-6.63Zm73.72-1.24a12.39,12.39,0,0,0-10.77,5.8v-5h-7.87v39.76h7.87V399.31c0-6.63,3.31-10.77,8.7-10.77a24.24,24.24,0,0,1,5.38.83l2.49-7.46a28,28,0,0,0-5.8-.83Zm-111.41,4.14c-4.14-2.9-9.94-4.14-16.15-4.14-9.94,0-16.15,4.56-16.15,12.43,0,6.63,4.56,10.35,13.25,11.6l4.14.41c4.56.83,7.46,2.49,7.46,4.56,0,2.9-3.31,5-9.53,5a21.84,21.84,0,0,1-13.25-4.14l-4.14,6.21c5.8,4.14,12.84,5,17,5,11.6,0,17.81-5.38,17.81-12.84,0-7-5-10.35-13.67-11.6l-4.14-.41c-3.73-.41-7-1.66-7-4.14,0-2.9,3.31-5,7.87-5,5,0,9.94,2.07,12.43,3.31Zm120.11,16.57c0,12,7.87,20.71,20.71,20.71,5.8,0,9.94-1.24,14.08-4.56l-4.14-6.21a16.74,16.74,0,0,1-10.35,3.73c-7,0-12.43-5.38-12.43-13.25S445,389,452.07,389a16.74,16.74,0,0,1,10.35,3.73l4.14-6.21c-4.14-3.31-8.28-4.56-14.08-4.56-12.43-.83-20.71,7.87-20.71,19.88h0Zm-55.5-20.71c-11.6,0-19.47,8.28-19.47,20.71s8.28,20.71,20.29,20.71a25.33,25.33,0,0,0,16.15-5.38l-4.14-5.8a19.79,19.79,0,0,1-11.6,4.14c-5.38,0-11.18-3.31-12-10.35h29.41v-3.31c0-12.43-7.46-20.71-18.64-20.71h0Zm-.41,7.46c5.8,0,9.94,3.73,10.35,9.94H364.68c1.24-5.8,5-9.94,11.18-9.94ZM268.59,401.79V381.91h-7.87v5c-2.9-3.73-7-5.8-12.84-5.8-11.18,0-19.47,8.7-19.47,20.71s8.28,20.71,19.47,20.71c5.8,0,9.94-2.07,12.84-5.8v5h7.87V401.79Zm-31.89,0c0-7.46,4.56-13.25,12.43-13.25,7.46,0,12,5.8,12,13.25,0,7.87-5,13.25-12,13.25-7.87.41-12.43-5.8-12.43-13.25Zm306.08-20.71a12.39,12.39,0,0,0-10.77,5.8v-5h-7.87v39.76H532V399.31c0-6.63,3.31-10.77,8.7-10.77a24.24,24.24,0,0,1,5.38.83l2.49-7.46a28,28,0,0,0-5.8-.83Zm-30.65,20.71V381.91h-7.87v5c-2.9-3.73-7-5.8-12.84-5.8-11.18,0-19.47,8.7-19.47,20.71s8.28,20.71,19.47,20.71c5.8,0,9.94-2.07,12.84-5.8v5h7.87V401.79Zm-31.89,0c0-7.46,4.56-13.25,12.43-13.25,7.46,0,12,5.8,12,13.25,0,7.87-5,13.25-12,13.25C564.73,415.46,560.17,409.25,560.17,401.79Z" transform="translate(-132.74 -48.5)"/>
         <g>
           <rect x="169.81" y="31.89" width="143.72" height="234.42" fill="#ff5f00"/>
           <path d="M317.05,197.6A149.5,149.5,0,0,1,373.79,80.39a149.1,149.1,0,1,0,0,234.42A149.5,149.5,0,0,1,317.05,197.6Z" transform="translate(-132.74 -48.5)" fill="#eb001b"/>
@@ -31,7 +42,12 @@ const CardLogos = {
     </svg>
   ),
   Amex: () => (
-    <svg width="36" height="36" viewBox="0 -139.5 750 750" xmlns="http://www.w3.org/2000/svg">
+    <svg 
+      width="36" 
+      height="36" 
+      viewBox="0 -139.5 750 750" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <title>American Express</title>
       <g>
         <g fill-rule="nonzero">
@@ -42,7 +58,12 @@ const CardLogos = {
     </svg>
   ),
   Discover: () => (
-    <svg width="36" height="36" viewBox="0 -139.5 750 750" xmlns="http://www.w3.org/2000/svg">
+    <svg 
+      width="36" 
+      height="36" 
+      viewBox="0 -139.5 750 750" 
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <title>Discover</title>
       <g>
         <g fill-rule="nonzero">
@@ -82,46 +103,36 @@ const FluidPayPayment = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [showResultPopup, setShowResultPopup] = useState(false);
   const [popupMessage, setPopupMessage] = useState('');
-  const [popupType, setPopupType] = useState('');
-  const [iframeUrl, setIframeUrl] = useState('');
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  
-  // Demo mode state
-  const [demoMode, setDemoMode] = useState(true);
-  
-  // Use ref to track current formData value
-  const formDataRef = useRef(null);
-  
-  // Monitor formData changes
-  useEffect(() => {
-    console.log('formData changed in FluidPayPayment:', formData);
-    formDataRef.current = formData;
-  }, [formData]);
+  const [popupType, setPopupType] = useState(''); // 'success' or 'error'
   
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
     let currentFormData = null;
     
-    // First, try to get data from location state
+    // First, try to get data from location state (this should be the transformed data)
     if (location.state && location.state.formData) {
       currentFormData = location.state.formData;
       console.log('Using form data from location state');
+      console.log('Location state family members:', currentFormData.familyMembers);
     }
     
-    // If no location state data, try to get from localStorage
+    // If no location state data, try to get from localStorage (auto-saved data)
     if (!currentFormData) {
       try {
         const savedData = localStorage.getItem('enrollment_draft');
         if (savedData) {
           const parsedData = JSON.parse(savedData);
           if (parsedData.formData) {
+            // For localStorage data, we need to transform it to include family members
             currentFormData = parsedData.formData;
-            console.log('Using form data from localStorage');
+            console.log('Using form data from localStorage (auto-saved)');
             
-            // Transform family members if needed
+            // If this is raw form data from localStorage, we need to transform it
+            // to include family members from the additional data
             if (parsedData.additionalData) {
               const familyMembers = [];
               
+              // Add adult member if present
               if (parsedData.additionalData.adultMember && 
                   parsedData.additionalData.adultMember.firstName && 
                   parsedData.additionalData.adultMember.lastName) {
@@ -130,8 +141,10 @@ const FluidPayPayment = () => {
                   memberType: 'adult',
                   role: 'S'
                 });
+                console.log('Added adult member from additionalData:', parsedData.additionalData.adultMember.firstName);
               }
               
+              // Add child member if present
               if (parsedData.additionalData.childMember && 
                   parsedData.additionalData.childMember.firstName && 
                   parsedData.additionalData.childMember.lastName) {
@@ -140,8 +153,10 @@ const FluidPayPayment = () => {
                   memberType: 'child',
                   role: 'D'
                 });
+                console.log('Added child member from additionalData:', parsedData.additionalData.childMember.firstName);
               }
               
+              // Add youth member if present
               if (parsedData.additionalData.youthMember && 
                   parsedData.additionalData.youthMember.firstName && 
                   parsedData.additionalData.youthMember.lastName) {
@@ -150,10 +165,13 @@ const FluidPayPayment = () => {
                   memberType: 'youth',
                   role: 'D'
                 });
+                console.log('Added youth member from additionalData:', parsedData.additionalData.youthMember.firstName);
               }
               
+              // Add family members to the form data
               if (familyMembers.length > 0) {
                 currentFormData.familyMembers = familyMembers;
+                console.log('Added family members from additionalData:', familyMembers.length);
               }
             }
           }
@@ -171,7 +189,6 @@ const FluidPayPayment = () => {
     }
     
     // Set the form data
-    console.log('Setting formData in FluidPayPayment:', currentFormData);
     setFormData(currentFormData);
     
     // Set customer info from form data
@@ -187,70 +204,736 @@ const FluidPayPayment = () => {
     });
     
     // Set signature data if available
-    console.log('FluidPayPayment - location.state:', location.state);
     if (location.state && location.state.signatureData) {
-      console.log('FluidPayPayment - Setting signatureData from location state');
       setSignatureData(location.state.signatureData);
-    } else {
-      console.log('FluidPayPayment - No signatureData in location state');
     }
     if (location.state && location.state.initialedSections) {
-      console.log('FluidPayPayment - Setting initialedSections from location state');
       setInitialedSections(location.state.initialedSections);
-    } else {
-      console.log('FluidPayPayment - No initialedSections in location state');
     }
     
-    // Fetch the FluidPay processor info
-    const fetchFluidPayInfo = async () => {
-      try {
-        const clubId = currentFormData.club || selectedClub?.id || "001";
-        console.log('Fetching FluidPay info for club:', clubId);
+            // Fetch the FluidPay processor info
+        const fetchFluidPayInfo = async () => {
+          try {
+            const clubId = currentFormData.club || selectedClub?.id || "001";
+            console.log('Fetching FluidPay info for club:', clubId);
+            
+            // PRODUCTION DATA REQUIRED: 
+            // This API call should retrieve real FluidPay credentials from your secure backend
+            // These credentials should be stored securely and never exposed in client-side code
+            const fluidPayResult = await api.getFluidPayInfo(clubId);
+            console.log('FluidPay API result:', fluidPayResult);
+            
+            if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
+              console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
+              setProcessorInfo(fluidPayResult.fluidPayInfo);
+            } else {
+              // PRODUCTION DATA REQUIRED: 
+              // Replace these demo values with actual FluidPay credentials
+              // For production, this fallback should either be removed or use environment-specific values
+              setProcessorInfo({
+                merchant_id: 'Demo FluidPay Merchant', // PRODUCTION: Your actual FluidPay Merchant ID
+                fluidpay_user_id: 'webuser',           // PRODUCTION: Your actual FluidPay User ID
+                fluidpay_pin: 'DEMO',                  // PRODUCTION: Your actual FluidPay PIN (keep secure)
+                fluidpay_url_process: 'https://api.demo.fluidpay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+              });
+            }
+          } catch (error) {
+            console.error('Error fetching FluidPay info:', error);
+            // PRODUCTION: In production, consider more robust error handling or retry logic
+            // These fallback values should be replaced with environment-specific values
+            setProcessorInfo({
+              merchant_id: 'Demo FluidPay Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
+              fluidpay_user_id: 'webuser',                      // PRODUCTION: Your actual User ID
+              fluidpay_pin: 'DEMO',                             // PRODUCTION: Your actual PIN (keep secure)
+              fluidpay_url_process: 'https://api.demo.fluidpay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+            });
+          }
+        };
+    
+            fetchFluidPayInfo();
+  }, [location, navigate, selectedClub]);
+  
+  // Function to fetch a transaction token from the backend
+  const fetchTransactionToken = async () => {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage('');
+      
+      console.log('Fetching transaction token with data:', {
+        clubId: formData.club || selectedClub?.id || "001",
+        amount: calculateProratedAmount().toFixed(2),
+        invoiceNumber: `INV-${Date.now()}`,
+        membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
+        customerInfo: customerInfo
+      });
+      
+      // PRODUCTION DATA REQUIRED:
+      // For production, implement a secure backend endpoint that generates a real transaction token
+      // This endpoint should communicate with FluidPay securely, using proper authentication
+      // The token generation should NEVER be done directly in the client-side code
+      const response = await api.getFluidPayToken({
+        clubId: formData.club || selectedClub?.id || "001",
+        amount: calculateProratedAmount().toFixed(2),
+        // PRODUCTION: Generate a real invoice number, potentially from your database/ERP system
+        invoiceNumber: `INV-${Date.now()}`, 
+        membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
+        customerInfo: customerInfo
+      });
+      
+      console.log('Transaction token response:', response);
+      
+      // PRODUCTION: Remove simulation code and implement proper error handling
+      if (!response || !response.success) {
+        throw new Error(response?.message || 'Failed to get transaction token');
+      }
+      
+      console.log('Returning token:', response.ssl_txn_auth_token);
+      return response.ssl_txn_auth_token;
+    } catch (error) {
+      console.error('Error fetching token:', error);
+      setErrorMessage('Unable to start payment process. Please try again later.');
+      setIsSubmitting(false);
+      return null;
+    }
+  };
+  
+  // Demo mode state - true when in demo/simulation mode
+  // PRODUCTION: Remove this demoMode state in production - always use the real integration
+  const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
+  const [iframeUrl, setIframeUrl] = useState(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  // Cleanup event listener on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('message', handleLightboxResponse);
+    };
+  }, []);
+
+  // Load the Converge script
+  useEffect(() => {
+    // Check if script is already loaded
+    if (document.getElementById('converge-script')) {
+      return;
+    }
+    
+    // PRODUCTION DATA REQUIRED:
+    // This entire simulation function should be REMOVED for production
+    // Only the actual Converge integration should be used
+    window.simulateConvergeLightbox = function(params) {
+      console.log('DEMO MODE: Simulating Converge Lightbox with params:', params);
+      
+      // Create a simple simulation modal
+      const modal = document.createElement('div');
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+      modal.style.zIndex = '10000';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      
+      const content = document.createElement('div');
+      content.style.width = '500px';
+      content.style.backgroundColor = 'white';
+      content.style.borderRadius = '8px';
+      content.style.padding = '20px';
+      content.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+      
+      const header = document.createElement('div');
+      header.style.borderBottom = '1px solid #ddd';
+      header.style.paddingBottom = '10px';
+      header.style.marginBottom = '15px';
+      header.style.display = 'flex';
+      header.style.justifyContent = 'space-between';
+      header.style.alignItems = 'center';
+      
+      const title = document.createElement('h3');
+      title.textContent = 'Demo Converge Payment';
+      title.style.margin = '0';
+      title.style.fontFamily = 'Arial, sans-serif';
+      title.style.color = '#0275d8';
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = '×';
+      closeBtn.style.background = 'none';
+      closeBtn.style.border = 'none';
+      closeBtn.style.fontSize = '24px';
+      closeBtn.style.cursor = 'pointer';
+      closeBtn.style.color = '#666';
+      closeBtn.onclick = function() {
+        document.body.removeChild(modal);
         
-        const fluidPayResult = await api.getFluidPayInfo(clubId);
-        console.log('FluidPay API result:', fluidPayResult);
-        
-        if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
-          console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
-          setProcessorInfo(fluidPayResult.fluidPayInfo);
-        } else {
-          // Set fallback info for FluidPay
-          setProcessorInfo({
-            merchant_id: 'Demo FluidPay Merchant',
-            fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
-            fluidpay_api_key: '✓ Configured'
-          });
+        // Simulate a canceled payment
+        if (params.onCancel) {
+          params.onCancel();
         }
-      } catch (error) {
-        console.error('Error fetching FluidPay info:', error);
-        setProcessorInfo({
-          merchant_id: 'Demo FluidPay Merchant (Fallback)',
-          fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
-          fluidpay_api_key: '✓ Configured'
-        });
+      };
+      
+      header.appendChild(title);
+      header.appendChild(closeBtn);
+      
+      const form = document.createElement('div');
+      form.innerHTML = `
+        <p style="margin-bottom: 20px; color: #666; font-family: Arial, sans-serif;">
+          This is a demonstration of the FluidPay Lightbox payment. In a real implementation, 
+          this would be a secure payment form from FluidPay.
+        </p>
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">Card Number</label>
+          <input type="text" value="4111 1111 1111 1111" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
+        </div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">Expiry</label>
+            <input type="text" value="12/25" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
+          </div>
+          <div style="flex: 1;">
+            <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">CVV</label>
+            <input type="text" value="123" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
+          </div>
+        </div>
+      `;
+      
+      const buttons = document.createElement('div');
+      buttons.style.marginTop = '20px';
+      buttons.style.display = 'flex';
+      buttons.style.justifyContent = 'space-between';
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.padding = '10px 15px';
+      cancelBtn.style.borderRadius = '4px';
+      cancelBtn.style.border = '1px solid #ddd';
+      cancelBtn.style.background = '#f8f9fa';
+      cancelBtn.style.cursor = 'pointer';
+      cancelBtn.onclick = function() {
+        document.body.removeChild(modal);
+        
+        // Simulate a canceled payment
+        if (params.onCancel) {
+          params.onCancel();
+        } else {
+          // Send a simulated message
+          const event = new MessageEvent('message', {
+            data: {
+              ssl_result: '1',
+              ssl_result_message: 'Payment canceled by user'
+            },
+            origin: 'https://api.convergepay.com'
+          });
+          window.dispatchEvent(event);
+        }
+      };
+      
+      const submitBtn = document.createElement('button');
+      submitBtn.textContent = 'Submit Payment';
+      submitBtn.style.padding = '10px 15px';
+      submitBtn.style.borderRadius = '4px';
+      submitBtn.style.border = 'none';
+      submitBtn.style.background = '#0275d8';
+      submitBtn.style.color = 'white';
+      submitBtn.style.cursor = 'pointer';
+      submitBtn.onclick = function() {
+        document.body.removeChild(modal);
+        
+        // Simulate a successful payment
+        setTimeout(() => {
+          // Create a simulated response
+          const event = new MessageEvent('message', {
+            data: {
+              ssl_result: '0',
+              ssl_txn_id: `TXN-${Date.now()}`,
+              ssl_approval_code: 'AUTH12345',
+              ssl_card_number: '411111******1111',
+              ssl_card_type: 'VISA',
+              ssl_exp_date: '1225'
+            },
+            origin: 'https://api.convergepay.com'
+          });
+          window.dispatchEvent(event);
+        }, 1000);
+      };
+      
+      buttons.appendChild(cancelBtn);
+      buttons.appendChild(submitBtn);
+      
+      content.appendChild(header);
+      content.appendChild(form);
+      content.appendChild(buttons);
+      modal.appendChild(content);
+      
+      document.body.appendChild(modal);
+    };
+    
+    // Define the global launchFluidPayLightbox function that will either use the real
+    // FluidPay Lightbox or our simulation function
+    window.launchFluidPayLightbox = function(params) {
+      if (window.hostedPayments) {
+        window.hostedPayments.launch(params);
+      } else {
+        // Use our simulation in demo mode
+        window.simulateFluidPayLightbox(params);
       }
     };
     
-    fetchFluidPayInfo();
-  }, [location, navigate, selectedClub]);
+     // PRODUCTION DATA REQUIRED:
+  // Load the correct FluidPay script based on environment
+  const script = document.createElement('script');
+  script.id = 'fluidpay-script';
+  
+  // PRODUCTION: Change this to production URL
+  // For production: https://api.fluidpay.com/hosted-payments/PayWithFluidPay.js
+  // For demo/testing: https://api.demo.fluidpay.com/hosted-payments/PayWithFluidPay.js
+  script.src = 'https://api.demo.fluidpay.com/hosted-payments/PayWithFluidPay.js';
+  script.async = true;
+  script.onload = () => {
+    console.log('FluidPay PayWithFluidPay script loaded successfully');
+    // setDemoMode(false); // DEMO: Keep in demo mode - uncomment for production
+  };
+  script.onerror = () => {
+    console.warn('Failed to load FluidPay script - using simulation mode instead');
+    setDemoMode(true); // Fallback to simulation
+  };
+  
+  document.body.appendChild(script);
+  
+  // Clean up on unmount
+  return () => {
+    const scriptElement = document.getElementById('fluidpay-script');
+    if (scriptElement) {
+      document.body.removeChild(scriptElement);
+    }
+  };
+}, []);
+  
+// Function to launch the FluidPay Lightbox
+const launchLightbox = async () => {
+  console.log('Launching FluidPay Lightbox...');
+  
+  // Get a transaction token from your server
+  const token = await fetchTransactionToken();
+  console.log('Got token:', token);
+  
+  if (!token) {
+    console.log('No token received, returning early');
+    return;
+  }
+  
+  try {
+    // Payment fields including billing information
+    const paymentFields = {
+      ssl_txn_auth_token: token,
+      ssl_first_name: customerInfo.firstName,
+      ssl_last_name: customerInfo.lastName,
+      ssl_avs_address: customerInfo.address,
+      ssl_city: customerInfo.city,
+      ssl_state: customerInfo.state,
+      ssl_avs_zip: customerInfo.zipCode,
+      ssl_phone: customerInfo.phone,
+      ssl_email: customerInfo.email
+    };
+    
+    console.log('Payment fields:', paymentFields);
+    console.log('Demo mode:', demoMode);
+    
+    if (demoMode) {
+      console.log('Using demo/simulation mode for FluidPay Lightbox');
+      
+      // Generate iframe URL for demo mode
+      const iframeUrl = `/online-enrollment/fluidpay-demo-iframe.html?token=${token}&amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
+      setIframeUrl(iframeUrl);
+      setIframeLoaded(true);
+      
+      // Set up postMessage listener for simulation
+      window.removeEventListener('message', handleLightboxResponse);
+      window.addEventListener('message', handleLightboxResponse, false);
+    } else {
+      console.log('Using real FluidPay Lightbox integration');
+      
+              // PRODUCTION: Use official FluidPay callback approach
+        const callback = {
+          onError: function (error) {
+            console.error('FluidPay Lightbox error:', error);
+            setErrorMessage('Payment system error. Please try again later.');
+            setIsSubmitting(false);
+          },
+          onCancelled: function () {
+            console.log('Payment cancelled by user');
+            setErrorMessage('Payment was cancelled.');
+            setIsSubmitting(false);
+          },
+          onDeclined: function (response) {
+            console.log('Payment declined:', response);
+            setPaymentResult({
+              success: false,
+              errorCode: response.ssl_result,
+              errorMessage: response.ssl_result_message
+            });
+            setErrorMessage(response.ssl_result_message || 'Payment was declined. Please try again.');
+            setIsSubmitting(false);
+          },
+          onApproval: function (response) {
+            console.log('Payment approved:', response);
+            setPaymentResult({
+              success: true,
+              transactionId: response.ssl_txn_id,
+              authorizationCode: response.ssl_approval_code,
+              cardNumber: response.ssl_card_number,
+              cardType: response.ssl_card_type
+            });
+            
+            setTimeout(() => {
+              finishEnrollment(response);
+            }, 3000);
+          }
+        };
+        
+        // PRODUCTION: Launch real FluidPay Lightbox using official method
+        if (window.PayWithFluidPay) {
+          window.PayWithFluidPay.open(paymentFields, callback);
+        } else {
+          throw new Error('PayWithFluidPay is not loaded');
+        }
+    }
+    
+  } catch (error) {
+    console.error('Error launching FluidPay Lightbox:', error);
+    setErrorMessage('Unable to launch payment form. Please try again later.');
+    setIsSubmitting(false);
+  }
+};
+  
+
+// Handle the response from the Lightbox (DEMO MODE ONLY)
+const handleLightboxResponse = (event) => {
+  try {
+    // PRODUCTION DATA REQUIRED:
+    // This function is only used in demo mode
+    // In production, responses come through the callback functions
+    
+    // PRODUCTION: Update origin validation for your environment
+    // For production: 'https://api.fluidpay.com'
+    // For demo: 'https://api.demo.fluidpay.com'
+    const expectedOrigin = 'https://api.demo.fluidpay.com';
+    
+    // Skip origin check in demo mode since it's simulated
+    if (!demoMode && event.origin !== expectedOrigin) {
+      return;
+    }
+    
+    const response = event.data;
+    console.log('Payment response received:', response);
+    
+    // Check if payment was successful - handle both FluidPay and Converge formats
+    const isSuccess = response.success === true || response.ssl_result === '0';
+    
+    if (isSuccess) {
+      // Payment successful
+      const successResult = {
+        success: true,
+        transactionId: response.transactionId || response.ssl_txn_id,
+        authorizationCode: response.authorizationCode || response.ssl_approval_code,
+        cardNumber: response.cardNumber || response.ssl_card_number,
+        cardType: response.cardType || response.ssl_card_type
+      };
+      
+      console.log('Payment successful! Data to be sent to backend:', {
+        transactionId: successResult.transactionId,
+        authorizationCode: successResult.authorizationCode,
+        last4: successResult.cardNumber?.slice(-4),
+        cardType: successResult.cardType,
+        expirationDate: response.expirationDate || response.ssl_exp_date || '1225'
+      });
+      
+      setPaymentResult(successResult);
+      setPopupType('success');
+      setPopupMessage(`Payment successful! Transaction ID: ${successResult.transactionId}`);
+      setShowResultPopup(true);
+      
+      // Wait a moment then process enrollment
+      setTimeout(() => {
+        setShowResultPopup(false);
+        // Ensure formData is available before calling finishEnrollment
+        if (formData) {
+          finishEnrollment(response);
+        } else {
+          console.error('formData not available, retrying in 1 second...');
+          setTimeout(() => {
+            if (formData) {
+              finishEnrollment(response);
+            } else {
+              console.error('formData still not available after retry');
+              setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+              setIsSubmitting(false);
+            }
+          }, 1000);
+        }
+      }, 3000);
+      
+    } else {
+      // Payment failed
+      const errorResult = {
+        success: false,
+        errorCode: response.errorCode || response.ssl_result,
+        errorMessage: response.errorMessage || response.ssl_result_message || 'Payment failed'
+      };
+      
+      setPaymentResult(errorResult);
+      setPopupType('error');
+      setPopupMessage(`Payment failed: ${errorResult.errorMessage}`);
+      setShowResultPopup(true);
+      setIsSubmitting(false);
+      
+      // Auto-hide error popup after 5 seconds
+      setTimeout(() => {
+        setShowResultPopup(false);
+      }, 5000);
+    }
+  } catch (error) {
+    console.error('Error processing FluidPay response:', error);
+    setErrorMessage('An error occurred while processing your payment. Please try again.');
+    setIsSubmitting(false);
+  }
+};
+
+// DEMO MODE: Simulate FluidPay Lightbox popup
+const simulateFluidPayLightbox = (config) => {
+  console.log('simulateFluidPayLightbox called with config:', config);
+  console.log('simulateFluidPayLightbox - formData:', formData);
+  
+  // Calculate the prorated amount before creating the modal
+  const proratedAmount = calculateProratedAmount();
+  console.log('simulateConvergeLightbox - calculated proratedAmount:', proratedAmount);
+  
+  // Create a modal popup for demo purposes
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+  `;
+  
+  const content = document.createElement('div');
+  content.style.cssText = `
+    background-color: white;
+    border-radius: 8px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  `;
+  
+  content.innerHTML = `
+    <h3>FluidPay Lightbox Payment (Demo)</h3>
+    <p>Processing payment with FluidPay...</p>
+    <div style="margin: 20px 0;">
+      <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+    </div>
+    <p><strong>Amount:</strong> $${proratedAmount.toFixed(2)}</p>
+    <p><strong>Customer:</strong> ${customerInfo.firstName} ${customerInfo.lastName}</p>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA', ssl_exp_date: '1225'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve VISA</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****2222', ssl_card_type: 'MASTERCARD', ssl_exp_date: '1230'}, '*');" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve MC</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****3333', ssl_card_type: 'AMEX', ssl_exp_date: '1228'}, '*');" style="background-color: #6f42c1; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve AMEX</button>
+    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '1', ssl_result_message: 'Card declined'}, '*');" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Decline Payment</button>
+    <button onclick="this.parentElement.parentElement.remove(); config.onCancel();" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Cancel</button>
+  `;
+  
+  modal.appendChild(content);
+  document.body.appendChild(modal);
+  
+  // Add CSS animation
+  const style = document.createElement('style');
+  style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+  document.head.appendChild(style);
+};
+
+// Add the simulation function to window for demo mode
+if (typeof window !== 'undefined') {
+  window.simulateFluidPayLightbox = simulateFluidPayLightbox;
+}
+  
+  // Complete enrollment after payment
+  const finishEnrollment = async (paymentResult) => {
+    try {
+      // Check if formData is available
+      if (!formData) {
+        console.error('formData is null, cannot complete enrollment');
+        setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+      
+      // Generate contract PDF for New Mexico (Converge)
+      let contractPDFArray = null;
+      try {
+        console.log('Generating contract PDF for FluidPay payment');
+        const pdfBuffer = await generatePDFBufferDenver(
+          formData,
+          signatureData,
+          new Date().toLocaleString(),
+          initialedSections,
+          selectedClub,
+          formData.monthlyDues || formData.membershipDetails?.price
+        );
+        
+        contractPDFArray = new Uint8Array(pdfBuffer);
+        console.log('Contract PDF generated for FluidPay payment:', {
+          size: contractPDFArray.length,
+          clubState: selectedClub?.state
+        });
+      } catch (pdfError) {
+        console.error('Error generating contract PDF for FluidPay payment:', pdfError);
+        // Continue with enrollment even if PDF generation fails
+      }
+
+      // Extract card information from payment result
+      const cardNumber = paymentResult.ssl_card_number || "";
+      const last4 = cardNumber.slice(-4);
+      const cardType = paymentResult.ssl_card_type || "";
+      
+      // For demo mode, we'll use a mock expiration date
+      // In production, this would come from the actual payment response
+      const expirationDate = paymentResult.ssl_exp_date || "1225"; // Demo: December 2025
+      
+      // Combine all data for submission
+      const submissionData = {
+        ...formData,
+        // Add signature data
+        signatureData: signatureData,
+        // Add selected club data
+        selectedClub: selectedClub,
+        // Add contract PDF
+        contractPDF: contractPDFArray,
+        // Add payment data
+        paymentInfo: {
+          processorName: 'FLUIDPAY',
+          transactionId: paymentResult.ssl_txn_id,
+          authorizationCode: paymentResult.ssl_approval_code,
+          last4: last4,
+          cardType: cardType,
+          expirationDate: expirationDate
+        }
+      };
+      
+      console.log('Submitting enrollment data:', submissionData);
+      
+      // Log detailed information about what's being sent
+      console.log('Enrollment submission details:', {
+        primaryMember: {
+          firstName: submissionData.firstName,
+          lastName: submissionData.lastName,
+          email: submissionData.email
+        },
+        familyMembers: submissionData.familyMembers ? submissionData.familyMembers.length : 0,
+        guardian: submissionData.guardian ? 'Present' : 'None',
+        paymentInfo: submissionData.paymentInfo,
+        membershipDetails: submissionData.membershipDetails
+      });
+      
+      if (submissionData.familyMembers && submissionData.familyMembers.length > 0) {
+        console.log('Family members being submitted:', submissionData.familyMembers.map(m => ({
+          name: `${m.firstName} ${m.lastName}`,
+          role: m.role,
+          memberType: m.memberType
+        })));
+        console.log('Raw family members data:', submissionData.familyMembers);
+      }
+      
+      if (submissionData.guardian) {
+        console.log('Guardian being submitted:', {
+          name: `${submissionData.guardian.firstName} ${submissionData.guardian.lastName}`,
+          relationship: submissionData.guardian.relationship
+        });
+      }
+      
+      // PRODUCTION DATA REQUIRED:
+      // Ensure this posts to your actual production API endpoint
+      // Add proper error handling, validation, and retry logic
+      // Consider adding transaction logging for payment reconciliation
+      const response = await api.post('/enrollment', submissionData);
+      
+// Debug logging before navigation
+console.log('FluidPayPayment - About to navigate with:');
+console.log('  formData:', formData);
+console.log('  signatureData:', signatureData);
+console.log('  initialedSections:', initialedSections);
+
+// Calculate the amount being billed
+const amountBilled = calculateProratedAmount();
+console.log('FluidPayPayment - amountBilled being passed to confirmation:', amountBilled);
+
+      // Navigate to confirmation page
+      navigate('/enrollment-confirmation', { 
+        state: { 
+          enrollmentData: response.data,
+          memberName: `${formData.firstName} ${formData.lastName}`,
+          successMessage: `Welcome ${formData.firstName} ${formData.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.custCode} to take the next steps in your membership journey.`,
+          paymentResponse: paymentResult,
+          formData: formData,
+          signatureData: signatureData,
+          initialedSections: initialedSections,
+          email: formData.email,
+          amountBilled: amountBilled,
+          membershipNumber: response.data.custCode,
+          transactionId: response.data.transactionId
+        } 
+      });
+    } catch (error) {
+      console.error('Enrollment submission error:', error);
+      setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
+      setIsSubmitting(false);
+    }
+  };
+  
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await launchLightbox();
+  };
   
   // Calculate prorated amount due now
   const calculateProratedAmount = () => {
-    if (!formData) return 0;
-    
-    // Use the totalCollected field if available, otherwise calculate from components
-    if (formData.totalCollected) {
-      return parseFloat(formData.totalCollected);
+    console.log('calculateProratedAmount called with formData:', formData);
+    if (!formData) {
+      console.log('calculateProratedAmount: formData is missing');
+      return 0;
     }
     
+    // Use the exact pre-calculated values from formData
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
     
+    // Calculate total using the exact values from formData
     const total = proratedDues + proratedAddOns + taxAmount;
+    
+    console.log('calculateProratedAmount using formData values:', {
+      proratedDues,
+      proratedAddOns,
+      taxAmount,
+      total: Math.round(total * 100) / 100,
+      formDataTotalCollected: formData.totalCollected,
+      formDataProratedDues: formData.proratedDues,
+      formDataProratedAddOns: formData.proratedAddOns,
+      formDataTaxAmount: formData.taxAmount
+    });
+    
     return Math.round(total * 100) / 100;
   };
   
+  // Calculate monthly amount going forward
   // Calculate monthly amount going forward (including addons and taxes)
   const calculateMonthlyAmount = () => {
     if (!formData) return 0;
@@ -271,216 +954,12 @@ const FluidPayPayment = () => {
     return grossMonthlyTotal;
   };
   
-  // Function to generate FluidPay iframe URL
-  const generateFluidPayIframeUrl = async () => {
-    try {
-      setIsSubmitting(true);
-      setErrorMessage('');
-      
-      const amount = calculateProratedAmount();
-      const clubId = formData.club || selectedClub?.id || "001";
-      
-      console.log('Generating FluidPay iframe URL with data:', {
-        clubId,
-        amount: amount.toFixed(2),
-        customerInfo
-      });
-      
-      // In production, this would call your backend to generate a secure iframe URL
-      // For demo purposes, we'll simulate the iframe URL generation
-      const iframeUrl = demoMode 
-        ? `/online-enrollment/fluidpay-demo-iframe.html?amount=${amount.toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`
-        : `${processorInfo?.fluidpay_base_url}/payment-form?token=${Date.now()}&amount=${amount.toFixed(2)}`;
-      
-      setIframeUrl(iframeUrl);
-      setIframeLoaded(true);
-      
-    } catch (error) {
-      console.error('Error generating FluidPay iframe URL:', error);
-      setErrorMessage('Unable to load payment form. Please try again later.');
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Handle iframe load
-  const handleIframeLoad = () => {
-    setIframeLoaded(true);
-    setIsSubmitting(false);
-  };
-  
-  // Handle iframe message (for demo mode)
-  const handleIframeMessage = (event) => {
-    console.log('Iframe message received:', event.data);
-    if (demoMode && event.data && event.data.type === 'fluidpay-payment') {
-      const { success, transactionId, error } = event.data;
-      
-      if (success) {
-        setPaymentResult({
-          success: true,
-          transactionId,
-          processor: 'FLUIDPAY'
-        });
-        setPopupType('success');
-        setPopupMessage(`Payment successful! Transaction ID: ${transactionId}`);
-        setShowResultPopup(true);
-        
-        setTimeout(() => {
-          setShowResultPopup(false);
-          // Ensure formData is available before calling finishEnrollment
-          if (formDataRef.current) {
-            finishEnrollment({ transactionId, processor: 'FLUIDPAY' });
-          } else {
-            console.error('formData not available, retrying in 1 second...');
-            setTimeout(() => {
-              if (formDataRef.current) {
-                finishEnrollment({ transactionId, processor: 'FLUIDPAY' });
-              } else {
-                console.error('formData still not available after retry');
-                setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
-                setIsSubmitting(false);
-              }
-            }, 1000);
-          }
-        }, 3000);
-      } else {
-        setPaymentResult({
-          success: false,
-          error,
-          processor: 'FLUIDPAY'
-        });
-        setPopupType('error');
-        setPopupMessage(`Payment failed: ${error}`);
-        setShowResultPopup(true);
-        setIsSubmitting(false);
-      }
-    }
-  };
-  
-  // Complete enrollment after payment
-  const finishEnrollment = async (paymentResult) => {
-    try {
-      console.log('finishEnrollment called with paymentResult:', paymentResult);
-      console.log('formData:', formDataRef.current);
-      
-      // Check if formData is available
-      if (!formDataRef.current) {
-        console.error('formData is null, cannot complete enrollment');
-        setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
-        setIsSubmitting(false);
-        return;
-      }
-      
-      // Generate contract PDF based on club state
-      let contractPDFArray = null;
-      try {
-        console.log('Generating contract PDF with data:', {
-          formData: !!formDataRef.current,
-          signatureData: !!signatureData,
-          initialedSections: !!initialedSections,
-          selectedClub: selectedClub?.state,
-          clubName: selectedClub?.name
-        });
-        
-        const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
-        console.log('Using PDF generator for club state:', selectedClub?.state);
-        
-        const pdfBuffer = await generatePDFBuffer(
-          formDataRef.current,
-          signatureData,
-          new Date().toLocaleString(),
-          initialedSections,
-          selectedClub,
-          formDataRef.current.monthlyDues || formDataRef.current.membershipDetails?.price
-        );
-        
-        // Convert ArrayBuffer to Uint8Array for transmission
-        contractPDFArray = new Uint8Array(pdfBuffer);
-        console.log('Contract PDF generated successfully:', {
-          size: contractPDFArray.length,
-          clubState: selectedClub?.state,
-          clubName: selectedClub?.name
-        });
-      } catch (pdfError) {
-        console.error('Error generating contract PDF:', pdfError);
-        console.error('PDF generation error details:', {
-          error: pdfError.message,
-          stack: pdfError.stack,
-          formData: !!formDataRef.current,
-          signatureData: !!signatureData,
-          initialedSections: !!initialedSections,
-          selectedClub: selectedClub?.state
-        });
-        // Continue with enrollment even if PDF generation fails
-      }
-
-      const submissionData = {
-        ...formDataRef.current,
-        signatureData: signatureData,
-        selectedClub: selectedClub,
-        contractPDF: contractPDFArray, // Send the contract PDF with enrollment
-        paymentInfo: {
-          processorName: 'FLUIDPAY',
-          transactionId: paymentResult.transactionId,
-          authorizationCode: paymentResult.authorizationCode || 'DEMO123',
-          last4: paymentResult.last4 || '1111'
-        }
-      };
-      
-      console.log('Submitting enrollment data with contract PDF');
-      
-      const response = await api.post('/enrollment', submissionData);
-      
-      const amountBilled = calculateProratedAmount();
-      
-      navigate('/enrollment-confirmation', { 
-        state: { 
-          enrollmentData: response.data,
-          memberName: `${formDataRef.current.firstName} ${formDataRef.current.lastName}`,
-          successMessage: `Welcome ${formDataRef.current.firstName} ${formDataRef.current.lastName} to ${selectedClub?.name || 'the club'}! You will use Membership# ${response.data.custCode} to take the next steps in your membership journey.`,
-          paymentResponse: paymentResult,
-          formData: formDataRef.current,
-          signatureData: signatureData,
-          initialedSections: initialedSections,
-          email: formDataRef.current.email,
-          amountBilled: amountBilled,
-          membershipNumber: response.data.custCode,
-          transactionId: response.data.transactionId
-        } 
-      });
-    } catch (error) {
-      console.error('Enrollment submission error:', error);
-      
-      // Check if it's a backend error (500 status)
-      if (error.response && error.response.status === 500) {
-        setErrorMessage('Payment was processed successfully, but there was a server error saving your enrollment. Please contact customer support with your transaction ID: ' + paymentResult.transactionId);
-      } else {
-        setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
-      }
-      
-      setIsSubmitting(false);
-    }
-  };
-  
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await generateFluidPayIframeUrl();
-  };
-  
-  // Add event listener for iframe messages
-  useEffect(() => {
-    window.addEventListener('message', handleIframeMessage);
-    return () => {
-      window.removeEventListener('message', handleIframeMessage);
-    };
-  }, [demoMode]);
-  
   if (!formData) {
     return <div className="loading">Loading...</div>;
   }
   
   return (
-    <div className="fluidpay-payment-container">
+    <div className="payment-container">
       {/* Payment Result Popup */}
       {showResultPopup && (
         <div className="popup-overlay">
@@ -524,8 +1003,10 @@ const FluidPayPayment = () => {
         </div>
       )}
       
+      {/* REMOVE THIS LINE - script is loaded dynamically */}
+      {/* <script src="https://api.convergepay.com/hosted-payments/presentation.js"></script> */}
+      
       <div className="payment-layout">
-        {/* Summary Sidebar */}
         <div className="payment-summary">
           <h2>Payment Summary</h2>
           
@@ -539,12 +1020,12 @@ const FluidPayPayment = () => {
                     <span className="detail-value">{processorInfo.merchant_id}</span>
                   </p>
                   <p className="detail-item">
-                    <span className="detail-label">Base URL:</span>
-                    <span className="detail-value">{processorInfo.fluidpay_base_url ? '✓ Configured' : '⚠️ Missing'}</span>
+                    <span className="detail-label">User ID:</span>
+                    <span className="detail-value">{processorInfo.converge_user_id ? '✓ Configured' : '⚠️ Missing'}</span>
                   </p>
                   <p className="detail-item">
-                    <span className="detail-label">API Key:</span>
-                    <span className="detail-value">{processorInfo.fluidpay_api_key ? '✓ Configured' : '⚠️ Missing'}</span>
+                    <span className="detail-label">Process URL:</span>
+                    <span className="detail-value">{processorInfo.converge_url_process ? '✓ Configured' : '⚠️ Missing'}</span>
                   </p>
                 </div>
               </div>
@@ -605,12 +1086,11 @@ const FluidPayPayment = () => {
           </div>
         </div>
         
-        {/* Payment Form Area */}
         <div className="payment-form-container">
           <h2>Payment Information</h2>
           
-          <div className="fluidpay-explainer">
-            <h3>FluidPay Secure Payment {demoMode && <span style={{color: 'orange'}}>(DEMO MODE)</span>}</h3>
+          <div className="lightbox-explainer">
+            <h3>FluidPay Lightbox Payment {demoMode && <span style={{color: 'orange'}}>(DEMO MODE)</span>}</h3>
             <p>
               When you click the "Pay Now" button below, a secure payment form will appear where 
               you can safely enter your credit card information. Your payment will be processed securely 
@@ -634,7 +1114,7 @@ const FluidPayPayment = () => {
               <div className="success-message">
                 <h3>Payment Successful! ✅</h3>
                 <p>Transaction ID: {paymentResult.transactionId}</p>
-                <p>Processor: {paymentResult.processor}</p>
+                <p>Card: {paymentResult.cardType} ending in {paymentResult.cardNumber?.slice(-4)}</p>
                 <p>Processing your enrollment...</p>
               </div>
             )}
@@ -642,7 +1122,7 @@ const FluidPayPayment = () => {
             {paymentResult && !paymentResult.success && (
               <div className="error-message">
                 <h3>Payment Failed ❌</h3>
-                <p>Error: {paymentResult.error}</p>
+                <p>Error: {paymentResult.errorMessage}</p>
                 <p>Please try again or use a different payment method.</p>
               </div>
             )}
@@ -681,12 +1161,12 @@ const FluidPayPayment = () => {
           {iframeLoaded && iframeUrl && (
             <div className="fluidpay-iframe-container">
               <h3>Secure Payment Form</h3>
-              <iframe
-                src={iframeUrl}
-                title="FluidPay Payment Form"
-                onLoad={handleIframeLoad}
-                style={{ width: '100%', height: '600px', border: '1px solid #ddd', borderRadius: '6px' }}
-              />
+                              <iframe
+                  src={iframeUrl}
+                  title="FluidPay Payment Form"
+                  onLoad={() => setIframeLoaded(true)}
+                  style={{ width: '100%', height: '600px', border: '1px solid #ddd', borderRadius: '6px' }}
+                />
             </div>
           )}
         </div>
@@ -695,4 +1175,4 @@ const FluidPayPayment = () => {
   );
 };
 
-export default FluidPayPayment; 
+export default FluidPayPayment;

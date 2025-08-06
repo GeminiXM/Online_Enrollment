@@ -191,6 +191,30 @@ const apiService = {
     }
   },
 
+  // Get a transaction token for FluidPay Lightbox
+  getFluidPayToken: async (tokenData) => {
+    try {
+      const response = await api.post("/payment/fluidpay-token", tokenData);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting FluidPay token:", error);
+
+      // For demo purposes, simulate a token response
+      // In production, you would never do this - tokens should only come from a secure backend
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("DEMO MODE: Returning mock token for development");
+        return {
+          success: true,
+          ssl_txn_auth_token: `DEMO_FLUIDPAY_TOKEN_${Date.now()}`,
+          message:
+            "This is a simulated FluidPay token for demonstration purposes only",
+        };
+      }
+
+      throw error;
+    }
+  },
+
   // Save contract PDF to contracts folder
   saveContractPDF: async (contractPDF, membershipNumber, memberName) => {
     try {

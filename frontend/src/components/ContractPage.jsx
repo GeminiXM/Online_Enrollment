@@ -566,6 +566,12 @@ const ContractPage = () => {
         initialedSectionsKeys: initialedBoxes ? Object.keys(initialedBoxes) : []
       });
       
+      console.log('ContractPage - signatureData value:', signatureData);
+      console.log('ContractPage - initialedBoxes value:', initialedBoxes);
+      console.log('ContractPage - signatureData.signature:', signatureData?.signature);
+      console.log('ContractPage - signatureData.initials:', signatureData?.initials);
+      console.log('ContractPage - isSigned:', isSigned);
+      
       // Continue to appropriate payment page with all data
       navigate(paymentRoute, {
         state: {

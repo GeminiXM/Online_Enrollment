@@ -4,12 +4,13 @@
 import express from "express";
 import { body } from "express-validator";
 import logger from "../utils/logger.js";
-import { 
-  getCCProcessorName, 
-  getFluidPayInfo, 
-  getConvergeInfo, 
+import {
+  getCCProcessorName,
+  getFluidPayInfo,
+  getConvergeInfo,
   getConvergeToken,
-  processPaymentDemo 
+  getFluidPayToken,
+  processPaymentDemo,
 } from "../controllers/paymentController.js";
 
 const router = express.Router();
@@ -39,7 +40,7 @@ const validatePaymentData = [
     .notEmpty()
     .withMessage("Billing ZIP code is required")
     .matches(/^\d{5}(-\d{4})?$/)
-    .withMessage("Invalid ZIP code format")
+    .withMessage("Invalid ZIP code format"),
 ];
 
 /**
@@ -57,7 +58,8 @@ router.get("/cc-processor", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving the credit card processor. Please try again later.",
+      message:
+        "An error occurred while retrieving the credit card processor. Please try again later.",
     });
   }
 });
@@ -77,7 +79,8 @@ router.get("/fluidpay-info", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving FluidPay information. Please try again later.",
+      message:
+        "An error occurred while retrieving FluidPay information. Please try again later.",
     });
   }
 });
@@ -97,7 +100,8 @@ router.get("/converge-info", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while retrieving Converge information. Please try again later.",
+      message:
+        "An error occurred while retrieving Converge information. Please try again later.",
     });
   }
 });
@@ -117,7 +121,29 @@ router.post("/converge-token", async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while generating the Converge token. Please try again later.",
+      message:
+        "An error occurred while generating the Converge token. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route POST /api/payment/fluidpay-token
+ * @desc Get FluidPay transaction token for payment processing
+ * @access Public
+ */
+router.post("/fluidpay-token", async (req, res) => {
+  try {
+    return await getFluidPayToken(req, res);
+  } catch (error) {
+    logger.error("Error in fluidpay-token route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message:
+        "An error occurred while generating the FluidPay token. Please try again later.",
     });
   }
 });
@@ -137,7 +163,8 @@ router.post("/process-demo", validatePaymentData, async (req, res) => {
     });
     return res.status(500).json({
       success: false,
-      message: "An error occurred while processing the demo payment. Please try again later.",
+      message:
+        "An error occurred while processing the demo payment. Please try again later.",
     });
   }
 });
