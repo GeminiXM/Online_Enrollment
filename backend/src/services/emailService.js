@@ -294,16 +294,10 @@ class EmailService {
               <li>Monthly dues will be automatically charged to your payment method.</li>
               <li>Please review our club rules and policies available on our website.</li>
               <li>For any questions, contact us at ma@wellbridge.com or call (303) 866-0800.</li>
-              <li>Club Location: ${
-                selectedClub?.address || "Address not available"
-              }</li>
+
             </ul>
             
-            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h4 style="margin-top: 0;">Club Hours</h4>
-              <p>Monday - Friday: 5:00 AM - 11:00 PM<br>
-              Saturday - Sunday: 6:00 AM - 10:00 PM</p>
-            </div>
+
             
             <p>We look forward to helping you achieve your fitness goals!</p>
             
@@ -361,10 +355,7 @@ class EmailService {
       logger.error("Error sending welcome email:", error);
       return false;
     } finally {
-      // Clean up temporary file
-      if (contractFilePath) {
-        await this.cleanupContractPDF(contractFilePath);
-      }
+      // No cleanup needed - contract file is permanent and properly named
     }
   }
 }

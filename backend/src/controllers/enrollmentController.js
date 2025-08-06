@@ -1269,12 +1269,28 @@ export const submitEnrollment = async (req, res) => {
           type: typeof contractPDFBuffer,
           hasData: !!contractPDFBuffer,
         });
+
+        // Save the contract PDF to the contracts folder
+        const contractsDir = path.join(__dirname, "../../../contracts");
+        if (!fs.existsSync(contractsDir)) {
+          fs.mkdirSync(contractsDir, { recursive: true });
+        }
+
+        const contractFileName = `contract_${updatedCustCode}_${Date.now()}.pdf`;
+        const contractFilePath = path.join(contractsDir, contractFileName);
+
+        // Convert Uint8Array to Buffer and save
+        const pdfBuffer = Buffer.from(contractPDFBuffer);
+        fs.writeFileSync(contractFilePath, pdfBuffer);
+
+        logger.info("Contract PDF saved successfully:", {
+          fileName: contractFileName,
+          filePath: contractFilePath,
+          membershipNumber: updatedCustCode,
+        });
       } else {
         logger.warn("No contract PDF buffer received from frontend");
       }
-
-      // Contract PDF is now saved in EnrollmentConfirmation.jsx with proper naming
-      // Removed contract saving from here to avoid duplicate files
     } catch (contractError) {
       logger.error("Error saving contract PDF after payment:", {
         error: contractError.message,

@@ -3,6 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import CanvasContractPDF from './CanvasContractPDF.jsx';
+import CanvasContractDenverPDF from './CanvasContractDenverPDF.jsx';
+import { generatePDFBuffer as generatePDFBufferNM } from './CanvasContractPDF.jsx';
+import { generatePDFBuffer as generatePDFBufferDenver } from './CanvasContractDenverPDF.jsx';
 // import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './FluidPayPayment.css';
 
@@ -360,15 +363,54 @@ const FluidPayPayment = () => {
         return;
       }
       
-      // Contract PDF is now generated in EnrollmentConfirmation.jsx with proper naming
-      // Removed contract generation from here to speed up navigation
+      // Generate contract PDF based on club state
       let contractPDFArray = null;
+      try {
+        console.log('Generating contract PDF with data:', {
+          formData: !!formDataRef.current,
+          signatureData: !!signatureData,
+          initialedSections: !!initialedSections,
+          selectedClub: selectedClub?.state,
+          clubName: selectedClub?.name
+        });
+        
+        const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
+        console.log('Using PDF generator for club state:', selectedClub?.state);
+        
+        const pdfBuffer = await generatePDFBuffer(
+          formDataRef.current,
+          signatureData,
+          new Date().toLocaleString(),
+          initialedSections,
+          selectedClub,
+          formDataRef.current.monthlyDues || formDataRef.current.membershipDetails?.price
+        );
+        
+        // Convert ArrayBuffer to Uint8Array for transmission
+        contractPDFArray = new Uint8Array(pdfBuffer);
+        console.log('Contract PDF generated successfully:', {
+          size: contractPDFArray.length,
+          clubState: selectedClub?.state,
+          clubName: selectedClub?.name
+        });
+      } catch (pdfError) {
+        console.error('Error generating contract PDF:', pdfError);
+        console.error('PDF generation error details:', {
+          error: pdfError.message,
+          stack: pdfError.stack,
+          formData: !!formDataRef.current,
+          signatureData: !!signatureData,
+          initialedSections: !!initialedSections,
+          selectedClub: selectedClub?.state
+        });
+        // Continue with enrollment even if PDF generation fails
+      }
 
       const submissionData = {
         ...formDataRef.current,
         signatureData: signatureData,
         selectedClub: selectedClub,
-        // Contract PDF is now generated in EnrollmentConfirmation.jsx
+        contractPDF: contractPDFArray, // Send the contract PDF with enrollment
         paymentInfo: {
           processorName: 'FLUIDPAY',
           transactionId: paymentResult.transactionId,

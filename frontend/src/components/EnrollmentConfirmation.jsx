@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import CanvasContractPDF from './CanvasContractPDF';
-import { generatePDFBuffer } from './CanvasContractPDF';
+import CanvasContractDenverPDF from './CanvasContractDenverPDF';
+import { generatePDFBuffer as generatePDFBufferNM } from './CanvasContractPDF';
+import { generatePDFBuffer as generatePDFBufferDenver } from './CanvasContractDenverPDF';
 import './EnrollmentConfirmation.css';
 
 
@@ -76,32 +78,38 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
   const hasSavedRef = useRef(false);
   
   useEffect(() => {
-    const saveContractToServer = async () => {
-      if (!formData || !signatureData || !membershipNumber || hasSavedRef.current) return;
+    const saveContractAndSendEmail = async () => {
+      if (!formData || !membershipNumber || hasSavedRef.current) return;
       hasSavedRef.current = true;
 
       try {
-        const pdfBuffer = await generatePDFBuffer(
-          formData,
-          signatureData,
-          formatTimestamp(),
-          initialedSections,
-          selectedClub,
-          formData.membershipDetails?.price || formData.monthlyDues
-        );
-        const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
-        const formDataToSend = new FormData();
-        formDataToSend.append('contract', blob, 'contract.pdf');
-        // Debug logging
-        console.log('Saving contract with data:', {
-          membershipNumber,
-          firstName: formData.primaryMember?.firstName,
-          lastName: formData.primaryMember?.lastName,
-          formDataKeys: Object.keys(formData || {}),
-          primaryMemberKeys: Object.keys(formData?.primaryMember || {}),
-          fullFormData: formData
-        });
-        
+        // Generate contract PDF for Converge payments (New Mexico)
+        // FluidPay payments (Colorado/Denver) already have contract PDF generated
+        let contractPDFArray = null;
+        if (paymentResponse?.processor === 'CONVERGE' && signatureData && initialedSections) {
+          try {
+            console.log('Generating contract PDF for Converge payment');
+            const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
+            
+            const pdfBuffer = await generatePDFBuffer(
+              formData,
+              signatureData,
+              formatTimestamp(),
+              initialedSections,
+              selectedClub,
+              formData.membershipDetails?.price || formData.monthlyDues
+            );
+            
+            contractPDFArray = new Uint8Array(pdfBuffer);
+            console.log('Contract PDF generated for Converge payment:', {
+              size: contractPDFArray.length,
+              clubState: selectedClub?.state
+            });
+          } catch (pdfError) {
+            console.error('Error generating contract PDF for Converge payment:', pdfError);
+          }
+        }
+
         // Try different ways to access the member data
         const firstName = formData.primaryMember?.firstName || 
                          formData.member?.firstName || 
@@ -112,63 +120,40 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
                         formData.lastName || 
                         '';
         
-        console.log('Extracted member data:', { firstName, lastName, membershipNumber });
+        console.log('Sending welcome email for:', { firstName, lastName, membershipNumber });
         
-        formDataToSend.append('memberId', membershipNumber);
-        formDataToSend.append('firstName', firstName);
-        formDataToSend.append('lastName', lastName);
-        formDataToSend.append('date', new Date().toISOString().split('T')[0]); // YYYY-MM-DD format
-
-        // Debug: Log what we're sending
-        console.log('Sending FormData with:', {
-          memberId: membershipNumber,
-          firstName,
-          lastName,
-          date: new Date().toISOString().split('T')[0]
-        });
-
-        const response = await fetch('/api/save-contract', {
-          method: 'POST',
-          body: formDataToSend,
-        });
-
-        if (response.ok) {
-          console.log('Contract saved successfully to server');
+        // Send welcome email with contract attachment
+        try {
+          const emailResponse = await fetch('/api/enrollment/send-welcome-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              membershipNumber,
+              firstName,
+              lastName,
+              email: formData.email,
+              selectedClub,
+              transactionId
+            }),
+          });
           
-          // Send welcome email with contract attachment
-          try {
-            const emailResponse = await fetch('/api/enrollment/send-welcome-email', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                membershipNumber,
-                firstName,
-                lastName,
-                email: formData.email,
-                selectedClub
-              }),
-            });
-            
-            if (emailResponse.ok) {
-              console.log('Welcome email sent successfully');
-            } else {
-              console.error('Failed to send welcome email');
-            }
-          } catch (emailError) {
-            console.error('Error sending welcome email:', emailError);
+          if (emailResponse.ok) {
+            console.log('Welcome email sent successfully');
+          } else {
+            console.error('Failed to send welcome email');
           }
-        } else {
-          console.error('Failed to save contract to server');
+        } catch (emailError) {
+          console.error('Error sending welcome email:', emailError);
         }
       } catch (error) {
-        console.error('Error saving contract to server:', error);
+        console.error('Error in saveContractAndSendEmail:', error);
       }
     };
 
-    saveContractToServer();
-  }, [formData, signatureData, initialedSections, selectedClub, membershipNumber]);
+    saveContractAndSendEmail();
+  }, [formData, signatureData, initialedSections, selectedClub, membershipNumber, transactionId, paymentResponse]);
 
   return (
     <div className="enrollment-confirmation">
@@ -255,14 +240,25 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             <h3>Your Membership Contract</h3>
             <p>Download your completed membership agreement for your records.</p>
             <div className="contract-download-actions">
-              <CanvasContractPDF 
-                formData={formData}
-                signatureData={signatureData}
-                signatureDate={formatTimestamp()}
-                initialedSections={initialedSections}
-                selectedClub={selectedClub}
-                membershipPrice={formData.membershipDetails?.price || formData.monthlyDues}
-              />
+              {selectedClub?.state === 'NM' ? (
+                <CanvasContractPDF 
+                  formData={formData}
+                  signatureData={signatureData}
+                  signatureDate={formatTimestamp()}
+                  initialedSections={initialedSections}
+                  selectedClub={selectedClub}
+                  membershipPrice={formData.membershipDetails?.price || formData.monthlyDues}
+                />
+              ) : (
+                <CanvasContractDenverPDF 
+                  formData={formData}
+                  signatureData={signatureData}
+                  signatureDate={formatTimestamp()}
+                  initialedSections={initialedSections}
+                  selectedClub={selectedClub}
+                  membershipPrice={formData.membershipDetails?.price || formData.monthlyDues}
+                />
+              )}
             </div>
           </div>
         )}

@@ -17,6 +17,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import SignatureSelector from './SignatureSelector';
 import CanvasContractPDF from './CanvasContractPDF';
+import CanvasContractDenverPDF from './CanvasContractDenverPDF';
 import './ContractPage.css';
 
 // Component for clickable initial boxes
@@ -1371,14 +1372,25 @@ const ContractPage = () => {
         
         {/* PDF Download Buttons */} 
         <div className="pdf-download-container">
-          <CanvasContractPDF
-            formData={formData}
-            signatureData={signatureData}
-            signatureDate={signatureDate}
-            initialedSections={initialedBoxes}
-            selectedClub={selectedClub}
-            membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
-          />
+          {selectedClub?.state === 'NM' ? (
+            <CanvasContractPDF
+              formData={formData}
+              signatureData={signatureData}
+              signatureDate={signatureDate}
+              initialedSections={initialedBoxes}
+              selectedClub={selectedClub}
+              membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
+            />
+          ) : (
+            <CanvasContractDenverPDF
+              formData={formData}
+              signatureData={signatureData}
+              signatureDate={signatureDate}
+              initialedSections={initialedBoxes}
+              selectedClub={selectedClub}
+              membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
+            />
+          )}
           {/* Debug display for family members data */}
           {/* {JSON.stringify(formData.familyMembers)} */}
         </div>

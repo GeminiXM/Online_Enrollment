@@ -447,8 +447,14 @@ router.post("/save-contract", async (req, res) => {
 // Send welcome email with contract attachment
 router.post("/send-welcome-email", async (req, res) => {
   try {
-    const { membershipNumber, firstName, lastName, email, selectedClub } =
-      req.body;
+    const {
+      membershipNumber,
+      firstName,
+      lastName,
+      email,
+      selectedClub,
+      transactionId,
+    } = req.body;
 
     if (!membershipNumber || !email) {
       return res.status(400).json({
@@ -457,10 +463,10 @@ router.post("/send-welcome-email", async (req, res) => {
       });
     }
 
-    // Create mock enrollment data for email
+    // Create enrollment data for email using the real transaction ID
     const enrollmentData = {
       custCode: membershipNumber,
-      transactionId: `TXN${Date.now()}`,
+      transactionId: transactionId || `TXN${Date.now()}`, // Use real transaction ID if available
       amountBilled: 0, // This will be calculated from the form data
     };
 
