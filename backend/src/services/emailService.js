@@ -305,11 +305,7 @@ class EmailService {
             The ${selectedClub?.name || formData.club || "Wellbridge"} Team</p>
           </div>
           
-          <div style="background-color: #2c3e50; color: white; padding: 15px; text-align: center; font-size: 12px;">
-            <p>This email was sent to ${
-              formData.email
-            }. If you have any questions, please contact us.</p>
-          </div>
+
         </div>
       `;
 

@@ -576,6 +576,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
       pdf.addPage();
       currentYPos = 20;
     }
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('EXTENDED PLAN', 20, currentYPos);
     currentYPos += 5;
@@ -600,6 +601,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // Refund Paragraph
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     const refundText = 'Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.';
     const splitRefundText = pdf.splitTextToSize(refundText, 170);
@@ -612,6 +614,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // C. PAID-IN-FULL Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('C. PAID-IN-FULL', 20, currentYPos);
     currentYPos += 5;
@@ -627,6 +630,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // D. EFT Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('D. EFT', 20, currentYPos);
     currentYPos += 5;
@@ -642,6 +646,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // E. DELINQUENT ACCOUNTS Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('E. DELINQUENT ACCOUNTS', 20, currentYPos);
     currentYPos += 5;
@@ -657,6 +662,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // F. REFERRALS Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('F. REFERRALS', 20, currentYPos);
     currentYPos += 5;
@@ -672,6 +678,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // G. EMAIL Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('G. EMAIL', 20, currentYPos);
     currentYPos += 5;
@@ -687,6 +694,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 2. UPGRADES/DOWNGRADES Section
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('2. UPGRADES/DOWNGRADES', 20, currentYPos);
     currentYPos += 5;
@@ -702,6 +710,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 3. CLUB'S RIGHT OF CANCELLATION
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text("3. CLUB'S RIGHT OF CANCELLATION", 20, currentYPos);
     currentYPos += 5;
@@ -717,6 +726,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 4. TERMINATION/RESIGNATION RIGHTS
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('4. TERMINATION/RESIGNATION RIGHTS', 20, currentYPos);
     currentYPos += 5;
@@ -732,6 +742,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // A. RESIGNATION POLICY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('A. RESIGNATION POLICY', 30, currentYPos);
     currentYPos += 5;
@@ -756,6 +767,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // B. DEATH OR DISABILITY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('B. DEATH OR DISABILITY', 30, currentYPos);
     currentYPos += 5;
@@ -771,6 +783,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 5. MEMBERSHIP POLICY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('5. MEMBERSHIP POLICY', 20, currentYPos);
     currentYPos += 5;
@@ -790,6 +803,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 6. MEMBERSHIP ENTRY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('6. MEMBERSHIP ENTRY', 20, currentYPos);
     currentYPos += 5;
@@ -805,6 +819,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 7. HOURS OF OPERATION
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('7. HOURS OF OPERATION', 20, currentYPos);
     currentYPos += 5;
@@ -820,6 +835,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 8. LEAVE OF ABSENCE POLICY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('8. LEAVE OF ABSENCE POLICY', 20, currentYPos);
     currentYPos += 5;
@@ -835,6 +851,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 9. PERSONAL TRAINING
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('9. PERSONAL TRAINING', 20, currentYPos);
     currentYPos += 5;
@@ -850,6 +867,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 10. EMERGENCY MEDICAL AID
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('10. EMERGENCY MEDICAL AID', 20, currentYPos);
     currentYPos += 5;
@@ -865,6 +883,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 11. AMENDING OF RULES
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('11. AMENDING OF RULES', 20, currentYPos);
     currentYPos += 5;
@@ -880,6 +899,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 12. UNAVAILABILITY OF FACILITY OR SERVICES
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('12. UNAVAILABILITY OF FACILITY OR SERVICES', 20, currentYPos);
     currentYPos += 5;
@@ -895,6 +915,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 13. HEALTH WARRANTY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('13. HEALTH WARRANTY', 20, currentYPos);
     currentYPos += 5;
@@ -910,6 +931,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 14. DAMAGE TO FACILITIES
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('14. DAMAGE TO FACILITIES', 20, currentYPos);
     currentYPos += 5;
@@ -925,6 +947,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 15. THEFT OR DAMAGE TO PERSONAL PROPERTY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('15. THEFT OR DAMAGE TO PERSONAL PROPERTY', 20, currentYPos);
     currentYPos += 5;
@@ -940,6 +963,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 16. RELEASE FROM LIABILITY
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('16. RELEASE FROM LIABILITY', 20, currentYPos);
     currentYPos += 5;
@@ -955,6 +979,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 17. WAIVER AND RELEASE OF ELECTRONIC MEDIA
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('17. WAIVER AND RELEASE OF ELECTRONIC MEDIA', 20, currentYPos);
     currentYPos += 5;
@@ -978,6 +1003,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 18. CORPORATE MEMBERS REGULATIONS
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('18. CORPORATE MEMBERS REGULATIONS', 20, currentYPos);
     currentYPos += 5;
@@ -1030,6 +1056,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     }
 
     // 19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS
+    pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
     pdf.text('19. STUDENT YOUNG PROFESSIONAL (SYP) MEMBERSHIPS', 20, currentYPos);
     currentYPos += 5;
@@ -1057,6 +1084,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     } else {
       currentYPos += 5;
     }
+    pdf.setFontSize(10);
     const sypText3 = `As used herein, the abbreviation "${getClubAbbreviation(selectedClub)}" means ${getClubName(selectedClub)}, its successors, assigns, employees, officers, directors, shareholders, and all persons, corporations, partnerships and other entities with which it is or may in the future become affiliated. The terms and conditions contained herein, along with the Rules and Regulations, constitute the full agreement between ${getClubAbbreviation(selectedClub)} and the member, and no oral promises are made a part of it.`;
     const splitSyp3 = pdf.splitTextToSize(sypText3, 160);
     currentYPos = drawPagedText(pdf, splitSyp3, 20, currentYPos);
