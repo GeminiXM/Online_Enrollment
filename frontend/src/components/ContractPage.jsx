@@ -1077,42 +1077,7 @@ const ContractPage = () => {
           </div>
         </div>
         
-        {/* Payment Authorization Section */}
-        <div className="info-section payment-auth-section">
-          <div className="info-row">
-            <div className="auth-text">
-              I hereby request and authorize {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData.requestedStartDate ? formatDateWithoutTimezoneShift(formData.requestedStartDate) : ''}.
-              <br /><br />
-              The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.
-            </div>
-          </div>
-          
-          <div className="info-row">
-            <div className="info-column">
-              <div className="info-label">Payment Method</div>
-              <div className="info-value">{formData.paymentMethod || 'Credit Card'}</div>
-            </div>
-          </div>
-          
-          <div className="info-row credit-card-info-row">
-            <div className="info-column">
-              <div className="info-label">Credit Card Number</div>
-              <div className="info-value">
-                {formData.creditCardNumber ? `${formData.creditCardNumber.replace(/\d(?=\d{4})/g, '*')}` : ''}
-              </div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">Expiration</div>
-              <div className="info-value">
-                {formData.expirationDate ? formatDateWithoutTimezoneShift(formData.expirationDate) : ''}
-              </div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">Name on Account</div>
-              <div className="info-value">{formData.firstName} {formData.lastName}</div>
-            </div>
-          </div>
-        </div>
+ 
         
         {/* DEBUG: All Dollar Amounts Section */}
         {currentAmounts && (

@@ -81,6 +81,33 @@ const ConvergeLightboxPayment = () => {
   const location = useLocation();
   const { selectedClub } = useClub();
   
+  // Utility function to format dates without timezone shifts
+  const formatDateWithoutTimezoneShift = (dateString) => {
+    if (!dateString) return '';
+    
+    // Parse the date string - avoid timezone shifts by handling parts manually
+    const parts = dateString.split(/[-T]/);
+    if (parts.length >= 3) {
+      const year = parseInt(parts[0], 10);
+      // JavaScript months are 0-based, so subtract 1 from the month
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      
+      // Create date with specific year, month, day in local timezone
+      const date = new Date(year, month, day);
+      
+      // Format to mm/dd/yyyy
+      return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    }
+    
+    // Fallback for unexpected format
+    return dateString;
+  };
+  
   // Data states
   const [formData, setFormData] = useState(null);
   const [signatureData, setSignatureData] = useState(null);
@@ -1094,6 +1121,42 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
               you can safely enter your credit card information. Your payment will be processed securely 
               by Converge, our payment processor.
             </p>
+                   {/* Payment Authorization Section */}
+        <div className="info-section payment-auth-section">
+          <div className="info-row">
+            <div className="auth-text">
+              I hereby request and authorize {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData.requestedStartDate ? formatDateWithoutTimezoneShift(formData.requestedStartDate) : ''}.
+              <br /><br />
+              The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.
+            </div>
+          </div>
+          
+          <div className="info-row">
+            <div className="info-column">
+              <div className="info-label">Payment Method</div>
+              <div className="info-value">{formData.paymentMethod || 'Credit Card'}</div>
+            </div>
+          </div>
+          
+          <div className="info-row credit-card-info-row">
+            <div className="info-column">
+              <div className="info-label">Credit Card Number</div>
+              <div className="info-value">
+                {formData.creditCardNumber ? `${formData.creditCardNumber.replace(/\d(?=\d{4})/g, '*')}` : ''}
+              </div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Expiration</div>
+              <div className="info-value">
+                {formData.expirationDate ? formatDateWithoutTimezoneShift(formData.expirationDate) : ''}
+              </div>
+            </div>
+            <div className="info-column">
+              <div className="info-label">Name on Account</div>
+              <div className="info-value">{formData.firstName} {formData.lastName}</div>
+            </div>
+          </div>
+            </div>
             
             <div className="credit-card-logos">
               <div><CardLogos.Visa /></div>
