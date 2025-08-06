@@ -192,28 +192,9 @@ class EmailService {
         clubId: selectedClub?.id,
       });
 
-      // Save contract PDF to temporary file
+      // Contract PDF is now saved in EnrollmentConfirmation.jsx with proper naming
+      // Removed contract saving from here to avoid duplicate files
       let contractFilePath = null;
-      try {
-        contractFilePath = await this.saveContractPDF(
-          contractPDFBuffer,
-          enrollmentData.custCode
-        );
-
-        if (contractFilePath) {
-          logger.info("Contract PDF saved successfully for email", {
-            filepath: contractFilePath,
-            memberName: `${formData.firstName} ${formData.lastName}`,
-          });
-        } else {
-          logger.warn(
-            "Failed to save contract PDF, continuing without attachment"
-          );
-        }
-      } catch (pdfError) {
-        logger.error("Error saving contract PDF for email:", pdfError);
-        // Continue without PDF if saving fails
-      }
 
       // Email content
       const emailContent = `
