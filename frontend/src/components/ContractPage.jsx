@@ -558,6 +558,13 @@ const ContractPage = () => {
       }
       
       console.log(`Routing to ${paymentRoute} for club in ${selectedClub?.state} (${selectedClub?.city})`);
+      console.log('ContractPage - Passing data to payment:', {
+        hasFormData: !!formData,
+        hasSignatureData: !!signatureData,
+        hasInitialedSections: !!initialedBoxes,
+        signatureDataKeys: signatureData ? Object.keys(signatureData) : [],
+        initialedSectionsKeys: initialedBoxes ? Object.keys(initialedBoxes) : []
+      });
       
       // Continue to appropriate payment page with all data
       navigate(paymentRoute, {

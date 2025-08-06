@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import CanvasContractPDF from './CanvasContractPDF.jsx';
+import { generatePDFBuffer as generatePDFBufferNM } from './CanvasContractPDF.jsx';
 // import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './ConvergeLightboxPayment.css';
 import './SignatureSelector.css'; // Import Google Fonts for signatures
@@ -772,9 +773,28 @@ if (typeof window !== 'undefined') {
         return;
       }
       
-      // Contract PDF is now generated in EnrollmentConfirmation.jsx with proper naming
-      // Removed contract generation from here to speed up navigation
+      // Generate contract PDF for New Mexico (Converge)
       let contractPDFArray = null;
+      try {
+        console.log('Generating contract PDF for Converge payment');
+        const pdfBuffer = await generatePDFBufferNM(
+          formData,
+          signatureData,
+          new Date().toLocaleString(),
+          initialedSections,
+          selectedClub,
+          formData.monthlyDues || formData.membershipDetails?.price
+        );
+        
+        contractPDFArray = new Uint8Array(pdfBuffer);
+        console.log('Contract PDF generated for Converge payment:', {
+          size: contractPDFArray.length,
+          clubState: selectedClub?.state
+        });
+      } catch (pdfError) {
+        console.error('Error generating contract PDF for Converge payment:', pdfError);
+        // Continue with enrollment even if PDF generation fails
+      }
 
       // Extract card information from payment result
       const cardNumber = paymentResult.ssl_card_number || "";
@@ -792,7 +812,8 @@ if (typeof window !== 'undefined') {
         signatureData: signatureData,
         // Add selected club data
         selectedClub: selectedClub,
-        // Contract PDF is now generated in EnrollmentConfirmation.jsx
+        // Add contract PDF
+        contractPDF: contractPDFArray,
         // Add payment data
         paymentInfo: {
           processorName: 'CONVERGE',

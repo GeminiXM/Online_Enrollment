@@ -1268,19 +1268,48 @@ export const submitEnrollment = async (req, res) => {
         logger.info("Contract PDF buffer received from frontend:", {
           type: typeof contractPDFBuffer,
           hasData: !!contractPDFBuffer,
+          isArray: Array.isArray(contractPDFBuffer),
+          constructor: contractPDFBuffer?.constructor?.name,
+          keys: contractPDFBuffer ? Object.keys(contractPDFBuffer) : [],
+          length: contractPDFBuffer?.length || 0,
         });
 
         // Save the contract PDF to the contracts folder
-        const contractsDir = path.join(__dirname, "../../../contracts");
+        const contractsDir = path.join(__dirname, "../contracts");
         if (!fs.existsSync(contractsDir)) {
           fs.mkdirSync(contractsDir, { recursive: true });
         }
 
-        const contractFileName = `contract_${updatedCustCode}_${Date.now()}.pdf`;
+        // Get member name for filename
+        const firstName = req.body.firstName || "";
+        const lastName = req.body.lastName || "";
+        const memberName = `${firstName} ${lastName}`.trim();
+
+        // Format date for filename
+        const today = new Date();
+        const dateStr = `${(today.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${today
+          .getDate()
+          .toString()
+          .padStart(2, "0")}-${today.getFullYear()}`;
+
+        const contractFileName = `${dateStr} ${updatedCustCode} ${memberName} ONLINE.pdf`;
         const contractFilePath = path.join(contractsDir, contractFileName);
 
-        // Convert Uint8Array to Buffer and save
-        const pdfBuffer = Buffer.from(contractPDFBuffer);
+        // Convert to Buffer and save
+        let pdfBuffer;
+        if (Array.isArray(contractPDFBuffer)) {
+          // If it's already an array, convert directly
+          pdfBuffer = Buffer.from(contractPDFBuffer);
+        } else if (contractPDFBuffer && typeof contractPDFBuffer === "object") {
+          // If it's an object (serialized Uint8Array), convert to array first
+          const byteArray = Object.values(contractPDFBuffer);
+          pdfBuffer = Buffer.from(byteArray);
+        } else {
+          // Fallback
+          pdfBuffer = Buffer.from(contractPDFBuffer);
+        }
         fs.writeFileSync(contractFilePath, pdfBuffer);
 
         logger.info("Contract PDF saved successfully:", {

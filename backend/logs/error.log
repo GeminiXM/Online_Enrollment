@@ -1671,3 +1671,16 @@
 2025-08-06 12:04:07:47 [31merror[39m: [31mError executing query:[39m
 2025-08-06 12:04:07:47 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-08-06 12:04:07:47 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError executing query:[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError executing query:[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-06 12:16:03:163 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError executing query:[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError executing query:[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-06 12:19:30:1930 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-06 12:31:12:3112 [31merror[39m: [31mError saving contract PDF after payment:[39m

@@ -187,11 +187,18 @@ const FluidPayPayment = () => {
     });
     
     // Set signature data if available
+    console.log('FluidPayPayment - location.state:', location.state);
     if (location.state && location.state.signatureData) {
+      console.log('FluidPayPayment - Setting signatureData from location state');
       setSignatureData(location.state.signatureData);
+    } else {
+      console.log('FluidPayPayment - No signatureData in location state');
     }
     if (location.state && location.state.initialedSections) {
+      console.log('FluidPayPayment - Setting initialedSections from location state');
       setInitialedSections(location.state.initialedSections);
+    } else {
+      console.log('FluidPayPayment - No initialedSections in location state');
     }
     
     // Fetch the FluidPay processor info
