@@ -8,6 +8,8 @@ const clubList = [
     address: "4300 Landau NE, Albuquerque, NM 87111",
     state: "NM",
     shortName: "Highpoint",
+    phone: "505-293-5820",
+    email: "nhpgm@wellbridge.com",
   },
   {
     id: "202",
@@ -15,6 +17,8 @@ const clubList = [
     address: "4100 Prospect NE, Albuquerque, NM 87110",
     state: "NM",
     shortName: "Midtown",
+    phone: "505-888-4811",
+    email: "nmtgm@wellbridge.com",
   },
   {
     id: "203",
@@ -22,6 +26,8 @@ const clubList = [
     address: "40 First Plaza NW, Suite 76, Albuquerque, NM 87102",
     state: "NM",
     shortName: "Downtown",
+    phone: "505-242-1500",
+    email: "ndtgm@wellbridge.com",
   },
   {
     id: "204",
@@ -29,6 +35,8 @@ const clubList = [
     address: "7120 Wyoming Blvd NE, Suite 8B, Albuquerque, NM 87109",
     state: "NM",
     shortName: "Del Norte",
+    phone: "505-857-0123",
+    email: "ndngm@wellbridge.com",
   },
   {
     id: "205",
@@ -36,6 +44,8 @@ const clubList = [
     address: "9190 Coors Blvd NW, Albuquerque, NM 87120",
     state: "NM",
     shortName: "Riverpoint",
+    phone: "505-897-3716",
+    email: "nrpgm@wellbridge.com",
   },
   {
     id: "252",
@@ -43,6 +53,8 @@ const clubList = [
     address: "5555 DTC Parkway, Greenwood Village, CO 80111",
     state: "CO",
     shortName: "Denver Tech Center",
+    phone: "303-779-0700",
+    email: "cdcgm@wellbridge.com",
   },
   {
     id: "254",
@@ -50,6 +62,8 @@ const clubList = [
     address: "1201 16th Street, Suite 300, Denver, CO 80202",
     state: "CO",
     shortName: "Tabor Center",
+    phone: "720-214-2400",
+    email: "ctbgm@wellbridge.com",
   },
   {
     id: "257",
@@ -57,6 +71,8 @@ const clubList = [
     address: "505 Thunderbird Drive, Boulder, CO 80303",
     state: "CO",
     shortName: "Flatirons",
+    phone: "303-499-6590",
+    email: "cfigm@wellbridge.com",
   },
   {
     id: "292",
@@ -64,8 +80,17 @@ const clubList = [
     address: "2695 South Monaco Parkway, Denver, CO 80222",
     state: "CO",
     shortName: "Monaco",
+    phone: "303-758-7080",
+    email: "cmogm@wellbridge.com",
   },
-  { id: "375", name: "MAC", address: "", state: "CO" },
+  {
+    id: "375",
+    name: "MAC",
+    address: "",
+    state: "CO",
+    phone: "303-000-0000",
+    email: "",
+  },
 ];
 
 // Create the context

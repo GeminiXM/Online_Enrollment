@@ -119,6 +119,7 @@ const ContractPage = () => {
   const [isSigned, setIsSigned] = useState(false);
   const [signatureDate, setSignatureDate] = useState('');
   const [isSignatureConfirmed, setIsSignatureConfirmed] = useState(false);
+  const [showStartDateInfo, setShowStartDateInfo] = useState(false);
 
   // Toggle the initialed state of a specific box
   const toggleInitialBox = (boxId) => {
@@ -801,63 +802,284 @@ const ContractPage = () => {
       <div className="member-info-summary">
         <h2>Membership Information</h2>
         
-        {/* Primary Member Information Section */}
-        <div className="info-section primary-member-section">
-          <div className="info-row">
-            <div className="info-column">
-              <div className="primary-member-label-container">
-                <div className="primary-member-label">PRIMARY MEMBER</div>
+        {/* Member Information Section - Canvas Style */}
+        <div style={{ 
+          maxWidth: '800px',
+          margin: '0 auto',
+          padding: '0 20px'
+        }}>
+          {/* Top Section - Personal Information */}
+          <div style={{ 
+            display: 'flex',
+            gap: '20px',
+            marginBottom: '15px'
+          }}>
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Membership ID
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.membershipId || <span style={{ color: '#4a90e2' }}>Primary Member</span>}
               </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">Last Name</div>
-              <div className="info-value">{formData.lastName}</div>
+            
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Last Name
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.lastName}
+              </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">First Name</div>
-              <div className="info-value">{formData.firstName}</div>
+            
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                First Name
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.firstName}
+              </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">DOB</div>
-              <div className="info-value">
+            
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                DOB
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
                 {formData.dob ? formatDateWithoutTimezoneShift(formData.dob) : 
                  formData.dateOfBirth ? formatDateWithoutTimezoneShift(formData.dateOfBirth) : ''}
               </div>
             </div>
+          </div>
 
- 
+          {/* Divider Line */}
+          <div style={{ 
+            borderTop: '1px solid #e0e0e0',
+            marginBottom: '10px'
+          }}></div>
+
+          {/* Middle Section - Contact Information */}
+          <div style={{ 
+            display: 'flex',
+            gap: '20px',
+            marginBottom: '15px'
+          }}>
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Phone Number
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.mobilePhone || formData.cellPhone || ''}
+              </div>
+            </div>
+            
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Email
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.email}
+              </div>
+            </div>
           </div>
-        </div>
-        
-       
-        {/* Contact Information Section (no extra space) */}
-        <div className="info-section contact-section" style={{ marginTop: '-8px' }}>
-          <div className="info-row">
-            <div className="info-column">
-              <div className="info-label">Phone Number</div>
-              <div className="info-value">{formData.mobilePhone || formData.cellPhone || ''}</div>
+
+          {/* Divider Line */}
+          <div style={{ 
+            borderTop: '1px solid #e0e0e0',
+            marginBottom: '10px'
+          }}></div>
+
+          {/* Bottom Section - Address Information */}
+          <div style={{ 
+            display: 'flex',
+            gap: '20px'
+          }}>
+            <div style={{ flex: '2' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Home Address
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.address}
+              </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">E-mail</div>
-              <div className="info-value">{formData.email}</div>
+            
+            <div style={{ flex: '0 0 80px' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                Apt/Unit
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.address2 || ''}
+              </div>
             </div>
-          </div>
-          <div className="info-row">
-            <div className="info-column">
-              <div className="info-label">Home Address</div>
-              <div className="info-value">{formData.address}</div>
+            
+            <div style={{ flex: '1' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                City
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.city}
+              </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">City</div>
-              <div className="info-value">{formData.city}</div>
+            
+            <div style={{ flex: '0 0 80px' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                State
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.state}
+              </div>
             </div>
-            <div className="info-column">
-              <div className="info-label">State</div>
-              <div className="info-value">{formData.state}</div>
-            </div>
-            <div className="info-column">
-              <div className="info-label">ZIP Code</div>
-              <div className="info-value">{formData.zipCode}</div>
+            
+            <div style={{ flex: '0 0 100px' }}>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                padding: '8px 12px',
+                fontWeight: 'bold',
+                fontSize: '14px',
+                color: '#333'
+              }}>
+                ZIP Code
+              </div>
+              <div style={{ 
+                backgroundColor: '#f5f5f5',
+                border: 'none',
+                padding: '8px 12px',
+                minHeight: '20px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                {formData.zipCode}
+              </div>
             </div>
           </div>
         </div>
@@ -1031,7 +1253,7 @@ const ContractPage = () => {
           </div>
           <div className="info-row">
             <div className="info-column financial-item">
-              <div className="info-label">Service Add-Ons</div>
+              <div className="info-label">Service Packages</div>
               <div className="info-value">${formData.packagesFee || '0.00'}</div>
             </div>
           </div>
@@ -1078,22 +1300,70 @@ const ContractPage = () => {
               </div>
             </div>
           </div>
-          <div className="info-row">
-            <div className="info-column" style={{textAlign: 'right', width: '100%'}}>
-              <div style={{
-                fontStyle: 'italic',
-                color: '#d63384',
-                fontSize: '0.75rem',
-                margin: '0',
-                padding: '4px 0',
-                textAlign: 'right !important',
-                display: 'block',
-                width: '100%'
-              }}>
-                *All memberships require an initial 3 months of full membership dues
-              </div>
-            </div>
-          </div>
+                          <div className="info-row">
+                  <div className="info-column" style={{textAlign: 'right', width: '100%'}}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'flex-end',
+                      gap: '8px',
+                      paddingRight: '20px',
+                      width: '100%'
+                    }}>
+                      <button
+                        type="button"
+                        tabIndex={0}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: 20,
+                          height: 20,
+                          borderRadius: '50%',
+                          background: '#e0e7ef',
+                          color: '#2a3b5e',
+                          fontWeight: 700,
+                          fontSize: 14,
+                          cursor: 'pointer',
+                          border: '1px solid #bfc8d6',
+                          marginLeft: 4,
+                          position: 'relative',
+                          padding: 0,
+                        }}
+                        onClick={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setShowStartDateInfo(prev => !prev);
+                        }}
+                        onBlur={() => setTimeout(() => setShowStartDateInfo(false), 150)}
+                        aria-label="3 Month Requirement Info"
+                      >
+                        i
+                        {showStartDateInfo && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 28,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            background: '#fff',
+                            color: '#2a3b5e',
+                            border: '1px solid #bfc8d6',
+                            borderRadius: 6,
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                            padding: '10px 14px',
+                            zIndex: 10,
+                            minWidth: 260,
+                            fontSize: 13,
+                            fontWeight: 400,
+                            whiteSpace: 'normal',
+                          }}>
+                            All memberships require an initial 3 months of full membership dues
+                          </div>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
         </div>
         
         {/* DEBUG: All Dollar Amounts Section - COMMENTED OUT */}

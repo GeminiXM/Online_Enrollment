@@ -337,7 +337,7 @@ class EmailService {
                 <li><strong>Club Address:</strong> ${
                   selectedClub?.address || "Address not available"
                 }</li>
-                <li><strong>Amount Paid:</strong> $${
+                <li><strong>Amount Paid Today:</strong> $${
                   enrollmentData.amountBilled || 0
                 }</li>
               </ul>
@@ -365,9 +365,12 @@ class EmailService {
             <h3>Important Information</h3>
             <ul>
               <li>Your membership agreement is attached to this email for your records.</li>
-              <li>Monthly dues will be automatically charged to your payment method.</li>
-              <li>Please review our club rules and policies available on our website.</li>
-              <li>For any questions, contact us at ma@wellbridge.com or call (303) 866-0800.</li>
+              <li>Monthly dues will be automatically charged to your provided payment method.</li>
+              <li>For further questions about your membership or to get involved with club programs, please come to the club or contact us at ${
+                selectedClub?.phone || "XXX-XXXX"
+              } or ${
+        selectedClub?.email || "gm@wellbridge.com"
+      } to get started today.
 
             </ul>
             
