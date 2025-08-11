@@ -982,10 +982,33 @@ function EnrollmentForm() {
           }));
         }
       }
+      
+      // If this is a start date change, validate it's not in the past
+      if (name === 'requestedStartDate') {
+        if (value) {
+          const selectedDate = new Date(value);
+          const today = new Date();
+          // Reset time to start of day for accurate comparison
+          today.setHours(0, 0, 0, 0);
+          selectedDate.setHours(0, 0, 0, 0);
+          
+          if (selectedDate < today) {
+            setErrors(prevErrors => ({
+              ...prevErrors,
+              requestedStartDate: "Start date cannot be in the past. Please select today or a future date."
+            }));
+          } else {
+            setErrors(prevErrors => ({
+              ...prevErrors,
+              requestedStartDate: null
+            }));
+          }
+        }
+      }
     }
     
-    // Clear errors for fields other than dateOfBirth
-    if (errors[name] && name !== 'dateOfBirth') {
+    // Clear errors for fields other than dateOfBirth and requestedStartDate
+    if (errors[name] && name !== 'dateOfBirth' && name !== 'requestedStartDate') {
       setErrors({
         ...errors,
         [name]: null
@@ -1310,6 +1333,21 @@ function EnrollmentForm() {
       // Check that at least one phone number is provided
       if (!formData.mobilePhone && !formData.homePhone && !formData.workPhone) {
         newErrors.mobilePhone = "At least one phone number is required";
+      }
+      
+      // Validate start date - must not be in the past
+      if (!formData.requestedStartDate) {
+        newErrors.requestedStartDate = "Requested start date is required";
+      } else {
+        const selectedDate = new Date(formData.requestedStartDate);
+        const today = new Date();
+        // Reset time to start of day for accurate comparison
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          newErrors.requestedStartDate = "Start date cannot be in the past. Please select today or a future date.";
+        }
       }
       
       // Add validation for Junior memberships - check guardian fields

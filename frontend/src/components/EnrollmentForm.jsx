@@ -900,7 +900,9 @@ function EnrollmentForm() {
       proratedAddOnsTax: formData.proratedAddOnsTax || 0,
       // Add prorated dues values for backend calculation
       proratedDues: formData.proratedDues || 0,
-      proratedDuesTax: formData.proratedDuesTax || 0
+      proratedDuesTax: formData.proratedDuesTax || 0,
+      // Add enrollment fee
+      initiationFee: '19.00'
     };
    
       // ADD THIS SECTION to create a prioritized phone field
@@ -1003,6 +1005,29 @@ function EnrollmentForm() {
           setErrors(prevErrors => ({
             ...prevErrors,
             dateOfBirth: null
+          }));
+        }
+      }
+    }
+    
+    // If this is a start date change, validate it's not in the past
+    if (name === 'requestedStartDate') {
+      if (value) {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        // Reset time to start of day for accurate comparison
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            requestedStartDate: "Start date cannot be in the past. Please select today or a future date."
+          }));
+        } else {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            requestedStartDate: null
           }));
         }
       }
@@ -1322,6 +1347,21 @@ function EnrollmentForm() {
         newErrors.mobilePhone = "At least one phone number is required";
       }
       
+      // Validate start date - must not be in the past
+      if (!formData.requestedStartDate) {
+        newErrors.requestedStartDate = "Requested start date is required";
+      } else {
+        const selectedDate = new Date(formData.requestedStartDate);
+        const today = new Date();
+        // Reset time to start of day for accurate comparison
+        today.setHours(0, 0, 0, 0);
+        selectedDate.setHours(0, 0, 0, 0);
+        
+        if (selectedDate < today) {
+          newErrors.requestedStartDate = "Start date cannot be in the past. Please select today or a future date.";
+        }
+      }
+      
       // Add validation for Junior memberships - check guardian fields
       if (isJuniorMembership) {
         if (!formData.guardianFirstName) {
@@ -1387,6 +1427,7 @@ function EnrollmentForm() {
           if (newErrors.state) missingFields.push("state");
           if (newErrors.zipCode) missingFields.push("ZIP code");
           if (newErrors.mobilePhone) missingFields.push("phone number");
+          if (newErrors.requestedStartDate) missingFields.push("start date");
           
           if (missingFields.length > 0) {
             if (missingFields.length === 1) {

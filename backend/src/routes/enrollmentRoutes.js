@@ -192,7 +192,21 @@ const validateEnrollmentData = [
     .notEmpty()
     .withMessage("Requested start date is required")
     .isDate()
-    .withMessage("Invalid date format"),
+    .withMessage("Invalid date format")
+    .custom((value) => {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      // Reset time to start of day for accurate comparison
+      today.setHours(0, 0, 0, 0);
+      selectedDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        throw new Error(
+          "Start date cannot be in the past. Please select today or a future date."
+        );
+      }
+      return true;
+    }),
   body("club").trim().notEmpty().withMessage("Club is required"),
 
   // Optional fields with validation if provided

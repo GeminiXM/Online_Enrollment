@@ -517,7 +517,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     const cancellationHeader = `${getClubName(selectedClub)} (${getClubAbbreviation(selectedClub)}) MONEY BACK GUARANTEE:`;
     pdf.text(cancellationHeader, 20, 45);
     pdf.setFont('helvetica', 'normal');
-    const cancellationText = `${getClubAbbreviation(selectedClub)} EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO ${getClubAbbreviation(selectedClub)} UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO ${getClubName(selectedClub)} THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM MT) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
+    const cancellationText = `${getClubAbbreviation(selectedClub)} EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO ${getClubAbbreviation(selectedClub)} UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM MT) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
     const splitCancellationText = pdf.splitTextToSize(cancellationText, 170);
     pdf.text(splitCancellationText, 20, 50);
     let currentYPos = 50 + (splitCancellationText.length * 4) + 5;
@@ -534,7 +534,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.setFontSize(12);
     pdf.setFont('helvetica', 'bold');
     pdf.text('MEMBERSHIP AGREEMENT', 105, currentYPos, { align: 'center' });
-    currentYPos += 3;
+    currentYPos += 5;
     pdf.setFontSize(10);
     pdf.text('1. MEMBERSHIP FEE STRUCTURES', 20, currentYPos);
     currentYPos += 5;
@@ -746,7 +746,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.text('A. RESIGNATION POLICY', 30, currentYPos);
     currentYPos += 5;
     pdf.setFont('helvetica', 'normal');
-    const resignationText = `A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.`;
+    const resignationText = `A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.`;
     const splitResignation = pdf.splitTextToSize(resignationText, 150);
     currentYPos = drawPagedText(pdf, splitResignation, 30, currentYPos);
     if (initialedSections?.resignation && signatureData?.initials?.text) {
@@ -788,7 +788,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.text('5. MEMBERSHIP ENTRY', 20, currentYPos);
     currentYPos += 5;
     pdf.setFont('helvetica', 'normal');
-    const mbrCardText = `I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented prior to entering ${getClubAbbreviation(selectedClub)}. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.`;
+    const mbrCardText = `I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented upon entering ${getClubAbbreviation(selectedClub)}. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.`;
     const splitmbrCardText = pdf.splitTextToSize(mbrCardText, 160);
     currentYPos = drawPagedText(pdf, splitmbrCardText, 20, currentYPos);
     currentYPos += 5;

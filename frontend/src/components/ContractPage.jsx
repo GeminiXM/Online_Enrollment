@@ -25,22 +25,24 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
   // Base style for the initial box
   const boxStyle = {
     display: 'inline-block',
-    border: '1px solid #aaa',
-    borderRadius: '2px',
-    padding: '1px 5px',
-    margin: '0 5px',
-    minWidth: '20px',
-    height: '15px',
-    backgroundColor: isInitialed ? '#f0f8ff' : '#f8f9fa', // Light blue background if initialed
+    border: '2px solid #007bff', // More prominent blue border
+    borderRadius: '4px', // Slightly more rounded corners
+    padding: '3px 8px', // More padding for larger size
+    margin: '0 8px', // More margin for better spacing
+    minWidth: '28px', // Larger minimum width
+    height: '22px', // Larger height
+    backgroundColor: isInitialed ? '#007bff' : '#ffffff', // Blue background if initialed, white if not
+    color: isInitialed ? '#ffffff' : '#007bff', // White text if initialed, blue if not
     cursor: 'pointer',
     textAlign: 'center',
     fontFamily: font?.font || 'inherit',
-    fontSize: 'small', // Smaller font size
+    fontSize: '0.9rem', // Larger font size
+    fontWeight: 'bold', // Bold font for better visibility
     lineHeight: 'normal',
     verticalAlign: 'middle',
     transition: 'all 0.2s ease-in-out', // Smooth transition for hover effects
-    boxShadow: isInitialed ? '0 0 2px rgba(0,123,255,0.5)' : 'none', // Subtle highlight if initialed
-    transform: 'scale(0.85)',
+    boxShadow: isInitialed ? '0 2px 8px rgba(0,123,255,0.4)' : '0 1px 3px rgba(0,0,0,0.1)', // More prominent shadow
+    transform: 'scale(1)', // No scaling down
     transformOrigin: 'center'
   };
 
@@ -49,9 +51,10 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
   
   // Apply hover effect styles
   if (isHovered) {
-    boxStyle.backgroundColor = isInitialed ? '#e6f0ff' : '#e9ecef';
-    boxStyle.boxShadow = '0 0 5px rgba(0,0,0,0.2)';
-    boxStyle.border = '1px solid #007bff';
+    boxStyle.backgroundColor = isInitialed ? '#0056b3' : '#f8f9ff'; // Darker blue if initialed, light blue if not
+    boxStyle.boxShadow = '0 4px 12px rgba(0,123,255,0.6)'; // More prominent shadow on hover
+    boxStyle.border = '2px solid #0056b3'; // Darker border on hover
+    boxStyle.transform = 'scale(1.05)'; // Slight scale up on hover
   }
 
   return (
@@ -1080,7 +1083,7 @@ const ContractPage = () => {
  
         
         {/* DEBUG: All Dollar Amounts Section */}
-        {currentAmounts && (
+        {currentAmounts && process.env.NODE_ENV === 'development' && (
           <div className="info-section debug-amounts-section" style={{backgroundColor: '#f0f8ff', border: '2px dashed #007bff', marginTop: '2rem'}}>
             <div className="info-header" style={{color: '#007bff', fontSize: '1.2rem', fontWeight: 'bold'}}>🔍 DEBUG: Database Parameter Mapping</div>
             
@@ -1461,7 +1464,7 @@ const DenverContract = ({
           
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
-          <p><strong>A. RESIGNATION POLICY: </strong>A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
+          <p><strong>A. RESIGNATION POLICY: </strong>A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -1475,7 +1478,7 @@ const DenverContract = ({
           
           <p><strong>B. DEATH OR DISABILITY: </strong>The contract may be cancelled in the event of member's death or total disability during the membership term. Total disability means a condition which has existed or will exist for more than six (6) months and which will prevent Member from using the club. In order to establish death, the member's estate must furnish to the club a death certificate. In order to establish disability, Member must furnish the club certification of the disability by a licensed physician whose diagnosis or treatment is within his scope of practice. Cancellation will be effective upon establishment of death or disability according to these provisions. In the event that Member has paid membership fees in advance, the club shall be entitled to retain an amount equal to the amount computed by dividing the total cost of the membership by the total number of months under the membership and multiplying the result by the number of months expired under the membership term. As to membership fees paid monthly, dues will be refunded for the month in which written notification is received of the death or disability and the proper documentation outlined above has been provided.</p>
           
-          <p><strong>5. MEMBERSHIP ENTRY</strong> - I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented prior to entering CAC. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
+          <p><strong>5. MEMBERSHIP ENTRY</strong> - I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented upon entering CAC. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
           
           <p><strong>6. HOURS OF OPERATION</strong> - Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in CAC.</p>
           
@@ -1674,7 +1677,7 @@ const NewMexicoContract = ({
           
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
-          <p><strong>A. RESIGNATION POLICY:</strong> A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards. Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
+          <p><strong>A. RESIGNATION POLICY:</strong> A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -1691,7 +1694,7 @@ const NewMexicoContract = ({
           <p><strong>5. MEMBERSHIP POLICY</strong> - This membership contract is in force monthly upon payment of dues and other account charges. By submitting this application, the member acknowledges that NMSW reserves the right to refuse membership, or to terminate this agreement at any time without notice. Member agrees to abide by the Corporate Member Regulations and by NMSW Membership Policies as they exist or may be amended from time-to-time.</p>
           <p>Furthermore, member understands that should member's account balance become more than 60-days past due, NMSW may cancel the membership at its sole discretion. If the collection process is commenced by NMSW for unpaid amounts, member agrees to pay collection costs, including attorney fees should they be incurred. Member recognizes the inherent risks of participating in an exercise program and hereby hold NMSW harmless from any and all injuries member, and/or member's family might incur in connection with member's membership activities at NMSW. This is our entire agreement; no verbal statements may alter or change its provisions. Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use, the facilities or programs of the club.</p>
           
-          <p><strong>6. MEMBERSHIP ENTRY</strong> - I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented prior to entering NMSW. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
+          <p><strong>6. MEMBERSHIP ENTRY</strong> - I understand cards and/or Club App with proper check-in credentials are mandatory and must be presented upon entering NMSW. These forms of entry are not transferable to another person. There will be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred on my membership card.</p>
           
           <p><strong>7. HOURS OF OPERATION</strong> - Operation schedules may vary and are subject to change. Schedule of hours of operation and any changes will be posted in NMSW.</p>
           

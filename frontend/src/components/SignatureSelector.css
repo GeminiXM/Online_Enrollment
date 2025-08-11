@@ -123,11 +123,12 @@
   color: white;
   border: none;
   border-radius: 2px;
-  padding: 2px 6px;
+  padding: 6px 12px;  /* Increased padding for larger button */
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-width: 50px;  /* Minimum width for button */
+  min-width: 80px;  /* Increased minimum width for larger button */
+  font-size: 0.9rem;  /* Slightly larger font size */
 }
 
 /* Hover effect for confirm button */
