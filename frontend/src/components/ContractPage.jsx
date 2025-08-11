@@ -201,6 +201,10 @@ const ContractPage = () => {
     if (location.state && location.state.formData) {
       // Log formData to understand structure
       console.log("FormData received:", location.state.formData);
+      console.log("PT data in formData:", {
+        hasPTAddon: location.state.formData.hasPTAddon,
+        ptPackage: location.state.formData.ptPackage
+      });
       
       // Process formData to extract and map data
       const data = location.state.formData;
@@ -338,6 +342,14 @@ const ContractPage = () => {
       const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
         total + (addon.price ? addon.price * proratedFactor : 0), 0).toFixed(2) || '0.00';
       
+      // Add PT package as one-time cost (not prorated)
+      const ptPackageAmount = data.hasPTAddon && data.ptPackage ? parseFloat(data.ptPackage.invtr_price || data.ptPackage.price || 0).toFixed(2) : '0.00';
+      console.log('PT package calculation:', {
+        hasPTAddon: data.hasPTAddon,
+        ptPackage: data.ptPackage,
+        ptPackageAmount: ptPackageAmount
+      });
+      
       // Check if club is in New Mexico by state property
       const isNewMexicoClub = selectedClub?.state === 'NM' || false;
       
@@ -356,6 +368,7 @@ const ContractPage = () => {
         parseFloat(initiationFee) + 
         parseFloat(proratedDues) + 
         parseFloat(proratedAddOns) + 
+        parseFloat(ptPackageAmount) + 
         parseFloat(taxAmount)
       ).toFixed(2);
       
@@ -379,6 +392,7 @@ const ContractPage = () => {
         initiationFee,
         proratedDues,
         proratedAddOns,
+        ptPackageAmount,
         monthlyDues,
         taxAmount,
         totalCollected,
@@ -1257,6 +1271,14 @@ const ContractPage = () => {
               <div className="info-value">${formData.packagesFee || '0.00'}</div>
             </div>
           </div>
+          {formData.hasPTAddon && formData.ptPackage && (
+            <div className="info-row">
+              <div className="info-column financial-item">
+                <div className="info-label">Personal Training Package</div>
+                <div className="info-value">${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}</div>
+              </div>
+            </div>
+          )}
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Taxes</div>
@@ -1271,6 +1293,7 @@ const ContractPage = () => {
                 parseFloat(formData.proratedDues || 0) + 
                 parseFloat(formData.proratedAddOns || 0) + 
                 parseFloat(formData.packagesFee || 0) + 
+                parseFloat(formData.ptPackageAmount || 0) + 
                 parseFloat(formData.taxAmount || 0)
               ).toFixed(2) || '0.00'}</div>
             </div>

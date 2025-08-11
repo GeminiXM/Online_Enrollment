@@ -8,6 +8,7 @@ import logger from "../utils/logger.js";
 import {
   submitEnrollment,
   getAddons,
+  getPTPackage,
   getSpecialtyMembershipBridgeCode,
   getMembershipPrice,
   getTaxRate,
@@ -377,6 +378,27 @@ router.get("/addons", async (req, res) => {
       success: false,
       message:
         "An error occurred while retrieving addons. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route GET /api/enrollment/pt-package
+ * @desc Get Personal Training package from the database
+ * @access Public
+ */
+router.get("/pt-package", async (req, res) => {
+  try {
+    return await getPTPackage(req, res);
+  } catch (error) {
+    logger.error("Error in pt-package route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message:
+        "An error occurred while retrieving the PT package. Please try again later.",
     });
   }
 });

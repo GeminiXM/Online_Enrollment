@@ -113,12 +113,21 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
     });
 
     // Execute the procedure
-    const query = `EXECUTE PROCEDURE ${actualProcedureName}(${Array(
-      params.length
-    )
-      .fill("?")
-      .join(", ")})`;
-    return await pool.query(clubId, query, params);
+    let query;
+    if (params.length > 0) {
+      // For procedures with parameters, construct the query with actual values
+      const paramValues = params.map((p) =>
+        typeof p === "string" ? `'${p}'` : p
+      );
+      query = `EXECUTE PROCEDURE ${actualProcedureName}(${paramValues.join(
+        ", "
+      )})`;
+      return await pool.query(clubId, query);
+    } else {
+      // For procedures without parameters, use the original approach
+      query = `EXECUTE PROCEDURE ${actualProcedureName}()`;
+      return await pool.query(clubId, query);
+    }
   } catch (error) {
     logger.error(`Error executing SQL procedure: ${procedureName}`, {
       error: error.message,
@@ -1387,6 +1396,70 @@ export const getAddons = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error retrieving addons",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc Get Personal Training package from the database
+ * @route GET /api/enrollment/pt-package
+ * @access Public
+ */
+export const getPTPackage = async (req, res) => {
+  try {
+    // Log initial request
+    logger.info("Received request for PT package");
+
+    // Get the club ID from the query parameters
+    const clubId = req.query.clubId || "001"; // Default to "001" if not provided
+
+    logger.info(`Fetching PT package for club ID: ${clubId}`);
+
+    // Execute the stored procedure from SQL file
+    let ptPackage;
+    try {
+      ptPackage = await executeSqlProcedure(
+        "procNewMemberPTPackageListSelect1",
+        clubId,
+        [clubId]
+      );
+    } catch (error) {
+      // If the stored procedure doesn't exist, use default values
+      logger.warn(
+        "PT package stored procedure not found, using default values",
+        {
+          clubId,
+          error: error.message,
+        }
+      );
+      ptPackage = [
+        {
+          price: 149,
+          description: "4 Sessions with a Trainer/Instructor",
+          upc: "PT001",
+          tax_code: "001",
+        },
+      ];
+    }
+
+    logger.info("PT package retrieved successfully", {
+      clubId,
+      ptPackage,
+    });
+
+    res.status(200).json({
+      success: true,
+      ptPackage,
+    });
+  } catch (error) {
+    logger.error("Error in getPTPackage:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving PT package",
       error: error.message,
     });
   }

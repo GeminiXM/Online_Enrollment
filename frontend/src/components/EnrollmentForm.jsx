@@ -207,6 +207,7 @@ function EnrollmentForm() {
 
   const [showPTModal, setShowPTModal] = useState(false);
   const [hasPTAddon, setHasPTAddon] = useState(false);
+  const [ptPackage, setPtPackage] = useState(null);
   const [formSubmissionData, setFormSubmissionData] = useState(null);
 
   const [showStartDateInfo, setShowStartDateInfo] = useState(false);
@@ -1478,23 +1479,55 @@ function EnrollmentForm() {
     }
   };
 
-  const handlePTAccept = () => {
-    setHasPTAddon(true);
+  const handlePTAccept = async () => {
+    console.log('PT Accept clicked!');
     setShowPTModal(false);
-    // Add the PT addon to your selected addons
-    const ptAddon = {
-      id: 'pt-sessions',
-      name: 'Personal Training Sessions',
-      price: 149,
-      description: '4 Personal Training Sessions'
-    };
-    setSelectedServiceAddons(prev => [...prev, ptAddon]);
+    
+    let ptPackageData;
+    
+    try {
+      // Fetch PT package from API
+      console.log('Fetching PT package for club:', selectedClub.id);
+      const response = await fetch(`/api/enrollment/pt-package?clubId=${selectedClub.id}`);
+      const data = await response.json();
+      
+      console.log('PT package API response:', data);
+      
+      if (data.success && data.ptPackage) {
+        ptPackageData = data.ptPackage[0]; // Get the first item from the array
+        console.log('PT package data:', ptPackageData);
+        setPtPackage(data.ptPackage);
+        setHasPTAddon(true);
+      } else {
+        // Fallback to default if API fails
+        ptPackageData = { price: 149, description: "4 Sessions with a Trainer/Instructor" };
+        console.log('Using fallback PT package data:', ptPackageData);
+        setPtPackage([ptPackageData]);
+        setHasPTAddon(true);
+      }
+    } catch (error) {
+      console.error('Error fetching PT package:', error);
+      // Fallback to default if API fails
+      ptPackageData = { price: 149, description: "4 Sessions with a Trainer/Instructor" };
+      console.log('Using fallback PT package data due to error:', ptPackageData);
+      setPtPackage([ptPackageData]);
+      setHasPTAddon(true);
+    }
+    
+    console.log('Navigating to contract with PT data:', {
+      hasPTAddon: true,
+      ptPackage: ptPackageData
+    });
     
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
       navigate('/contract', { 
         state: { 
-          formData: formSubmissionData
+          formData: {
+            ...formSubmissionData,
+            hasPTAddon: true,
+            ptPackage: ptPackageData
+          }
         } 
       });
     }
@@ -3203,6 +3236,11 @@ function EnrollmentForm() {
       });
     }
     
+    // Add PT package as one-time cost (not prorated)
+    if (hasPTAddon && ptPackage) {
+      total += parseFloat(ptPackage.price || 149);
+    }
+    
     // Round to 2 decimal places
     return Math.round(total * 100) / 100;
   };
@@ -4368,6 +4406,20 @@ function EnrollmentForm() {
               </div>
             )}
             
+            {hasPTAddon && ptPackage && (
+              <div className="pt-package">
+                <h3>Personal Training Package</h3>
+                <ul>
+                  <li>
+                    <div>{ptPackage.description || "4 Sessions with a Trainer/Instructor"}</div>
+                    <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
+                      <span style={{color: "#28a745"}}>One-time cost: ${ptPackage.price || 149}</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            )}
+            
             <div className="cart-total">
               <div className="due-now-total">
                 <h3>Total Due Now</h3>
@@ -4378,8 +4430,14 @@ function EnrollmentForm() {
                   </div>
                   <div className="price-row">
                     <span>Prorated Dues & Add-ons</span>
-                    <span>${formData.requestedStartDate ? (calculateTotalProratedCost() - 19.0).toFixed(2) : '0.00'}</span>
+                    <span>${formData.requestedStartDate ? (calculateTotalProratedCost() - 19.0 - (hasPTAddon && ptPackage ? parseFloat(ptPackage.price || 149) : 0)).toFixed(2) : '0.00'}</span>
                   </div>
+                  {hasPTAddon && ptPackage && (
+                    <div className="price-row">
+                      <span>Personal Training Package</span>
+                      <span>${ptPackage.price || 149}</span>
+                    </div>
+                  )}
                   <div className="price-row">
                     <span>Subtotal</span>
                     <span>${formData.requestedStartDate ? calculateTotalProratedCost().toFixed(2) : '19.00'}</span>
@@ -4431,6 +4489,7 @@ function EnrollmentForm() {
         isOpen={showPTModal}
         onClose={handlePTDecline}
         onAccept={handlePTAccept}
+        selectedClub={selectedClub}
       />
     </div>
   );

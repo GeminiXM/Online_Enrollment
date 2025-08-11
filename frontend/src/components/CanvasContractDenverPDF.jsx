@@ -443,6 +443,14 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
           { content: '', styles: { fontStyle: 'normal' } },
           { content: '', styles: { fontStyle: 'normal' } }
         ],
+        ...(formData.hasPTAddon && formData.ptPackage ? [
+          [
+            { content: 'Personal Training Package', styles: { fontStyle: 'normal' } },
+            { content: `$${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}`, styles: { fontStyle: 'normal' } },
+            { content: '', styles: { fontStyle: 'normal' } },
+            { content: '', styles: { fontStyle: 'normal' } }
+          ]
+        ] : []),
         [
           { content: 'Taxes', styles: { fontStyle: 'normal' } },
           { content: `$${formData.taxAmount || '0.00'}`, styles: { fontStyle: 'normal' } },
