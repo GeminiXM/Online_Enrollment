@@ -438,7 +438,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
           { content: formatDate(formData.requestedStartDate) || '', styles: { fontStyle: 'bold' } }
         ],
         [
-          { content: 'Packages', styles: { fontStyle: 'normal' } },
+          { content: 'Service Packages', styles: { fontStyle: 'normal' } },
           { content: `$${formData.packagesFee || '0.00'}`, styles: { fontStyle: 'normal' } },
           { content: '', styles: { fontStyle: 'normal' } },
           { content: '', styles: { fontStyle: 'normal' } }

@@ -1190,6 +1190,17 @@ function EnrollmentForm() {
       newErrors.tempGender = "Please select a gender or choose 'Prefer not to say'";
     }
     
+    // For adult members, require either email or phone
+    if (memberType === 'adult') {
+      const hasEmail = memberData.email && memberData.email.trim();
+      const hasPhone = memberData.cellPhone && memberData.cellPhone.trim();
+      
+      if (!hasEmail && !hasPhone) {
+        newErrors.tempEmail = "Email or phone number is required for adult members";
+        newErrors.tempCellPhone = "Email or phone number is required for adult members";
+      }
+    }
+    
     // Validate email if provided
     if (memberData.email && !isValidEmail(memberData.email.trim())) {
       newErrors.tempEmail = "Please enter a valid email address";
@@ -2277,7 +2288,7 @@ function EnrollmentForm() {
 
               <div className="form-group">
                 <label htmlFor="tempEmail">
-                  Email
+                  Email <span className="required">*</span>
                 </label>
                 <input
                   type="email"
@@ -2300,7 +2311,7 @@ function EnrollmentForm() {
             <div className="form-row">
               <div className="form-group">
                 <label htmlFor="tempCellPhone">
-                  Phone Number
+                  Phone Number <span className="required">*</span>
                 </label>
                 <input
                   type="tel"
@@ -2317,6 +2328,10 @@ function EnrollmentForm() {
                     {errors.tempCellPhone}
                   </div>
                 )}
+              </div>
+              
+              <div className="form-note" style={{fontSize: '0.8rem', color: '#666', marginTop: '0.5rem', fontStyle: 'italic'}}>
+                * Either email or phone number is required for adult members
               </div>
               
 {/*               <div className="form-group">
