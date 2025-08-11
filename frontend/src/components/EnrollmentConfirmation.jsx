@@ -92,7 +92,10 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
             const pdfBuffer = await generatePDFBuffer(
-              formData,
+              {
+                ...formData,
+                membershipId: membershipNumber // Add membership ID to formData
+              },
               signatureData,
               formatTimestamp(),
               initialedSections,
@@ -244,7 +247,10 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             <div className="contract-download-actions">
               {selectedClub?.state === 'NM' ? (
                 <CanvasContractPDF 
-                  formData={formData}
+                  formData={{
+                    ...formData,
+                    membershipId: membershipNumber // Add membership ID to formData
+                  }}
                   signatureData={signatureData}
                   signatureDate={formatTimestamp()}
                   initialedSections={initialedSections}
@@ -253,7 +259,10 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
                 />
               ) : (
                 <CanvasContractDenverPDF 
-                  formData={formData}
+                  formData={{
+                    ...formData,
+                    membershipId: membershipNumber // Add membership ID to formData
+                  }}
                   signatureData={signatureData}
                   signatureDate={formatTimestamp()}
                   initialedSections={initialedSections}

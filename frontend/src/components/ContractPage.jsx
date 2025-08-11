@@ -1010,7 +1010,7 @@ const ContractPage = () => {
         
         {/* Financial Details Section */}
         <div className="info-section financial-details-section">
-          <div className="info-header">Financial Details</div>
+          <div className="info-header">Today's Charges</div>
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Enrollment Fee</div>
@@ -1078,12 +1078,26 @@ const ContractPage = () => {
               </div>
             </div>
           </div>
+          <div className="info-row">
+            <div className="info-column" style={{textAlign: 'right', width: '100%'}}>
+              <div style={{
+                fontStyle: 'italic',
+                color: '#d63384',
+                fontSize: '0.75rem',
+                margin: '0',
+                padding: '4px 0',
+                textAlign: 'right !important',
+                display: 'block',
+                width: '100%'
+              }}>
+                *All memberships require an initial 3 months of full membership dues
+              </div>
+            </div>
+          </div>
         </div>
         
- 
-        
-        {/* DEBUG: All Dollar Amounts Section */}
-        {currentAmounts && process.env.NODE_ENV === 'development' && (
+        {/* DEBUG: All Dollar Amounts Section - COMMENTED OUT */}
+        {false && currentAmounts && process.env.NODE_ENV === 'development' && (
           <div className="info-section debug-amounts-section" style={{backgroundColor: '#f0f8ff', border: '2px dashed #007bff', marginTop: '2rem'}}>
             <div className="info-header" style={{color: '#007bff', fontSize: '1.2rem', fontWeight: 'bold'}}>🔍 DEBUG: Database Parameter Mapping</div>
             

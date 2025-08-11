@@ -99,8 +99,8 @@ class EmailService {
       ? Number((addonsTotal * taxRate).toFixed(2))
       : 0;
 
-    // Gross monthly total includes dues + addons + taxes
-    const grossMonthlyTotal = monthlyDues + addonsTotal + duesTax + addonsTax;
+    // Monthly total includes dues + addons (without taxes)
+    const monthlyTotal = monthlyDues + addonsTotal;
 
     // Log the calculation for debugging
     logger.info("calculateMonthlyAmount calculation:", {
@@ -111,12 +111,12 @@ class EmailService {
       taxRate,
       duesTax,
       addonsTax,
-      grossMonthlyTotal: grossMonthlyTotal.toFixed(2),
+      monthlyTotal: monthlyTotal.toFixed(2),
       formDataKeys: Object.keys(formData || {}),
       selectedClubState: selectedClub?.state,
     });
 
-    return grossMonthlyTotal.toFixed(2);
+    return monthlyTotal.toFixed(2);
   }
 
   /**
@@ -349,7 +349,7 @@ class EmailService {
                 $${this.calculateMonthlyAmount(formData, selectedClub)}
               </p>
               <p style="font-size: 12px; color: #666;">
-                Includes monthly dues, add-ons, and applicable taxes
+                Includes monthly dues and add-ons (applicable taxes not included)
               </p>
             </div>
             

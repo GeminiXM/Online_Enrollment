@@ -213,15 +213,27 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.text(clubName, xStart + prefixWidth, y);
     const clubNameWidth = pdf.getTextWidth(clubName);
     pdf.setFontSize(10);
-    const suffix = '          Membership Information - PRIMARY MEMBER';
+    const suffix = '          Membership Information - ';
     pdf.text(suffix, xStart + prefixWidth + clubNameWidth, y);
+    
+    // Calculate position for "PRIMARY MEMBER" text
+    const suffixWidth = pdf.getTextWidth(suffix);
+    const primaryMemberX = xStart + prefixWidth + clubNameWidth + suffixWidth;
+    
+    // Set font size to 14 for "PRIMARY MEMBER"
+    pdf.setFontSize(14);
+    pdf.text('Primary Member', primaryMemberX, y);
+    
+    // Reset font size back to 10
+    pdf.setFontSize(10);
 
     // Primary Member details table
     autoTable(pdf, {
       startY: 50,
-      head: [['Last Name', 'First Name', 'DOB']],
+      head: [['Membership ID', 'Last Name', 'First Name', 'DOB']],
       body: [
         [
+          formData.membershipId || '',
           formData.lastName || '',
           formData.firstName || '',
           formatDate(formData.dob || formData.dateOfBirth) || ''
@@ -402,7 +414,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
       startY: currentY + 5,
       head: [
         [
-          { content: 'Financial Details', colSpan: 2, styles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' } },
+          { content: "Today's Charges", colSpan: 2, styles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold', halign: 'center' } },
           { content: 'Monthly Cost Going Forward', colSpan: 2, styles: { fillColor: [60, 60, 60], textColor: [255, 255, 255], fontStyle: 'bold', halign: 'center' } }
         ]
       ],
@@ -450,20 +462,6 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     });
 
     currentY = pdf.lastAutoTable.finalY + 10;
-
-    // Membership ID Section (if applicable)
-    if (formData.membershipId) {
-      pdf.setFontSize(10);
-      pdf.setFont('helvetica', 'bold');
-      pdf.text('Membership ID', 20, currentY);
-      autoTable(pdf, {
-        startY: currentY + 5,
-        body: [[formData.membershipId]],
-        theme: 'grid',
-        margin: { left: 20, right: 20 }
-      });
-      currentY = pdf.lastAutoTable.finalY + 10;
-    }
 
     // Payment Authorization Section
     pdf.setFontSize(12);
