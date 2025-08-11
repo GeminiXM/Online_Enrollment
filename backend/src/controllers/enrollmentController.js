@@ -922,7 +922,7 @@ export const submitEnrollment = async (req, res) => {
     const prorateTaxAmount = membershipDetails.proratedTaxAmount || 0.0;
 
     // Calculate totals from the enrollment form data
-    const initiationFee = 0.0; // Get from membership details if available
+    const initiationFee = 19.0; // Enrollment fee set to $19
     const prorateAmount = membershipDetails.proratedPrice || 0.0;
 
     // Get UPC codes

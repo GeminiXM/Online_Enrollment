@@ -622,7 +622,7 @@ const ContractPage = () => {
     const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
     const monthlyDues = parseFloat(formData.monthlyDues || 0);
     const proratedDues = parseFloat(formData.proratedDues || 0);
-    const initiationFee = parseFloat(formData.initiationFee || 0);
+    const initiationFee = parseFloat(formData.initiationFee || 19);
     
     // Calculate service addons totals
     const serviceAddons = formData.serviceAddons || [];
@@ -1011,7 +1011,7 @@ const ContractPage = () => {
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Enrollment Fee</div>
-              <div className="info-value">${formData.initiationFee || '0.00'}</div>
+              <div className="info-value">${formData.initiationFee || '19.00'}</div>
             </div>
           </div>
           <div className="info-row">
@@ -1042,7 +1042,7 @@ const ContractPage = () => {
             <div className="info-column financial-item total-collected">
               <div className="info-label">Total Collected (Tax included)</div>
               <div className="info-value">${formData.totalCollected || (
-                parseFloat(formData.initiationFee || 0) + 
+                parseFloat(formData.initiationFee || 19) + 
                 parseFloat(formData.proratedDues || 0) + 
                 parseFloat(formData.proratedAddOns || 0) + 
                 parseFloat(formData.packagesFee || 0) + 
@@ -1155,7 +1155,7 @@ const ContractPage = () => {
                   </div>
                   
                   <div style={{marginBottom: '0.5rem'}}>
-                    <strong>Initiation Fee:</strong> ${parseFloat(formData.initiationFee || 0).toFixed(2)}
+                    <strong>Initiation Fee:</strong> ${parseFloat(formData.initiationFee || 19).toFixed(2)}
                   </div>
                   
                   {currentAmounts.serviceAddons.length > 0 && (

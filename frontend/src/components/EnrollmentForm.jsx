@@ -3121,8 +3121,11 @@ function EnrollmentForm() {
     // Get prorated factor (percentage of month remaining)
     const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
     
-    // Start with prorated membership price - this already includes family members in the I/D/F type
-    let total = proratedPrice !== undefined ? proratedPrice : 0;
+    // Start with enrollment fee
+    let total = 19.0; // $19 enrollment fee
+    
+    // Add prorated membership price - this already includes family members in the I/D/F type
+    total += proratedPrice !== undefined ? proratedPrice : 0;
     
     // Do NOT add extra family member costs - the membership price already includes this based on type
     
@@ -3774,7 +3777,7 @@ function EnrollmentForm() {
             <div className="form-row address-row">
               <div className="form-group address-field">
                 <label htmlFor="address1">
-                  Address <span className="required">*</span>
+                  Billing Address <span className="required">*</span>
                 </label>
                 <input
                   type="text"
@@ -4315,12 +4318,15 @@ function EnrollmentForm() {
                 <div className="price-breakdown">
                   <div className="price-row">
                     <span>Enrollment Fee</span>
-                    <span>$0.00</span>
+                    <span>$19.00</span>
                   </div>
                   <div className="price-row">
-                    
+                    <span>Prorated Dues & Add-ons</span>
+                    <span>${formData.requestedStartDate ? (calculateTotalProratedCost() - 19.0).toFixed(2) : '0.00'}</span>
+                  </div>
+                  <div className="price-row">
                     <span>Subtotal</span>
-                    <span>${calculateTotalProratedCost().toFixed(2)}</span>
+                    <span>${formData.requestedStartDate ? calculateTotalProratedCost().toFixed(2) : '19.00'}</span>
                   </div>
                   <div className="price-row">
                     {selectedClub?.state === 'NM' ? (

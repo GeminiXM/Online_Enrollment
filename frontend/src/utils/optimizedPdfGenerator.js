@@ -343,7 +343,7 @@ export const generatePdfOnce = async (
       startY: membershipTableEndY + 20,
       head: [["Item", "Amount"]],
       body: [
-        ["Initiation Fee", `$${formData.initiationFee || "0.00"}`],
+        ["Initiation Fee", `$${formData.initiationFee || "19.00"}`],
         ["Pro-rated Dues", `$${formData.proratedDues || "0.00"}`],
         ["Pro-rated Add-Ons", `$${formData.proratedAddOns || "0.00"}`],
         ["Packages", `$${formData.packagesFee || "0.00"}`],

@@ -678,28 +678,26 @@ const handleLightboxResponse = (event) => {
       
       setPaymentResult(successResult);
       setPopupType('success');
-      setPopupMessage(`Payment successful! Transaction ID: ${successResult.transactionId}`);
+      setPopupMessage(`Payment successful! Creating your membership, please wait...`);
       setShowResultPopup(true);
       
-      // Wait a moment then process enrollment
-      setTimeout(() => {
-        setShowResultPopup(false);
-        // Ensure formData is available before calling finishEnrollment
-        if (formData) {
-          finishEnrollment(response);
-        } else {
-          console.error('formData not available, retrying in 1 second...');
-          setTimeout(() => {
-            if (formData) {
-              finishEnrollment(response);
-            } else {
-              console.error('formData still not available after retry');
-              setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
-              setIsSubmitting(false);
-            }
-          }, 1000);
-        }
-      }, 3000);
+      // Keep popup visible and process enrollment
+      // The popup will remain visible until navigation completes
+      if (formData) {
+        finishEnrollment(response);
+      } else {
+        console.error('formData not available, retrying in 1 second...');
+        setTimeout(() => {
+          if (formData) {
+            finishEnrollment(response);
+          } else {
+            console.error('formData still not available after retry');
+            setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
+            setIsSubmitting(false);
+            setShowResultPopup(false);
+          }
+        }, 1000);
+      }
       
     } else {
       // Payment failed
@@ -921,6 +919,7 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
       console.error('Enrollment submission error:', error);
       setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
       setIsSubmitting(false);
+      setShowResultPopup(false);
     }
   };
   
@@ -942,11 +941,13 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
+    const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Calculate total using the exact values from formData
-    const total = proratedDues + proratedAddOns + taxAmount;
+    // Calculate total using the exact values from formData plus enrollment fee
+    const total = enrollmentFee + proratedDues + proratedAddOns + taxAmount;
     
     console.log('calculateProratedAmount using formData values:', {
+      enrollmentFee,
       proratedDues,
       proratedAddOns,
       taxAmount,
@@ -1011,9 +1012,12 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
             <div className="popup-content">
               <p>{popupMessage}</p>
               {popupType === 'success' && (
-                <p className="popup-redirect-message">
-                  Redirecting to confirmation page...
-                </p>
+                <div className="popup-loading">
+                  <div className="loading-spinner"></div>
+                  <p className="popup-redirect-message">
+                    Creating your membership and generating contract...
+                  </p>
+                </div>
               )}
             </div>
             {popupType === 'error' && (

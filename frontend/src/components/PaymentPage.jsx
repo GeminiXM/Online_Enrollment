@@ -403,9 +403,10 @@ const PaymentPage = () => {
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
+    const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Calculate total using the exact values from formData
-    const total = proratedDues + proratedAddOns + taxAmount;
+    // Calculate total using the exact values from formData plus enrollment fee
+    const total = enrollmentFee + proratedDues + proratedAddOns + taxAmount;
     return Math.round(total * 100) / 100;
   };
   
