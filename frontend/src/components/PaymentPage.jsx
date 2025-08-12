@@ -405,8 +405,11 @@ const PaymentPage = () => {
     const taxAmount = parseFloat(formData.taxAmount || 0);
     const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Calculate total using the exact values from formData plus enrollment fee
-    const total = enrollmentFee + proratedDues + proratedAddOns + taxAmount;
+    // Add PT package amount if selected
+    const ptPackageAmount = formData.hasPTAddon && formData.ptPackage ? parseFloat(formData.ptPackage.invtr_price || formData.ptPackage.price || 0) : 0;
+    
+    // Calculate total using the exact values from formData plus enrollment fee and PT package
+    const total = enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount + taxAmount;
     return Math.round(total * 100) / 100;
   };
   
@@ -539,7 +542,8 @@ const PaymentPage = () => {
           signatureData: signatureData,     
           initialedSections: initialedSections,
           membershipNumber: response.data.custCode,
-          transactionId: response.data.transactionId
+          transactionId: response.data.transactionId,
+          amountBilled: response.data.amountBilled
         } 
       });
     } catch (error) {

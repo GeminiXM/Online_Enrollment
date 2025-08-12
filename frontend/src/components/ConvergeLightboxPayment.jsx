@@ -945,19 +945,25 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
     const taxAmount = parseFloat(formData.taxAmount || 0);
     const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Calculate total using the exact values from formData plus enrollment fee
-    const total = enrollmentFee + proratedDues + proratedAddOns + taxAmount;
+    // Add PT package amount if selected
+    const ptPackageAmount = formData.hasPTAddon && formData.ptPackage ? parseFloat(formData.ptPackage.invtr_price || formData.ptPackage.price || 0) : 0;
+    
+    // Calculate total using the exact values from formData plus enrollment fee and PT package
+    const total = enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount + taxAmount;
     
     console.log('calculateProratedAmount using formData values:', {
       enrollmentFee,
       proratedDues,
       proratedAddOns,
+      ptPackageAmount,
       taxAmount,
       total: Math.round(total * 100) / 100,
       formDataTotalCollected: formData.totalCollected,
       formDataProratedDues: formData.proratedDues,
       formDataProratedAddOns: formData.proratedAddOns,
-      formDataTaxAmount: formData.taxAmount
+      formDataTaxAmount: formData.taxAmount,
+      hasPTAddon: formData.hasPTAddon,
+      ptPackage: formData.ptPackage
     });
     
     return Math.round(total * 100) / 100;

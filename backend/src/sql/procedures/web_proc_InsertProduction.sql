@@ -50,5 +50,6 @@ EXECUTE PROCEDURE web_proc_InsertProduction (
 	parAddonsTax,
 	parAddonsTotal,
 	parDuesTax,
-	parGrossMonthlyTotal
-)
+	parGrossMonthlyTotal,
+	parNewPT,
+	parPTUpc)

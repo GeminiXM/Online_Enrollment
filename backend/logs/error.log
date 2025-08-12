@@ -2239,3 +2239,13 @@
 2025-08-11 17:16:24:1624 [31merror[39m: [31mError executing query:[39m
 2025-08-11 17:16:24:1624 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-08-11 17:16:24:1624 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError executing query:[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError executing query:[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-11 17:44:07:447 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-11 17:53:36:5336 [31merror[39m: [31mError executing query:[39m
+2025-08-11 17:53:36:5336 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertWebAsprecdoc[39m
+2025-08-11 17:53:36:5336 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-08-11 17:55:40:5540 [31merror[39m: [31mError in submitEnrollment:[39m

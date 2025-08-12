@@ -116,9 +116,15 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
     let query;
     if (params.length > 0) {
       // For procedures with parameters, construct the query with actual values
-      const paramValues = params.map((p) =>
-        typeof p === "string" ? `'${p}'` : p
-      );
+      const paramValues = params.map((p) => {
+        if (p === null || p === undefined) {
+          return "NULL";
+        } else if (typeof p === "string") {
+          return `'${p}'`;
+        } else {
+          return p;
+        }
+      });
       query = `EXECUTE PROCEDURE ${actualProcedureName}(${paramValues.join(
         ", "
       )})`;
@@ -416,6 +422,8 @@ export const submitEnrollment = async (req, res) => {
       familyMembers,
       guardian,
       paymentInfo, // Extract payment information
+      hasPTAddon, // Extract PT selection
+      ptPackage, // Extract PT package data
     } = req.body;
 
     // Extract payment data for database insertion
@@ -430,6 +438,7 @@ export const submitEnrollment = async (req, res) => {
     };
 
     logger.info("Payment data extracted:", paymentData);
+    logger.info("PT selection:", { hasPTAddon, ptPackage });
 
     // Log specialty membership for debugging
     logger.info("Specialty membership data:", {
@@ -521,7 +530,7 @@ export const submitEnrollment = async (req, res) => {
         "", // parPin
         "", // parToken
         specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
-        "", // parNewPt
+        hasPTAddon ? "Y" : "N", // parNewPt - Y if PT was selected, N if not
       ]);
 
       // Then retrieve the generated code
@@ -589,7 +598,7 @@ export const submitEnrollment = async (req, res) => {
       "", // parPin
       paymentData.token, // parToken - transaction token from payment processor
       specialtyMembership || "", // parSpecialtyMembership - use specialty membership code (J, S, Y)
-      "", // parNewPt
+      hasPTAddon ? "Y" : "N", // parNewPt - Y if PT was selected, N if not
     ]);
 
     logger.info("Primary membership record inserted successfully");
@@ -934,6 +943,26 @@ export const submitEnrollment = async (req, res) => {
     const initiationFee = 19.0; // Enrollment fee set to $19
     const prorateAmount = membershipDetails.proratedPrice || 0.0;
 
+    // Calculate totalProrateBilled here so it's available for the response
+    const ptPackageAmount =
+      hasPTAddon && ptPackage
+        ? parseFloat(ptPackage.invtr_price || ptPackage.price || 0)
+        : 0;
+    const proratedDues =
+      parseFloat(req.body.proratedDues) ||
+      membershipDetails.proratedPrice ||
+      0.0;
+    const proratedDuesTax =
+      parseFloat(req.body.proratedDuesTax) ||
+      membershipDetails.proratedTaxAmount ||
+      0.0;
+    const proratedAddonsTotal = parseFloat(req.body.proratedAddOns) || 0.0;
+    const proratedAddonsTax = parseFloat(req.body.proratedAddOnsTax) || 0.0;
+    const proratedDuesAddon = proratedDues + proratedAddonsTotal;
+    const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
+    const totalProrateBilled =
+      proratedDuesAddon + proratedDuesAddonTax + ptPackageAmount;
+
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";
     const addonUpcCodes =
@@ -1010,9 +1039,7 @@ export const submitEnrollment = async (req, res) => {
         calculatedProratedAddonsTax: proratedAddonsTax,
       });
 
-      const proratedDuesAddon = proratedDues + proratedAddonsTotal;
-      const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
-      const totalProrateBilled = proratedDuesAddon + proratedDuesAddonTax;
+      // Use the totalProrateBilled calculated above
       const duesTax = membershipDetails.taxRate
         ? Number((netDues * membershipDetails.taxRate).toFixed(2))
         : 0.0;
@@ -1071,6 +1098,8 @@ export const submitEnrollment = async (req, res) => {
           addonsTotal.toFixed(2), // parAddonsTotal
           duesTax.toFixed(2), // parDuesTax
           grossMonthlyTotal.toFixed(2), // parGrossMonthlyTotal
+          hasPTAddon ? "Y" : "N", // parNewPT - Y if PT was selected, N if not
+          hasPTAddon && ptPackage ? (ptPackage.invtr_upccode || "").trim() : "", // parPTUpc - PT UPC code if PT was selected
         ]
       );
 
@@ -1340,6 +1369,10 @@ export const submitEnrollment = async (req, res) => {
     // Welcome email is now sent from EnrollmentConfirmation.jsx after contract is created
     // Removed email sending from here to ensure contract file exists before sending email
 
+    // Calculate total amount billed (including PT package if selected)
+    const totalAmountBilled =
+      totalProrateBilled + initiationFee + initiationFeeTax;
+
     res.status(200).json({
       success: true,
       message: "Enrollment submitted successfully",
@@ -1347,6 +1380,7 @@ export const submitEnrollment = async (req, res) => {
       transactionId: transactionId,
       resultCode: resultCode,
       errorMessage: errorMessage,
+      amountBilled: totalAmountBilled.toFixed(2),
     });
   } catch (error) {
     logger.error("Error in submitEnrollment:", {

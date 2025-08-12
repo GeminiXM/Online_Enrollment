@@ -903,7 +903,11 @@ function EnrollmentForm() {
       proratedDues: formData.proratedDues || 0,
       proratedDuesTax: formData.proratedDuesTax || 0,
       // Add enrollment fee
-      initiationFee: '19.00'
+      initiationFee: '19.00',
+      // Add PT selection
+      hasPTAddon: hasPTAddon || false,
+      // Add PT package data if available
+      ptPackage: ptPackage || null
     };
    
       // ADD THIS SECTION to create a prioritized phone field
@@ -1535,11 +1539,15 @@ function EnrollmentForm() {
 
   const handlePTDecline = () => {
     setShowPTModal(false);
+    setHasPTAddon(false); // Ensure PT is marked as declined
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
       navigate('/contract', { 
         state: { 
-          formData: formSubmissionData
+          formData: {
+            ...formSubmissionData,
+            hasPTAddon: false
+          }
         } 
       });
     }
