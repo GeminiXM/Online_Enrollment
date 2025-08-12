@@ -226,9 +226,10 @@ export const generatePdfOnce = async (
     // Primary Member details table
     autoTable(pdf, {
       startY: 60,
-      head: [["Last Name", "First Name", "DOB", "Gender"]],
+      head: [["Membership ID", "Last Name", "First Name", "DOB", "Gender"]],
       body: [
         [
+          formData.membershipId || "",
           formData.lastName || "",
           formData.firstName || "",
           formatDate(formData.dob || formData.dateOfBirth) || "",

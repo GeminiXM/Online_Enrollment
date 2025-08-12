@@ -961,7 +961,10 @@ export const submitEnrollment = async (req, res) => {
     const proratedDuesAddon = proratedDues + proratedAddonsTotal;
     const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
     const totalProrateBilled =
-      proratedDuesAddon + proratedDuesAddonTax + ptPackageAmount;
+      proratedDuesAddon +
+      proratedDuesAddonTax +
+      ptPackageAmount +
+      initiationFee;
 
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";
@@ -1029,7 +1032,9 @@ export const submitEnrollment = async (req, res) => {
         totalProrateBilled:
           proratedDues +
           proratedAddonsTotal +
-          (proratedDuesTax + proratedAddonsTax),
+          (proratedDuesTax + proratedAddonsTax) +
+          ptPackageAmount +
+          initiationFee,
       });
 
       logger.info("Received prorated addon values from frontend:", {
@@ -1257,6 +1262,28 @@ export const submitEnrollment = async (req, res) => {
               );
             }
           }
+        }
+
+        // Insert PT package item if selected
+        if (hasPTAddon && ptPackage && transactionId) {
+          logger.info(
+            "Inserting PT package item with UPC code:",
+            ptPackage.invtr_upccode
+          );
+          await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
+            transactionId, // parTrans
+            ptPackage.invtr_upccode || "", // parUPC
+            parseFloat(ptPackage.invtr_price || ptPackage.price || 0).toFixed(
+              2
+            ), // parPrice - full PT package price
+            0.0, // parTax - PT packages typically don't have tax
+            1, // parQty
+          ]);
+          logger.info(
+            `PT package item inserted successfully with price: ${parseFloat(
+              ptPackage.invtr_price || ptPackage.price || 0
+            ).toFixed(2)}`
+          );
         }
       }
     } catch (productionError) {

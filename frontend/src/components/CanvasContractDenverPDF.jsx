@@ -188,6 +188,12 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     throw new Error("Missing required data for PDF generation");
   }
 
+  console.log('CanvasContractDenverPDF - Received formData:', {
+    membershipId: formData.membershipId,
+    hasMembershipId: !!formData.membershipId,
+    formDataKeys: Object.keys(formData || {})
+  });
+
   try {
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
     await loadFontsIntoJsPDF(pdf);
@@ -228,6 +234,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.setFontSize(10);
 
     // Primary Member details table
+    console.log('CanvasContractDenverPDF - Creating table with membershipId:', formData.membershipId);
     autoTable(pdf, {
       startY: 50,
       head: [['Membership ID', 'Last Name', 'First Name', 'DOB']],

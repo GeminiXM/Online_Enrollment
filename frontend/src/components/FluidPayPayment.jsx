@@ -800,28 +800,8 @@ if (typeof window !== 'undefined') {
         return;
       }
       
-      // Generate contract PDF for New Mexico (Converge)
+      // Contract PDF will be generated in enrollment confirmation with membership ID
       let contractPDFArray = null;
-      try {
-        console.log('Generating contract PDF for FluidPay payment');
-        const pdfBuffer = await generatePDFBufferDenver(
-          formData,
-          signatureData,
-          new Date().toLocaleString(),
-          initialedSections,
-          selectedClub,
-          formData.monthlyDues || formData.membershipDetails?.price
-        );
-        
-        contractPDFArray = new Uint8Array(pdfBuffer);
-        console.log('Contract PDF generated for FluidPay payment:', {
-          size: contractPDFArray.length,
-          clubState: selectedClub?.state
-        });
-      } catch (pdfError) {
-        console.error('Error generating contract PDF for FluidPay payment:', pdfError);
-        // Continue with enrollment even if PDF generation fails
-      }
 
       // Extract card information from payment result
       const cardNumber = paymentResult.ssl_card_number || "";

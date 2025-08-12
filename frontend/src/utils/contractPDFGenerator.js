@@ -272,9 +272,10 @@ export const generateContractPDFBuffer = async (
     // Primary Member details table - matches ContractPage layout
     autoTable(pdf, {
       startY: 50,
-      head: [["Last Name", "First Name", "DOB"]],
+      head: [["Membership ID", "Last Name", "First Name", "DOB"]],
       body: [
         [
+          formData.membershipId || "",
           formData.lastName || "",
           formData.firstName || "",
           formatDate(formData.dob || formData.dateOfBirth) || "",

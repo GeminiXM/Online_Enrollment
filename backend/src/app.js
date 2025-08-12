@@ -112,9 +112,23 @@ app.post(
   express.raw({ type: "application/pdf", limit: "15mb" }),
   async (req, res) => {
     try {
-      const contractId = req.header("x-contract-id") || Date.now();
-      const memberId = req.header("x-member-id") || "unknown";
-      const fileName = `contract_${memberId}_${contractId}.pdf`;
+      const membershipNumber = req.header("x-contract-id") || "unknown";
+      const memberName = req.header("x-member-id") || "unknown";
+
+      // Parse member name (format: "firstName_lastName")
+      const nameParts = memberName.split("_");
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts[1] || "";
+
+      // Get current date in MM-DD-YYYY format
+      const today = new Date();
+      const formattedDate = `${String(today.getMonth() + 1).padStart(
+        2,
+        "0"
+      )}-${String(today.getDate()).padStart(2, "0")}-${today.getFullYear()}`;
+
+      // Generate proper filename: mm-dd-yyyy member# first name last name ONLINE.pdf
+      const fileName = `${formattedDate} ${membershipNumber} ${firstName} ${lastName} ONLINE.pdf`;
       const savePath = path.join(uploadDir, fileName);
 
       await fs.promises.writeFile(savePath, req.body);

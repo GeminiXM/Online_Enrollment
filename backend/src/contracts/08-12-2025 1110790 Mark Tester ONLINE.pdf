@@ -10,7 +10,7 @@
 endobj
 4 0 obj
 <<
-/Length 14994
+/Length 15635
 >>
 stream
 0.5670000000000001 w
@@ -19,8 +19,8 @@ BT
 /F2 18 Tf
 20.6999999999999993 TL
 0 g
-155.7077952755905699 735.3070866141732722 Td
-(New Mexico Sports and Wellness) Tj
+200.3477952755905847 735.3070866141732722 Td
+(Colorado Athletic Club) Tj
 ET
 BT
 /F2 18 Tf
@@ -41,14 +41,21 @@ BT
 16.0999999999999979 TL
 0 g
 115.492913385826796 664.4409448818897772 Td
-(Del Norte) Tj
+(Tabor Center) Tj
 ET
 BT
 /F2 10 Tf
 11.5 TL
 0 g
-177.5129133858268062 664.4409448818897772 Td
-(          Membership Information - PRIMARY MEMBER) Tj
+201.1729133858268028 664.4409448818897772 Td
+(          Membership Information - ) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0 g
+354.4729133858267573 664.4409448818897772 Td
+(Primary Member) Tj
 ET
 0. G
 0.5670000000000001 w
@@ -58,39 +65,52 @@ ET
 0.78 G
 0. w
 0.86 g
-56.6929133858267775 650.2677165354331237 165.7466077490038288 -21.4999999999999964 re
+56.6929133858267775 650.2677165354331237 154.5722902933063665 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 0. g
 61.6929133858267775 636.76771653543301 Td
+(Membership ID) Tj
+ET
+0.86 g
+0.78 G
+0. w
+0.86 g
+211.2652036791331511 650.2677165354331237 114.3645288918573044 -21.4999999999999964 re
+f
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+216.2652036791331511 636.76771653543301 Td
 (Last Name) Tj
 ET
 0.86 g
 0.78 G
 0. w
 0.86 g
-222.439521134830585 650.2677165354331237 169.0450477042078603 -21.4999999999999964 re
+325.6297325709904271 650.2677165354331237 116.6404399145808526 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 0. g
-227.439521134830585 636.76771653543301 Td
+330.6297325709904271 636.76771653543301 Td
 (First Name) Tj
 ET
 0.86 g
 0.78 G
 0. w
 0.86 g
-391.4845688390384453 650.2677165354331237 163.8225177751347985 -21.4999999999999964 re
+442.2701724855713223 650.2677165354331237 113.0369141286019499 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 0. g
-396.4845688390384453 636.76771653543301 Td
+447.2701724855712655 636.76771653543301 Td
 (DOB) Tj
 ET
 0. G
@@ -99,39 +119,52 @@ ET
 0.78 G
 0.2834645669291339 w
 1. g
-56.6929133858267775 628.7677165354331237 165.7466077490038288 -21.4999999999999964 re
+56.6929133858267775 628.7677165354331237 154.5722902933063665 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
 61.6929133858267775 615.26771653543301 Td
+() Tj
+ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+211.2652036791331511 628.7677165354331237 114.3645288918573044 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+216.2652036791331511 615.26771653543301 Td
 (Tester) Tj
 ET
 1. g
 0.78 G
 0.2834645669291339 w
 1. g
-222.439521134830585 628.7677165354331237 169.0450477042078603 -21.4999999999999964 re
+325.6297325709904271 628.7677165354331237 116.6404399145808526 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
-227.439521134830585 615.26771653543301 Td
+330.6297325709904271 615.26771653543301 Td
 (Mark) Tj
 ET
 1. g
 0.78 G
 0.2834645669291339 w
 1. g
-391.4845688390384453 628.7677165354331237 163.8225177751347985 -21.4999999999999964 re
+442.2701724855713223 628.7677165354331237 113.0369141286019499 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
-396.4845688390384453 615.26771653543301 Td
+447.2701724855712655 615.26771653543301 Td
 (01/01/1970) Tj
 ET
 0. G
@@ -334,7 +367,7 @@ ET
 0.78 G
 0. w
 0.24 g
-56.6929133858267775 495.7559055118110223 122.5607241120043795 -21.4999999999999964 re
+56.6929133858267775 495.7559055118110223 109.7489970201927889 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
@@ -347,39 +380,39 @@ ET
 0.78 G
 0. w
 0.24 g
-179.2536374978311642 495.7559055118110223 111.7042245375151737 -21.4999999999999964 re
+166.4419104060195593 495.7559055118110223 152.149356594696286 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 1. g
-184.2536374978311642 482.2559055118109654 Td
+171.4419104060195593 482.2559055118109654 Td
 (Add-on Options) Tj
 ET
 0.24 g
 0.78 G
 0. w
 0.24 g
-290.9578620353463521 495.7559055118110223 150.5521808462294473 -21.4999999999999964 re
+318.5912670007158454 495.7559055118110223 134.814402956501425 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 1. g
-295.9578620353463521 482.2559055118109654 Td
+323.5912670007158454 482.2559055118109654 Td
 (Specialty Membership) Tj
 ET
 0.24 g
 0.78 G
 0. w
 0.24 g
-441.5100428815757709 495.7559055118110223 113.7970437325974586 -21.4999999999999964 re
+453.405669957217242 495.7559055118110223 101.9014166569559308 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 1. g
-446.5100428815757709 482.2559055118109654 Td
+458.405669957217242 482.2559055118109654 Td
 (Agreement Type) Tj
 ET
 0. G
@@ -388,7 +421,7 @@ ET
 0.78 G
 0.2834645669291339 w
 1. g
-56.6929133858267775 474.2559055118109654 122.5607241120043795 -21.4999999999999964 re
+56.6929133858267775 474.2559055118109654 109.7489970201927889 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
@@ -401,39 +434,39 @@ ET
 0.78 G
 0.2834645669291339 w
 1. g
-179.2536374978311642 474.2559055118109654 111.7042245375151737 -21.4999999999999964 re
+166.4419104060195593 474.2559055118109654 152.149356594696286 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
-184.2536374978311642 460.7559055118109654 Td
+171.4419104060195593 460.7559055118109654 Td
+(Racquet Court Reservation) Tj
+ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+318.5912670007158454 474.2559055118109654 134.814402956501425 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+323.5912670007158454 460.7559055118109654 Td
 (None) Tj
 ET
 1. g
 0.78 G
 0.2834645669291339 w
 1. g
-290.9578620353463521 474.2559055118109654 150.5521808462294473 -21.4999999999999964 re
+453.405669957217242 474.2559055118109654 101.9014166569559308 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
-295.9578620353463521 460.7559055118109654 Td
-(None) Tj
-ET
-1. g
-0.78 G
-0.2834645669291339 w
-1. g
-441.5100428815757709 474.2559055118109654 113.7970437325974586 -21.4999999999999964 re
-B
-BT
-/F1 10 Tf
-11.5 TL
-0.314 g
-446.5100428815757709 460.7559055118109654 Td
+458.405669957217242 460.7559055118109654 Td
 (Month-to-month) Tj
 ET
 0. G
@@ -465,8 +498,8 @@ BT
 /F2 10 Tf
 11.5 TL
 0. g
-140.7000000000000171 382.5629921259841808 Td
-(Financial Details) Tj
+140.5000000000000284 382.5629921259841808 Td
+(Today's Charges) Tj
 ET
 0.24 g
 0.78 G
@@ -507,7 +540,7 @@ BT
 11.5 TL
 0.314 g
 217.5984251968503997 361.0629921259841808 Td
-($0.00) Tj
+($19.00) Tj
 ET
 1. g
 0.78 G
@@ -533,7 +566,7 @@ BT
 11.5 TL
 0.314 g
 464.2125984251969157 361.0629921259841808 Td
-($115) Tj
+($150) Tj
 ET
 1. g
 0.78 G
@@ -559,7 +592,7 @@ BT
 11.5 TL
 0.314 g
 217.5984251968503997 339.5629921259842376 Td
-($85.32) Tj
+($87.1) Tj
 ET
 1. g
 0.78 G
@@ -586,7 +619,7 @@ BT
 11.5 TL
 0.314 g
 464.2125984251969157 339.5629921259842376 Td
-($115.00) Tj
+($165.00) Tj
 ET
 1. g
 0.78 G
@@ -612,7 +645,7 @@ BT
 11.5 TL
 0.314 g
 217.5984251968503997 306.5629921259842376 Td
-($0.00) Tj
+($8.71) Tj
 ET
 1. g
 0.78 G
@@ -638,7 +671,7 @@ BT
 11.5 TL
 0.314 g
 464.2125984251969157 306.5629921259842376 Td
-(08/10/2025) Tj
+(08/15/2025) Tj
 ET
 1. g
 0.78 G
@@ -651,7 +684,7 @@ BT
 11.5 TL
 0.314 g
 61.6929133858267775 285.0629921259842945 Td
-(Packages) Tj
+(Service Packages) Tj
 ET
 1. g
 0.78 G
@@ -703,7 +736,7 @@ BT
 11.5 TL
 0.314 g
 61.6929133858267775 263.5629921259843513 Td
-(Taxes) Tj
+(Personal Training Package) Tj
 ET
 1. g
 0.78 G
@@ -716,7 +749,7 @@ BT
 11.5 TL
 0.314 g
 217.5984251968503997 263.5629921259843513 Td
-($0.00) Tj
+($149.00) Tj
 ET
 1. g
 0.78 G
@@ -755,7 +788,7 @@ BT
 11.5 TL
 0.314 g
 61.6929133858267775 242.0629921259843513 Td
-(Total Collected \(Tax included\)) Tj
+(Taxes) Tj
 ET
 1. g
 0.78 G
@@ -768,7 +801,7 @@ BT
 11.5 TL
 0.314 g
 217.5984251968503997 242.0629921259843513 Td
-($85.32) Tj
+($0.00) Tj
 ET
 1. g
 0.78 G
@@ -796,6 +829,58 @@ BT
 464.2125984251969157 242.0629921259843513 Td
 () Tj
 ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+56.6929133858267775 234.0629921259843513 155.9055118110236435 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+61.6929133858267775 220.5629921259843513 Td
+(Total Collected \(Tax included\)) Tj
+ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+212.5984251968504282 234.0629921259843513 90.708661417322844 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+217.5984251968503997 220.5629921259843513 Td
+($263.81) Tj
+ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+303.3070866141732722 234.0629921259843513 155.9055118110236435 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+308.3070866141732722 220.5629921259843513 Td
+() Tj
+ET
+1. g
+0.78 G
+0.2834645669291339 w
+1. g
+459.2125984251969157 234.0629921259843513 90.708661417322844 -21.4999999999999964 re
+B
+BT
+/F1 10 Tf
+11.5 TL
+0.314 g
+464.2125984251969157 220.5629921259843513 Td
+() Tj
+ET
 0. G
 0.5670000000000001 w
 0.78 G
@@ -808,26 +893,26 @@ BT
 /F2 12 Tf
 13.7999999999999989 TL
 0. g
-56.6929133858267775 205.7165354330709306 Td
+56.6929133858267775 184.2165354330709306 Td
 (Payment Authorization) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 191.5433070866142771 Td
-(I hereby request and authorize New Mexico Sports and Wellness to charge my account via Electronic Funds) Tj
-T* (Transfer on a monthly basis beginning 09/01/2025.) Tj
+56.6929133858267775 170.0433070866142771 Td
+(I hereby request and authorize Colorado Athletic Club to charge my account via Electronic Funds Transfer on) Tj
+T* (a monthly basis beginning 09/01/2025.) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 163.1968503937008563 Td
+56.6929133858267775 141.6968503937008563 Td
 (The debit will consist of monthly dues plus any other club charges \(if applicable\) made by myself or other) Tj
 T* (persons included in my membership in accordance with the resignation policy detailed in the Terms and) Tj
-T* (Conditions within this Agreement. The authorization is extended by me to New Mexico Sports and Wellness) Tj
-T* (and/or its authorized agents or firms engaged in the business of processing check and charge card debits.) Tj
+T* (Conditions within this Agreement. The authorization is extended by me to Colorado Athletic Club and/or its) Tj
+T* (authorized agents or firms engaged in the business of processing check and charge card debits.) Tj
 ET
 0. G
 0.5670000000000001 w
@@ -837,13 +922,13 @@ ET
 0.78 G
 0. w
 0.86 g
-56.6929133858267775 120.6771653543308105 498.6141732283464307 -21.4999999999999964 re
+56.6929133858267775 99.1771653543308247 498.6141732283464307 -21.4999999999999964 re
 f
 BT
 /F2 10 Tf
 11.5 TL
 0. g
-61.6929133858267775 107.1771653543307821 Td
+61.6929133858267775 85.6771653543308958 Td
 (Payment Method) Tj
 ET
 0. G
@@ -852,13 +937,13 @@ ET
 0.78 G
 0.2834645669291339 w
 1. g
-56.6929133858267775 99.1771653543308247 498.6141732283464307 -21.4999999999999964 re
+56.6929133858267775 77.6771653543308531 498.6141732283464307 -21.4999999999999964 re
 B
 BT
 /F1 10 Tf
 11.5 TL
 0.314 g
-61.6929133858267775 85.6771653543308958 Td
+61.6929133858267775 64.1771653543308958 Td
 (Credit Card) Tj
 ET
 0. G
@@ -871,55 +956,6 @@ ET
 0.5670000000000001 w
 0. G
 0.5670000000000001 w
-0. G
-0.5670000000000001 w
-0.86 g
-0.78 G
-0. w
-0.86 g
-56.6929133858267775 63.5039370078741641 202.3809657410174623 -21.4999999999999964 re
-f
-BT
-/F2 10 Tf
-11.5 TL
-0. g
-61.6929133858267775 50.0039370078740149 Td
-(Credit Card Number) Tj
-ET
-0.86 g
-0.78 G
-0. w
-0.86 g
-259.0738791268442469 63.5039370078741641 113.3565142079935839 -21.4999999999999964 re
-f
-BT
-/F2 10 Tf
-11.5 TL
-0. g
-264.0738791268442469 50.0039370078740149 Td
-(Expiration) Tj
-ET
-0.86 g
-0.78 G
-0. w
-0.86 g
-372.430393334837845 63.5039370078741641 182.8766932793353703 -21.4999999999999964 re
-f
-BT
-/F2 10 Tf
-11.5 TL
-0. g
-377.430393334837845 50.0039370078740149 Td
-(Name on Account) Tj
-ET
-0. G
-0.5670000000000001 w
-0. G
-0.5670000000000001 w
-0. G
-0.5670000000000001 w
-0.78 G
-0. w
 BT
 /F1 8 Tf
 9.1999999999999993 TL
@@ -939,11 +975,13 @@ endobj
 endobj
 6 0 obj
 <<
-/Length 1354
+/Length 1394
 >>
 stream
-0. w
-0.78 G
+0.5670000000000001 w
+0. G
+0. G
+0.5670000000000001 w
 0.86 g
 0.78 G
 0. w
@@ -1051,7 +1089,7 @@ endobj
 endobj
 8 0 obj
 <<
-/Length 4962
+/Length 4915
 >>
 stream
 0.5670000000000001 w
@@ -1075,22 +1113,22 @@ BT
 11.5 TL
 0. g
 56.6929133858267775 664.4409448818897772 Td
-(New Mexico Sports and Wellness \(NMSW\) MONEY BACK GUARANTEE:) Tj
+(Colorado Athletic Club \(CAC\) MONEY BACK GUARANTEE:) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
 56.6929133858267775 650.26771653543301 Td
-(NMSW EXTENDS A FOURTEEN \(14\) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES) Tj
-T* (NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP) Tj
+(CAC EXTENDS A FOURTEEN \(14\) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES) Tj
+T* (NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP) Tj
 T* (APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY) Tj
-T* (RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO New Mexico Sports and Wellness) Tj
-T* (THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL,) Tj
-T* (HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS) Tj
+T* (RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT) Tj
+T* (YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND) Tj
+T* (DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS) Tj
 T* (DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY) Tj
 T* (HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND) Tj
-T* (WITHIN 14 DAYS \(NOT LATER THAN 5PM MT\) OF 08/23/2025, YOU WILL BE ENTITLED TO A REFUND) Tj
+T* (WITHIN 14 DAYS \(NOT LATER THAN 5PM MT\) OF 08/28/2025, YOU WILL BE ENTITLED TO A REFUND) Tj
 T* (OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.) Tj
 ET
 BT
@@ -1107,11 +1145,11 @@ BT
 0. g
 56.6929133858267775 500.0314960629921188 Td
 (I have read and understand this agreement along with the terms and conditions contained on this document) Tj
-T* (and will abide by the rules and regulations of New Mexico Sports and Wellness. In addition, I understand that) Tj
-T* (the primary member represents all members and accepts all responsibility on the account and that all) Tj
-T* (memberships are non-transferable and non-assignable to another individual. By signing this document or) Tj
-T* (sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it) Tj
-T* (were an original signature.) Tj
+T* (and will abide by the rules and regulations of Colorado Athletic Club. In addition, I understand that the primary) Tj
+T* (member represents all members and accepts all responsibility on the account and that all memberships are) Tj
+T* (non-transferable and non-assignable to another individual. By signing this document or sending this by) Tj
+T* (facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original) Tj
+T* (signature.) Tj
 ET
 BT
 /F2 12 Tf
@@ -1124,21 +1162,21 @@ BT
 /F2 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 397.9842519685038837 Td
+56.6929133858267775 392.3149606299212451 Td
 (1. MEMBERSHIP FEE STRUCTURES) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 383.8110236220471734 Td
+56.6929133858267775 378.1417322834645347 Td
 (A.) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-85.0393700787401627 383.8110236220471734 Td
+85.0393700787401627 378.1417322834645347 Td
 (The Member is required to immediately pay any applicable start up costs which are due and owing) Tj
 T* (separate and apart from the monthly dues stated on this membership agreement.) Tj
 ET
@@ -1146,93 +1184,92 @@ BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 346.9606299212597946 Td
+56.6929133858267775 341.2913385826770991 Td
 (B.) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-85.0393700787401627 346.9606299212597946 Td
-(The Member elects to purchase a membership and to pay to New Mexico Sports and Wellness) Tj
-T* (\(NMSW\) the required total monthly dues as indicated on this agreement under one of the following) Tj
-T* (scenarios: ) Tj
+85.0393700787401627 341.2913385826770991 Td
+(The Member elects to purchase a membership and to pay to Colorado Athletic Club \(CAC\) the required) Tj
+T* (total monthly dues as indicated on this agreement under one of the following scenarios: ) Tj
 ET
 BT
 /F2 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 295.9370078740157055 Td
+56.6929133858267775 304.4409448818897204 Td
 (MONTH-TO-MONTH) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 281.7637795275589951 Td
+56.6929133858267775 290.26771653543301 Td
 (I understand that I am committing to a minimum three \(3\) month membership. The three \(3\) month period) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 267.5905511811023416 Td
+56.6929133858267775 276.0944881889763565 Td
 (commences on the 1st of the month following the date the membership begins. After fulfilling my minimum) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 253.4173228346455744 Td
+56.6929133858267775 261.9212598425195893 Td
 (three \(3\) month membership commitment, I understand that the membership may be cancelled at any time) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 239.2440944881889209 Td
+56.6929133858267775 247.7480314960629357 Td
 (with written notice pursuant to the Resignation Policy \(Item 4A\) and the total dues owing for the membership) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 225.0708661417322674 Td
+56.6929133858267775 233.5748031496062822 Td
 (as well as all discounts and initiation fees are not refundable. As such, any failure to use the membership) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 210.8976377952755001 Td
+56.6929133858267775 219.401574803149515 Td
 (indicated above and/or the facilities and programs associated therewith does not relieve applicant of any) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 196.7244094488188466 Td
+56.6929133858267775 205.2283464566928615 Td
 (liability for payment of the total dues or other charges owing as indicated above, regardless of circumstances.) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 182.5511811023621931 Td
+56.6929133858267775 191.0551181102362079 Td
 (Dues may increase at any time, with a one \(1\) month notice.) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 154.2047244094487723 Td
+56.6929133858267775 162.7086614173227872 Td
 (INITIAL:) Tj
 ET
 BT
 /F15 12 Tf
 13.7999999999999989 TL
 0. g
-98.962204724409446 154.2047244094487723 Td
+98.962204724409446 162.7086614173227872 Td
 <00ae010c> Tj
 ET
 BT
@@ -1254,325 +1291,318 @@ endobj
 endobj
 10 0 obj
 <<
-/Length 7486
+/Length 7085
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 735.3070866141732722 Td
 (EXTENDED PLAN) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 721.133858267716505 Td
-(I elect to pay for the number of selected months on this agreement for consecutive months) Tj
+(I elect to pay for the number of selected months on this agreement for consecutive months of member dues) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 706.9606299212598515 Td
-(of member dues plus any club charges \(if applicable\) made by myself or any other persons) Tj
+(plus any club charges \(if applicable\) made by myself or any other persons included in my membership. I) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 692.7874015748031979 Td
-(included in my membership. I understand that I am committing to a minimum three \(3\)) Tj
+(understand that I am committing to a minimum three \(3\) month membership. The three \(3\) month period) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 678.6141732283464307 Td
-(month membership. The three \(3\) month period commences on the 1st of the month) Tj
+(commences on the 1st of the month following the date the membership begins. Member acknowledges that) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 664.4409448818897772 Td
-(following the date the membership begins. Member acknowledges that in order to be) Tj
+(in order to be relieved of the agreement terms, the balance of the dues owed for the remaining months of the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 650.26771653543301 Td
-(relieved of the agreement terms, the balance of the dues owed for the remaining months of) Tj
+(agreement must be paid in full. Special consideration can be made if cause for cancellation is based on a) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 636.0944881889763565 Td
-(the agreement must be paid in full. Special consideration can be made if cause for) Tj
+(medical contingency and written authorization from a doctor is received; or if a member moves 50 miles or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 621.9212598425197029 Td
-(cancellation is based on a medical contingency and written authorization from a doctor is) Tj
+(more away from the nearest Colorado Athletic Club with proof of new residency. Any Leave of Absence taken) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 607.7480314960629357 Td
-(received; or if a member moves 50 miles or more away from the nearest New Mexico) Tj
+(during the initial term of this agreement will extend the commitment by the number of months the member's) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 593.5748031496062822 Td
-(Sports and Wellness with proof of new residency. Any Leave of Absence taken during the) Tj
+(account is on Leave of Absence. Rate for Student/Young Professional memberships will only be honored) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 579.401574803149515 Td
-(initial term of this agreement will extend the commitment by the number of months the) Tj
+(through the current maximum age for this type of membership regardless of whether the number of selected) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 565.2283464566928615 Td
-(member's account is on Leave of Absence. Rate for Student/Young Professional) Tj
+(months on this agreement has expired or not. AT THE END OF THE AGREEMENT PERIOD CHOSEN THIS) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 551.0551181102362079 Td
-(memberships will only be honored through the current maximum age for this type of) Tj
+(PLAN REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation Policy \(Item 4A\)) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 536.8818897637795544 Td
-(membership regardless of whether the number of selected months on this agreement has) Tj
+(applies. I authorize CAC to collect payment under the method of payment indicated on the agreement and the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 522.7086614173227872 Td
-(expired or not. AT THE END OF THE AGREEMENT PERIOD CHOSEN THIS PLAN) Tj
+(balance of the remaining dues owed should I not satisfy the terms of the agreement.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 508.5354330708661337 Td
-(REMAINS IN EFFECT ON A MONTH-TO-MONTH BASIS and the Resignation Policy \(Item) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 494.3622047244094233 Td
-(4A\) applies. I authorize NMSW to collect payment under the method of payment indicated) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 480.1889763779527129 Td
-(on the agreement and the balance of the remaining dues owed should I not satisfy the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 466.0157480314960026 Td
-(terms of the agreement.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 437.6692913385826387 Td
 (INITIAL:) Tj
 ET
 BT
 /F15 12 Tf
 13.7999999999999989 TL
 0. g
-106.2822047244094534 437.6692913385826387 Td
+98.962204724409446 494.3622047244094233 Td
 <00ae010c> Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 466.0157480314960026 Td
+(Except as expressly provided in this Membership Agreement, no portion of the initial fee or monthly) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 451.842519685039349 Td
+(membership dues is refundable, regardless of whether member attends or uses, or is able to attend or use,) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 437.6692913385826387 Td
+(the facilities or programs of the club.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 409.3228346456692748 Td
-(Except as expressly provided in this Membership Agreement, no portion of the initial fee or) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 395.1496062992125644 Td
-(monthly membership dues is refundable, regardless of whether member attends or uses,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 380.976377952755854 Td
-(or is able to attend or use, the facilities or programs of the club.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 352.6299212598424901 Td
 (C. PAID-IN-FULL) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 395.1496062992125644 Td
+(I elect to pay my total dues, as indicated on this agreement, in advance in consideration of a discount) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 380.976377952755854 Td
+(on yearly dues. At the completion of the prepaid period, my membership will automatically revert to) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 366.8031496062991437 Td
+(month-to-month billing unless I prepay another year in advance or terminate with a written notice) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 352.6299212598424901 Td
+(pursuant to the Resignation Policy \(Item 4A.\). If terminating prior to the completion of the prepaid) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 338.4566929133857798 Td
-(I elect to pay my total dues, as indicated on this agreement, in advance in) Tj
+(agreement, a refund will be granted minus the discount percent indicated above. If a renewal of) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 324.2834645669290694 Td
-(consideration of a discount on yearly dues. At the completion of the prepaid period,) Tj
+(membership is requested by the applicant and approved at the conclusion of the term indicated, I) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 310.1102362204724159 Td
-(my membership will automatically revert to month-to-month billing unless I prepay) Tj
+(understand that the renewal monthly dues to be charged will be those dues rates in effect at the time of) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 295.9370078740157055 Td
-(another year in advance or terminate with a written notice pursuant to the Resignation) Tj
+(renewal.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 281.7637795275589951 Td
-(Policy \(Item 4A.\). If terminating prior to the completion of the prepaid agreement, a) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 267.5905511811023416 Td
-(refund will be granted minus the discount percent indicated above. If a renewal of) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 253.4173228346455744 Td
-(membership is requested by the applicant and approved at the conclusion of the term) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 239.2440944881889209 Td
-(indicated, I understand that the renewal monthly dues to be charged will be those) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 225.0708661417322674 Td
-(dues rates in effect at the time of renewal.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 196.7244094488188466 Td
 (D. EFT) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 182.5511811023621931 Td
-(All dues and Member charges will be payable monthly \(with the exception of annual) Tj
+56.6929133858267775 253.4173228346455744 Td
+(All dues and Member charges will be payable monthly \(with the exception of annual dues) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 239.2440944881889209 Td
+(prepayments\) and collected by Electronic Funds Transfer \(EFT\) from either the Member's bank) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 225.0708661417322674 Td
+(account or charged to an approved credit card. Please notify Colorado Athletic Club \(CAC\) at the time) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 210.8976377952755001 Td
+(you change bank accounts or credit cards and provide the appropriate information to avoid having your) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 196.7244094488188466 Td
+(old account charged for your monthly dues.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 168.3779527559054259 Td
-(dues prepayments\) and collected by Electronic Funds Transfer \(EFT\) from either the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 154.2047244094487723 Td
-(Member's bank account or charged to an approved credit card. Please notify New) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 140.0314960629920051 Td
-(Mexico Sports and Wellness \(NMSW\) at the time you change bank accounts or credit) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 125.8582677165353516 Td
-(cards and provide the appropriate information to avoid having your old account) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 111.6850393700786981 Td
-(charged for your monthly dues.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 83.3385826771652773 Td
 (E. DELINQUENT ACCOUNTS) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 69.1653543307086238 Td
-(In the event a bank account or credit card is unable to be charged at the designated) Tj
+56.6929133858267775 154.2047244094487723 Td
+(In the event a bank account or credit card is unable to be charged at the designated date, the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 140.0314960629920051 Td
+(membership is subject to a late fee. A charge will be issued for checks returned due to insufficient) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 125.8582677165353516 Td
+(funds and credit cards that are declined when a balance is due. The Primary Member is responsible for) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 111.6850393700786981 Td
+(all charges incurred.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 83.3385826771652773 Td
+(F. REFERRALS) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 69.1653543307086238 Td
+(If a dues referral program is in effect, it will not extend or modify the terms of the membership) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 54.9921259842518566 Td
-(date, the membership is subject to a late fee. A charge will be issued for checks) Tj
+(agreement. Any Member in default of payment due may NOT cure the default by way of credit for) Tj
 ET
 BT
 /F1 8 Tf
@@ -1593,311 +1623,311 @@ endobj
 endobj
 12 0 obj
 <<
-/Length 7046
+/Length 6668
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 735.3070866141732722 Td
-(returned due to insufficient funds and credit cards that are declined when a balance is) Tj
+("referral" members to Colorado Athletic Club.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 721.133858267716505 Td
-(due. The Primary Member is responsible for all charges incurred.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 692.7874015748031979 Td
-(F. REFERRALS) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 678.6141732283464307 Td
-(If a dues referral program is in effect, it will not extend or modify the terms of the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 664.4409448818897772 Td
-(membership agreement. Any Member in default of payment due may NOT cure the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 650.26771653543301 Td
-(default by way of credit for "referral" members to New Mexico Sports and Wellness.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 621.9212598425197029 Td
+56.6929133858267775 706.9606299212598515 Td
 (G. EMAIL) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 607.7480314960629357 Td
-(By providing my email address, I am consenting to receive information via email from) Tj
+56.6929133858267775 692.7874015748031979 Td
+(By providing my email address, I am consenting to receive information via email from Colorado Athletic) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 593.5748031496062822 Td
-(New Mexico Sports and Wellness, The Wellbridge Company and their affiliated) Tj
+56.6929133858267775 678.6141732283464307 Td
+(Club, The Wellbridge Company and their affiliated companies. Any further distribution of my email) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 579.401574803149515 Td
-(companies. Any further distribution of my email address is unauthorized.) Tj
+56.6929133858267775 664.4409448818897772 Td
+(address is unauthorized.) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 551.0551181102362079 Td
+56.6929133858267775 636.0944881889763565 Td
 (2. UPGRADES/DOWNGRADES) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 536.8818897637795544 Td
-(Requests for upgrades/downgrades of membership must be made in writing.) Tj
+56.6929133858267775 621.9212598425197029 Td
+(Requests for upgrades/downgrades of membership must be made in writing. Upgrades will be effective) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 522.7086614173227872 Td
-(Upgrades will be effective immediately unless otherwise requested. Requests for) Tj
+56.6929133858267775 607.7480314960629357 Td
+(immediately unless otherwise requested. Requests for downgrades must be submitted by the last day) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 508.5354330708661337 Td
-(downgrades must be submitted by the last day of the month for the downgrade to be) Tj
+56.6929133858267775 593.5748031496062822 Td
+(of the month for the downgrade to be effective for the following month. Primary Member's signature is) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 494.3622047244094233 Td
-(effective for the following month. Primary Member's signature is required for all) Tj
+56.6929133858267775 579.401574803149515 Td
+(required for all changes. Proof of eligibility/residency to upgrade/add members is required.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 480.1889763779527129 Td
-(changes. Proof of eligibility/residency to upgrade/add members is required.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 451.842519685039349 Td
+56.6929133858267775 551.0551181102362079 Td
 (3. CLUB'S RIGHT OF CANCELLATION) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 536.8818897637795544 Td
+(Management of CAC may suspend or cancel the rights, privileges or membership of any Member) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 522.7086614173227872 Td
+(whose actions are detrimental to the facility or do not comply with the rules and regulations of the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 508.5354330708661337 Td
+(facility upon any failure of a Member to make payment to CAC of all amounts due from the Member) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 494.3622047244094233 Td
+(within sixty \(60\) days after billed. CAC has the option of declaring any other indebtedness of the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 480.1889763779527129 Td
+(Member to CAC immediately due and payable, without notice or demand. The Member agrees to pay) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 466.0157480314960026 Td
+(CAC a reasonable attorney's fee, court costs and all other expenses incurred by CAC in making the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 451.842519685039349 Td
+(collection. All outstanding amounts not paid when due shall accumulate interest at the rate of 1.5% per) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 437.6692913385826387 Td
-(Management of NMSW may suspend or cancel the rights, privileges or membership) Tj
+(month.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 423.4960629921259283 Td
-(of any Member whose actions are detrimental to the facility or do not comply with the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 409.3228346456692748 Td
-(rules and regulations of the facility upon any failure of a Member to make payment to) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 395.1496062992125644 Td
-(NMSW of all amounts due from the Member within sixty \(60\) days after billed. NMSW) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 380.976377952755854 Td
-(has the option of declaring any other indebtedness of the Member to NMSW) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 366.8031496062991437 Td
-(immediately due and payable, without notice or demand. The Member agrees to pay) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 352.6299212598424901 Td
-(NMSW a reasonable attorney's fee, court costs and all other expenses incurred by) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 338.4566929133857798 Td
-(NMSW in making the collection. All outstanding amounts not paid when due shall) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 324.2834645669290694 Td
-(accumulate interest at the rate of 1.5% per month.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 295.9370078740157055 Td
 (4. TERMINATION/RESIGNATION RIGHTS) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 281.7637795275589951 Td
-(In addition to the Cancellation Right set forth on this agreement, Member has the) Tj
+56.6929133858267775 395.1496062992125644 Td
+(In addition to the Cancellation Right set forth on this agreement, Member has the following rights to) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 267.5905511811023416 Td
-(following rights to terminate:) Tj
+56.6929133858267775 380.976377952755854 Td
+(terminate:) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 239.2440944881889209 Td
+85.0393700787401627 352.6299212598424901 Td
 (A. RESIGNATION POLICY) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 338.4566929133857798 Td
+(A month-to-month membership may be cancelled by providing at least one \(1\) month's written) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 324.2834645669290694 Td
+(notice. Cancellation shall be effective on the 1st of the month that is at least one \(1\) month after) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 310.1102362204724159 Td
+(the date the notice is delivered. Notice can be provided by first class mail \(Certified with Return) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 295.9370078740157055 Td
+(Receipt Recommended\), personal delivery of cancellation form at the club \(Obtaining a copy) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 281.7637795275589951 Td
+(from Club Personnel Recommended\), and contact with the club to obtain the current, digital form) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 267.5905511811023416 Td
+(of cancellation. Concurrently with the delivery of written notice, Member must pay the club any) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 253.4173228346455744 Td
+(amounts due on the account as of the cancellation date and on or before the cancellation date) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 239.2440944881889209 Td
+(member must return all membership cards \(if applicable\). Those who have signed on an) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 225.0708661417322674 Td
-(A month-to-month membership may be cancelled by providing at least one \(1\)) Tj
+(Extended Plan agreement are subject to the terms of their agreement and are responsible for) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 210.8976377952755001 Td
-(month's written notice. Cancellation shall be effective on the 1st of the month) Tj
+(the balance of remaining dues. All memberships are non-refundable, non-transferable,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 196.7244094488188466 Td
-(that is at least one \(1\) month after the date the notice is delivered. Notice can be) Tj
+(non-assignable and non-proprietary.) Tj
 ET
 BT
-/F1 12 Tf
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 168.3779527559054259 Td
+(INITIAL:) Tj
+ET
+BT
+/F15 12 Tf
 13.7999999999999989 TL
 0. g
-85.0393700787401627 182.5511811023621931 Td
-(provided by first class mail \(Certified with Return Receipt Recommended\),) Tj
+98.962204724409446 168.3779527559054259 Td
+<00ae010c> Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 168.3779527559054259 Td
-(personal delivery of cancellation form at the club \(Obtaining a copy from Club) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 154.2047244094487723 Td
-(Personnel Recommended\), and contact with the club to obtain the current,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 140.0314960629920051 Td
-(digital form of cancellation. Concurrently with the delivery of written notice,) Tj
+(B. DEATH OR DISABILITY) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 125.8582677165353516 Td
-(Member must pay the club any amounts due on the account as of the) Tj
+(The contract may be cancelled in the event of member's death or total disability during the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 111.6850393700786981 Td
-(cancellation date and on or before the cancellation date member must return all) Tj
+(membership term. Total disability means a condition which has existed or will exist for more than) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 97.5118110236219309 Td
-(membership cards. Those who have signed on an Extended Plan agreement) Tj
+(six \(6\) months and which will prevent Member from using the club. In order to establish death,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 83.3385826771652773 Td
-(are subject to the terms of their agreement and are responsible for the balance) Tj
+(the member's estate must furnish to the club a death certificate. In order to establish disability,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 69.1653543307086238 Td
-(of remaining dues. All memberships are non-refundable, non-transferable,) Tj
+(Member must furnish the club certification of the disability by a licensed physician whose) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 54.9921259842518566 Td
-(non-assignable and non-proprietary.) Tj
+(diagnosis or treatment is within his scope of practice. Cancellation will be effective upon) Tj
 ET
 BT
 /F1 8 Tf
@@ -1918,318 +1948,290 @@ endobj
 endobj
 14 0 obj
 <<
-/Length 7165
+/Length 6193
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 721.133858267716505 Td
-(INITIAL:) Tj
+85.0393700787401627 735.3070866141732722 Td
+(establishment of death or disability according to these provisions. In the event that Member has) Tj
 ET
 BT
-/F15 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-106.2822047244094534 721.133858267716505 Td
-<00ae010c> Tj
+85.0393700787401627 721.133858267716505 Td
+(paid membership fees in advance, the club shall be entitled to retain an amount equal to the) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 706.9606299212598515 Td
+(amount computed by dividing the total cost of the membership by the total number of months) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 692.7874015748031979 Td
-(B. DEATH OR DISABILITY) Tj
+(under the membership and multiplying the result by the number of months expired under the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 678.6141732283464307 Td
-(The contract may be cancelled in the event of member's death or total disability) Tj
+(membership term. As to membership fees paid monthly, dues will be refunded for the month in) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 664.4409448818897772 Td
-(during the membership term. Total disability means a condition which has) Tj
+(which written notification is received of the death or disability and the proper documentation) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 85.0393700787401627 650.26771653543301 Td
-(existed or will exist for more than six \(6\) months and which will prevent Member) Tj
+(outlined above has been provided.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 636.0944881889763565 Td
-(from using the club. In order to establish death, the member's estate must) Tj
+56.6929133858267775 621.9212598425197029 Td
+(5. MEMBERSHIP ENTRY) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 621.9212598425197029 Td
-(furnish to the club a death certificate. In order to establish disability, Member) Tj
+56.6929133858267775 607.7480314960629357 Td
+(I understand cards and/or Club App with proper check-in credentials are mandatory and must be) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 607.7480314960629357 Td
-(must furnish the club certification of the disability by a licensed physician whose) Tj
+56.6929133858267775 593.5748031496062822 Td
+(presented upon entering CAC. These forms of entry are not transferable to another person. There will) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 593.5748031496062822 Td
-(diagnosis or treatment is within his scope of practice. Cancellation will be) Tj
+56.6929133858267775 579.401574803149515 Td
+(be a replacement fee for each lost card. I acknowledge that I am responsible for all charges incurred) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 579.401574803149515 Td
-(effective upon establishment of death or disability according to these provisions.) Tj
+56.6929133858267775 565.2283464566928615 Td
+(on my membership card.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 565.2283464566928615 Td
-(In the event that Member has paid membership fees in advance, the club shall) Tj
+56.6929133858267775 536.8818897637795544 Td
+(6. HOURS OF OPERATION) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 551.0551181102362079 Td
-(be entitled to retain an amount equal to the amount computed by dividing the) Tj
+56.6929133858267775 522.7086614173227872 Td
+(Operation schedules may vary and are subject to change. Schedule of hours of operation and any) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 536.8818897637795544 Td
-(total cost of the membership by the total number of months under the) Tj
+56.6929133858267775 508.5354330708661337 Td
+(changes will be posted in CAC.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 522.7086614173227872 Td
-(membership and multiplying the result by the number of months expired under) Tj
+56.6929133858267775 480.1889763779527129 Td
+(7. LEAVE OF ABSENCE POLICY) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 508.5354330708661337 Td
-(the membership term. As to membership fees paid monthly, dues will be) Tj
+56.6929133858267775 466.0157480314960026 Td
+(This Membership may be put on a Leave of Absence \(LOA\). LOA requests must be in writing and) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 494.3622047244094233 Td
-(refunded for the month in which written notification is received of the death or) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 480.1889763779527129 Td
-(disability and the proper documentation outlined above has been provided.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 451.842519685039349 Td
-(5. MEMBERSHIP POLICY) Tj
+(submitted by the last day of the month for the LOA to be effective the following month. LOA must state) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 437.6692913385826387 Td
-(This membership contract is in force monthly upon payment of dues and other) Tj
+(the leave and return date. There is a monthly charge for accounts in LOA \(exceptions for medical) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 423.4960629921259283 Td
-(account charges. By submitting this application, the member acknowledges that) Tj
+(LOAs may be approved for no charge with proper medical documentation\). There will be no retroaction) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 409.3228346456692748 Td
-(NMSW reserves the right to refuse membership, or to terminate this agreement at) Tj
+(or partial month adjustments. A medical LOA must be accompanied by a doctor's note. If member) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 395.1496062992125644 Td
-(any time without notice. Member agrees to abide by the Corporate Member) Tj
+(chooses to cancel their membership while on a LOA, the membership is reinstated, full dues will be) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 380.976377952755854 Td
-(Regulations and by NMSW Membership Policies as they exist or may be amended) Tj
+(charged for the final month of membership and the cancellation policy takes effect. An LOA extends) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 366.8031496062991437 Td
-(from time-to-time.) Tj
+(any memberships in an Extended Plan by the number of months the membership is in a LOA status.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 338.4566929133857798 Td
-(Furthermore, member understands that should member's account balance become) Tj
+(8. PERSONAL TRAINING) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 324.2834645669290694 Td
-(more than 60-days past due, NMSW may cancel the membership at its sole) Tj
+(Personal trainers not employed by CAC are not allowed to train or consult in any part of the clubs due) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 310.1102362204724159 Td
-(discretion. If the collection process is commenced by NMSW for unpaid amounts,) Tj
+(to CAC's interest in ensuring the accuracy of information relayed, as well as to reduce the potential for) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 295.9370078740157055 Td
-(member agrees to pay collection costs, including attorney fees should they be) Tj
+(injury.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 281.7637795275589951 Td
-(incurred. Member recognizes the inherent risks of participating in an exercise) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 267.5905511811023416 Td
-(program and hereby holds NMSW harmless from any and all injuries member, and/or) Tj
+(9. EMERGENCY MEDICAL AID) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 253.4173228346455744 Td
-(member's family might incur in connection with member's membership activities at) Tj
+(CAC reserves the right to call emergency medical aid for an injured Member or guest and said Member) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 239.2440944881889209 Td
-(NMSW. This is our entire agreement; no verbal statements may alter or change its) Tj
+(or guest accepts responsibility for any financial obligations arising from such emergency medical aid or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 225.0708661417322674 Td
-(provisions. Except as expressly provided in this Membership Agreement, no portion of) Tj
+(transportation to a medical facility.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 210.8976377952755001 Td
-(the initial fee or monthly membership dues is refundable, regardless of whether) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 196.7244094488188466 Td
-(member attends or uses, or is able to attend or use, the facilities or programs of the) Tj
+(10. AMENDING OF RULES) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 182.5511811023621931 Td
-(club.) Tj
+(I understand CAC reserves the right to amend or add to these conditions and to adopt new conditions) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 154.2047244094487723 Td
-(6. MEMBERSHIP ENTRY) Tj
+56.6929133858267775 168.3779527559054259 Td
+(as it may deem necessary for the proper management of the clubs and the business.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 140.0314960629920051 Td
-(I understand cards and/or Club App with proper check-in credentials are mandatory) Tj
+(11. UNAVAILABILITY OF FACILITY OR SERVICES) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 125.8582677165353516 Td
-(and must be presented prior to entering NMSW. These forms of entry are not) Tj
+(I agree to accept the fact that a particular facility or service in the premises may be unavailable at any) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 111.6850393700786981 Td
-(transferable to another person. There will be a replacement fee for each lost card. I) Tj
+(particular time due to mechanical breakdown, fire, act of God, condemnation, loss of lease,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 97.5118110236219309 Td
-(acknowledge that I am responsible for all charges incurred on my membership card.) Tj
+(catastrophe or any other reason. Further, I agree not to hold CAC responsible or liable for such) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 69.1653543307086238 Td
-(7. HOURS OF OPERATION) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 54.9921259842518566 Td
-(Operation schedules may vary and are subject to change. Schedule of hours of) Tj
+56.6929133858267775 83.3385826771652773 Td
+(occurrences.) Tj
 ET
 BT
 /F1 8 Tf
@@ -2250,311 +2252,318 @@ endobj
 endobj
 16 0 obj
 <<
-/Length 7154
+/Length 7484
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 735.3070866141732722 Td
-(operation and any changes will be posted in NMSW.) Tj
+(12. HEALTH WARRANTY) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 721.133858267716505 Td
+(I warrant and represent that I, any family member, ward or guest \(each, a "Guest"\) who uses any CAC) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 706.9606299212598515 Td
-(8. LEAVE OF ABSENCE POLICY) Tj
+(facility has no disability, impairment or illness preventing such person from engaging in active or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 692.7874015748031979 Td
-(This Membership may be put on a Leave of Absence \(LOA\). LOA requests must be in) Tj
+(passive exercise or that will be detrimental or inimical to such person's health, safety or physical) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 678.6141732283464307 Td
-(writing and submitted by the last day of the month for the LOA to be effective the) Tj
+(condition. I acknowledge and agree that: \(1\) CAC will rely on the foregoing warranty in issuing my) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 664.4409448818897772 Td
-(following month. LOA must state the leave and return date. There is a monthly charge) Tj
+(membership, \(2\) CAC may perform a fitness assessment or similar testing to establish my or my) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 650.26771653543301 Td
-(for accounts in LOA \(exceptions for medical LOAs may be approved for no charge) Tj
+(Guests' initial physical statistics, \(3\) if any fitness or similar testing is performed by CAC, it is solely for) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 636.0944881889763565 Td
-(with proper medical documentation\). There will be no retroaction or partial month) Tj
+(the purpose of providing comparative data with which I or my Guests may chart progress in a program) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 621.9212598425197029 Td
-(adjustments. A medical LOA must be accompanied by a doctor's note. If member) Tj
+(and is not for any diagnostic purposes whatsoever, and \(4\) CAC shall not be subject to any claim or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 607.7480314960629357 Td
-(chooses to cancel their membership while on a LOA, the membership is reinstated,) Tj
+(demand whatsoever on account of CAC's evaluation or interpretation of such fitness assessment or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 593.5748031496062822 Td
-(full dues will be charged for the final month of membership and the cancellation policy) Tj
+(similar testing. I and my Guests are responsible for understanding our respective medical history and) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 579.401574803149515 Td
-(takes effect. An LOA extends any memberships in an Extended Plan by the number) Tj
+(should consult with a physician prior to engaging in exercise or continuation of exercise if a medical) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 565.2283464566928615 Td
-(of months the membership is in a LOA status.) Tj
+(condition appears to be developing.) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 536.8818897637795544 Td
-(9. PERSONAL TRAINING) Tj
+(13. DAMAGE TO FACILITIES) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 522.7086614173227872 Td
-(Personal trainers not employed by NMSW are not allowed to train or consult in any) Tj
+(I agree to pay for any damage that I, my family or my Guests may cause this club's facilities through) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 508.5354330708661337 Td
-(part of the clubs due to NMSW's interest in ensuring the accuracy of information) Tj
+(careless or negligent use thereof.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 494.3622047244094233 Td
-(relayed, as well as to reduce the potential for injury.) Tj
+56.6929133858267775 480.1889763779527129 Td
+(14.        WAIVER AND RELEASE OF THEFT/PROPERTY DAMAGE ) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 466.0157480314960026 Td
-(10. EMERGENCY MEDICAL AID) Tj
+(I hereby acknowledge and recognize that I am responsible to protect against theft or damage to any of) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 451.842519685039349 Td
-(NMSW reserves the right to call emergency medical aid for an injured Member or) Tj
+(my or my Guests' personal property while using the CAC's facilities and that CAC has advised me not) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 437.6692913385826387 Td
-(guest and said Member or guest accepts responsibility for any financial obligations) Tj
+(to bring any valuables to CAC' facilities. I waive and release CAC from any and all claims, damages, or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 423.4960629921259283 Td
-(arising from such emergency medical aid or transportation to a medical facility.) Tj
+(responsibility relating to the theft of or damage to my or my Guests' personal property at CAC' facilities,) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 409.3228346456692748 Td
+(including without limitation, any belongings left by me in a locker, the locker room, or other CAC) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 395.1496062992125644 Td
-(11. AMENDING OF RULES) Tj
+(facilities, or theft or damage to any automobiles or personal property in the club's parking lot.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 380.976377952755854 Td
-(I understand NMSW reserves the right to amend or add to these conditions and to) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 366.8031496062991437 Td
-(adopt new conditions as it may deem necessary for the proper management of the) Tj
+(15.        WAIVER AND RELEASE OF PERSONAL INJURY ) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 352.6299212598424901 Td
-(clubs and the business.) Tj
+(I recognize, acknowledge, and agree that athletic activities and the use of the Club may result in) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 338.4566929133857798 Td
+(personal injuries, including serious bodily injury or death. By accepting this agreement and in using the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 324.2834645669290694 Td
-(12. UNAVAILABILITY OF FACILITY OR SERVICES) Tj
+(CAC's facilities, I assume all risks of injuries that I or my minor children may suffer and all) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 310.1102362204724159 Td
-(I agree to accept the fact that a particular facility or service in the premises may be) Tj
+(responsibilities associated with the use of the Club's athletic facilities, including any athletic activities,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 295.9370078740157055 Td
-(unavailable at any particular time due to mechanical breakdown, fire, act of God,) Tj
+(showers, steam rooms, or other Club usage. I agree, waive, and release CAC, its owners, managers,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 281.7637795275589951 Td
-(condemnation, loss of lease, catastrophe or any other reason. Further, I agree not to) Tj
+(and any of their subsidiaries, assigns, successors, attorneys, and insurers \(the "CAC Parties"\) from) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 267.5905511811023416 Td
-(hold NMSW responsible or liable for such occurrences.) Tj
+(any and all claims, damages, liabilities, expenses, and costs arising out of, or relating to \(a\) the) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 253.4173228346455744 Td
+(negligence of CAC, its owners, managers or employees, \(b\) any another member's, guest's or invitee's) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 239.2440944881889209 Td
-(13. HEALTH WARRANTY) Tj
+(conduct, \(c\) the condition of CAC's facilities, or \(d\) my or my Guests' use of CAC's facilities and) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 225.0708661417322674 Td
-(I warrant and represent that I, any family member, ward or guest \(each, a "Guest"\)) Tj
+(activities, including without limitation, my or my Guests' use of CAC's parking lot, athletic facilities,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 210.8976377952755001 Td
-(who uses any NMSW facility has no disability, impairment or illness preventing such) Tj
+(athletic equipment, pool, sauna, steam room, showers, or any other facilities and activities associated) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 196.7244094488188466 Td
-(person from engaging in active or passive exercise or that will be detrimental or) Tj
+(with CAC. Further, I agree to indemnify and defend the CAC Parties against any and all claims,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 182.5511811023621931 Td
-(inimical to such person's health, safety or physical condition. I acknowledge and) Tj
+(damages, costs, expenses, arising from my and my Guests or invitees use of CAC's facilities.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 168.3779527559054259 Td
-(agree that: \(1\) NMSW will rely on the foregoing warranty in issuing my membership,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 154.2047244094487723 Td
-(\(2\) NMSW may perform a fitness assessment or similar testing to establish my or my) Tj
+(16. WAIVER AND RELEASE OF ELECTRONIC MEDIA) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 140.0314960629920051 Td
-(Guests' initial physical statistics, \(3\) if any fitness or similar testing is performed by) Tj
+(I recognize, acknowledge and grant permission for Starmark Holdings, LLC, its affiliates, subsidiaries,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 125.8582677165353516 Td
-(NMSW, it is solely for the purpose of providing comparative data with which I or my) Tj
+(employees, successors and/or anyone acting with its authority, to take and use still photographs,) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 111.6850393700786981 Td
-(Guests may chart progress in a program and is not for any diagnostic purposes) Tj
+(motion picture, video, sound recordings and/or testimonials of me and/or any family member, ward or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 97.5118110236219309 Td
-(whatsoever, and \(4\) NMSW shall not be subject to any claim or demand whatsoever) Tj
+(guest.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 83.3385826771652773 Td
-(on account of NMSW's evaluation or interpretation of such fitness assessment or) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 69.1653543307086238 Td
-(similar testing. I and my Guests are responsible for understanding our respective) Tj
+(I hereby waive any right to inspect or approve the photographs, electronic matter, and/or finished) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 54.9921259842518566 Td
-(medical history and should consult with a physician prior to engaging in exercise or) Tj
+(products that may be used in conjunction with them now or in the future. I hereby grant all right, title) Tj
 ET
 BT
 /F1 8 Tf
@@ -2575,311 +2584,325 @@ endobj
 endobj
 18 0 obj
 <<
-/Length 7067
+/Length 6831
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 735.3070866141732722 Td
-(continuation of exercise if a medical condition appears to be developing.) Tj
+(and interest I may now have in the photographs, electronic matter, and/or finished products to) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 721.133858267716505 Td
+(Starmark Holdings, LLC and/or anyone acting with its authority, and hereby waive any right to royalties) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 706.9606299212598515 Td
-(14. DAMAGE TO FACILITIES) Tj
+(or other compensation arising from or related to the use of the photographs, electronic matter, and/or) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
 56.6929133858267775 692.7874015748031979 Td
-(I agree to pay for any damage that I, my family or my Guests may cause this club's) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 678.6141732283464307 Td
-(facilities through careless or negligent use thereof.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 650.26771653543301 Td
-(15. THEFT OR DAMAGE TO PERSONAL PROPERTY) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 636.0944881889763565 Td
-(I acknowledge that NMSW will not accept responsibility for theft, loss or damage to) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 621.9212598425197029 Td
-(personal property left in a locker or in NMSW or for theft, loss or damage to) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 607.7480314960629357 Td
-(automobiles or personal property left in NMSW parking lot. NMSW suggests that) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 593.5748031496062822 Td
-(members do not bring valuables on NMSW premises. Signs are posted throughout) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 579.401574803149515 Td
-(the club and are strictly enforced.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 551.0551181102362079 Td
-(16. RELEASE FROM LIABILITY) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 536.8818897637795544 Td
-(I agree, in attending and using the facilities and equipment therein, that I do so at my) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 522.7086614173227872 Td
-(own risk. NMSW shall not be liable for any damages arising from personal injuries) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 508.5354330708661337 Td
-(sustained by me and/or my guest\(s\) in, or about the premises. I assume full) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 494.3622047244094233 Td
-(responsibility for any injuries or damages which may occur to me in, on or about the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 480.1889763779527129 Td
-(premises, and I do hereby fully and forever release and discharge NMSW and all) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 466.0157480314960026 Td
-(associated owners, employees, and agents from any and all claims, demands,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 451.842519685039349 Td
-(damages, rights of action or causes of action present or future, whether the same be) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 437.6692913385826387 Td
-(known or unknown, anticipated or unanticipated, resulting from or arising out of my) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 423.4960629921259283 Td
-(use or intended use of the said facilities and equipment thereof.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 395.1496062992125644 Td
-(17. WAIVER AND RELEASE OF ELECTRONIC MEDIA) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 380.976377952755854 Td
-(I recognize, acknowledge and grant permission for Starmark Holdings, LLC, its) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 366.8031496062991437 Td
-(affiliates, subsidiaries, employees, successors and/or anyone acting with its authority,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 352.6299212598424901 Td
-(to take and use still photographs, motion picture, video, sound recordings and/or) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 338.4566929133857798 Td
-(testimonials of me and/or any family member, ward or guest.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 310.1102362204724159 Td
-(I hereby waive any right to inspect or approve the photographs, electronic matter,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 295.9370078740157055 Td
-(and/or finished products that may be used in conjunction with them now or in the) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 281.7637795275589951 Td
-(future. I hereby grant all right, title and interest I may now have in the photographs,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 267.5905511811023416 Td
-(electronic matter, and/or finished products to Starmark Holdings, LLC and/or anyone) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 253.4173228346455744 Td
-(acting with its authority, and hereby waive any right to royalties or other compensation) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 239.2440944881889209 Td
-(arising from or related to the use of the photographs, electronic matter, and/or) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 225.0708661417322674 Td
 (finished matter.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 196.7244094488188466 Td
-(I hereby consent to receive future calls, text messages, and/or short message service) Tj
+56.6929133858267775 664.4409448818897772 Td
+(I hereby consent to receive future calls, text messages, and/or short message service \("SMS"\) calls) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 182.5511811023621931 Td
-(\("SMS"\) calls \(collectively, "Calls"\) that deliver prerecorded or prewritten messages by) Tj
+56.6929133858267775 650.26771653543301 Td
+(\(collectively, "Calls"\) that deliver prerecorded or prewritten messages by or on behalf of Wellbridge to) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 168.3779527559054259 Td
-(or on behalf of Wellbridge to me. Providing consent to receive such Calls is not a) Tj
+56.6929133858267775 636.0944881889763565 Td
+(me. Providing consent to receive such Calls is not a condition of purchasing any goods or services) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 154.2047244094487723 Td
-(condition of purchasing any goods or services from Wellbridge. I understand that I) Tj
+56.6929133858267775 621.9212598425197029 Td
+(from Wellbridge. I understand that I may revoke this consent by following the "opt-out" procedures) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 140.0314960629920051 Td
-(may revoke this consent by following the "opt-out" procedures presented upon) Tj
+56.6929133858267775 607.7480314960629357 Td
+(presented upon receiving a Call.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 125.8582677165353516 Td
-(receiving a Call.) Tj
+56.6929133858267775 579.401574803149515 Td
+(17. CORPORATE MEMBERS REGULATIONS) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-56.6929133858267775 97.5118110236219309 Td
-(18. CORPORATE MEMBERS REGULATIONS) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 83.3385826771652773 Td
+85.0393700787401627 565.2283464566928615 Td
 (1.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 83.3385826771652773 Td
-(Corporate members must be a W-2 paid employee or associate of a firm or) Tj
+96.3779527559055254 565.2283464566928615 Td
+(Corporate members must be a W-2 paid employee or associate of a firm or approved) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 69.1653543307086238 Td
-(approved organization that has a corporate membership with NMSW, unless) Tj
+96.3779527559055254 551.0551181102362079 Td
+(organization that has a corporate membership with CAC, unless otherwise agreed to in writing.) Tj
 ET
 BT
-/F1 12 Tf
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 536.8818897637795544 Td
+(CAC must be notified immediately of any change in employment status.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 508.5354330708661337 Td
+(2.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 508.5354330708661337 Td
+(Discounts on monthly dues may change in accordance with the number of employees of the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 494.3622047244094233 Td
+(corporate firm who belong to CAC. I understand I will lose my corporate discount and will be) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 480.1889763779527129 Td
+(readjusted to regular rates if my employer drops below the minimum required number of) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 466.0157480314960026 Td
+(participating employees for them to be eligible in the corporate discount program.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 437.6692913385826387 Td
+(3.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 437.6692913385826387 Td
+(It is the member's responsibility to notify CAC of any change in employment status. I understand) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 423.4960629921259283 Td
+(that I will be assessed appropriate monthly fees should I leave the above) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 409.3228346456692748 Td
+(corporation/organization, or the corporation/organization drops its corporate membership.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+85.0393700787401627 380.976377952755854 Td
+(4.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+96.3779527559055254 380.976377952755854 Td
+(Proof of employment must be provided to obtain the corporate discount.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 352.6299212598424901 Td
+(INITIAL:) Tj
+ET
+BT
+/F15 12 Tf
 13.7999999999999989 TL
 0. g
-96.3779527559055254 54.9921259842518566 Td
-(otherwise agreed to in writing. NMSW must be notified immediately of any) Tj
+98.962204724409446 352.6299212598424901 Td
+<00ae010c> Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 324.2834645669290694 Td
+(18. STUDENT YOUNG PROFESSIONAL \(SYP\) MEMBERSHIPS) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 310.1102362204724159 Td
+(Student/Young Professional \(SYP\) discounted memberships are offered exclusively to members) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 295.9370078740157055 Td
+(between the ages of 19-29. This special discounted rate will be honored through the age of 29. I) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 281.7637795275589951 Td
+(understand that beginning the month after my 30th birthday my monthly dues rate will increase by $10.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 267.5905511811023416 Td
+(Each year thereafter my monthly rate will increase by an additional $10 until my rate reaches the then) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 253.4173228346455744 Td
+(current rate. I also understand that my rate may also change for any other upgrades or downgrades of) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 239.2440944881889209 Td
+(the membership that I may initiate.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 210.8976377952755001 Td
+(Proof of age must be received within 14 days; otherwise your membership will be converted to the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 196.7244094488188466 Td
+(equivalent of one individually priced membership and you will be responsible for the entire billed) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 182.5511811023621931 Td
+(amount. If the documentation is not received by 08/28/2025, your rate will go to $150.00 per month) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 168.3779527559054259 Td
+(until the proper documentation is provided. The club will not issue a dues credit for any portion of the) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 154.2047244094487723 Td
+(additional charges once billed.) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 125.8582677165353516 Td
+(INITIAL:) Tj
+ET
+BT
+/F15 12 Tf
+13.7999999999999989 TL
+0. g
+98.962204724409446 125.8582677165353516 Td
+<00ae010c> Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 97.5118110236219309 Td
+(As used herein, the abbreviation "CAC" means Colorado Athletic Club, its successors, assigns,) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 83.3385826771652773 Td
+(employees, officers, directors, shareholders, and all persons, corporations, partnerships and other) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 69.1653543307086238 Td
+(entities with which it is or may in the future become affiliated. The terms and conditions contained) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0. g
+56.6929133858267775 54.9921259842518566 Td
+(herein, along with the Rules and Regulations, constitute the full agreement between CAC and the) Tj
 ET
 BT
 /F1 8 Tf
@@ -2900,325 +2923,136 @@ endobj
 endobj
 20 0 obj
 <<
-/Length 6899
+/Length 2639
 >>
 stream
 0.5670000000000001 w
 0. G
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 735.3070866141732722 Td
-(change in employment status.) Tj
+56.6929133858267775 735.3070866141732722 Td
+(member, and no oral promises are made a part of it.) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F2 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 706.9606299212598515 Td
-(2.) Tj
+56.6929133858267775 706.9606299212598515 Td
+(19. CORPORATE PROOF) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 706.9606299212598515 Td
-(Discounts on monthly dues may change in accordance with the number of) Tj
+56.6929133858267775 692.7874015748031979 Td
+(Although you were unable to provide corporate proof when beginning your membership, we would like) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 692.7874015748031979 Td
-(employees of the corporate firm who belong to NMSW. I understand I will lose) Tj
+56.6929133858267775 678.6141732283464307 Td
+(to offer you the opportunity to immediately take advantage of your membership.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 678.6141732283464307 Td
-(my corporate discount and will be readjusted to regular rates if my employer) Tj
+56.6929133858267775 650.26771653543301 Td
+(If this proof is not received within 14 days, your membership will be converted to the equivalent of one) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 664.4409448818897772 Td
-(drops below the minimum required number of participating employees for them) Tj
+56.6929133858267775 636.0944881889763565 Td
+(individually priced membership and you will be responsible for the entire billed amount. If the) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 650.26771653543301 Td
-(to be eligible in the corporate discount program.) Tj
+56.6929133858267775 621.9212598425197029 Td
+(documentation is not received by 08/28/2025, your rate will go to $150.00 per month until the proper) Tj
 ET
 BT
-/F2 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-85.0393700787401627 621.9212598425197029 Td
-(3.) Tj
+56.6929133858267775 607.7480314960629357 Td
+(documentation is provided. The club will not issue a dues credit for any portion of the additional) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 621.9212598425197029 Td
-(It is the member's responsibility to notify NMSW of any change in employment) Tj
+56.6929133858267775 593.5748031496062822 Td
+(charges once billed.) Tj
 ET
 BT
-/F1 12 Tf
-13.7999999999999989 TL
+/F1 10 Tf
+11.5 TL
 0. g
-96.3779527559055254 607.7480314960629357 Td
-(status. I understand that I will be assessed appropriate monthly fees should I) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-96.3779527559055254 593.5748031496062822 Td
-(leave the above corporation/organization, or the corporation/organization drops) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-96.3779527559055254 579.401574803149515 Td
-(its corporate membership.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-85.0393700787401627 551.0551181102362079 Td
-(4.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-96.3779527559055254 551.0551181102362079 Td
-(Proof of employment must be provided to obtain the corporate discount.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 522.7086614173227872 Td
+56.6929133858267775 565.2283464566928615 Td
 (INITIAL:) Tj
 ET
 BT
 /F15 12 Tf
 13.7999999999999989 TL
 0. g
-106.2822047244094534 522.7086614173227872 Td
+98.962204724409446 565.2283464566928615 Td
 <00ae010c> Tj
 ET
 BT
 /F2 12 Tf
 13.7999999999999989 TL
 0. g
-56.6929133858267775 494.3622047244094233 Td
-(19. STUDENT YOUNG PROFESSIONAL \(SYP\) MEMBERSHIPS) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 480.1889763779527129 Td
-(Student/Young Professional \(SYP\) discounted memberships are offered exclusively to) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 466.0157480314960026 Td
-(members between the ages of 19-29. This special discounted rate will be honored) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 451.842519685039349 Td
-(through the age of 29. I understand that beginning the month after my 30th birthday) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 437.6692913385826387 Td
-(my monthly dues rate will increase by $10. Each year thereafter my monthly rate will) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 423.4960629921259283 Td
-(increase by an additional $10 until my rate reaches the then current rate. I also) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 409.3228346456692748 Td
-(understand that my rate may also change for any other upgrades or downgrades of) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 395.1496062992125644 Td
-(the membership that I may initiate.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 366.8031496062991437 Td
-(Proof of age must be received within 14 days; otherwise your membership will be) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 352.6299212598424901 Td
-(converted to the equivalent of one individually priced membership and you will be) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 338.4566929133857798 Td
-(responsible for the entire billed amount. If the documentation is not received by) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 324.2834645669290694 Td
-(08/23/2025, your rate will go to $115.00 per month until the proper documentation is) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 310.1102362204724159 Td
-(provided. The club will not issue a dues credit for any portion of the additional charges) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 295.9370078740157055 Td
-(once billed.) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 267.5905511811023416 Td
-(INITIAL:) Tj
-ET
-BT
-/F15 12 Tf
-13.7999999999999989 TL
-0. g
-106.2822047244094534 267.5905511811023416 Td
-<00ae010c> Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 239.2440944881889209 Td
-(As used herein, the abbreviation "NMSW" means New Mexico Sports and Wellness,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 225.0708661417322674 Td
-(its successors, assigns, employees, officers, directors, shareholders, and all persons,) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 210.8976377952755001 Td
-(corporations, partnerships and other entities with which it is or may in the future) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 196.7244094488188466 Td
-(become affiliated. The terms and conditions contained herein, along with the Rules) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 182.5511811023621931 Td
-(and Regulations, constitute the full agreement between NMSW and the member, and) Tj
-ET
-BT
-/F1 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 168.3779527559054259 Td
-(no oral promises are made a part of it.) Tj
-ET
-BT
-/F2 12 Tf
-13.7999999999999989 TL
-0. g
-56.6929133858267775 140.0314960629920051 Td
+56.6929133858267775 536.8818897637795544 Td
 (SIGNATURE) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-56.6929133858267775 120.1889763779527129 Td
+56.6929133858267775 517.0393700787401485 Td
 (By signing below, I acknowledge that I have read and understand this agreement along with the terms and) Tj
-T* (conditions contained in this document and agree to abide by the rules and regulations of New Mexico Sports) Tj
-T* (and Wellness.) Tj
+T* (conditions contained in this document and agree to abide by the rules and regulations of Colorado Athletic) Tj
+T* (Club.) Tj
 ET
 BT
 /F15 22 Tf
 25.2999999999999972 TL
 0. g
-141.7322834645669332 49.3228346456692179 Td
+141.7322834645669332 446.1732283464566535 Td
 <00ae02770371031306b2010c02b8037e038b02b80371> Tj
 ET
-113.3858267716535551 35.149606299212536 m
-283.4645669291338663 35.149606299212536 l
+113.3858267716535551 432. m
+283.4645669291338663 432. l
 S
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-170.0787401574803255 20.9763779527557972 Td
+170.0787401574803255 417.8267716535432896 Td
 (Member Signature) Tj
 ET
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-425.1968503937008563 43.6535433070865793 Td
-(8/5/2025, 10:25:57 PM) Tj
+425.1968503937008563 440.503937007873958 Td
+(8/12/2025, 9:41:43 AM) Tj
 ET
-396.8503937007874356 35.149606299212536 m
-510.2362204724410049 35.149606299212536 l
+396.8503937007874356 432. m
+510.2362204724410049 432. l
 S
 BT
 /F1 10 Tf
 11.5 TL
 0. g
-425.1968503937008563 20.9763779527557972 Td
+425.1968503937008563 417.8267716535432896 Td
 (Date) Tj
 ET
 BT
@@ -4094,7 +3928,7 @@ endobj
 65 0 obj
 <<
 /Producer (jsPDF 3.0.1)
-/CreationDate (D:20250805222557-06'00')
+/CreationDate (D:20250812094143-06'00')
 >>
 endobj
 66 0 obj
@@ -4108,79 +3942,79 @@ endobj
 xref
 0 67
 0000000000 65535 f 
-0000065573 00000 n 
-0000162257 00000 n 
+0000060290 00000 n 
+0000156974 00000 n 
 0000000015 00000 n 
 0000000120 00000 n 
-0000015167 00000 n 
-0000015272 00000 n 
-0000016678 00000 n 
-0000016783 00000 n 
-0000021797 00000 n 
-0000021903 00000 n 
-0000029442 00000 n 
-0000029549 00000 n 
-0000036648 00000 n 
-0000036755 00000 n 
-0000043973 00000 n 
-0000044080 00000 n 
-0000051287 00000 n 
-0000051394 00000 n 
-0000058514 00000 n 
-0000058621 00000 n 
-0000065683 00000 n 
-0000065809 00000 n 
-0000065940 00000 n 
-0000066074 00000 n 
-0000066212 00000 n 
-0000066336 00000 n 
-0000066465 00000 n 
-0000066597 00000 n 
-0000066733 00000 n 
-0000066861 00000 n 
-0000066988 00000 n 
-0000067117 00000 n 
-0000067250 00000 n 
-0000067352 00000 n 
-0000067448 00000 n 
-0000113661 00000 n 
-0000114171 00000 n 
-0000114362 00000 n 
-0000114669 00000 n 
-0000114807 00000 n 
-0000118774 00000 n 
-0000119142 00000 n 
-0000119333 00000 n 
-0000119550 00000 n 
-0000119689 00000 n 
-0000132990 00000 n 
-0000133358 00000 n 
-0000133545 00000 n 
-0000133758 00000 n 
-0000133893 00000 n 
-0000140276 00000 n 
-0000140644 00000 n 
-0000140840 00000 n 
-0000141060 00000 n 
-0000141202 00000 n 
-0000155955 00000 n 
-0000156323 00000 n 
-0000156518 00000 n 
-0000156737 00000 n 
-0000156878 00000 n 
-0000161333 00000 n 
-0000161701 00000 n 
-0000161895 00000 n 
-0000162115 00000 n 
-0000162582 00000 n 
-0000162668 00000 n 
+0000015808 00000 n 
+0000015913 00000 n 
+0000017359 00000 n 
+0000017464 00000 n 
+0000022431 00000 n 
+0000022537 00000 n 
+0000029675 00000 n 
+0000029782 00000 n 
+0000036503 00000 n 
+0000036610 00000 n 
+0000042856 00000 n 
+0000042963 00000 n 
+0000050500 00000 n 
+0000050607 00000 n 
+0000057491 00000 n 
+0000057598 00000 n 
+0000060400 00000 n 
+0000060526 00000 n 
+0000060657 00000 n 
+0000060791 00000 n 
+0000060929 00000 n 
+0000061053 00000 n 
+0000061182 00000 n 
+0000061314 00000 n 
+0000061450 00000 n 
+0000061578 00000 n 
+0000061705 00000 n 
+0000061834 00000 n 
+0000061967 00000 n 
+0000062069 00000 n 
+0000062165 00000 n 
+0000108378 00000 n 
+0000108888 00000 n 
+0000109079 00000 n 
+0000109386 00000 n 
+0000109524 00000 n 
+0000113491 00000 n 
+0000113859 00000 n 
+0000114050 00000 n 
+0000114267 00000 n 
+0000114406 00000 n 
+0000127707 00000 n 
+0000128075 00000 n 
+0000128262 00000 n 
+0000128475 00000 n 
+0000128610 00000 n 
+0000134993 00000 n 
+0000135361 00000 n 
+0000135557 00000 n 
+0000135777 00000 n 
+0000135919 00000 n 
+0000150672 00000 n 
+0000151040 00000 n 
+0000151235 00000 n 
+0000151454 00000 n 
+0000151595 00000 n 
+0000156050 00000 n 
+0000156418 00000 n 
+0000156612 00000 n 
+0000156832 00000 n 
+0000157299 00000 n 
+0000157385 00000 n 
 trailer
 <<
 /Size 67
 /Root 66 0 R
 /Info 65 0 R
-/ID [ <5ABF476E8E8DDA006C54C983CEA74CA3> <5ABF476E8E8DDA006C54C983CEA74CA3> ]
+/ID [ <AD05740080A59F1A998C246CDE19D9FD> <AD05740080A59F1A998C246CDE19D9FD> ]
 >>
 startxref
-162772
+157489
 %%EOF

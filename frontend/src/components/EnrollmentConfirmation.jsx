@@ -79,23 +79,36 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
   
   useEffect(() => {
     const saveContractAndSendEmail = async () => {
+      console.log('EnrollmentConfirmation - saveContractAndSendEmail called with:', {
+        hasFormData: !!formData,
+        membershipNumber,
+        hasSaved: hasSavedRef.current
+      });
+      
       if (!formData || !membershipNumber || hasSavedRef.current) return;
       hasSavedRef.current = true;
 
       try {
-        // Generate contract PDF for Converge payments (New Mexico)
-        // FluidPay payments (Colorado/Denver) already have contract PDF generated
+        // Generate contract PDF for all payments (both Converge and FluidPay)
         let contractPDFArray = null;
-        if (paymentResponse?.processor === 'CONVERGE' && signatureData && initialedSections) {
+        if (signatureData && initialedSections) {
           try {
-            console.log('Generating contract PDF for Converge payment');
+            console.log('Generating contract PDF for payment processor:', paymentResponse?.processor);
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
+            const pdfFormData = {
+              ...formData,
+              membershipId: membershipNumber // Add membership ID to formData
+            };
+            
+            console.log('PDF generation - formData with membershipId:', {
+              membershipId: pdfFormData.membershipId,
+              membershipNumber,
+              hasMembershipId: !!pdfFormData.membershipId
+            });
+            
             const pdfBuffer = await generatePDFBuffer(
-              {
-                ...formData,
-                membershipId: membershipNumber // Add membership ID to formData
-              },
+              pdfFormData,
               signatureData,
               formatTimestamp(),
               initialedSections,
@@ -104,12 +117,34 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             );
             
             contractPDFArray = new Uint8Array(pdfBuffer);
-            console.log('Contract PDF generated for Converge payment:', {
+            console.log('Contract PDF generated for payment:', {
               size: contractPDFArray.length,
-              clubState: selectedClub?.state
+              clubState: selectedClub?.state,
+              processor: paymentResponse?.processor
             });
+            
+            // Save the contract PDF to the server
+            try {
+              const saveResponse = await fetch('/api/save-contract-pdf', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/pdf',
+                  'X-Contract-Id': membershipNumber,
+                  'X-Member-Id': `${formData.firstName}_${formData.lastName}`
+                },
+                body: contractPDFArray,
+              });
+              
+              if (saveResponse.ok) {
+                console.log('Contract PDF saved to server successfully');
+              } else {
+                console.error('Failed to save contract PDF to server');
+              }
+            } catch (saveError) {
+              console.error('Error saving contract PDF to server:', saveError);
+            }
           } catch (pdfError) {
-            console.error('Error generating contract PDF for Converge payment:', pdfError);
+            console.error('Error generating contract PDF for payment:', pdfError);
           }
         }
 

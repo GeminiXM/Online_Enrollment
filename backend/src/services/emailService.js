@@ -62,18 +62,13 @@ class EmailService {
    * Convert membership type codes to readable names
    */
   getMembershipTypeDisplay(membershipType, selectedClub) {
-    // For New Mexico clubs, convert codes to readable names
-    if (selectedClub?.state === "NM") {
-      const membershipTypeMap = {
-        I: "Individual Membership",
-        D: "Dual Membership",
-        F: "Family Membership",
-      };
-      return membershipTypeMap[membershipType] || membershipType;
-    }
-
-    // For Colorado clubs, return as-is (should already be readable)
-    return membershipType;
+    // Convert codes to readable names for all clubs
+    const membershipTypeMap = {
+      I: "Individual Membership",
+      D: "Dual Membership",
+      F: "Family Membership",
+    };
+    return membershipTypeMap[membershipType] || membershipType;
   }
 
   /**
