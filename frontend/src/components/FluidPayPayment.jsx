@@ -259,9 +259,8 @@ const FluidPayPayment = () => {
               // For production, this fallback should either be removed or use environment-specific values
               setProcessorInfo({
                 merchant_id: 'Demo FluidPay Merchant', // PRODUCTION: Your actual FluidPay Merchant ID
-                fluidpay_user_id: 'webuser',           // PRODUCTION: Your actual FluidPay User ID
-                fluidpay_pin: 'DEMO',                  // PRODUCTION: Your actual FluidPay PIN (keep secure)
-                fluidpay_url_process: 'https://api.demo.fluidpay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+                fluidpay_api_key: 'pub_test_demo_key',      // PRODUCTION: Your actual FluidPay Public API Key
+                fluidpay_base_url: 'https://sandbox.fluidpay.com' // PRODUCTION: Use production URL
               });
             }
           } catch (error) {
@@ -270,9 +269,8 @@ const FluidPayPayment = () => {
             // These fallback values should be replaced with environment-specific values
             setProcessorInfo({
               merchant_id: 'Demo FluidPay Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
-              fluidpay_user_id: 'webuser',                      // PRODUCTION: Your actual User ID
-              fluidpay_pin: 'DEMO',                             // PRODUCTION: Your actual PIN (keep secure)
-              fluidpay_url_process: 'https://api.demo.fluidpay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
+              fluidpay_api_key: 'pub_test_fallback_key',        // PRODUCTION: Your actual Public API Key
+              fluidpay_base_url: 'https://sandbox.fluidpay.com' // PRODUCTION: Use production URL
             });
           }
         };
@@ -280,514 +278,265 @@ const FluidPayPayment = () => {
             fetchFluidPayInfo();
   }, [location, navigate, selectedClub]);
   
-  // Function to fetch a transaction token from the backend
-  const fetchTransactionToken = async () => {
-    try {
-      setIsSubmitting(true);
-      setErrorMessage('');
-      
-      console.log('Fetching transaction token with data:', {
-        clubId: formData.club || selectedClub?.id || "001",
-        amount: calculateProratedAmount().toFixed(2),
-        invoiceNumber: `INV-${Date.now()}`,
-        membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
-        customerInfo: customerInfo
-      });
-      
-      // PRODUCTION DATA REQUIRED:
-      // For production, implement a secure backend endpoint that generates a real transaction token
-      // This endpoint should communicate with FluidPay securely, using proper authentication
-      // The token generation should NEVER be done directly in the client-side code
-      const response = await api.getFluidPayToken({
-        clubId: formData.club || selectedClub?.id || "001",
-        amount: calculateProratedAmount().toFixed(2),
-        // PRODUCTION: Generate a real invoice number, potentially from your database/ERP system
-        invoiceNumber: `INV-${Date.now()}`, 
-        membershipId: formData.membershipDetails?.membershipId || "STD-MEMBERSHIP",
-        customerInfo: customerInfo
-      });
-      
-      console.log('Transaction token response:', response);
-      
-      // PRODUCTION: Remove simulation code and implement proper error handling
-      if (!response || !response.success) {
-        throw new Error(response?.message || 'Failed to get transaction token');
-      }
-      
-      console.log('Returning token:', response.ssl_txn_auth_token);
-      return response.ssl_txn_auth_token;
-    } catch (error) {
-      console.error('Error fetching token:', error);
-      setErrorMessage('Unable to start payment process. Please try again later.');
-      setIsSubmitting(false);
-      return null;
-    }
-  };
-  
-  // Demo mode state - true when in demo/simulation mode
-  // PRODUCTION: Remove this demoMode state in production - always use the real integration
-  const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
-  const [iframeUrl, setIframeUrl] = useState(null);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
 
-  // Cleanup event listener on unmount
+  
+  // FluidPay Tokenizer state
+  const [tokenizer, setTokenizer] = useState(null);
+  const [isTokenizerLoaded, setIsTokenizerLoaded] = useState(false);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      window.removeEventListener('message', handleLightboxResponse);
+      // Clean up any event listeners if needed
     };
   }, []);
 
-  // Load the Converge script
+  // Load FluidPay Tokenizer script and initialize when ready
   useEffect(() => {
     // Check if script is already loaded
-    if (document.getElementById('converge-script')) {
+    if (document.getElementById('fluidpay-tokenizer-script')) {
       return;
     }
     
-    // PRODUCTION DATA REQUIRED:
-    // This entire simulation function should be REMOVED for production
-    // Only the actual Converge integration should be used
-    window.simulateConvergeLightbox = function(params) {
-      console.log('DEMO MODE: Simulating Converge Lightbox with params:', params);
-      
-      // Create a simple simulation modal
-      const modal = document.createElement('div');
-      modal.style.position = 'fixed';
-      modal.style.top = '0';
-      modal.style.left = '0';
-      modal.style.width = '100%';
-      modal.style.height = '100%';
-      modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-      modal.style.zIndex = '10000';
-      modal.style.display = 'flex';
-      modal.style.justifyContent = 'center';
-      modal.style.alignItems = 'center';
-      
-      const content = document.createElement('div');
-      content.style.width = '500px';
-      content.style.backgroundColor = 'white';
-      content.style.borderRadius = '8px';
-      content.style.padding = '20px';
-      content.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
-      
-      const header = document.createElement('div');
-      header.style.borderBottom = '1px solid #ddd';
-      header.style.paddingBottom = '10px';
-      header.style.marginBottom = '15px';
-      header.style.display = 'flex';
-      header.style.justifyContent = 'space-between';
-      header.style.alignItems = 'center';
-      
-      const title = document.createElement('h3');
-      title.textContent = 'Demo Converge Payment';
-      title.style.margin = '0';
-      title.style.fontFamily = 'Arial, sans-serif';
-      title.style.color = '#0275d8';
-      
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = '×';
-      closeBtn.style.background = 'none';
-      closeBtn.style.border = 'none';
-      closeBtn.style.fontSize = '24px';
-      closeBtn.style.cursor = 'pointer';
-      closeBtn.style.color = '#666';
-      closeBtn.onclick = function() {
-        document.body.removeChild(modal);
-        
-        // Simulate a canceled payment
-        if (params.onCancel) {
-          params.onCancel();
-        }
-      };
-      
-      header.appendChild(title);
-      header.appendChild(closeBtn);
-      
-      const form = document.createElement('div');
-      form.innerHTML = `
-        <p style="margin-bottom: 20px; color: #666; font-family: Arial, sans-serif;">
-          This is a demonstration of the FluidPay Lightbox payment. In a real implementation, 
-          this would be a secure payment form from FluidPay.
-        </p>
-        <div style="margin-bottom: 15px;">
-          <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">Card Number</label>
-          <input type="text" value="4111 1111 1111 1111" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
-        </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-          <div style="flex: 1;">
-            <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">Expiry</label>
-            <input type="text" value="12/25" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
-          </div>
-          <div style="flex: 1;">
-            <label style="display: block; margin-bottom: 5px; font-family: Arial, sans-serif; font-size: 14px;">CVV</label>
-            <input type="text" value="123" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" readonly>
-          </div>
-        </div>
-      `;
-      
-      const buttons = document.createElement('div');
-      buttons.style.marginTop = '20px';
-      buttons.style.display = 'flex';
-      buttons.style.justifyContent = 'space-between';
-      
-      const cancelBtn = document.createElement('button');
-      cancelBtn.textContent = 'Cancel';
-      cancelBtn.style.padding = '10px 15px';
-      cancelBtn.style.borderRadius = '4px';
-      cancelBtn.style.border = '1px solid #ddd';
-      cancelBtn.style.background = '#f8f9fa';
-      cancelBtn.style.cursor = 'pointer';
-      cancelBtn.onclick = function() {
-        document.body.removeChild(modal);
-        
-        // Simulate a canceled payment
-        if (params.onCancel) {
-          params.onCancel();
-        } else {
-          // Send a simulated message
-          const event = new MessageEvent('message', {
-            data: {
-              ssl_result: '1',
-              ssl_result_message: 'Payment canceled by user'
-            },
-            origin: 'https://api.convergepay.com'
-          });
-          window.dispatchEvent(event);
-        }
-      };
-      
-      const submitBtn = document.createElement('button');
-      submitBtn.textContent = 'Submit Payment';
-      submitBtn.style.padding = '10px 15px';
-      submitBtn.style.borderRadius = '4px';
-      submitBtn.style.border = 'none';
-      submitBtn.style.background = '#0275d8';
-      submitBtn.style.color = 'white';
-      submitBtn.style.cursor = 'pointer';
-      submitBtn.onclick = function() {
-        document.body.removeChild(modal);
-        
-        // Simulate a successful payment
-        setTimeout(() => {
-          // Create a simulated response
-          const event = new MessageEvent('message', {
-            data: {
-              ssl_result: '0',
-              ssl_txn_id: `TXN-${Date.now()}`,
-              ssl_approval_code: 'AUTH12345',
-              ssl_card_number: '411111******1111',
-              ssl_card_type: 'VISA',
-              ssl_exp_date: '1225'
-            },
-            origin: 'https://api.convergepay.com'
-          });
-          window.dispatchEvent(event);
-        }, 1000);
-      };
-      
-      buttons.appendChild(cancelBtn);
-      buttons.appendChild(submitBtn);
-      
-      content.appendChild(header);
-      content.appendChild(form);
-      content.appendChild(buttons);
-      modal.appendChild(content);
-      
-      document.body.appendChild(modal);
+    // Load FluidPay Tokenizer script
+    const script = document.createElement('script');
+    script.id = 'fluidpay-tokenizer-script';
+    
+    // PRODUCTION: Use production URL for live transactions
+    // For production: https://api.fluidpay.com/tokenizer/tokenizer.js
+    // For sandbox: https://sandbox.fluidpay.com/tokenizer/tokenizer.js
+    script.src = 'https://sandbox.fluidpay.com/tokenizer/tokenizer.js';
+    script.async = true;
+    script.onload = () => {
+      console.log('FluidPay Tokenizer script loaded successfully');
+      setIsTokenizerLoaded(true);
+    };
+    script.onerror = () => {
+      console.error('Failed to load FluidPay Tokenizer script');
+      setErrorMessage('Unable to load payment system. Please refresh the page and try again.');
     };
     
-    // Define the global launchFluidPayLightbox function that will either use the real
-    // FluidPay Lightbox or our simulation function
-    window.launchFluidPayLightbox = function(params) {
-      if (window.hostedPayments) {
-        window.hostedPayments.launch(params);
-      } else {
-        // Use our simulation in demo mode
-        window.simulateFluidPayLightbox(params);
+    document.body.appendChild(script);
+    
+    // Clean up on unmount
+    return () => {
+      const scriptElement = document.getElementById('fluidpay-tokenizer-script');
+      if (scriptElement) {
+        document.body.removeChild(scriptElement);
       }
     };
-    
-     // PRODUCTION DATA REQUIRED:
-  // Load the correct FluidPay script based on environment
-  const script = document.createElement('script');
-  script.id = 'fluidpay-script';
-  
-  // PRODUCTION: Change this to production URL
-  // For production: https://api.fluidpay.com/hosted-payments/PayWithFluidPay.js
-  // For demo/testing: https://api.demo.fluidpay.com/hosted-payments/PayWithFluidPay.js
-  script.src = 'https://api.demo.fluidpay.com/hosted-payments/PayWithFluidPay.js';
-  script.async = true;
-  script.onload = () => {
-    console.log('FluidPay PayWithFluidPay script loaded successfully');
-    // setDemoMode(false); // DEMO: Keep in demo mode - uncomment for production
-  };
-  script.onerror = () => {
-    console.warn('Failed to load FluidPay script - using simulation mode instead');
-    setDemoMode(true); // Fallback to simulation
-  };
-  
-  document.body.appendChild(script);
-  
-  // Clean up on unmount
-  return () => {
-    const scriptElement = document.getElementById('fluidpay-script');
-    if (scriptElement) {
-      document.body.removeChild(scriptElement);
+  }, []);
+
+  // Initialize Tokenizer when script is loaded and processor info is available
+  useEffect(() => {
+    if (isTokenizerLoaded && processorInfo && processorInfo.fluidpay_api_key && window.Tokenizer) {
+      console.log('Initializing FluidPay Tokenizer...');
+      console.log('API Key received:', processorInfo.fluidpay_api_key);
+      console.log('API Key starts with pub_:', processorInfo.fluidpay_api_key.startsWith('pub_'));
+      
+      // If API key doesn't have correct format, use fallback
+      if (!processorInfo.fluidpay_api_key.startsWith('pub_')) {
+        console.warn('Invalid API key format, using fallback');
+        setProcessorInfo({
+          ...processorInfo,
+          fluidpay_api_key: 'pub_test_demo_key'
+        });
+        return;
+      }
+      
+      const tokenizerInstance = initializeTokenizer();
+      if (tokenizerInstance) {
+        setTokenizer(tokenizerInstance);
+      }
     }
-  };
-}, []);
+  }, [isTokenizerLoaded, processorInfo]);
   
-// Function to launch the FluidPay Lightbox
-const launchLightbox = async () => {
-  console.log('Launching FluidPay Lightbox...');
+// Function to initialize FluidPay Tokenizer
+const initializeTokenizer = () => {
+  if (!processorInfo || !isTokenizerLoaded || !window.Tokenizer) {
+    console.log('Tokenizer not ready:', { 
+      processorInfo: !!processorInfo, 
+      isTokenizerLoaded, 
+      hasTokenizer: !!window.Tokenizer 
+    });
+    return null;
+  }
+
+  // Validate API key format
+  const apiKey = processorInfo.fluidpay_api_key;
+  if (!apiKey || !apiKey.startsWith('pub_')) {
+    console.error('Invalid FluidPay API key format. API key must start with "pub_"');
+    setErrorMessage('Payment processor configuration error. Please contact support.');
+    setIsSubmitting(false);
+    return null;
+  }
+
+  try {
+    // Create FluidPay Tokenizer instance
+    const tokenizerInstance = new window.Tokenizer({
+      apikey: apiKey, // Public API key from stored procedure
+      container: '#fluidpay-tokenizer-container',
+      amount: calculateProratedAmount().toFixed(2),
+      settings: {
+        payment: {
+          types: ['card'], // Only credit/debit cards for now
+          card: {
+            requireCVV: true,
+            strict_mode: false
+          }
+        },
+        user: {
+          showInline: true,
+          showName: true,
+          showEmail: true,
+          showPhone: true
+        },
+        billing: {
+          show: true,
+          showTitle: true
+        },
+        styles: {
+          'body': {
+            'font-family': 'Arial, sans-serif',
+            'color': '#333'
+          },
+          'input': {
+            'border': '1px solid #ddd',
+            'border-radius': '4px',
+            'padding': '8px 12px',
+            'font-size': '14px'
+          },
+          '.payment .cvv input': {
+            'border': '1px solid #ddd',
+            'padding-left': '6px'
+          }
+        }
+      },
+      submission: (resp) => {
+        console.log('Tokenizer submission response:', resp);
+        
+        if (resp.status === 'success') {
+          // Token generated successfully, now process the payment
+          processPaymentWithToken(resp.token, resp);
+        } else if (resp.status === 'error') {
+          console.error('Tokenizer error:', resp.msg);
+          setErrorMessage('Payment form error: ' + resp.msg);
+          setIsSubmitting(false);
+        } else if (resp.status === 'validation') {
+          console.error('Validation errors:', resp.invalid);
+          setErrorMessage('Please check your payment information and try again.');
+          setIsSubmitting(false);
+        }
+      },
+      onLoad: () => {
+        console.log('FluidPay Tokenizer loaded successfully');
+      },
+      onPaymentChange: (type) => {
+        console.log('Payment type changed to:', type);
+      },
+      validCard: (card) => {
+        console.log('Valid card detected:', card);
+      }
+    });
+
+    setTokenizer(tokenizerInstance);
+    return tokenizerInstance;
+  } catch (error) {
+    console.error('Error initializing FluidPay Tokenizer:', error);
+    setErrorMessage('Unable to initialize payment form. Please refresh and try again.');
+    setIsSubmitting(false);
+    return null;
+  }
+};
+
+// Function to process payment with token
+const processPaymentWithToken = async (token, tokenizerResponse) => {
+  try {
+    console.log('Processing payment with token:', token);
+    
+    // Prepare payment data
+    const paymentData = {
+      clubId: formData.club || selectedClub?.id || "001",
+      amount: calculateProratedAmount().toFixed(2),
+      token: token,
+      customerInfo: {
+        firstName: customerInfo.firstName,
+        lastName: customerInfo.lastName,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+        address: customerInfo.address,
+        city: customerInfo.city,
+        state: customerInfo.state,
+        zipCode: customerInfo.zipCode
+      },
+      // Include user data from tokenizer if available
+      user: tokenizerResponse.user || null,
+      billing: tokenizerResponse.billing || null
+    };
+
+    // Call backend to process the payment
+    const response = await api.processFluidPayPayment(paymentData);
+    
+    if (response && response.success) {
+      console.log('Payment processed successfully:', response);
+      
+      setPaymentResult({
+        success: true,
+        transactionId: response.transactionId,
+        authorizationCode: response.authorizationCode,
+        cardNumber: response.cardNumber,
+        cardType: response.cardType
+      });
+      
+      setPopupType('success');
+      setPopupMessage('Payment successful! Creating your membership, please wait...');
+      setShowResultPopup(true);
+      
+      // Complete enrollment
+      setTimeout(() => {
+        finishEnrollment(response);
+      }, 2000);
+    } else {
+      throw new Error(response?.message || 'Payment processing failed');
+    }
+  } catch (error) {
+    console.error('Error processing payment:', error);
+    setErrorMessage('Payment processing failed: ' + error.message);
+    setIsSubmitting(false);
+    setShowResultPopup(false);
+  }
+};
+
+// Function to launch payment process
+const launchPayment = async () => {
+  console.log('Launching FluidPay payment process...');
   
-  // Get a transaction token from your server
-  const token = await fetchTransactionToken();
-  console.log('Got token:', token);
-  
-  if (!token) {
-    console.log('No token received, returning early');
+  if (!processorInfo) {
+    setErrorMessage('Payment processor information not available. Please try again.');
     return;
   }
   
+  if (!tokenizer) {
+    setErrorMessage('Payment system is still loading. Please wait a moment and try again.');
+    return;
+  }
+  
+  setIsSubmitting(true);
+  setErrorMessage('');
+  
   try {
-    // Payment fields including billing information
-    const paymentFields = {
-      ssl_txn_auth_token: token,
-      ssl_first_name: customerInfo.firstName,
-      ssl_last_name: customerInfo.lastName,
-      ssl_avs_address: customerInfo.address,
-      ssl_city: customerInfo.city,
-      ssl_state: customerInfo.state,
-      ssl_avs_zip: customerInfo.zipCode,
-      ssl_phone: customerInfo.phone,
-      ssl_email: customerInfo.email
-    };
-    
-    console.log('Payment fields:', paymentFields);
-    console.log('Demo mode:', demoMode);
-    
-    if (demoMode) {
-      console.log('Using demo/simulation mode for FluidPay Lightbox');
-      
-      // Generate iframe URL for demo mode
-      const iframeUrl = `/online-enrollment/fluidpay-demo-iframe.html?token=${token}&amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
-      setIframeUrl(iframeUrl);
-      setIframeLoaded(true);
-      
-      // Set up postMessage listener for simulation
-      window.removeEventListener('message', handleLightboxResponse);
-      window.addEventListener('message', handleLightboxResponse, false);
-    } else {
-      console.log('Using real FluidPay Lightbox integration');
-      
-              // PRODUCTION: Use official FluidPay callback approach
-        const callback = {
-          onError: function (error) {
-            console.error('FluidPay Lightbox error:', error);
-            setErrorMessage('Payment system error. Please try again later.');
-            setIsSubmitting(false);
-          },
-          onCancelled: function () {
-            console.log('Payment cancelled by user');
-            setErrorMessage('Payment was cancelled.');
-            setIsSubmitting(false);
-          },
-          onDeclined: function (response) {
-            console.log('Payment declined:', response);
-            setPaymentResult({
-              success: false,
-              errorCode: response.ssl_result,
-              errorMessage: response.ssl_result_message
-            });
-            setErrorMessage(response.ssl_result_message || 'Payment was declined. Please try again.');
-            setIsSubmitting(false);
-          },
-          onApproval: function (response) {
-            console.log('Payment approved:', response);
-            setPaymentResult({
-              success: true,
-              transactionId: response.ssl_txn_id,
-              authorizationCode: response.ssl_approval_code,
-              cardNumber: response.ssl_card_number,
-              cardType: response.ssl_card_type
-            });
-            
-            setTimeout(() => {
-              finishEnrollment(response);
-            }, 3000);
-          }
-        };
-        
-        // PRODUCTION: Launch real FluidPay Lightbox using official method
-        if (window.PayWithFluidPay) {
-          window.PayWithFluidPay.open(paymentFields, callback);
-        } else {
-          throw new Error('PayWithFluidPay is not loaded');
-        }
-    }
+    // The tokenizer is already initialized and should display the payment form
+    console.log('FluidPay Tokenizer ready for payment');
     
   } catch (error) {
-    console.error('Error launching FluidPay Lightbox:', error);
+    console.error('Error launching payment:', error);
     setErrorMessage('Unable to launch payment form. Please try again later.');
     setIsSubmitting(false);
   }
 };
   
 
-// Handle the response from the Lightbox (DEMO MODE ONLY)
-const handleLightboxResponse = (event) => {
-  try {
-    // PRODUCTION DATA REQUIRED:
-    // This function is only used in demo mode
-    // In production, responses come through the callback functions
-    
-    // PRODUCTION: Update origin validation for your environment
-    // For production: 'https://api.fluidpay.com'
-    // For demo: 'https://api.demo.fluidpay.com'
-    const expectedOrigin = 'https://api.demo.fluidpay.com';
-    
-    // Skip origin check in demo mode since it's simulated
-    if (!demoMode && event.origin !== expectedOrigin) {
-      return;
-    }
-    
-    const response = event.data;
-    console.log('Payment response received:', response);
-    
-    // Check if payment was successful - handle both FluidPay and Converge formats
-    const isSuccess = response.success === true || response.ssl_result === '0';
-    
-    if (isSuccess) {
-      // Payment successful
-      const successResult = {
-        success: true,
-        transactionId: response.transactionId || response.ssl_txn_id,
-        authorizationCode: response.authorizationCode || response.ssl_approval_code,
-        cardNumber: response.cardNumber || response.ssl_card_number,
-        cardType: response.cardType || response.ssl_card_type
-      };
-      
-      console.log('Payment successful! Data to be sent to backend:', {
-        transactionId: successResult.transactionId,
-        authorizationCode: successResult.authorizationCode,
-        last4: successResult.cardNumber?.slice(-4),
-        cardType: successResult.cardType,
-        expirationDate: response.expirationDate || response.ssl_exp_date || '1225'
-      });
-      
-      setPaymentResult(successResult);
-      setPopupType('success');
-      setPopupMessage(`Payment successful! Creating your membership, please wait...`);
-      setShowResultPopup(true);
-      
-      // Keep popup visible and process enrollment
-      // The popup will remain visible until navigation completes
-      if (formData) {
-        finishEnrollment(response);
-      } else {
-        console.error('formData not available, retrying in 1 second...');
-        setTimeout(() => {
-          if (formData) {
-            finishEnrollment(response);
-          } else {
-            console.error('formData still not available after retry');
-            setErrorMessage('Unable to complete enrollment - form data is missing. Please try again.');
-            setIsSubmitting(false);
-            setShowResultPopup(false);
-          }
-        }, 1000);
-      }
-      
-    } else {
-      // Payment failed
-      const errorResult = {
-        success: false,
-        errorCode: response.errorCode || response.ssl_result,
-        errorMessage: response.errorMessage || response.ssl_result_message || 'Payment failed'
-      };
-      
-      setPaymentResult(errorResult);
-      setPopupType('error');
-      setPopupMessage(`Payment failed: ${errorResult.errorMessage}`);
-      setShowResultPopup(true);
-      setIsSubmitting(false);
-      
-      // Auto-hide error popup after 5 seconds
-      setTimeout(() => {
-        setShowResultPopup(false);
-      }, 5000);
-    }
-  } catch (error) {
-    console.error('Error processing FluidPay response:', error);
-    setErrorMessage('An error occurred while processing your payment. Please try again.');
-    setIsSubmitting(false);
-  }
-};
 
-// DEMO MODE: Simulate FluidPay Lightbox popup
-const simulateFluidPayLightbox = (config) => {
-  console.log('simulateFluidPayLightbox called with config:', config);
-  console.log('simulateFluidPayLightbox - formData:', formData);
-  
-  // Calculate the prorated amount before creating the modal
-  const proratedAmount = calculateProratedAmount();
-  console.log('simulateConvergeLightbox - calculated proratedAmount:', proratedAmount);
-  
-  // Create a modal popup for demo purposes
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-  `;
-  
-  const content = document.createElement('div');
-  content.style.cssText = `
-    background-color: white;
-    border-radius: 8px;
-    padding: 30px;
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  `;
-  
-  content.innerHTML = `
-    <h3>FluidPay Lightbox Payment (Demo)</h3>
-    <p>Processing payment with FluidPay...</p>
-    <div style="margin: 20px 0;">
-      <div style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
-    </div>
-    <p><strong>Amount:</strong> $${proratedAmount.toFixed(2)}</p>
-    <p><strong>Customer:</strong> ${customerInfo.firstName} ${customerInfo.lastName}</p>
-    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****1111', ssl_card_type: 'VISA', ssl_exp_date: '1225'}, '*');" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve VISA</button>
-    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****2222', ssl_card_type: 'MASTERCARD', ssl_exp_date: '1230'}, '*');" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve MC</button>
-    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '0', ssl_txn_id: 'DEMO_' + Date.now(), ssl_approval_code: 'DEMO123', ssl_card_number: '****3333', ssl_card_type: 'AMEX', ssl_exp_date: '1228'}, '*');" style="background-color: #6f42c1; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Approve AMEX</button>
-    <button onclick="this.parentElement.parentElement.remove(); window.postMessage({ssl_result: '1', ssl_result_message: 'Card declined'}, '*');" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Decline Payment</button>
-    <button onclick="this.parentElement.parentElement.remove(); config.onCancel();" style="background-color: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px;">Cancel</button>
-  `;
-  
-  modal.appendChild(content);
-  document.body.appendChild(modal);
-  
-  // Add CSS animation
-  const style = document.createElement('style');
-  style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
-  document.head.appendChild(style);
-};
-
-// Add the simulation function to window for demo mode
-if (typeof window !== 'undefined') {
-  window.simulateFluidPayLightbox = simulateFluidPayLightbox;
-}
   
   // Complete enrollment after payment
   const finishEnrollment = async (paymentResult) => {
@@ -906,7 +655,7 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await launchLightbox();
+    await launchPayment();
   };
   
   // Calculate prorated amount due now
@@ -1037,12 +786,12 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
                     <span className="detail-value">{processorInfo.merchant_id}</span>
                   </p>
                   <p className="detail-item">
-                    <span className="detail-label">User ID:</span>
-                    <span className="detail-value">{processorInfo.converge_user_id ? '✓ Configured' : '⚠️ Missing'}</span>
+                    <span className="detail-label">API Key:</span>
+                    <span className="detail-value">{processorInfo.fluidpay_api_key ? '✓ Configured' : '⚠️ Missing'}</span>
                   </p>
                   <p className="detail-item">
-                    <span className="detail-label">Process URL:</span>
-                    <span className="detail-value">{processorInfo.converge_url_process ? '✓ Configured' : '⚠️ Missing'}</span>
+                    <span className="detail-label">Base URL:</span>
+                    <span className="detail-value">{processorInfo.fluidpay_base_url || 'https://api-sandbox.fluidpay.com'}</span>
                   </p>
                 </div>
               </div>
@@ -1107,11 +856,10 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
           <h2>Payment Information</h2>
           
           <div className="lightbox-explainer">
-            <h3>FluidPay Lightbox Payment {demoMode && <span style={{color: 'orange'}}>(DEMO MODE)</span>}</h3>
+            <h3>FluidPay Secure Payment</h3>
             <p>
-              When you click the "Pay Now" button below, a secure payment form will appear where 
-              you can safely enter your credit card information. Your payment will be processed securely 
-              by FluidPay, our payment processor.
+              Enter your payment information securely below. Your credit card information will be 
+              tokenized and processed securely by FluidPay, our payment processor.
             </p>
             
        {/* Payment Authorization Section */}
@@ -1181,6 +929,16 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
               </div>
             )}
             
+            {/* FluidPay Tokenizer Container */}
+            <div id="fluidpay-tokenizer-container" className="tokenizer-container">
+              {!tokenizer && (
+                <div className="tokenizer-loading">
+                  <div className="loading-spinner"></div>
+                  <p>Loading secure payment form...</p>
+                </div>
+              )}
+            </div>
+            
             <div className="form-actions">
               <button 
                 type="button" 
@@ -1194,7 +952,7 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
                 type="button" 
                 className="primary-button"
                 onClick={handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || !tokenizer}
               >
                 {isSubmitting ? "Processing..." : "Pay with FluidPay"}
               </button>
@@ -1211,18 +969,7 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
             </div>
           </div>
           
-          {/* Iframe Container */}
-          {iframeLoaded && iframeUrl && (
-            <div className="fluidpay-iframe-container">
-              <h3>Secure Payment Form</h3>
-                              <iframe
-                  src={iframeUrl}
-                  title="FluidPay Payment Form"
-                  onLoad={() => setIframeLoaded(true)}
-                  style={{ width: '100%', height: '600px', border: '1px solid #ddd', borderRadius: '6px' }}
-                />
-            </div>
-          )}
+
         </div>
       </div>
     </div>

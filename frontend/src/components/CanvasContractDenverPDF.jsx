@@ -436,7 +436,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
           { content: 'Pro-rated Dues', styles: { fontStyle: 'normal' } },
           { content: `$${formData.proratedDues || '0.00'}`, styles: { fontStyle: 'normal' } },
           { content: 'Total Monthly Membership Dues Rate', styles: { fontStyle: 'normal' } },
-          { content: `$${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}`, styles: { fontStyle: 'normal' } }
+          { content: `$${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}`, styles: { fontStyle: 'bold' } }
         ],
         [
           { content: 'Pro-rated Add-Ons', styles: { fontStyle: 'normal' } },
@@ -444,12 +444,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
           { content: 'Membership Start Date', styles: { fontStyle: 'normal' } },
           { content: formatDate(formData.requestedStartDate) || '', styles: { fontStyle: 'bold' } }
         ],
-        [
-          { content: 'Service Packages', styles: { fontStyle: 'normal' } },
-          { content: `$${formData.packagesFee || '0.00'}`, styles: { fontStyle: 'normal' } },
-          { content: '', styles: { fontStyle: 'normal' } },
-          { content: '', styles: { fontStyle: 'normal' } }
-        ],
+
         ...(formData.hasPTAddon && formData.ptPackage ? [
           [
             { content: 'Personal Training Package', styles: { fontStyle: 'normal' } },

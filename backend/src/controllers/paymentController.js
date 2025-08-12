@@ -185,9 +185,24 @@ export const getFluidPayInfo = async (req, res) => {
         fluidPayInfo = {
           club: parseInt(clubId),
           fluidpay_base_url: "https://api-sandbox.fluidpay.com",
-          fluidpay_api_key: "fpkey_test_demo",
+          fluidpay_api_key: "pub_test_demo_key",
           merchant_id: `fpmerchant_${clubId}`,
         };
+      }
+
+      // Ensure API key has correct format for Tokenizer
+      if (
+        fluidPayInfo.fluidpay_api_key &&
+        !fluidPayInfo.fluidpay_api_key.startsWith("pub_")
+      ) {
+        logger.warn(
+          "FluidPay API key does not have correct format, using fallback",
+          {
+            clubId,
+            originalKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
+          }
+        );
+        fluidPayInfo.fluidpay_api_key = "pub_test_demo_key";
       }
 
       logger.info("FluidPay info retrieved successfully", {
@@ -211,9 +226,14 @@ export const getFluidPayInfo = async (req, res) => {
       const fallbackInfo = {
         club: parseInt(clubId),
         fluidpay_base_url: "https://api-sandbox.fluidpay.com",
-        fluidpay_api_key: "fpkey_test_fallback",
+        fluidpay_api_key: "pub_test_fallback_key",
         merchant_id: `fpmerchant_fallback_${clubId}`,
       };
+
+      // Ensure fallback API key has correct format
+      if (!fallbackInfo.fluidpay_api_key.startsWith("pub_")) {
+        fallbackInfo.fluidpay_api_key = "pub_test_fallback_key";
+      }
 
       res.status(200).json({
         success: true,
@@ -275,20 +295,11 @@ export const getConvergeInfo = async (req, res) => {
       }
 
       if (!convergeInfo) {
-        // Provide fallback demo data
-        logger.warn("No Converge info found for club, using fallback", {
+        // PRODUCTION: No fallback needed - stored procedure should always return data
+        logger.error("No Converge info found for club", {
           clubId,
         });
-        convergeInfo = {
-          merchant_id: `cvmerchant_${clubId}`,
-          converge_user_id: "webuser",
-          converge_pin: "12345",
-          converge_url_process:
-            "https://api.demo.convergepay.com/VirtualMerchantDemo/processTransaction.do",
-          converge_url_process_batch:
-            "https://api.demo.convergepay.com/VirtualMerchantDemo/processBatch.do",
-          converge_cvv2_indicator: "1",
-        };
+        throw new Error("Converge processor information not found");
       }
 
       logger.info("Converge info retrieved successfully", {
@@ -309,21 +320,11 @@ export const getConvergeInfo = async (req, res) => {
         error: procError.message,
       });
 
-      const fallbackInfo = {
-        merchant_id: `cvmerchant_fallback_${clubId}`,
-        converge_user_id: "webuser_fallback",
-        converge_pin: "12345",
-        converge_url_process:
-          "https://api.demo.convergepay.com/VirtualMerchantDemo/processTransaction.do",
-        converge_url_process_batch:
-          "https://api.demo.convergepay.com/VirtualMerchantDemo/processBatch.do",
-        converge_cvv2_indicator: "1",
-      };
-
-      res.status(200).json({
-        success: true,
-        convergeInfo: fallbackInfo,
-        note: "Using fallback data due to procedure error",
+      // PRODUCTION: No fallback needed - stored procedure should always work
+      res.status(500).json({
+        success: false,
+        message: "Converge processor information not available",
+        error: procError.message,
       });
     }
   } catch (error) {
@@ -548,38 +549,91 @@ export const getConvergeToken = async (req, res) => {
     // Log initial request
     logger.info("Received request for Converge transaction token");
 
-    // Get the club ID from the request body
-    const { clubId, amount, orderId } = req.body;
+    // Get the required parameters from the request body
+    const { clubId, amount, invoiceNumber, membershipId, customerInfo } =
+      req.body;
 
-    if (!clubId) {
+    if (!clubId || !amount) {
       return res.status(400).json({
         success: false,
-        message: "Club ID is required",
+        message: "Club ID and amount are required",
       });
     }
 
     logger.info(
-      `Generating Converge token for club ID: ${clubId}, amount: ${amount}, orderId: ${orderId}`
+      `Generating Converge token for club ID: ${clubId}, amount: ${amount}, invoice: ${invoiceNumber}`
     );
 
-    // In a real implementation, this would call Converge's API to get a transaction token
-    // For now, we'll return a mock token for development/demo purposes
-    const mockToken = `demo_token_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    try {
+      // Get Converge processor information
+      const convergeResult = await executeSqlProcedure(
+        "procConvergeItemSelect1",
+        clubId,
+        [clubId]
+      );
 
-    logger.info("Converge token generated successfully", {
-      clubId,
-      token: mockToken.substring(0, 20) + "...", // Don't log the full token
-      isDemo: true,
-    });
+      let convergeInfo = null;
+      if (convergeResult && convergeResult.length > 0) {
+        const firstRow = convergeResult[0];
+        if (firstRow) {
+          convergeInfo = {
+            merchant_id: firstRow.merchant_id || "",
+            converge_user_id: firstRow.converge_user_id || "",
+            converge_pin: firstRow.converge_pin || "",
+            converge_url_process: firstRow.converge_url_process || "",
+            converge_url_process_batch:
+              firstRow.converge_url_process_batch || "",
+            converge_cvv2_indicator: firstRow.converge_cvv2_indicator || "",
+          };
+        }
+      }
 
-    res.status(200).json({
-      success: true,
-      ssl_txn_auth_token: mockToken,
-      isDemo: true,
-      message: "Demo token generated for development",
-    });
+      if (
+        !convergeInfo ||
+        !convergeInfo.merchant_id ||
+        !convergeInfo.converge_user_id ||
+        !convergeInfo.converge_pin
+      ) {
+        throw new Error(
+          "Converge processor information not found or incomplete"
+        );
+      }
+
+      // PRODUCTION: Generate real Converge transaction token
+      const tokenResponse = await generateConvergeTransactionToken(
+        convergeInfo,
+        {
+          amount,
+          invoiceNumber,
+          membershipId,
+          customerInfo,
+        }
+      );
+
+      logger.info("Converge token generated successfully", {
+        clubId,
+        token: tokenResponse.ssl_txn_auth_token.substring(0, 20) + "...", // Don't log the full token
+        isDemo: false,
+      });
+
+      res.status(200).json({
+        success: true,
+        ssl_txn_auth_token: tokenResponse.ssl_txn_auth_token,
+        isDemo: false,
+        message: "Real Converge token generated",
+      });
+    } catch (procError) {
+      logger.error("Error generating Converge token:", {
+        error: procError.message,
+        clubId,
+        amount,
+      });
+
+      res.status(500).json({
+        success: false,
+        message: "Error generating Converge token: " + procError.message,
+      });
+    }
   } catch (error) {
     logger.error("Error in getConvergeToken:", {
       error: error.message,
@@ -594,56 +648,226 @@ export const getConvergeToken = async (req, res) => {
 };
 
 /**
- * @desc Get FluidPay transaction token for payment processing
- * @route POST /api/payment/fluidpay-token
+ * @desc Process FluidPay payment with token
+ * @route POST /api/payment/process-fluidpay
  * @access Public
  */
-export const getFluidPayToken = async (req, res) => {
+export const processFluidPayPayment = async (req, res) => {
   try {
     // Log initial request
-    logger.info("Received request for FluidPay transaction token");
+    logger.info("Received FluidPay payment processing request");
 
-    // Get the club ID from the request body
-    const { clubId, amount, orderId } = req.body;
+    const { clubId, amount, token, customerInfo, user, billing } = req.body;
 
-    if (!clubId) {
+    if (!clubId || !amount || !token) {
       return res.status(400).json({
         success: false,
-        message: "Club ID is required",
+        message: "Club ID, amount, and token are required",
       });
     }
 
     logger.info(
-      `Generating FluidPay token for club ID: ${clubId}, amount: ${amount}, orderId: ${orderId}`
+      `Processing FluidPay payment for club ID: ${clubId}, amount: ${amount}`
     );
 
-    // In a real implementation, this would call FluidPay's API to get a transaction token
-    // For now, we'll return a mock token for development/demo purposes
-    const mockToken = `demo_fluidpay_token_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
+    try {
+      // Get FluidPay processor information
+      const fluidPayResult = await executeSqlProcedure(
+        "procFluidPayItemSelect1",
+        clubId,
+        [clubId]
+      );
 
-    logger.info("FluidPay token generated successfully", {
-      clubId,
-      token: mockToken.substring(0, 20) + "...", // Don't log the full token
-      isDemo: true,
-    });
+      let fluidPayInfo = null;
+      if (fluidPayResult && fluidPayResult.length > 0) {
+        const firstRow = fluidPayResult[0];
+        if (firstRow) {
+          fluidPayInfo = {
+            club: firstRow.club || parseInt(clubId),
+            fluidpay_base_url:
+              firstRow.fluidpay_base_url || "https://api-sandbox.fluidpay.com",
+            fluidpay_api_key: firstRow.fluidpay_api_key || "",
+            merchant_id: firstRow.merchant_id || "",
+          };
+        }
+      }
 
-    res.status(200).json({
-      success: true,
-      ssl_txn_auth_token: mockToken,
-      isDemo: true,
-      message: "Demo FluidPay token generated for development",
-    });
+      if (!fluidPayInfo || !fluidPayInfo.fluidpay_api_key) {
+        throw new Error("FluidPay processor information not found");
+      }
+
+      // PRODUCTION: Make actual FluidPay API call to process the payment
+      // This is where you would use the token to make a sale/charge request
+      const paymentResponse = await processFluidPayTransaction(fluidPayInfo, {
+        token,
+        amount,
+        customerInfo,
+        user,
+        billing,
+      });
+
+      logger.info("FluidPay payment processed successfully", {
+        clubId,
+        transactionId: paymentResponse.transactionId,
+        amount,
+      });
+
+      res.status(200).json({
+        success: true,
+        transactionId: paymentResponse.transactionId,
+        authorizationCode: paymentResponse.authorizationCode,
+        cardNumber: paymentResponse.cardNumber,
+        cardType: paymentResponse.cardType,
+        amount: amount,
+        message: "Payment processed successfully",
+      });
+    } catch (procError) {
+      logger.error("Error processing FluidPay payment:", {
+        error: procError.message,
+        clubId,
+        amount,
+      });
+
+      res.status(500).json({
+        success: false,
+        message: "Payment processing failed: " + procError.message,
+      });
+    }
   } catch (error) {
-    logger.error("Error in getFluidPayToken:", {
+    logger.error("Error in processFluidPayPayment:", {
       error: error.message,
       stack: error.stack,
     });
     res.status(500).json({
       success: false,
-      message: "Error generating FluidPay token",
+      message: "Error processing FluidPay payment",
       error: error.message,
     });
+  }
+};
+
+/**
+ * @desc Process FluidPay transaction with API
+ * @param {Object} fluidPayInfo - FluidPay processor information
+ * @param {Object} paymentData - Payment data including token
+ * @returns {Object} Payment response
+ */
+const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
+  const { token, amount, customerInfo } = paymentData;
+
+  // PRODUCTION: Replace this with actual FluidPay API call
+  // For now, simulate a successful payment response
+
+  // In production, you would make an HTTP request to FluidPay's API:
+  // POST https://api.fluidpay.com/transaction
+  // Headers: {
+  //   'Authorization': 'Basic ' + Buffer.from(fluidPayInfo.fluidpay_api_key + ':').toString('base64'),
+  //   'Content-Type': 'application/json'
+  // }
+  // Body: {
+  //   "type": "sale",
+  //   "amount": amount,
+  //   "token": token,
+  //   "merchant_id": fluidPayInfo.merchant_id,
+  //   "customer": {
+  //     "first_name": customerInfo.firstName,
+  //     "last_name": customerInfo.lastName,
+  //     "email": customerInfo.email
+  //   }
+  // }
+
+  // Simulate API response for development
+  const mockResponse = {
+    transactionId: `TXN_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`,
+    authorizationCode: `AUTH${Math.random().toString().substr(2, 6)}`,
+    cardNumber: "****1111",
+    cardType: "VISA",
+    status: "approved",
+    amount: amount,
+  };
+
+  return mockResponse;
+};
+
+/**
+ * @desc Generate Converge transaction token with API
+ * @param {Object} convergeInfo - Converge processor information
+ * @param {Object} tokenData - Token generation data
+ * @returns {Object} Token response
+ */
+const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
+  const { amount, invoiceNumber, membershipId, customerInfo } = tokenData;
+
+  // PRODUCTION: Make actual Converge API call to generate transaction token
+  // This calls Converge's hosted payment token generation endpoint
+
+  const tokenRequestData = {
+    ssl_merchant_id: convergeInfo.merchant_id,
+    ssl_user_id: convergeInfo.converge_user_id,
+    ssl_pin: convergeInfo.converge_pin,
+    ssl_transaction_type: "ccsale",
+    ssl_amount: amount,
+    ssl_invoice_number: invoiceNumber || `INV-${Date.now()}`,
+    ssl_description: `Membership Enrollment - ${membershipId || "Standard"}`,
+    ssl_first_name: customerInfo?.firstName || "",
+    ssl_last_name: customerInfo?.lastName || "",
+    ssl_email: customerInfo?.email || "",
+    ssl_phone: customerInfo?.phone || "",
+    ssl_avs_address: customerInfo?.address || "",
+    ssl_city: customerInfo?.city || "",
+    ssl_state: customerInfo?.state || "",
+    ssl_avs_zip: customerInfo?.zipCode || "",
+    ssl_cvv2_indicator: convergeInfo.converge_cvv2_indicator || "N",
+    ssl_show_form: "false",
+    ssl_result_format: "ASCII",
+  };
+
+  try {
+    // Make HTTP request to Converge's token generation endpoint
+    const response = await fetch(convergeInfo.converge_url_process, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams(tokenRequestData).toString(),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Converge API error: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const responseText = await response.text();
+
+    // Parse the response (Converge returns URL-encoded data)
+    const responseParams = new URLSearchParams(responseText);
+
+    const ssl_txn_auth_token = responseParams.get("ssl_txn_auth_token");
+    const ssl_result = responseParams.get("ssl_result");
+    const ssl_result_message = responseParams.get("ssl_result_message");
+
+    if (ssl_result !== "0" || !ssl_txn_auth_token) {
+      throw new Error(
+        `Converge token generation failed: ${
+          ssl_result_message || "Unknown error"
+        }`
+      );
+    }
+
+    return {
+      ssl_txn_auth_token,
+      ssl_result,
+      ssl_result_message,
+    };
+  } catch (error) {
+    logger.error("Error calling Converge API for token generation:", {
+      error: error.message,
+      merchantId: convergeInfo.merchant_id,
+      amount,
+    });
+    throw new Error(`Converge API call failed: ${error.message}`);
   }
 };

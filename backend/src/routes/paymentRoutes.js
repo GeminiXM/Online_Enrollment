@@ -9,7 +9,7 @@ import {
   getFluidPayInfo,
   getConvergeInfo,
   getConvergeToken,
-  getFluidPayToken,
+  processFluidPayPayment,
   processPaymentDemo,
 } from "../controllers/paymentController.js";
 
@@ -128,22 +128,22 @@ router.post("/converge-token", async (req, res) => {
 });
 
 /**
- * @route POST /api/payment/fluidpay-token
- * @desc Get FluidPay transaction token for payment processing
+ * @route POST /api/payment/process-fluidpay
+ * @desc Process FluidPay payment with token
  * @access Public
  */
-router.post("/fluidpay-token", async (req, res) => {
+router.post("/process-fluidpay", async (req, res) => {
   try {
-    return await getFluidPayToken(req, res);
+    return await processFluidPayPayment(req, res);
   } catch (error) {
-    logger.error("Error in fluidpay-token route", {
+    logger.error("Error in process-fluidpay route", {
       error: error.message,
       stack: error.stack,
     });
     return res.status(500).json({
       success: false,
       message:
-        "An error occurred while generating the FluidPay token. Please try again later.",
+        "An error occurred while processing the FluidPay payment. Please try again later.",
     });
   }
 });

@@ -342,24 +342,45 @@ const ContractPage = () => {
       const proratedAddOns = data.serviceAddons?.reduce((total, addon) => 
         total + (addon.price ? addon.price * proratedFactor : 0), 0).toFixed(2) || '0.00';
       
-      // Add PT package as one-time cost (not prorated)
-      const ptPackageAmount = data.hasPTAddon && data.ptPackage ? parseFloat(data.ptPackage.invtr_price || data.ptPackage.price || 0).toFixed(2) : '0.00';
-      console.log('PT package calculation:', {
-        hasPTAddon: data.hasPTAddon,
-        ptPackage: data.ptPackage,
-        ptPackageAmount: ptPackageAmount
-      });
-      
       // Check if club is in New Mexico by state property
       const isNewMexicoClub = selectedClub?.state === 'NM' || false;
       
       // Get tax rate from membershipDetails or use the actual tax rate from form data
       const taxRate = isNewMexicoClub ? (data.membershipDetails?.taxRate || data.taxRate || 0.07625) : 0; // Use actual tax rate from database
       
-      // Use pre-calculated tax values from form data to ensure consistency
-      const proratedDuesTax = parseFloat(data.proratedDuesTax || 0);
-      const proratedAddonsTax = parseFloat(data.proratedAddOnsTax || 0);
-      const totalTaxAmount = proratedDuesTax + proratedAddonsTax;
+      // Handle PT package for New Mexico - separate tax from price
+      let ptPackageAmount, ptPackageTax;
+      if (data.hasPTAddon && data.ptPackage) {
+        const ptPackagePriceWithTax = parseFloat(data.ptPackage.invtr_price || data.ptPackage.price || 0);
+        if (isNewMexicoClub) {
+          // For New Mexico, separate tax from the price
+          ptPackageAmount = Math.round(ptPackagePriceWithTax / (1 + taxRate)); // Round to nearest dollar
+          ptPackageTax = ptPackagePriceWithTax - ptPackageAmount;
+        } else {
+          // For non-NM clubs, use the price as-is
+          ptPackageAmount = ptPackagePriceWithTax;
+          ptPackageTax = 0;
+        }
+      } else {
+        ptPackageAmount = 0;
+        ptPackageTax = 0;
+      }
+      
+      console.log('PT package calculation:', {
+        hasPTAddon: data.hasPTAddon,
+        ptPackage: data.ptPackage,
+        ptPackageAmount: ptPackageAmount,
+        ptPackageTax: ptPackageTax,
+        isNewMexicoClub: isNewMexicoClub
+      });
+      
+      // Calculate tax on enrollment fee and prorated amounts
+      const enrollmentFee = 19.0;
+      const taxableAmount = enrollmentFee + parseFloat(proratedDues) + parseFloat(proratedAddOns);
+      const duesAndFeesTax = isNewMexicoClub ? Number((taxableAmount * taxRate).toFixed(2)) : 0;
+      
+      // Calculate total tax amount including PT package tax
+      const totalTaxAmount = duesAndFeesTax + ptPackageTax;
       
       // Calculate tax amount (will be 0 for non-NM clubs)
       const taxAmount = isNewMexicoClub ? totalTaxAmount.toFixed(2) : '0.00';
@@ -1265,19 +1286,16 @@ const ContractPage = () => {
               <div className="info-value">${formData.proratedAddOns || '0.00'}</div>
             </div>
           </div>
-          <div className="info-row">
-            <div className="info-column financial-item">
-              <div className="info-label">Service Packages</div>
-              <div className="info-value">${formData.packagesFee || '0.00'}</div>
-            </div>
-          </div>
+
+
           {formData.hasPTAddon && formData.ptPackage && (
             <div className="info-row">
               <div className="info-column financial-item">
-                <div className="info-label">Personal Training Package</div>
+                <div className="info-label">Personal Training Package (including applicable taxes)</div>
                 <div className="info-value">${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}</div>
               </div>
             </div>
+            
           )}
           <div className="info-row">
             <div className="info-column financial-item">
@@ -1304,15 +1322,21 @@ const ContractPage = () => {
         <div className="info-section payment-summary-section">
           <div className="info-header">Monthly Cost Going Forward</div>
           <div className="info-row">
-            <div className="info-column">
+            {/* <div className="info-column">
               <div className="info-label">{formData.displayMembershipType || 'Individual'} Dues {formData.displayAgreementType || 'Month-to-month'}</div>
               <div className="info-value">${formData.monthlyDues || '0.00'}</div>
-            </div>
+            </div> */}
           </div>
           <div className="info-row">
             <div className="info-column">
-              <div className="info-label">Total Monthly Membership Dues Rate</div>
-              <div className="info-value">${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}</div>
+              <div className="info-label">
+                Total Monthly Membership Dues Rate
+                <br />
+                <span style={{ fontStyle: 'italic' }}>(applicable taxes not included)</span>
+              </div>
+              <div className="info-value" style={{ fontWeight: "bold" }}>
+                ${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}
+              </div>
             </div>
           </div>
           <div className="info-row">

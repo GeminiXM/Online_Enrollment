@@ -706,8 +706,10 @@ function EnrollmentForm() {
       const isNewMexicoClub = selectedClub?.state === 'NM';
       const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
       
-      // Calculate tax amount for prorated price
-      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
+      // Calculate tax amount for total taxable amount (enrollment fee + prorated price)
+      const enrollmentFee = 19.0; // $19 enrollment fee
+      const totalTaxableAmount = enrollmentFee + prorated;
+      const proratedTax = Number((totalTaxableAmount * effectiveTaxRate).toFixed(2));
       setProratedTaxAmount(proratedTax);
       
       // Calculate tax for full membership price
@@ -3463,8 +3465,10 @@ function EnrollmentForm() {
       const isNewMexicoClub = selectedClub?.state === 'NM';
       const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
 
-      // Calculate tax amount for prorated price (due now)
-      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
+      // Calculate tax amount for total taxable amount (enrollment fee + prorated price)
+      const enrollmentFee = 19.0; // $19 enrollment fee
+      const totalTaxableAmount = enrollmentFee + prorated;
+      const proratedTax = Number((totalTaxableAmount * effectiveTaxRate).toFixed(2));
       setProratedTaxAmount(proratedTax);
 
       // Calculate monthly total (going forward)

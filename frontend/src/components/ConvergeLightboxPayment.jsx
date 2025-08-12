@@ -254,26 +254,14 @@ const ConvergeLightboxPayment = () => {
           console.log('Setting Converge processor info:', convergeResult.convergeInfo);
           setProcessorInfo(convergeResult.convergeInfo);
         } else {
-          // PRODUCTION DATA REQUIRED: 
-          // Replace these demo values with actual Converge credentials
-          // For production, this fallback should either be removed or use environment-specific values
-          setProcessorInfo({
-            merchant_id: 'Demo Converge Merchant', // PRODUCTION: Your actual Converge Merchant ID
-            converge_user_id: 'webuser',           // PRODUCTION: Your actual Converge User ID
-            converge_pin: 'DEMO',                  // PRODUCTION: Your actual Converge PIN (keep secure)
-            converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
-          });
+          // PRODUCTION: No fallback needed - backend should always provide real data
+          console.error('No Converge info received from backend');
+          setErrorMessage('Payment processor configuration error. Please contact support.');
         }
       } catch (error) {
         console.error('Error fetching Converge info:', error);
-        // PRODUCTION: In production, consider more robust error handling or retry logic
-        // These fallback values should be replaced with environment-specific values
-        setProcessorInfo({
-          merchant_id: 'Demo Converge Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
-          converge_user_id: 'webuser',                      // PRODUCTION: Your actual User ID
-          converge_pin: 'DEMO',                             // PRODUCTION: Your actual PIN (keep secure)
-          converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo' // PRODUCTION: Use production URL
-        });
+        // PRODUCTION: No fallback needed - backend should always provide real data
+        setErrorMessage('Unable to load payment processor configuration. Please try again later.');
       }
     };
     
@@ -325,8 +313,8 @@ const ConvergeLightboxPayment = () => {
   };
   
   // Demo mode state - true when in demo/simulation mode
-  // PRODUCTION: Remove this demoMode state in production - always use the real integration
-  const [demoMode, setDemoMode] = useState(true); // DEMO: Force demo mode for development
+  // PRODUCTION: Set to false for production - always use the real integration
+  const [demoMode, setDemoMode] = useState(false); // PRODUCTION: Use real integration
   const [iframeUrl, setIframeUrl] = useState(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
 
@@ -507,19 +495,18 @@ const ConvergeLightboxPayment = () => {
       }
     };
     
-     // PRODUCTION DATA REQUIRED:
-  // Load the correct Converge script based on environment
+     // PRODUCTION: Load the correct Converge script based on environment
   const script = document.createElement('script');
   script.id = 'converge-script';
   
-  // PRODUCTION: Change this to production URL
+  // PRODUCTION: Using production URL for live transactions
   // For production: https://api.convergepay.com/hosted-payments/PayWithConverge.js
   // For demo/testing: https://api.demo.convergepay.com/hosted-payments/PayWithConverge.js
-  script.src = 'https://api.demo.convergepay.com/hosted-payments/PayWithConverge.js';
+  script.src = 'https://api.convergepay.com/hosted-payments/PayWithConverge.js';
   script.async = true;
   script.onload = () => {
     console.log('Converge PayWithConverge script loaded successfully');
-    // setDemoMode(false); // DEMO: Keep in demo mode - uncomment for production
+    setDemoMode(false); // PRODUCTION: Use real integration
   };
   script.onerror = () => {
     console.warn('Failed to load Converge script - using simulation mode instead');
@@ -645,7 +632,7 @@ const handleLightboxResponse = (event) => {
     // PRODUCTION: Update origin validation for your environment
     // For production: 'https://api.convergepay.com'
     // For demo: 'https://api.demo.convergepay.com'
-    const expectedOrigin = 'https://api.demo.convergepay.com';
+    const expectedOrigin = 'https://api.convergepay.com';
     
     // Skip origin check in demo mode since it's simulated
     if (!demoMode && event.origin !== expectedOrigin) {
