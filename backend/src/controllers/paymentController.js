@@ -804,9 +804,9 @@ const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
   // This calls Converge's hosted payment token generation endpoint
 
   const tokenRequestData = {
-    ssl_merchant_id: convergeInfo.merchant_id,
-    ssl_user_id: convergeInfo.converge_user_id,
-    ssl_pin: convergeInfo.converge_pin,
+    ssl_merchant_id: convergeInfo.merchant_id.trim(),
+    ssl_user_id: convergeInfo.converge_user_id.trim(),
+    ssl_pin: convergeInfo.converge_pin.trim(),
     ssl_transaction_type: "ccsale",
     ssl_amount: amount,
     ssl_invoice_number: invoiceNumber || `INV-${Date.now()}`,
@@ -825,6 +825,15 @@ const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
   };
 
   try {
+    // Log the request details for debugging
+    logger.info("Making Converge API request:", {
+      url: convergeInfo.converge_url_process,
+      merchantId: convergeInfo.merchant_id.trim(),
+      userId: convergeInfo.converge_user_id.trim(),
+      amount,
+      invoiceNumber: invoiceNumber || `INV-${Date.now()}`,
+    });
+
     // Make HTTP request to Converge's token generation endpoint
     const response = await fetch(convergeInfo.converge_url_process, {
       method: "POST",
@@ -834,13 +843,30 @@ const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
       body: new URLSearchParams(tokenRequestData).toString(),
     });
 
+    logger.info("Converge API response status:", {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    });
+
     if (!response.ok) {
+      const errorText = await response.text();
+      logger.error("Converge API error response:", {
+        status: response.status,
+        statusText: response.statusText,
+        errorText: errorText.substring(0, 500), // Log first 500 chars
+      });
       throw new Error(
-        `Converge API error: ${response.status} ${response.statusText}`
+        `Converge API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 200)}`
       );
     }
 
     const responseText = await response.text();
+
+    logger.info("Converge API response text:", {
+      responseLength: responseText.length,
+      responsePreview: responseText.substring(0, 200),
+    });
 
     // Parse the response (Converge returns URL-encoded data)
     const responseParams = new URLSearchParams(responseText);
@@ -848,6 +874,13 @@ const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
     const ssl_txn_auth_token = responseParams.get("ssl_txn_auth_token");
     const ssl_result = responseParams.get("ssl_result");
     const ssl_result_message = responseParams.get("ssl_result_message");
+
+    logger.info("Parsed Converge response:", {
+      hasToken: !!ssl_txn_auth_token,
+      tokenLength: ssl_txn_auth_token ? ssl_txn_auth_token.length : 0,
+      ssl_result,
+      ssl_result_message,
+    });
 
     if (ssl_result !== "0" || !ssl_txn_auth_token) {
       throw new Error(

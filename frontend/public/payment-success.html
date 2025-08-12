@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Enrollment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+        .success-container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success-icon {
+            color: #28a745;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .instructions {
+            background-color: #e7f3ff;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Payment Successful!</h1>
+        <p>Your payment has been processed successfully. Thank you for your enrollment!</p>
+        
+        <div class="instructions">
+            <h3>Next Steps:</h3>
+            <ol>
+                <li>Return to the enrollment application tab</li>
+                <li>Complete the enrollment process</li>
+                <li>You will receive a confirmation email</li>
+            </ol>
+        </div>
+        
+        <a href="/online-enrollment/" class="btn">Return to Enrollment</a>
+        <a href="/online-enrollment/enrollment-confirmation" class="btn">View Confirmation</a>
+    </div>
+    
+    <script>
+        // Auto-close this tab after 10 seconds
+        setTimeout(() => {
+            window.close();
+        }, 10000);
+        
+        // Also close when user clicks return button
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                window.close();
+            });
+        });
+    </script>
+</body>
+</html>
+

@@ -2315,3 +2315,11 @@
 2025-08-12 13:03:22:322 [31merror[39m: [31mError executing query:[39m
 2025-08-12 13:03:22:322 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-08-12 13:03:22:322 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-12 15:56:51:5651 [31merror[39m: [31mError calling Converge API for token generation:[39m
+2025-08-12 15:56:51:5651 [31merror[39m: [31mError generating Converge token:[39m
+2025-08-12 16:00:04:04 [31merror[39m: [31mError calling Converge API for token generation:[39m
+2025-08-12 16:00:04:04 [31merror[39m: [31mError generating Converge token:[39m
+2025-08-12 16:06:10:610 [31merror[39m: [31mError calling Converge API for token generation:[39m
+2025-08-12 16:06:10:610 [31merror[39m: [31mError generating Converge token:[39m
+2025-08-12 16:09:54:954 [31merror[39m: [31mError calling Converge API for token generation:[39m
+2025-08-12 16:09:54:954 [31merror[39m: [31mError generating Converge token:[39m
