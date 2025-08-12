@@ -592,8 +592,8 @@ const ContractPage = () => {
         // Route to FluidPay for Colorado/Denver clubs
         paymentRoute = '/payment-fluidpay';
       } else if (isNewMexicoClub) {
-        // Route to Converge for New Mexico clubs
-        paymentRoute = '/payment-converge';
+        // Route to integrated payment page for New Mexico clubs (includes Converge option)
+        paymentRoute = '/payment';
       }
       
       console.log(`Routing to ${paymentRoute} for club in ${selectedClub?.state} (${selectedClub?.city})`);

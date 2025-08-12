@@ -593,3 +593,218 @@
   font-style: italic;
   margin-top: 15px !important;
 }
+
+/* Converge Payment Section Styles */
+.converge-payment-section {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.converge-info h4 {
+  color: #343a40;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.converge-info p {
+  color: #6c757d;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.converge-payment-section .payment-details {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 15px 0;
+}
+
+.converge-payment-section .payment-details p {
+  margin: 5px 0;
+  color: #495057;
+}
+
+.converge-payment-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.converge-payment-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.converge-payment-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  color: #6c757d;
+}
+
+.loading-message .spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Payment Method Information Styles */
+.payment-method-info {
+  margin: 20px 0;
+}
+
+.payment-method-display {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.payment-method-converge,
+.payment-method-standard {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.payment-method-title {
+  font-weight: bold;
+  color: #343a40;
+  font-size: 1.1rem;
+}
+
+.payment-method-description {
+  color: #6c757d;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Converge Payment Instructions Styles */
+.converge-payment-instructions {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.payment-summary-box {
+  background-color: white;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.payment-summary-box h4 {
+  color: #343a40;
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+}
+
+.payment-instructions {
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  border-radius: 5px;
+}
+
+.payment-instructions p {
+  color: #0056b3;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Embedded Converge Payment Form Styles */
+.converge-payment-container {
+  width: 100%;
+}
+
+.converge-embedded-form {
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-header h4 {
+  color: #343a40;
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+}
+
+.form-header p {
+  color: #6c757d;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.iframe-container {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 20px 0;
+  background-color: #f8f9fa;
+}
+
+.iframe-container iframe {
+  display: block;
+  border: none;
+  width: 100%;
+  min-height: 600px;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.security-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.security-notice svg {
+  color: #28a745;
+}

@@ -3,6 +3,7 @@
 
 import express from "express";
 import { body } from "express-validator";
+import axios from "axios";
 import logger from "../utils/logger.js";
 import {
   getCCProcessorName,
@@ -165,6 +166,62 @@ router.post("/process-demo", validatePaymentData, async (req, res) => {
       success: false,
       message:
         "An error occurred while processing the demo payment. Please try again later.",
+    });
+  }
+});
+
+// Converge direct API payment endpoint
+router.post("/converge", async (req, res) => {
+  try {
+    const paymentData = req.body;
+
+    logger.info("Processing Converge payment:", {
+      amount: paymentData.ssl_amount,
+      merchant_id: paymentData.ssl_merchant_id,
+      transaction_type: paymentData.ssl_transaction_type,
+    });
+
+    // Send payment data to Converge API
+    const response = await axios.post(
+      paymentData.ssl_url_process ||
+        "https://api.convergepay.com/VirtualMerchant/process.do",
+      paymentData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 30000, // 30 second timeout
+      }
+    );
+
+    // Parse Converge response
+    const responseData = response.data;
+    logger.info("Converge API response:", responseData);
+
+    // Check if payment was successful
+    if (responseData.ssl_result === "0") {
+      // Payment successful
+      res.json({
+        success: true,
+        transaction_id: responseData.ssl_txn_id,
+        authorization_code: responseData.ssl_approval_code,
+        message: "Payment processed successfully",
+      });
+    } else {
+      // Payment failed
+      res.json({
+        success: false,
+        message: responseData.ssl_result_message || "Payment failed",
+        error_code: responseData.ssl_result,
+      });
+    }
+  } catch (error) {
+    logger.error("Converge payment error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Payment processing failed. Please try again.",
+      error: error.message,
     });
   }
 });

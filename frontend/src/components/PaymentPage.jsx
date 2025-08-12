@@ -96,14 +96,18 @@ const PaymentPage = () => {
     billingZipCode: ''
   });
   
+  // Converge payment state
+  const [convergeInfo, setConvergeInfo] = useState(null);
+  const [isLoadingConverge, setIsLoadingConverge] = useState(false);
+  
   // Other state
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState('');
-  const [processorName, setProcessorName] = useState('');
-  const [processorInfo, setProcessorInfo] = useState(null);
   const [showProcessorDemo, setShowProcessorDemo] = useState(false);
   const [paymentResponse, setPaymentResponse] = useState(null);
+  const [processorName, setProcessorName] = useState('');
+  const [processorInfo, setProcessorInfo] = useState(null);
+  const [errors, setErrors] = useState({});
   
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
@@ -185,22 +189,27 @@ const PaymentPage = () => {
                   
                   if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
                     console.log('Setting Converge processor info:', convergeResult.convergeInfo);
+                    setConvergeInfo(convergeResult.convergeInfo);
                     setProcessorInfo(convergeResult.convergeInfo);
                   } else {
                     // Set fallback info for Converge
-                    setProcessorInfo({
+                    const fallbackInfo = {
                       merchant_id: 'Demo Converge Merchant',
                       converge_user_id: 'webuser',
                       converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                    });
+                    };
+                    setConvergeInfo(fallbackInfo);
+                    setProcessorInfo(fallbackInfo);
                   }
                 } catch (error) {
                   console.error('Error fetching Converge info:', error);
-                  setProcessorInfo({
+                  const fallbackInfo = {
                     merchant_id: 'Demo Converge Merchant (Fallback)',
                     converge_user_id: 'webuser',
                     converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                  });
+                  };
+                  setConvergeInfo(fallbackInfo);
+                  setProcessorInfo(fallbackInfo);
                 }
               }
             } else {
@@ -210,32 +219,39 @@ const PaymentPage = () => {
               try {
                 const convergeResult = await api.getConvergeInfo(clubId);
                 if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
+                  setConvergeInfo(convergeResult.convergeInfo);
                   setProcessorInfo(convergeResult.convergeInfo);
                 } else {
-                  setProcessorInfo({
+                  const fallbackInfo = {
                     merchant_id: 'Demo Converge Merchant (Default)',
                     converge_user_id: 'webuser',
                     converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                  });
+                  };
+                  setConvergeInfo(fallbackInfo);
+                  setProcessorInfo(fallbackInfo);
                 }
               } catch (error) {
                 console.error('Error fetching default Converge info:', error);
-                setProcessorInfo({
+                const fallbackInfo = {
                   merchant_id: 'Demo Converge Merchant (Fallback)',
                   converge_user_id: 'webuser',
                   converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                });
+                };
+                setConvergeInfo(fallbackInfo);
+                setProcessorInfo(fallbackInfo);
               }
             }
           } catch (error) {
             console.error('Error in fetchProcessor:', error);
             // Ensure we at least have a processor name and info
             setProcessorName('CONVERGE');
-            setProcessorInfo({
+            const fallbackInfo = {
               merchant_id: 'Demo Converge Merchant (Error Fallback)',
               converge_user_id: 'webuser',
               converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-            });
+            };
+            setConvergeInfo(fallbackInfo);
+            setProcessorInfo(fallbackInfo);
           }
         };
         
@@ -561,28 +577,152 @@ const PaymentPage = () => {
     }
   };
   
-  // Add state to track payment method selection
+  // Add state to track payment method selection - auto-select based on club
   const [paymentMethod, setPaymentMethod] = useState('standard');
+  
+  // Fetch Converge processor information
+  const fetchConvergeInfo = async () => {
+    if (!formData?.club) return;
+    
+    setIsLoadingConverge(true);
+    try {
+      const response = await api.get(`/payment/converge-info?clubId=${formData.club}`);
+      setConvergeInfo(response.data);
+      console.log('Converge API result:', response.data);
+    } catch (error) {
+      console.error('Error fetching Converge info:', error);
+      setSubmitError('Failed to load payment processor information');
+    } finally {
+      setIsLoadingConverge(false);
+    }
+  };
+
+  // State for Converge direct API payment
+  const [convergePaymentData, setConvergePaymentData] = useState({
+    cardNumber: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvv: '',
+    cardholderName: ''
+  });
+  const [showConvergeForm, setShowConvergeForm] = useState(false);
+
+  // Process Converge payment - direct API integration
+  const processConvergePayment = async () => {
+    if (!convergeInfo || !formData) {
+      setSubmitError('Payment processor information not available');
+      return;
+    }
+
+    // Validate payment data
+    if (!convergePaymentData.cardNumber || !convergePaymentData.expiryMonth || 
+        !convergePaymentData.expiryYear || !convergePaymentData.cvv || 
+        !convergePaymentData.cardholderName) {
+      setSubmitError('Please fill in all payment fields');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
+    try {
+      // Create the payment data for Converge API
+      const paymentData = {
+        ssl_merchant_id: convergeInfo.merchant_id?.trim(),
+        ssl_user_id: convergeInfo.converge_user_id?.trim(),
+        ssl_pin: convergeInfo.converge_pin?.trim(),
+        ssl_transaction_type: 'ccsale',
+        ssl_amount: calculateProratedAmount().toFixed(2),
+        ssl_card_number: convergePaymentData.cardNumber.replace(/\s/g, ''),
+        ssl_exp_date: `${convergePaymentData.expiryMonth}${convergePaymentData.expiryYear}`,
+        ssl_cvv2cvc2: convergePaymentData.cvv,
+        ssl_first_name: formData.firstName,
+        ssl_last_name: formData.lastName,
+        ssl_avs_address: formData.address || '',
+        ssl_city: formData.city || '',
+        ssl_state: formData.state || '',
+        ssl_avs_zip: formData.zipCode || '',
+        ssl_email: formData.email || '',
+        ssl_phone: formData.phone || '',
+        ssl_description: 'Membership Enrollment - Standard',
+        ssl_result_format: 'JSON'
+      };
+
+      console.log('Sending payment data to Converge API:', paymentData);
+
+      // Send payment data to your backend to process with Converge
+      const response = await fetch('/api/payment/converge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Payment successful
+        setShowProcessorDemo(true);
+        setPaymentResponse({
+          success: true,
+          message: 'Payment processed successfully!',
+          transaction_id: result.transaction_id,
+          authorization_code: result.authorization_code
+        });
+
+        // Complete enrollment after successful payment
+        await completeEnrollment(result.transaction_id, result.authorization_code);
+      } else {
+        // Payment failed
+        setSubmitError(result.message || 'Payment failed. Please try again.');
+      }
+
+      setIsSubmitting(false);
+
+    } catch (error) {
+      console.error('Converge payment error:', error);
+      setSubmitError('Failed to process payment. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
   
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // If Converge Lightbox is selected, redirect to the Lightbox payment page
-    if (paymentMethod === 'converge-lightbox') {
-      navigate('/payment-converge', {
-        state: {
-          formData: formData,
-          signatureData: signatureData,
-          initialedSections: initialedSections 
-        }
-      });
+    // Automatically use the correct payment method based on club
+    if (processorName === 'CONVERGE') {
+      await processConvergePayment();
       return;
     }
     
-    // Otherwise process payment normally
+    // Otherwise process payment normally (FluidPay or other)
     await processPayment();
   };
+  
+  // Load Converge info when component mounts and club is available
+  useEffect(() => {
+    if (formData?.club && processorName === 'CONVERGE') {
+      fetchConvergeInfo();
+    }
+  }, [formData?.club, processorName]);
+
+  // Auto-select payment method based on club location
+  useEffect(() => {
+    if (selectedClub && processorName) {
+      const isNewMexicoClub = selectedClub.state === 'NM';
+      const isColoradoClub = selectedClub.state === 'CO';
+      
+      if (isNewMexicoClub && processorName === 'CONVERGE') {
+        setPaymentMethod('converge-lightbox');
+      } else if (isColoradoClub && processorName === 'FLUIDPAY') {
+        setPaymentMethod('standard'); // FluidPay uses standard form
+      } else {
+        setPaymentMethod('standard'); // Default fallback
+      }
+    }
+  }, [selectedClub, processorName]);
   
   if (!formData) {
     return <div className="loading">Loading...</div>;
@@ -699,46 +839,28 @@ const PaymentPage = () => {
             </div>
           </div>
           
-          {/* Payment Method Selection */}
-          <div className="payment-method-selection">
-            <h3>Select Payment Method</h3>
-            <div className="payment-options">
-              <div className="payment-option">
-                <input 
-                  type="radio" 
-                  id="standardPayment" 
-                  name="paymentMethod" 
-                  value="standard"
-                  checked={paymentMethod === 'standard'}
-                  onChange={() => setPaymentMethod('standard')}
-                />
-                <label htmlFor="standardPayment">
-                  <span className="payment-option-title">Standard Payment Form</span>
-                  <span className="payment-option-description">Enter your card details directly on this page</span>
-                </label>
-              </div>
-              
-              {processorName === 'CONVERGE' && (
-                <div className="payment-option">
-                  <input 
-                    type="radio" 
-                    id="convergeLightboxPayment" 
-                    name="paymentMethod" 
-                    value="converge-lightbox"
-                    checked={paymentMethod === 'converge-lightbox'}
-                    onChange={() => setPaymentMethod('converge-lightbox')}
-                  />
-                  <label htmlFor="convergeLightboxPayment">
-                    <span className="payment-option-title">Converge Lightbox Payment</span>
-                    <span className="payment-option-description">Use Converge's secure payment system in a popup window</span>
-                  </label>
+          {/* Payment Method Information */}
+          <div className="payment-method-info">
+            <h3>Payment Method</h3>
+            <div className="payment-method-display">
+              {processorName === 'CONVERGE' ? (
+                <div className="payment-method-converge">
+                  <span className="payment-method-title">Converge Secure Payment</span>
+                  <span className="payment-method-description">Your payment will be processed securely through Converge's payment system</span>
+                </div>
+              ) : (
+                <div className="payment-method-standard">
+                  <span className="payment-method-title">Direct Payment Form</span>
+                  <span className="payment-method-description">Enter your card details directly on this page</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Only show card preview if standard payment method is selected */}
-          {paymentMethod === 'standard' && (
+
+
+          {/* Only show card preview if using FluidPay (standard payment form) */}
+          {processorName === 'FLUIDPAY' && (
             <div className={`card-preview ${getCardType()}`} style={{ height: "110px", marginBottom: "0.25rem" }}>
               <div className="card-chip"></div>
               <div className="card-number-display">
@@ -804,6 +926,172 @@ const PaymentPage = () => {
                   </div>
                 )}
               </div>
+            </div>
+          ) : processorName === 'CONVERGE' ? (
+            // Show embedded Converge payment form
+            <div className="converge-payment-container">
+              {!showConvergeForm ? (
+                // Show payment summary and button to load form
+                <div className="converge-payment-instructions">
+                  <div className="payment-summary-box">
+                    <h4>Payment Summary</h4>
+                    <div className="payment-details">
+                      <p><strong>Amount:</strong> ${calculateProratedAmount().toFixed(2)}</p>
+                      <p><strong>Member:</strong> {formData?.firstName} {formData?.lastName}</p>
+                      <p><strong>Club:</strong> {selectedClub?.name}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="payment-instructions">
+                    <p>Click the button below to enter your payment information securely. Your payment will be processed through Converge's secure payment system.</p>
+                  </div>
+                  
+                  <div className="form-actions">
+                    <button 
+                      type="button" 
+                      className="secondary-button"
+                      onClick={() => navigate(-1)}
+                    >
+                      Back
+                    </button>
+                    <button 
+                      type="button" 
+                      className="primary-button"
+                      onClick={() => setShowConvergeForm(true)}
+                      disabled={isLoadingConverge || !convergeInfo}
+                    >
+                      {isLoadingConverge ? 'Loading...' : 'Enter Payment Information'}
+                    </button>
+                  </div>
+                  
+                  {isLoadingConverge && (
+                    <div className="loading-message">
+                      <div className="spinner"></div>
+                      <p>Loading payment processor...</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Show embedded Converge payment form
+                <div className="converge-embedded-form">
+                  <div className="form-header">
+                    <h4>Complete Your Payment</h4>
+                    <p>Please enter your payment information below. This information is securely processed through Converge.</p>
+                  </div>
+                  
+                  <form onSubmit={(e) => { e.preventDefault(); processConvergePayment(); }} className="payment-form">
+                    <div className="form-group">
+                      <label htmlFor="cardholderName">Cardholder Name <span className="required">*</span></label>
+                      <input
+                        type="text"
+                        id="cardholderName"
+                        value={convergePaymentData.cardholderName}
+                        onChange={(e) => setConvergePaymentData(prev => ({ ...prev, cardholderName: e.target.value }))}
+                        placeholder="Name on card"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="form-group">
+                      <label htmlFor="cardNumber">Card Number <span className="required">*</span></label>
+                      <div className="input-icon-container">
+                        <input
+                          type="text"
+                          id="cardNumber"
+                          value={convergePaymentData.cardNumber}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                            setConvergePaymentData(prev => ({ ...prev, cardNumber: value }));
+                          }}
+                          placeholder="1234 5678 9012 3456"
+                          maxLength="19"
+                          required
+                        />
+                        <div className="card-type-icon">
+                          {/* Card type icons will be shown here */}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="form-row">
+                      <div className="form-group">
+                        <label htmlFor="expiryMonth">Expiry Month <span className="required">*</span></label>
+                        <select
+                          id="expiryMonth"
+                          value={convergePaymentData.expiryMonth}
+                          onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryMonth: e.target.value }))}
+                          required
+                        >
+                          <option value="">Month</option>
+                          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                            <option key={month} value={month.toString().padStart(2, '0')}>
+                              {month.toString().padStart(2, '0')}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="expiryYear">Expiry Year <span className="required">*</span></label>
+                        <select
+                          id="expiryYear"
+                          value={convergePaymentData.expiryYear}
+                          onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryYear: e.target.value }))}
+                          required
+                        >
+                          <option value="">Year</option>
+                          {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
+                            <option key={year} value={year.toString().slice(-2)}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="form-group">
+                        <label htmlFor="cvv">CVV <span className="required">*</span></label>
+                        <input
+                          type="text"
+                          id="cvv"
+                          value={convergePaymentData.cvv}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                            setConvergePaymentData(prev => ({ ...prev, cvv: value }));
+                          }}
+                          placeholder="123"
+                          maxLength="4"
+                          required
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="form-actions">
+                      <button 
+                        type="button" 
+                        className="secondary-button"
+                        onClick={() => setShowConvergeForm(false)}
+                      >
+                        Back to Summary
+                      </button>
+                      <button 
+                        type="submit" 
+                        className="primary-button"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Processing Payment...' : `Pay $${calculateProratedAmount().toFixed(2)}`}
+                      </button>
+                    </div>
+                    
+                    <div className="security-notice">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                      </svg>
+                      Your payment information is secure and encrypted
+                    </div>
+                  </form>
+                </div>
+              )}
             </div>
           ) : (
             <form className="payment-form" onSubmit={handleSubmit}>
@@ -936,7 +1224,7 @@ const PaymentPage = () => {
                 className="primary-button"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Processing..." : "Submit Enrollment"}
+                {isSubmitting ? "Processing..." : processorName === 'CONVERGE' ? "Open Secure Payment Form" : "Submit Enrollment"}
               </button>
             </div>
             
