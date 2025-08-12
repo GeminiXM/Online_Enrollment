@@ -926,16 +926,25 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
       return 0;
     }
     
-    // Use the exact pre-calculated values from formData
+    // Use the corrected totalCollected value from ContractPage
+    const totalCollected = parseFloat(formData.totalCollected || 0);
+    
+    // If totalCollected is available and correct, use it
+    if (totalCollected > 0) {
+      console.log('Using totalCollected from ContractPage:', totalCollected);
+      return totalCollected;
+    }
+    
+    // Fallback calculation if totalCollected is not available
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
     const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Add PT package amount if selected
-    const ptPackageAmount = formData.hasPTAddon && formData.ptPackage ? parseFloat(formData.ptPackage.invtr_price || formData.ptPackage.price || 0) : 0;
+    // Add PT package amount if selected (use the corrected amount from formData)
+    const ptPackageAmount = parseFloat(formData.ptPackageAmount || 0);
     
-    // Calculate total using the exact values from formData plus enrollment fee and PT package
+    // Calculate total using the corrected values
     const total = enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount + taxAmount;
     
     console.log('calculateProratedAmount using formData values:', {
@@ -956,9 +965,20 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
     return Math.round(total * 100) / 100;
   };
   
-  // Calculate monthly amount going forward
-  // Calculate monthly amount going forward (including addons and taxes)
+  // Calculate monthly amount going forward (base amount without tax)
   const calculateMonthlyAmount = () => {
+    if (!formData) return 0;
+    
+    const monthlyDues = parseFloat(formData.monthlyDues || 0);
+    const serviceAddons = formData.serviceAddons || [];
+    const addonsTotal = serviceAddons.reduce((sum, addon) => sum + parseFloat(addon.price || 0), 0);
+    
+    // Return base amount (dues + addons) without tax
+    return monthlyDues + addonsTotal;
+  };
+  
+  // Calculate monthly tax amount
+  const calculateMonthlyTax = () => {
     if (!formData) return 0;
     
     const monthlyDues = parseFloat(formData.monthlyDues || 0);
@@ -971,10 +991,7 @@ console.log('ConvergeLightboxPayment - amountBilled being passed to confirmation
     const duesTax = isNewMexicoClub ? Number((monthlyDues * taxRate).toFixed(2)) : 0;
     const addonsTax = isNewMexicoClub ? Number((addonsTotal * taxRate).toFixed(2)) : 0;
     
-    // Gross monthly total includes dues + addons + taxes
-    const grossMonthlyTotal = monthlyDues + addonsTotal + duesTax + addonsTax;
-    
-    return grossMonthlyTotal;
+    return duesTax + addonsTax;
   };
   
   if (!formData) {

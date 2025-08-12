@@ -399,16 +399,24 @@ const PaymentPage = () => {
   const calculateProratedAmount = () => {
     if (!formData) return 0;
     
-    // Use the exact pre-calculated values from formData
+    // Use the corrected totalCollected value from ContractPage
+    const totalCollected = parseFloat(formData.totalCollected || 0);
+    
+    // If totalCollected is available and correct, use it
+    if (totalCollected > 0) {
+      return totalCollected;
+    }
+    
+    // Fallback calculation if totalCollected is not available
     const proratedDues = parseFloat(formData.proratedDues || 0);
     const proratedAddOns = parseFloat(formData.proratedAddOns || 0);
     const taxAmount = parseFloat(formData.taxAmount || 0);
     const enrollmentFee = 19.0; // $19 enrollment fee
     
-    // Add PT package amount if selected
-    const ptPackageAmount = formData.hasPTAddon && formData.ptPackage ? parseFloat(formData.ptPackage.invtr_price || formData.ptPackage.price || 0) : 0;
+    // Add PT package amount if selected (use the corrected amount from formData)
+    const ptPackageAmount = parseFloat(formData.ptPackageAmount || 0);
     
-    // Calculate total using the exact values from formData plus enrollment fee and PT package
+    // Calculate total using the corrected values
     const total = enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount + taxAmount;
     return Math.round(total * 100) / 100;
   };
