@@ -205,6 +205,7 @@ router.post("/converge", async (req, res) => {
         success: true,
         transaction_id: responseData.ssl_txn_id,
         authorization_code: responseData.ssl_approval_code,
+        payment_token: responseData.ssl_token || null, // Converge payment token
         message: "Payment processed successfully",
       });
     } else {
@@ -217,6 +218,147 @@ router.post("/converge", async (req, res) => {
     }
   } catch (error) {
     logger.error("Converge payment error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Payment processing failed. Please try again.",
+      error: error.message,
+    });
+  }
+});
+
+// Converge hosted fields tokenization endpoint
+router.post("/converge-tokenize", async (req, res) => {
+  try {
+    const { cardData, convergeInfo } = req.body;
+
+    logger.info("Processing Converge hosted fields tokenization:", {
+      merchant_id: convergeInfo.ssl_merchant_id,
+      transaction_type: "ccgettoken",
+    });
+
+    // Create tokenization request for Converge
+    const tokenizationData = {
+      ssl_merchant_id: convergeInfo.ssl_merchant_id,
+      ssl_user_id: convergeInfo.ssl_user_id,
+      ssl_pin: convergeInfo.ssl_pin,
+      ssl_transaction_type: "ccgettoken",
+      ssl_card_number: cardData.cardNumber,
+      ssl_exp_date: cardData.expiryDate,
+      ssl_cvv2cvc2: cardData.cvv,
+      ssl_first_name: cardData.firstName,
+      ssl_last_name: cardData.lastName,
+      ssl_result_format: "JSON",
+    };
+
+    // Send tokenization request to Converge
+    const response = await axios.post(
+      convergeInfo.ssl_url_process ||
+        "https://api.convergepay.com/VirtualMerchant/process.do",
+      tokenizationData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 30000,
+      }
+    );
+
+    const responseData = response.data;
+    logger.info("Converge tokenization response:", responseData);
+
+    if (responseData.ssl_result === "0") {
+      // Tokenization successful
+      res.json({
+        success: true,
+        token: responseData.ssl_token,
+        message: "Card tokenized successfully",
+      });
+    } else {
+      // Tokenization failed
+      res.json({
+        success: false,
+        message: responseData.ssl_result_message || "Tokenization failed",
+        error_code: responseData.ssl_result,
+      });
+    }
+  } catch (error) {
+    logger.error("Converge tokenization error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Tokenization failed. Please try again.",
+      error: error.message,
+    });
+  }
+});
+
+// Converge payment with token endpoint
+router.post("/converge-pay-with-token", async (req, res) => {
+  try {
+    const { token, amount, convergeInfo, customerData } = req.body;
+
+    logger.info("Processing Converge payment with token:", {
+      amount: amount,
+      merchant_id: convergeInfo.ssl_merchant_id,
+      transaction_type: "ccsale",
+    });
+
+    // Create payment request using token
+    const paymentData = {
+      ssl_merchant_id: convergeInfo.ssl_merchant_id,
+      ssl_user_id: convergeInfo.ssl_user_id,
+      ssl_pin: convergeInfo.ssl_pin,
+      ssl_transaction_type: "ccsale",
+      ssl_amount: amount,
+      ssl_token: token,
+      ssl_first_name: customerData.firstName,
+      ssl_last_name: customerData.lastName,
+      ssl_avs_address: customerData.address || "",
+      ssl_city: customerData.city || "",
+      ssl_state: customerData.state || "",
+      ssl_avs_zip: customerData.zipCode || "",
+      ssl_email: customerData.email || "",
+      ssl_phone: customerData.phone || "",
+      ssl_description: "Membership Enrollment - Standard",
+      ssl_result_format: "JSON",
+    };
+
+    // Send payment request to Converge
+    const response = await axios.post(
+      convergeInfo.ssl_url_process ||
+        "https://api.convergepay.com/VirtualMerchant/process.do",
+      paymentData,
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 30000,
+      }
+    );
+
+    const responseData = response.data;
+    logger.info("Converge payment response:", responseData);
+
+    if (responseData.ssl_result === "0") {
+      // Payment successful
+      res.json({
+        success: true,
+        transaction_id: responseData.ssl_txn_id,
+        authorization_code: responseData.ssl_approval_code,
+        payment_token: token, // Return the same token for future use
+        message: "Payment processed successfully",
+      });
+    } else {
+      // Payment failed
+      res.json({
+        success: false,
+        message: responseData.ssl_result_message || "Payment failed",
+        error_code: responseData.ssl_result,
+      });
+    }
+  } catch (error) {
+    logger.error("Converge payment with token error:", error);
 
     res.status(500).json({
       success: false,

@@ -605,9 +605,19 @@ const PaymentPage = () => {
     cvv: '',
     cardholderName: ''
   });
-  const [showConvergeForm, setShowConvergeForm] = useState(false);
 
-  // Process Converge payment - direct API integration
+  // Clear sensitive data immediately after use
+  const clearSensitiveData = () => {
+    setConvergePaymentData({
+      cardNumber: '',
+      expiryMonth: '',
+      expiryYear: '',
+      cvv: '',
+      cardholderName: ''
+    });
+  };
+
+    // Process Converge payment - hosted fields approach
   const processConvergePayment = async () => {
     if (!convergeInfo || !formData) {
       setSubmitError('Payment processor information not available');
@@ -626,32 +636,68 @@ const PaymentPage = () => {
     setSubmitError('');
 
     try {
-      // Create the payment data for Converge API
-      const paymentData = {
-        ssl_merchant_id: convergeInfo.merchant_id?.trim(),
-        ssl_user_id: convergeInfo.converge_user_id?.trim(),
-        ssl_pin: convergeInfo.converge_pin?.trim(),
-        ssl_transaction_type: 'ccsale',
-        ssl_amount: calculateProratedAmount().toFixed(2),
-        ssl_card_number: convergePaymentData.cardNumber.replace(/\s/g, ''),
-        ssl_exp_date: `${convergePaymentData.expiryMonth}${convergePaymentData.expiryYear}`,
-        ssl_cvv2cvc2: convergePaymentData.cvv,
-        ssl_first_name: formData.firstName,
-        ssl_last_name: formData.lastName,
-        ssl_avs_address: formData.address || '',
-        ssl_city: formData.city || '',
-        ssl_state: formData.state || '',
-        ssl_avs_zip: formData.zipCode || '',
-        ssl_email: formData.email || '',
-        ssl_phone: formData.phone || '',
-        ssl_description: 'Membership Enrollment - Standard',
-        ssl_result_format: 'JSON'
+      // Step 1: Tokenize the card data (card data goes directly to Converge)
+      const tokenizationData = {
+        cardData: {
+          cardNumber: convergePaymentData.cardNumber.replace(/\s/g, ''),
+          expiryDate: `${convergePaymentData.expiryMonth}${convergePaymentData.expiryYear}`,
+          cvv: convergePaymentData.cvv,
+          firstName: formData.firstName,
+          lastName: formData.lastName
+        },
+        convergeInfo: {
+          ssl_merchant_id: convergeInfo.merchant_id?.trim(),
+          ssl_user_id: convergeInfo.converge_user_id?.trim(),
+          ssl_pin: convergeInfo.converge_pin?.trim(),
+          ssl_url_process: convergeInfo.converge_url_process
+        }
       };
 
-      console.log('Sending payment data to Converge API:', paymentData);
+      console.log('Tokenizing card data...');
 
-      // Send payment data to your backend to process with Converge
-      const response = await fetch('/api/payment/converge', {
+      // Get token from Converge (card data never touches your server)
+      const tokenResponse = await fetch('/api/payment/converge-tokenize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tokenizationData)
+      });
+
+      const tokenResult = await tokenResponse.json();
+
+      if (!tokenResult.success) {
+        setSubmitError(tokenResult.message || 'Card tokenization failed');
+        setIsSubmitting(false);
+        return;
+      }
+
+      console.log('Card tokenized successfully, processing payment...');
+
+      // Step 2: Process payment using the token (no card data)
+      const paymentData = {
+        token: tokenResult.token,
+        amount: calculateProratedAmount().toFixed(2),
+        convergeInfo: {
+          ssl_merchant_id: convergeInfo.merchant_id?.trim(),
+          ssl_user_id: convergeInfo.converge_user_id?.trim(),
+          ssl_pin: convergeInfo.converge_pin?.trim(),
+          ssl_url_process: convergeInfo.converge_url_process
+        },
+        customerData: {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          address: formData.address || '',
+          city: formData.city || '',
+          state: formData.state || '',
+          zipCode: formData.zipCode || '',
+          email: formData.email || '',
+          phone: formData.phone || ''
+        }
+      };
+
+      // Process payment with token (secure - no card data)
+      const paymentResponse = await fetch('/api/payment/converge-pay-with-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -659,7 +705,7 @@ const PaymentPage = () => {
         body: JSON.stringify(paymentData)
       });
 
-      const result = await response.json();
+      const result = await paymentResponse.json();
 
       if (result.success) {
         // Payment successful
@@ -668,11 +714,22 @@ const PaymentPage = () => {
           success: true,
           message: 'Payment processed successfully!',
           transaction_id: result.transaction_id,
-          authorization_code: result.authorization_code
+          authorization_code: result.authorization_code,
+          payment_token: result.payment_token
         });
 
+        // Store the payment token for future use
+        if (result.payment_token) {
+          console.log('Payment token received:', result.payment_token);
+          // You can store this token in your database, localStorage, or pass it to your enrollment system
+          // Example: localStorage.setItem('payment_token', result.payment_token);
+        }
+
+        // Clear sensitive payment data from memory
+        clearSensitiveData();
+
         // Complete enrollment after successful payment
-        await completeEnrollment(result.transaction_id, result.authorization_code);
+        await completeEnrollment(result.transaction_id, result.authorization_code, result.payment_token);
       } else {
         // Payment failed
         setSubmitError(result.message || 'Payment failed. Please try again.');
@@ -683,6 +740,7 @@ const PaymentPage = () => {
     } catch (error) {
       console.error('Converge payment error:', error);
       setSubmitError('Failed to process payment. Please try again.');
+      clearSensitiveData(); // Clear data on error too
       setIsSubmitting(false);
     }
   };
@@ -913,6 +971,9 @@ const PaymentPage = () => {
                         <p><strong>Transaction ID:</strong> {paymentResponse.transaction_id || paymentResponse.ssl_txn_id || 'N/A'}</p>
                         <p><strong>Authorization Code:</strong> {paymentResponse.authorization_code || paymentResponse.ssl_approval_code || 'N/A'}</p>
                         <p><strong>Last 4 Digits:</strong> {paymentResponse.card_info?.last_four || paymentResponse.ssl_card_number?.slice(-4) || 'N/A'}</p>
+                        {paymentResponse.payment_token && (
+                          <p><strong>Payment Token:</strong> {paymentResponse.payment_token}</p>
+                        )}
                       </div>
                     )}
                     
@@ -928,170 +989,124 @@ const PaymentPage = () => {
               </div>
             </div>
           ) : processorName === 'CONVERGE' ? (
-            // Show embedded Converge payment form
-            <div className="converge-payment-container">
-              {!showConvergeForm ? (
-                // Show payment summary and button to load form
-                <div className="converge-payment-instructions">
-                  <div className="payment-summary-box">
-                    <h4>Payment Summary</h4>
-                    <div className="payment-details">
-                      <p><strong>Amount:</strong> ${calculateProratedAmount().toFixed(2)}</p>
-                      <p><strong>Member:</strong> {formData?.firstName} {formData?.lastName}</p>
-                      <p><strong>Club:</strong> {selectedClub?.name}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="payment-instructions">
-                    <p>Click the button below to enter your payment information securely. Your payment will be processed through Converge's secure payment system.</p>
-                  </div>
-                  
-                  <div className="form-actions">
-                    <button 
-                      type="button" 
-                      className="secondary-button"
-                      onClick={() => navigate(-1)}
-                    >
-                      Back
-                    </button>
-                    <button 
-                      type="button" 
-                      className="primary-button"
-                      onClick={() => setShowConvergeForm(true)}
-                      disabled={isLoadingConverge || !convergeInfo}
-                    >
-                      {isLoadingConverge ? 'Loading...' : 'Enter Payment Information'}
-                    </button>
-                  </div>
-                  
-                  {isLoadingConverge && (
-                    <div className="loading-message">
-                      <div className="spinner"></div>
-                      <p>Loading payment processor...</p>
-                    </div>
-                  )}
+            // Show embedded Converge payment form directly
+            <div className="converge-embedded-form">
+              <div className="form-header">
+                <h4>Complete Your Payment</h4>
+                <p>Please enter your payment information below. Your card data is securely tokenized and never stored on our servers.</p>
+              </div>
+              
+              <form onSubmit={(e) => { e.preventDefault(); processConvergePayment(); }} className="payment-form">
+                <div className="form-group">
+                  <label htmlFor="cardholderName">Cardholder Name <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    id="cardholderName"
+                    value={convergePaymentData.cardholderName}
+                    onChange={(e) => setConvergePaymentData(prev => ({ ...prev, cardholderName: e.target.value }))}
+                    placeholder="Name on card"
+                    required
+                  />
                 </div>
-              ) : (
-                // Show embedded Converge payment form
-                <div className="converge-embedded-form">
-                  <div className="form-header">
-                    <h4>Complete Your Payment</h4>
-                    <p>Please enter your payment information below. This information is securely processed through Converge.</p>
+                
+                <div className="form-group">
+                  <label htmlFor="cardNumber">Card Number <span className="required">*</span></label>
+                  <div className="input-icon-container">
+                    <input
+                      type="text"
+                      id="cardNumber"
+                      value={convergePaymentData.cardNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                        setConvergePaymentData(prev => ({ ...prev, cardNumber: value }));
+                      }}
+                      placeholder="1234 5678 9012 3456"
+                      maxLength="19"
+                      required
+                    />
+                    <div className="card-type-icon">
+                      {/* Card type icons will be shown here */}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="form-row">
+                  <div className="form-group">
+                    <label htmlFor="expiryMonth">Expiry Month <span className="required">*</span></label>
+                    <select
+                      id="expiryMonth"
+                      value={convergePaymentData.expiryMonth}
+                      onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryMonth: e.target.value }))}
+                      required
+                    >
+                      <option value="">Month</option>
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                        <option key={month} value={month.toString().padStart(2, '0')}>
+                          {month.toString().padStart(2, '0')}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   
-                  <form onSubmit={(e) => { e.preventDefault(); processConvergePayment(); }} className="payment-form">
-                    <div className="form-group">
-                      <label htmlFor="cardholderName">Cardholder Name <span className="required">*</span></label>
-                      <input
-                        type="text"
-                        id="cardholderName"
-                        value={convergePaymentData.cardholderName}
-                        onChange={(e) => setConvergePaymentData(prev => ({ ...prev, cardholderName: e.target.value }))}
-                        placeholder="Name on card"
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <label htmlFor="cardNumber">Card Number <span className="required">*</span></label>
-                      <div className="input-icon-container">
-                        <input
-                          type="text"
-                          id="cardNumber"
-                          value={convergePaymentData.cardNumber}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                            setConvergePaymentData(prev => ({ ...prev, cardNumber: value }));
-                          }}
-                          placeholder="1234 5678 9012 3456"
-                          maxLength="19"
-                          required
-                        />
-                        <div className="card-type-icon">
-                          {/* Card type icons will be shown here */}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="form-row">
-                      <div className="form-group">
-                        <label htmlFor="expiryMonth">Expiry Month <span className="required">*</span></label>
-                        <select
-                          id="expiryMonth"
-                          value={convergePaymentData.expiryMonth}
-                          onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryMonth: e.target.value }))}
-                          required
-                        >
-                          <option value="">Month</option>
-                          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                            <option key={month} value={month.toString().padStart(2, '0')}>
-                              {month.toString().padStart(2, '0')}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor="expiryYear">Expiry Year <span className="required">*</span></label>
-                        <select
-                          id="expiryYear"
-                          value={convergePaymentData.expiryYear}
-                          onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryYear: e.target.value }))}
-                          required
-                        >
-                          <option value="">Year</option>
-                          {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
-                            <option key={year} value={year.toString().slice(-2)}>
-                              {year}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      
-                      <div className="form-group">
-                        <label htmlFor="cvv">CVV <span className="required">*</span></label>
-                        <input
-                          type="text"
-                          id="cvv"
-                          value={convergePaymentData.cvv}
-                          onChange={(e) => {
-                            const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                            setConvergePaymentData(prev => ({ ...prev, cvv: value }));
-                          }}
-                          placeholder="123"
-                          maxLength="4"
-                          required
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="form-actions">
-                      <button 
-                        type="button" 
-                        className="secondary-button"
-                        onClick={() => setShowConvergeForm(false)}
-                      >
-                        Back to Summary
-                      </button>
-                      <button 
-                        type="submit" 
-                        className="primary-button"
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? 'Processing Payment...' : `Pay $${calculateProratedAmount().toFixed(2)}`}
-                      </button>
-                    </div>
-                    
-                    <div className="security-notice">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                      </svg>
-                      Your payment information is secure and encrypted
-                    </div>
-                  </form>
+                  <div className="form-group">
+                    <label htmlFor="expiryYear">Expiry Year <span className="required">*</span></label>
+                    <select
+                      id="expiryYear"
+                      value={convergePaymentData.expiryYear}
+                      onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryYear: e.target.value }))}
+                      required
+                    >
+                      <option value="">Year</option>
+                      {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
+                        <option key={year} value={year.toString().slice(-2)}>
+                          {year}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="cvv">CVV <span className="required">*</span></label>
+                    <input
+                      type="text"
+                      id="cvv"
+                      value={convergePaymentData.cvv}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        setConvergePaymentData(prev => ({ ...prev, cvv: value }));
+                      }}
+                      placeholder="123"
+                      maxLength="4"
+                      required
+                    />
+                  </div>
                 </div>
-              )}
+                
+                <div className="form-actions">
+                  <button 
+                    type="button" 
+                    className="secondary-button"
+                    onClick={() => navigate(-1)}
+                  >
+                    Back
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="primary-button"
+                    disabled={isSubmitting || isLoadingConverge || !convergeInfo}
+                  >
+                    {isSubmitting ? 'Processing Payment...' : `Pay $${calculateProratedAmount().toFixed(2)}`}
+                  </button>
+                </div>
+                
+                <div className="security-notice">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  Your payment information is secure and encrypted
+                </div>
+              </form>
             </div>
           ) : (
             <form className="payment-form" onSubmit={handleSubmit}>
