@@ -184,8 +184,8 @@ export const getFluidPayInfo = async (req, res) => {
         });
         fluidPayInfo = {
           club: parseInt(clubId),
-          fluidpay_base_url: "https://api-sandbox.fluidpay.com",
-          fluidpay_api_key: "pub_test_demo_key",
+          fluidpay_base_url: "https://api.fluidpay.com",
+          fluidpay_api_key: "pub_31FUYRENhNiAvspejegbLoPD2he",
           merchant_id: `fpmerchant_${clubId}`,
         };
       }
@@ -202,7 +202,7 @@ export const getFluidPayInfo = async (req, res) => {
             originalKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
           }
         );
-        fluidPayInfo.fluidpay_api_key = "pub_test_demo_key";
+        fluidPayInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
       }
 
       logger.info("FluidPay info retrieved successfully", {
@@ -225,14 +225,14 @@ export const getFluidPayInfo = async (req, res) => {
 
       const fallbackInfo = {
         club: parseInt(clubId),
-        fluidpay_base_url: "https://api-sandbox.fluidpay.com",
-        fluidpay_api_key: "pub_test_fallback_key",
+        fluidpay_base_url: "https://api.fluidpay.com",
+        fluidpay_api_key: "pub_31FUYRENhNiAvspejegbLoPD2he",
         merchant_id: `fpmerchant_fallback_${clubId}`,
       };
 
       // Ensure fallback API key has correct format
       if (!fallbackInfo.fluidpay_api_key.startsWith("pub_")) {
-        fallbackInfo.fluidpay_api_key = "pub_test_fallback_key";
+        fallbackInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
       }
 
       res.status(200).json({
@@ -857,7 +857,9 @@ const generateConvergeTransactionToken = async (convergeInfo, tokenData) => {
         errorText: errorText.substring(0, 500), // Log first 500 chars
       });
       throw new Error(
-        `Converge API error: ${response.status} ${response.statusText} - ${errorText.substring(0, 200)}`
+        `Converge API error: ${response.status} ${
+          response.statusText
+        } - ${errorText.substring(0, 200)}`
       );
     }
 

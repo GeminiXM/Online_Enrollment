@@ -78,7 +78,7 @@ const ConvergeLightboxPayment = () => {
       setErrorMessage('Payment completed but no transaction token received. Please contact support.');
       return;
     }
-
+    
     // Now we can pass this token to web_proc_InsertWebStrcustr
     console.log('Transaction token for database:', transactionToken);
     
@@ -177,7 +177,7 @@ const ConvergeLightboxPayment = () => {
         setErrorMessage('Unable to load payment processor information.');
       }
     };
-
+    
     fetchConvergeInfo();
   }, [selectedClub]);
 
@@ -189,12 +189,12 @@ const ConvergeLightboxPayment = () => {
   }, []);
 
   // Launch Converge Lightbox
-  const launchLightbox = async () => {
-    console.log('Launching Converge Lightbox...');
+const launchLightbox = async () => {
+  console.log('Launching Converge Lightbox...');
     
     try {
       // Payment fields for Converge Lightbox (Virtual Merchant API)
-      const paymentFields = {
+    const paymentFields = {
         ssl_merchant_id: processorInfo.merchant_id.trim(),
         ssl_user_id: processorInfo.converge_user_id.trim(),
         ssl_pin: processorInfo.converge_pin.trim(),
@@ -202,19 +202,19 @@ const ConvergeLightboxPayment = () => {
         ssl_amount: calculateProratedAmount().toFixed(2),
         ssl_invoice_number: `INV-${Date.now()}`,
         ssl_description: `Membership Enrollment - ${formData?.membershipDetails?.membershipId || 'Standard'}`,
-        ssl_first_name: customerInfo.firstName,
-        ssl_last_name: customerInfo.lastName,
-        ssl_avs_address: customerInfo.address,
-        ssl_city: customerInfo.city,
-        ssl_state: customerInfo.state,
-        ssl_avs_zip: customerInfo.zipCode,
-        ssl_phone: customerInfo.phone,
+      ssl_first_name: customerInfo.firstName,
+      ssl_last_name: customerInfo.lastName,
+      ssl_avs_address: customerInfo.address,
+      ssl_city: customerInfo.city,
+      ssl_state: customerInfo.state,
+      ssl_avs_zip: customerInfo.zipCode,
+      ssl_phone: customerInfo.phone,
         ssl_email: customerInfo.email,
         ssl_cvv2_indicator: processorInfo.converge_cvv2_indicator || "N"
-      };
-      
-      console.log('Payment fields:', paymentFields);
-      console.log('Demo mode:', demoMode);
+    };
+    
+    console.log('Payment fields:', paymentFields);
+    console.log('Demo mode:', demoMode);
       console.log('Converge credentials being used:', {
         merchant_id: paymentFields.ssl_merchant_id,
         user_id: paymentFields.ssl_user_id,
@@ -222,11 +222,11 @@ const ConvergeLightboxPayment = () => {
         amount: paymentFields.ssl_amount,
         transaction_type: paymentFields.ssl_transaction_type
       });
+    
+    if (demoMode) {
+      console.log('Using demo/simulation mode for Converge Lightbox');
       
-      if (demoMode) {
-        console.log('Using demo/simulation mode for Converge Lightbox');
-        
-        // Generate iframe URL for demo mode
+      // Generate iframe URL for demo mode
         const iframeUrl = `/online-enrollment/converge-demo-iframe.html?amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
         
         // Create iframe for demo
@@ -242,11 +242,11 @@ const ConvergeLightboxPayment = () => {
         iframe.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
         
         document.body.appendChild(iframe);
-        
-        // Set up postMessage listener for simulation
-        window.removeEventListener('message', handleLightboxResponse);
-        window.addEventListener('message', handleLightboxResponse, false);
-      } else {
+      
+      // Set up postMessage listener for simulation
+      window.removeEventListener('message', handleLightboxResponse);
+      window.addEventListener('message', handleLightboxResponse, false);
+    } else {
         console.log('Using real Converge Lightbox integration (Virtual Merchant API)');
         
         // Create a form that POSTs to Converge Virtual Merchant API
@@ -285,18 +285,18 @@ const ConvergeLightboxPayment = () => {
         setErrorMessage('');
         
         // Show instructions to user
-        setTimeout(() => {
+          setTimeout(() => {
           alert('Payment form opened in new tab. Please complete your payment in the new tab, then return here to continue with enrollment.');
         }, 100);
-      }
-      
-    } catch (error) {
-      console.error('Error launching Converge Lightbox:', error);
-      setErrorMessage('Unable to launch payment form. Please try again later.');
-      setIsSubmitting(false);
+    }
+    
+  } catch (error) {
+    console.error('Error launching Converge Lightbox:', error);
+    setErrorMessage('Unable to launch payment form. Please try again later.');
+    setIsSubmitting(false);
     }
   };
-
+  
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -317,7 +317,7 @@ const ConvergeLightboxPayment = () => {
   const handleBack = () => {
     navigate('/contract', { state: { formData } });
   };
-
+  
   if (!formData) {
     return (
       <div className="payment-page">
@@ -325,14 +325,14 @@ const ConvergeLightboxPayment = () => {
       </div>
     );
   }
-
+  
   return (
     <div className="payment-page">
-      <div className="payment-container">
+    <div className="payment-container">
         <div className="payment-header">
           <h1>Converge Lightbox Payment</h1>
           <p>When you click the "Pay Now" button below, a secure payment form will appear where you can safely enter your credit card information. Your payment will be processed securely by Converge, our payment processor.</p>
-        </div>
+            </div>
 
         <div className="payment-authorization">
           <p><strong>I hereby request and authorize {selectedClub?.name || 'New Mexico Sports and Wellness'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData?.membershipStartDate ? formatDateWithoutTimezoneShift(formData.membershipStartDate) : 'the start date'}. The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.name || 'New Mexico Sports and Wellness'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.</strong></p>
@@ -357,27 +357,27 @@ const ConvergeLightboxPayment = () => {
             </div>
           </div>
         </div>
-
+        
         <div className="payment-actions">
-          <button
-            type="button"
+              <button 
+                type="button" 
             onClick={handleBack}
             className="btn btn-secondary"
-            disabled={isSubmitting}
-          >
-            Back
-          </button>
+                disabled={isSubmitting}
+              >
+                Back
+              </button>
           
-          <button
+              <button 
             type="submit"
-            onClick={handleSubmit}
+                onClick={handleSubmit}
             className="btn btn-primary"
             disabled={isSubmitting || !processorInfo}
-          >
+              >
             {isSubmitting ? 'Processing...' : 'Pay with Converge'}
-          </button>
-        </div>
-
+              </button>
+            </div>
+            
         {errorMessage && (
           <div className="error-message">
             {errorMessage}
@@ -388,8 +388,8 @@ const ConvergeLightboxPayment = () => {
           <div className="success-message">
             <h3>Payment Successful!</h3>
             <p>Your payment has been processed successfully. You will be redirected to the confirmation page shortly.</p>
-          </div>
-        )}
+            </div>
+          )}
 
         <div className="payment-security">
           <p>Your payment information is secure and encrypted</p>

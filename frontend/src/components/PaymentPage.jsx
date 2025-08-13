@@ -168,16 +168,16 @@ const PaymentPage = () => {
                     // Set fallback info for FluidPay
                     setProcessorInfo({
                       merchant_id: 'Demo FluidPay Merchant',
-                      fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
-                      fluidpay_api_key: '✓ Configured'
+                      fluidpay_base_url: 'https://api.fluidpay.com',
+                      fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he'
                     });
                   }
                 } catch (error) {
                   console.error('Error fetching FluidPay info:', error);
                   setProcessorInfo({
                     merchant_id: 'Demo FluidPay Merchant (Fallback)',
-                    fluidpay_base_url: 'https://api-sandbox.fluidpay.com',
-                    fluidpay_api_key: '✓ Configured'
+                    fluidpay_base_url: 'https://api.fluidpay.com',
+                    fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he'
                   });
                 }
               } else {
@@ -952,10 +952,9 @@ const PaymentPage = () => {
                 {!paymentResponse ? (
                   <div className="processing-loading">
                     <div className="spinner"></div>
-                    <p>Processing your payment with {processorName === 'FLUIDPAY' ? 'FluidPay' : 'Converge'}...</p>
+                    <p>Processing your payment...</p>
                     <p className="processing-details">
-                      Amount: ${calculateProratedAmount().toFixed(2) || "50.00"}<br/>
-                      Card: **** **** **** {paymentFormData.cardNumber.slice(-4)}
+                      Amount: ${calculateProratedAmount().toFixed(2) || "50.00"}
                     </p>
                   </div>
                 ) : (

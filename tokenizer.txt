@@ -1,0 +1,447 @@
+okenizer
+Securely tokenize user payments
+
+Overview
+The purpose of the Tokenizer API is to provide a javascript implementation that injects hosted payment fields onto a client’s website. By injecting the hosted payment page into an iframe via this library, a client remains outside the scope of PCI while still having full control over the processing of the transaction. Once the sensitive data has been collected and tokenized, you may submit any regular API call exchanging the sensitive information with the token you have received within 2 minutes.
+
+Example
+
+WARNING
+
+Generated tokens have a 2 minute expiration time
+
+Simplicity
+With a few lines of code you can take customer payments on your website
+
+Security
+Tokenizer creates a secure iframe that seperates your website from the processing of users payment information into a vault system with a returned token hash
+
+Customizability
+Even though we host and provide the form you can pass your own css styles to tokenizer. See styles
+
+Playground
+
+var example = new Tokenizer({
+  apikey: 'key here',
+  container: document.querySelector('#div container'),
+  submission: (resp) => {
+    console.log(resp)
+  },
+  settings: {
+    processorId: 'optional',
+    payment: {
+      types: ['card'],
+      card: { strict_mode: false, requireCVV: false }
+    }
+  }
+})
+Payment Methods
+Credit Card Options
+Strict Mode
+Require CVV
+User Required
+Billing Required
+Add Script Code
+TIP
+
+You will need a public api key, the public api key will start with pub_ and is safe to use on the frontend of your website.
+
+TIP
+
+The code that instantiates a new tokenizer instance (not the script src import) can be in the head or the body as long as the container element your referring to has loaded and is accessible. You can use any string to access your element as long as it can be referenced in a document.querySelector('#container') call as that is what tokenizer will attempt to do to look for the element you provided.
+
+WARNING
+
+If you're developing locally be sure to set the url to your api endpoint. Otherwise it will attempt to make a request to the url you are on.
+
+WARNING
+
+Based upon how you build your front end application you may want to place the tokenizer.js file at the bottom of the html body.
+
+DANGER
+
+The secret api key, should never be shared and should only be used within the backend of your application.
+
+
+<html>
+  <head>
+    <!-- Add tokenizer.js file to head or end of body based upon your application setup -->
+    <script language="javascript" src="https://sandbox.fluidpay.com/tokenizer/tokenizer.js"></script>
+  </head>
+  <body>
+    <!-- Add div with id, that we will reference below, for where iframe form will go -->
+    <div id="container"></div>
+
+    <!-- Add button to call submit -->
+    <button onclick="example.submit()">Submit</button>
+
+    <!-- Add script tag -->
+    <script>
+      var example = new Tokenizer({
+        url: '', // Optional - Only needed if domain is different than the one your on, example: localhost
+        apikey: 'pub_XXXXXXXXXXXXXX',
+        container: '#container', // Make sure that this "container" is the same as the id of the div container you referenced above.
+        // Callback after submission request has been made
+        // See Advanced -> Methods for breakdown of specific fields
+        submission: (resp) => { console.log(resp) }
+      })
+    </script>
+  </body>
+</html>
+Default Output
+Default
+
+Process with token
+Once you have received the token from the submission callback, you can use the token to replace a payment object in any of our direct API calls.
+
+See Transaction Processing for more details
+
+See below for a few examples:
+
+Sale
+
+fetch("{ url goes here }/api/transaction", {
+  method: "POST",
+  headers: {
+    "Authorization": "APIKEY",
+    "Content-Type": "application/json",
+  },
+  body: {
+    "type": "sale",
+    "amount": 1112,
+    "payment_method": {
+      "token": "<tokenizer token goes here>"
+    }
+  }
+})
+.then(response => response.text())
+.then(data => console.log(data));
+Customer Vault
+
+fetch("{ url goes here }/api/vault/customer", {
+  method: "POST",
+  headers: {
+    "Authorization": "APIKEY",
+    "Content-Type": "application/json",
+  },
+  body: {
+    "description": "test description",
+    "payment_method": {
+      "token": "<tokenizer token goes here>"
+    },
+    "billing_address": {
+      "first_name": "John",
+      "last_name": "Smith",
+      "company": "Some Business",
+      "address_line_1": "123 Some St",
+      "address_line_2": "STE 1",
+      "city": "Some Town",
+      "state": "IL",
+      "postal_code": "60187",
+      "country": "US",
+      "email": "user@somesite.com",
+      "phone": "5555555555",
+      "fax": "555555555"
+    }
+  }
+})
+.then(response => response.text())
+.then(data => console.log(data));
+Advanced
+Multiple Payment Types
+Tokenizer currently supports two payment types credit/debit cards and ach. By default only card is enabled, to enable ach add it to the payment types
+
+
+var example = new Tokenizer({
+  apikey: 'pub_XXXXXXXXXXXXXX',
+  container: '#container',
+  submission: (resp) => { console.log(resp) },
+  settings: {
+    payment: {
+      types: ['card', 'ach'], // Default ['card']
+      ach: {
+        sec_code: 'web', // Default web - web, ccd, ppd, tel
+        showSecCode: false, // Default false - true to show sec code dropdown
+        verifyAccountRouting: false, // Default false - true to verify account routing numbers
+        
+        // If ach selected make certain user fields required
+        user_required: {
+          first_name: false,
+          last_name: false,
+          email: false,
+          phone: false,
+        }
+
+        // If ach selected make certain billing fields required
+        billing_required: {
+          address: false,
+          city: false,
+          state: false,
+          zip: false,
+          country: false,
+        }
+      },
+      card: {
+        strict_mode: false, // Set to true to allow for 19 digit cards
+        requireCVV: false, // Default false - true to require cvv
+
+         // If card selected make certain user fields required
+        user_required: {
+          first_name: false,
+          last_name: false,
+          email: false,
+          phone: false,
+        }
+
+        // If card selected make certain billing fields required
+        billing_required: {
+          address: false,
+          city: false,
+          state: false,
+          zip: false,
+          country: false,
+        }
+      }
+    }
+  }
+})
+Paay Integration
+Tokenizer will make paay requests when the service is turned on. If the paay service is turned on any use of tokenizer will attempt paay service. Below are a list of options you may use to fine tune paay service with tokenizer.
+
+
+var example = new Tokenizer({
+  apikey: "pub_XXXXXXXXXXXXXX",
+  container: '#container',
+  submission: (resp) => {
+    console.log(resp);
+
+    console.log(resp.paay); // to see paay response values
+  },
+  settings: {
+    paay: {
+      sandbox: false, // Set to true to send to sandbox endpoint
+      forceDisabled: false, // Force not running paay
+      rejectChallenges: [], // Statuses to reject from submission
+      // https://docs.3dsintegrator.com/docs/3ds-response-table-of-content
+    },
+  },
+});
+
+// amount must be passed to submit for paay.
+// otherwise it will be run as an NPA(Non-Payment Authentication)
+example.submit("5.55");
+Fee Calculation
+Tokenizer will calculate certain fees for you based upon the amount, payment type selected and the processor id that is passed in. Processor id is optional and if not passed in it will default to the default processor.
+
+
+var tokenizer = new Tokenizer({
+  apikey: apikey,
+  amount: 100,
+  container: this.$refs.example as HTMLDivElement,
+  settings: {
+    payment: {
+      calculateFees: true,
+
+      // optional - default will use default processor
+      processorId: '12345'
+    }
+  },
+  submission: (resp: any) => {
+    console.log(resp)
+  },
+  validCard: (resp: any) => {
+    console.log(resp)
+  }
+})
+
+// Submit
+var submit = function() {
+  // submit off to the tokenizer with the dollar amount
+  tokenizer.submit()
+}
+Settings
+Tokenizer allows the you to easy take in user, billing and shpping information within the same form. This info will be pased back to the submission callback in raw values.
+
+TIP
+
+Tokenizer DOES NOT tokenize user, shipping or billing information! It only tokenizes payment info
+
+
+var example = new Tokenizer({
+  apikey: 'pub_XXXXXXXXXXXXXX',
+  container: '#container',
+  submission: (resp) => { console.log(resp) },
+  settings: {
+    payment: {
+      calculateFees: true,
+      showTitle: true,
+      placeholderCreditCard: '0000 0000 0000 0000',
+      showExpDate: true,
+      showCVV: true,
+      ach: {
+        sec_code: 'web', // Default web - web, ccd, ppd, tel
+        secCodeList: ['web', 'ccd', 'ppd'], // Default web, ccd, ppd
+        showSecCode: false // Default false - true to show sec code dropdown
+      },
+      card: {
+        strict_mode: false, // Set to true to allow for 19 digit cards
+        requireCVV: false // Default false - true to require cvv
+      }
+    },
+    user: {
+      showInline: true,
+      showName: true,
+      showEmail: true,
+      showPhone: true,
+      showTitle: true
+    },
+    shipping: {
+      show: true,
+      showTitle: true
+    },
+    billing: {
+      show: true,
+      showTitle: true
+    }
+  }
+})
+Methods
+
+var example = new Tokenizer({
+  apikey: 'pub_XXXXXXXXXXXXXX',
+  container: '#container',
+  // Callback after submission request has been made
+  submission: (resp) => {
+    // Figure out what response you got back
+    switch(resp.status) {
+      case 'success':
+        // Successful submission
+        console.log(resp.token)
+
+        // If you had user info
+        if (resp.user) { console.log(resp.user) }
+
+        // If you had billing info
+        if (resp.billing) { console.log(resp.billing) }
+        
+        // If you had shipping info
+        if (resp.shipping) { console.log(resp.shipping) }
+        break;
+      case 'error':
+        // Encountered an error while performing submission
+        console.log(resp.msg)
+        break;
+      case 'validation':
+        // Encountered form validation specific errors
+        console.log(resp.invalid)
+        break;
+    }
+  },
+
+  // Callback after iframe is initiated an onload
+  onLoad: () => { console.log('iframe has loaded') },
+
+  // Callback after payment type changes
+  onPaymentChange: (type) => { console.log(type) },
+
+  // Callback to identify when a valid cc has been inputed
+  // If valid will return ccbin data as well
+  validCard: (card) => {
+    console.log(card)
+    // card.isValid // Boolean
+    // card.bin // Object of bin data
+
+    // If lookupFees is enabled in the options, then you will also receive the following:
+    // card.ServiceFee uint - ServiceFee is applicable, to be added to the requested amount.
+    // card.PaymentAdjustment.value 
+    // card.PaymentAdjustment.type
+    // card.RequestedAmount uint - this is the base amount of the transaction, any service fee/surcharge should be added to this
+    // card.Surcharge uint - this is the amount to be surcharged.
+    // card.Disclosure string - this is the surcharge text to be presented to the card holder
+
+    // If you need to check if surchargable
+    // Pass state and card bin data
+    var isSurchargeable = example.isSurchargeable(state, card.bin)
+    console.log(isSurchargeable)
+  },
+
+  // Callback for when the user has changed sec code or account type
+  achOnChange: (data: any) => { console.log(data) },
+
+  // Callback for when someone swipped a card
+  magStripeSwipe: (data: any) => { console.log(data) }
+})
+
+// Set error on field
+// by passing in the field name which is the name of primary css on the field
+// it will set a red border around the field
+example.setError('cvv') // Set error on cvv field
+
+// Set expiration date on card payment
+example.setExpDate('09/12')
+
+// Submit payment
+example.submit()
+Single Page Apps
+Tokenizer is currently setup to output to UMD(univeral module loader). If you hare having difficulty configuring webpack to get the file imported. You can always import into your main file and just refer to it as if it was a window variable.
+
+
+// index.js - add to your main file
+import './tokenizer.js' // tokenizer will add to window.Tokenizer allowing you to globally use it
+
+new Tokenizer({
+  apikey: 'pub_XXXXXXXXXXXXXX',
+  container: '#container'
+})
+Card Swipe Reader
+By default tokenizer will allow the ability to take in a card swipe reader and automaticallly fill out the credit card and expiration fields.
+
+In order for this to work you have to at least be focused on the credit card field.
+
+Style Examples
+Tokenizer allows the passing of css information to style form within the iframe
+
+
+// Example Code
+var example = new Tokenizer({
+  apikey: 'pub_XXXXXXXXXXXXXX',
+  container: '#container',
+  submission: (resp) => { console.log(resp) },
+  settings: {
+    // Styles object will get converted into a css style sheet.
+    // Inspect elements to see structured html elements
+    // and style them the same way you would in css.
+    styles: {
+      'body': {
+        'color': '#ffffff'
+      },
+      'input': {
+        'color': '#ffffff',
+        'border-radius': '8px',
+        'background-color': '#ffffff40',
+        'border': 'none'
+      },
+
+      // Example - style cvv to have full border box
+      '.payment .cvv input': {
+        'border': 'solid 1px #ffffff',
+        'padding-left': '6px'
+      }
+    }
+  }
+})
+Default
+Default
+
+Dark Mode
+Dark Mode
+
+Purple
+Purple
+
+Integration
+Konnektive
+If you are looking to use our Tokenizer integration along side Konnektive as a CRM, you will need to submit the resulting token in the formCardNonce field to their Order Import API.
+
+Pager
+Next page
