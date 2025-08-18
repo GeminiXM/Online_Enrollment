@@ -354,7 +354,8 @@ class EmailService {
                 selectedClub?.address || "our club location"
               }.</li>
               <li><strong>Orientation:</strong> Schedule a free orientation session to learn about our facilities and programs.</li>
-              
+              <li><strong>Schedule a Personal Training Session:</strong> Fill out the form here <a href="https://wellbridge.com/personal-coaching-session/" style="color: #1e90ff;">https://wellbridge.com/personal-coaching-session/</a> to get Started!</li>
+                            
             </ol>
             
             <h3>Important Information</h3>

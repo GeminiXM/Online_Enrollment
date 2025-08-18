@@ -38,6 +38,15 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
   }
 
   const getDescription = (addonName) => {
+    // Find the addon in the addons array to get its description from the database
+    const addon = addons?.find(a => a.invtr_desc === addonName);
+    
+    // If the addon has a description field from the database, use it
+    if (addon && addon.description) {
+      return addon.description;
+    }
+    
+    // Fallback to hardcoded descriptions for backward compatibility
     switch(addonName) {
       case 'Tennis Passport':
         return 'Allows you to play tennis at any Wellbridge club location';
@@ -71,7 +80,7 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
   };
 
   return (
-    <div>
+    <div className="service-addons-container">
       <div className="addons-grid">
         {regularAddons.map((addon, index) => (
           <div 
@@ -104,7 +113,11 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
       </div>
       
       {hoveredAddon && (
-        <div className="addon-description-text">
+        <div 
+          className="addon-description-text"
+          onMouseEnter={() => setHoveredAddon(hoveredAddon)}
+          onMouseLeave={() => setHoveredAddon(null)}
+        >
           {getDescription(hoveredAddon)}
         </div>
       )}

@@ -283,6 +283,20 @@ function EnrollmentForm() {
         setSelectedServiceAddons(reconstructedAddons);
       }
       
+      // Restore PT data if available
+      if (contractData.hasPTAddon && contractData.ptPackage) {
+        console.log("Restoring PT data from contract:", {
+          hasPTAddon: contractData.hasPTAddon,
+          ptPackage: contractData.ptPackage
+        });
+        setHasPTAddon(true);
+        setPtPackage(contractData.ptPackage);
+      } else {
+        // Ensure PT is cleared if not present
+        setHasPTAddon(false);
+        setPtPackage(null);
+      }
+      
       // Set membership price data if available
       if (contractData.membershipDetails) {
         const details = contractData.membershipDetails;
@@ -1471,11 +1485,28 @@ function EnrollmentForm() {
       
       // Transform form data for submission
       const submissionData = transformFormDataForSubmission();
-      console.log("Preparing to show PT modal with data", submissionData);
+      console.log("Preparing to submit form with data", submissionData);
       
-      // Store the submission data and show PT modal
+      // Store the submission data
       setFormSubmissionData(submissionData);
-      setShowPTModal(true);
+      
+      // Only show PT modal if PT is not already in the cart
+      if (!hasPTAddon) {
+        console.log("PT not in cart, showing PT modal");
+        setShowPTModal(true);
+      } else {
+        console.log("PT already in cart, proceeding directly to contract");
+        // Navigate directly to contract since PT is already selected
+        navigate('/contract', { 
+          state: { 
+            formData: {
+              ...submissionData,
+              hasPTAddon: true,
+              ptPackage: ptPackage
+            }
+          } 
+        });
+      }
       
       // Clear saved data since we're proceeding with submission
       await clearSavedData();
@@ -4429,6 +4460,16 @@ function EnrollmentForm() {
                     </div>
                   </li>
                 </ul>
+                <button 
+                  type="button"
+                  className="remove-pt-button"
+                  onClick={() => {
+                    setHasPTAddon(false);
+                    setPtPackage(null);
+                  }}
+                >
+                  Remove Personal Training
+                </button>
               </div>
             )}
             

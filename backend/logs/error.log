@@ -2349,3 +2349,6 @@
 2025-08-18 10:49:35:4935 [31merror[39m: [31mError processing FluidPay payment:[39m
 2025-08-18 10:54:13:5413 [31merror[39m: [31mFluidPay API call failed[39m
 2025-08-18 10:54:13:5413 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 14:56:40:5640 [31merror[39m: [31mError connecting to database:[39m
+2025-08-18 14:56:40:5640 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-18 14:56:40:5640 [31merror[39m: [31mError in getTaxRate:[39m
