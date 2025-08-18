@@ -4306,7 +4306,7 @@ function EnrollmentForm() {
           <div className="privacy-notice">
             <p>
                  <strong>Privacy Notice:</strong> The information collected on this form is used solely for the purpose of 
-              processing your gym membership enrollment. We adhere to all applicable data protection laws and will not 
+              processing your Club membership enrollment. We adhere to all applicable data protection laws and will not 
               share your personal information with third parties without your consent, except as required by law.
             </p>
           </div>
@@ -4420,7 +4420,7 @@ function EnrollmentForm() {
             
             {hasPTAddon && ptPackage && (
               <div className="pt-package">
-                <h3>Personal Training Package</h3>
+                <h3>New Intro Personal Training Package</h3>
                 <ul>
                   <li>
                     <div>{ptPackage.description || "4 Sessions with a Trainer/Instructor"}</div>
@@ -4446,7 +4446,7 @@ function EnrollmentForm() {
                   </div>
                   {hasPTAddon && ptPackage && (
                     <div className="price-row">
-                      <span>Personal Training Package</span>
+                      <span>New Intro Personal Training Package</span>
                       <span>${ptPackage.price || 149}</span>
                     </div>
                   )}

@@ -447,7 +447,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
 
         ...(formData.hasPTAddon && formData.ptPackage ? [
           [
-            { content: 'Personal Training Package', styles: { fontStyle: 'normal' } },
+            { content: 'New Intro Personal Training Package', styles: { fontStyle: 'normal' } },
             { content: `$${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}`, styles: { fontStyle: 'normal' } },
             { content: '', styles: { fontStyle: 'normal' } },
             { content: '', styles: { fontStyle: 'normal' } }

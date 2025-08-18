@@ -2323,3 +2323,29 @@
 2025-08-12 16:06:10:610 [31merror[39m: [31mError generating Converge token:[39m
 2025-08-12 16:09:54:954 [31merror[39m: [31mError calling Converge API for token generation:[39m
 2025-08-12 16:09:54:954 [31merror[39m: [31mError generating Converge token:[39m
+2025-08-14 15:19:25:1925 [31merror[39m: [31mError connecting to database:[39m
+2025-08-14 15:19:25:1925 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-14 15:19:25:1925 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-14 15:24:55:2455 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-14 15:24:55:2455 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-14 15:29:23:2923 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-14 15:29:23:2923 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-14 15:35:13:3513 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-14 15:35:13:3513 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-14 15:47:04:474 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-14 15:47:04:474 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-14 15:55:14:5514 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-14 15:55:14:5514 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 10:26:21:2621 [31merror[39m: [31mFailed to parse FluidPay response as JSON[39m
+2025-08-18 10:26:21:2621 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-18 10:26:21:2621 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 10:37:35:3735 [31merror[39m: [31mFailed to parse FluidPay response as JSON[39m
+2025-08-18 10:37:35:3735 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-18 10:37:35:3735 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 10:41:35:4135 [31merror[39m: [31mFailed to parse FluidPay response as JSON[39m
+2025-08-18 10:41:35:4135 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-18 10:41:35:4135 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 10:49:35:4935 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-18 10:49:35:4935 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-08-18 10:54:13:5413 [31merror[39m: [31mFluidPay API call failed[39m
+2025-08-18 10:54:13:5413 [31merror[39m: [31mError processing FluidPay payment:[39m

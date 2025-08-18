@@ -1291,7 +1291,7 @@ const ContractPage = () => {
           {formData.hasPTAddon && formData.ptPackage && (
             <div className="info-row">
               <div className="info-column financial-item">
-                <div className="info-label">Personal Training Package (including applicable taxes)</div>
+                <div className="info-label">New Intro Personal Training Package (including applicable taxes)</div>
                 <div className="info-value">${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}</div>
               </div>
             </div>

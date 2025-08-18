@@ -119,31 +119,41 @@
 
 /* Confirm button for selecting signature style */
 .confirm-btn {
-  background-color: #6c757d;  /* Medium gray (Bootstrap secondary) */
-  color: white;
+  background-color: #007bff !important;  /* Bootstrap primary blue for better visibility */
+  color: white !important;
   border: none;
-  border-radius: 2px;
-  padding: 6px 12px;  /* Increased padding for larger button */
+  border-radius: 4px;  /* Slightly more rounded */
+  padding: 8px 16px;  /* More padding for larger button */
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s;
-  min-width: 80px;  /* Increased minimum width for larger button */
+  transition: all 0.2s ease-in-out;  /* Smooth transition for all effects */
+  min-width: 90px;  /* Increased minimum width for larger button */
   font-size: 0.9rem;  /* Slightly larger font size */
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);  /* Subtle shadow */
 }
 
 /* Hover effect for confirm button */
 .confirm-btn:hover {
-  background-color: #5a6268;  /* Slightly darker on hover */
+  background-color: #0056b3 !important;  /* Darker blue on hover */
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3) !important;  /* Enhanced shadow on hover */
+  transform: translateY(-1px) !important;  /* Slight lift effect */
 }
 
-/* Confirmed state styling - turns green when confirmed */
-.confirm-btn.confirmed {
-  background-color: #28a745;  /* Green background (Bootstrap success) */
+/* Confirmed state styling - uses "Due Today" color from shopping cart */
+.signature-selector .confirm-btn.confirmed {
+  background-color: #0055b7 !important;  /* "Due Today" blue color from shopping cart */
+  box-shadow: 0 2px 8px rgba(0, 85, 183, 0.3) !important;  /* Subtle glow effect */
+  transition: all 0.2s ease-in-out !important;  /* Smooth transition for hover effects */
+  color: white !important;  /* Ensure white text */
+  border: 2px solid #0055b7 !important;  /* Add border for extra emphasis */
 }
 
-/* Hover effect for confirmed state */
-.confirm-btn.confirmed:hover {
-  background-color: #218838;  /* Slightly darker green on hover */
+/* Hover effect for confirmed state - enhanced glow like initial boxes */
+.signature-selector .confirm-btn.confirmed:hover {
+  background-color: #004494 !important;  /* Slightly darker blue on hover */
+  box-shadow: 0 4px 12px rgba(0, 85, 183, 0.6) !important;  /* Enhanced glow effect on hover */
+  transform: scale(1.02) !important;  /* Slight scale up on hover */
+  border-color: #004494 !important;  /* Darker border on hover */
 }
 
 /* Legal notice about electronic signature */

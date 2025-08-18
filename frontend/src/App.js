@@ -6,7 +6,7 @@ import LandingPage from "./components/LandingPage.jsx";
 import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
 import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
-import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
+//import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
@@ -107,8 +107,6 @@ function AppContent() {
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}
           />
-          <Route path="/payment-demo" element={<PaymentProcessorDemo />} />
-          {/* <Route path="/contract-save-test" element={<ContractSaveTest />} /> */}
           {/* Add more routes as needed */}
         </Routes>
       </main>

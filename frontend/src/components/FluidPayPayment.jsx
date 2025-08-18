@@ -258,17 +258,18 @@ const FluidPayPayment = () => {
               // Replace these demo values with actual FluidPay credentials
               // For production, this fallback should either be removed or use environment-specific values
               setProcessorInfo({
-                merchant_id: 'Demo FluidPay Merchant', // PRODUCTION: Your actual FluidPay Merchant ID
+                merchant_id: 'cdiggns6lr8tirs7uuog', // PRODUCTION: Your actual FluidPay Merchant ID
                 fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he',      // PRODUCTION: Your actual FluidPay Public API Key
                 fluidpay_base_url: 'https://api.fluidpay.com' // PRODUCTION: Use production URL
               });
             }
           } catch (error) {
             console.error('Error fetching FluidPay info:', error);
+            setErrorMessage('Unable to load payment processor information.');
             // PRODUCTION: In production, consider more robust error handling or retry logic
             // These fallback values should be replaced with environment-specific values
             setProcessorInfo({
-              merchant_id: 'Demo FluidPay Merchant (Fallback)', // PRODUCTION: Your actual Merchant ID
+              merchant_id: 'cdiggns6lr8tirs7uuog', // PRODUCTION: Your actual Merchant ID
               fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he',        // PRODUCTION: Your actual Public API Key
               fluidpay_base_url: 'https://api.fluidpay.com' // PRODUCTION: Use production URL
             });
@@ -380,6 +381,19 @@ const initializeTokenizerWithKey = (processorInfoToUse) => {
       apikey: apiKey,
       container: '#fluidpay-tokenizer-container',
       amount: calculateProratedAmount().toFixed(2),
+      user: {
+        firstName: customerInfo.firstName || '',
+        lastName: customerInfo.lastName || '',
+        email: customerInfo.email || '',
+        phone: customerInfo.phone || ''
+      },
+      billing: {
+        address: customerInfo.address || '',
+        city: customerInfo.city || '',
+        state: customerInfo.state || '',
+        zip: customerInfo.zipCode || ''
+      },
+
       settings: {
         payment: {
           types: ['card'],
@@ -392,11 +406,15 @@ const initializeTokenizerWithKey = (processorInfoToUse) => {
           showInline: true,
           showName: true,
           showEmail: true,
-          showPhone: true
+          showPhone: true,
+          autoFill: true,
+          prefill: true
         },
         billing: {
           show: true,
-          showTitle: true
+          showTitle: true,
+          autoFill: true,
+          prefill: true
         }
       },
       submission: (resp) => {
@@ -418,6 +436,11 @@ const initializeTokenizerWithKey = (processorInfoToUse) => {
             setErrorMessage('Please check your payment information and try again.');
             setIsSubmitting(false);
             break;
+          default:
+            console.error('Unknown tokenizer status:', resp.status);
+            setErrorMessage('Unexpected payment form response. Please try again.');
+            setIsSubmitting(false);
+            break;
         }
       },
       onLoad: () => {
@@ -437,6 +460,7 @@ const initializeTokenizerWithKey = (processorInfoToUse) => {
     console.error('Error initializing FluidPay Tokenizer:', error);
     setErrorMessage('Unable to initialize payment form. Please refresh and try again.');
     setIsSubmitting(false);
+    setIsInitialized(false);
     return null;
   }
 };
@@ -494,27 +518,16 @@ const processPaymentWithToken = async (token, tokenizerResponse) => {
     }
   } catch (error) {
     console.error('Error processing payment:', error);
-    setErrorMessage('Payment processing failed: ' + error.message);
-            setIsSubmitting(false);
-            setShowResultPopup(false);
-          }
+    setErrorMessage('Payment processing failed. Please check your card information and try again.');
+    setIsSubmitting(false);
+    setShowResultPopup(false);
+  }
 };
 
 // Function to launch payment process
 const launchPayment = async () => {
   console.log('Launching FluidPay payment process...');
   
-  if (!processorInfo) {
-    setErrorMessage('Payment processor information not available. Please try again.');
-    return;
-  }
-  
-  if (!tokenizer) {
-    setErrorMessage('Payment system is still loading. Please wait a moment and try again.');
-    return;
-  }
-  
-  // Don't set isSubmitting to true here - let the FluidPay Tokenizer handle the submission
   setErrorMessage('');
   
   try {
@@ -532,6 +545,7 @@ const launchPayment = async () => {
   } catch (error) {
     console.error('Error launching payment:', error);
     setErrorMessage('Unable to launch payment form. Please try again later.');
+    setIsSubmitting(false);
   }
 };
 
@@ -646,7 +660,7 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
       });
     } catch (error) {
       console.error('Enrollment submission error:', error);
-      setErrorMessage('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
+      setErrorMessage('Payment successful but enrollment submission failed. Please contact support.');
       setIsSubmitting(false);
       setShowResultPopup(false);
     }
@@ -655,6 +669,20 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!processorInfo) {
+      setErrorMessage('Payment processor information not loaded. Please try again.');
+      return;
+    }
+    
+    if (!tokenizer) {
+      setErrorMessage('Payment system is still loading. Please wait a moment and try again.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setErrorMessage('');
+    
     await launchPayment();
   };
   
@@ -979,11 +1007,6 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
       </div>
     </div>
   );
-};
-
-// Fallback function for backward compatibility
-const initializeTokenizer = () => {
-  return initializeTokenizerWithKey(processorInfo);
 };
 
 export default FluidPayPayment;

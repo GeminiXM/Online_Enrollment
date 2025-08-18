@@ -4,6 +4,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Import fetch for making HTTP requests
+// Node.js 18+ has fetch built-in, but we'll use node-fetch for compatibility
+import fetch from "node-fetch";
+
 // Get the current file's directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -178,32 +182,16 @@ export const getFluidPayInfo = async (req, res) => {
       }
 
       if (!fluidPayInfo) {
-        // Provide fallback demo data
-        logger.warn("No FluidPay info found for club, using fallback", {
+        logger.error("No FluidPay info found for club in database", {
           clubId,
         });
-        fluidPayInfo = {
-          club: parseInt(clubId),
-          fluidpay_base_url: "https://api.fluidpay.com",
-          fluidpay_api_key: "pub_31FUYRENhNiAvspejegbLoPD2he",
-          merchant_id: `fpmerchant_${clubId}`,
-        };
+        throw new Error(
+          "FluidPay processor information not found in database for this club."
+        );
       }
 
-      // Ensure API key has correct format for Tokenizer
-      if (
-        fluidPayInfo.fluidpay_api_key &&
-        !fluidPayInfo.fluidpay_api_key.startsWith("pub_")
-      ) {
-        logger.warn(
-          "FluidPay API key does not have correct format, using fallback",
-          {
-            clubId,
-            originalKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
-          }
-        );
-        fluidPayInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
-      }
+      // Use hardcoded public API key for frontend tokenizer
+      fluidPayInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
 
       logger.info("FluidPay info retrieved successfully", {
         clubId,
@@ -218,27 +206,15 @@ export const getFluidPayInfo = async (req, res) => {
         fluidPayInfo,
       });
     } catch (procError) {
-      // If database error, return demo data
       logger.error("Error executing FluidPay procedure:", {
         error: procError.message,
+        clubId,
       });
 
-      const fallbackInfo = {
-        club: parseInt(clubId),
-        fluidpay_base_url: "https://api.fluidpay.com",
-        fluidpay_api_key: "pub_31FUYRENhNiAvspejegbLoPD2he",
-        merchant_id: `fpmerchant_fallback_${clubId}`,
-      };
-
-      // Ensure fallback API key has correct format
-      if (!fallbackInfo.fluidpay_api_key.startsWith("pub_")) {
-        fallbackInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
-      }
-
-      res.status(200).json({
-        success: true,
-        fluidPayInfo: fallbackInfo,
-        note: "Using fallback data due to procedure error",
+      res.status(500).json({
+        success: false,
+        message: "Error retrieving FluidPay information from database",
+        error: procError.message,
       });
     }
   } catch (error) {
@@ -335,205 +311,6 @@ export const getConvergeInfo = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error retrieving Converge information",
-      error: error.message,
-    });
-  }
-};
-
-/**
- * @desc Process a demo payment (no actual payment processing)
- * @route POST /api/payment/process-demo
- * @access Public
- */
-export const processPaymentDemo = async (req, res) => {
-  try {
-    // Log initial request
-    logger.info("Received demo payment processing request");
-
-    const {
-      clubId,
-      cardNumber,
-      expiryDate,
-      cvv,
-      nameOnCard,
-      billingZipCode,
-      amount,
-      membershipDetails,
-      processorName,
-    } = req.body;
-
-    // Input validation
-    if (
-      !clubId ||
-      !cardNumber ||
-      !expiryDate ||
-      !cvv ||
-      !nameOnCard ||
-      !billingZipCode
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Missing required payment information",
-      });
-    }
-
-    logger.info(
-      `Processing demo payment for club ID: ${clubId} using ${
-        processorName || "unknown"
-      } processor`
-    );
-
-    // Determine which processor to use
-    let processorToUse = processorName;
-
-    if (!processorToUse) {
-      // Get the processor name if not provided
-      const processorResult = await executeSqlProcedure(
-        "web_proc_GetCCProcessorName",
-        clubId,
-        [clubId]
-      );
-
-      if (processorResult && processorResult.length > 0) {
-        const firstRow = processorResult[0];
-        const firstKey = Object.keys(firstRow)[0];
-        if (firstKey) {
-          processorToUse = firstRow[firstKey];
-        }
-      }
-    }
-
-    logger.info(`Using processor: ${processorToUse}`);
-
-    // Simulate processing with the appropriate processor
-    let paymentResponse;
-
-    // Check if this is a test decline card
-    const isDeclineCard =
-      cardNumber.includes("4000000000000002") || // FluidPay decline card
-      cardNumber.includes("4000120000001154"); // Converge decline card
-
-    // Generate response based on processor
-    if (processorToUse === "FLUIDPAY") {
-      // Get FluidPay info
-      const fluidPayResult = await executeSqlProcedure(
-        "procFluidPayItemSelect1",
-        clubId,
-        [clubId]
-      );
-      let merchantId = "";
-
-      if (fluidPayResult && fluidPayResult.length > 0) {
-        const firstRow = fluidPayResult[0];
-        merchantId = firstRow.merchant_id || "";
-      }
-
-      if (isDeclineCard) {
-        paymentResponse = {
-          success: false,
-          processor: "FLUIDPAY",
-          error: {
-            code: "card_declined",
-            message:
-              "Your card was declined. Please try a different payment method.",
-          },
-          transaction_id: null,
-        };
-      } else {
-        paymentResponse = {
-          success: true,
-          processor: "FLUIDPAY",
-          transaction_id: `fp_${Date.now()}_${Math.floor(
-            Math.random() * 1000000
-          )}`,
-          merchant_id: merchantId,
-          authorization_code: Math.floor(Math.random() * 1000000)
-            .toString()
-            .padStart(6, "0"),
-          card_info: {
-            last_four: cardNumber.slice(-4),
-            card_type: cardNumber.startsWith("4")
-              ? "visa"
-              : cardNumber.startsWith("5")
-              ? "mastercard"
-              : cardNumber.startsWith("3")
-              ? "amex"
-              : "unknown",
-            expiry: expiryDate,
-          },
-          amount: amount || "50.00",
-        };
-      }
-    } else {
-      // Assume CONVERGE
-      // Get Converge info
-      const convergeResult = await executeSqlProcedure(
-        "procConvergeItemSelect1",
-        clubId,
-        [clubId]
-      );
-      let merchantId = "";
-
-      if (convergeResult && convergeResult.length > 0) {
-        const firstRow = convergeResult[0];
-        merchantId = firstRow.merchant_id || "";
-      }
-
-      if (isDeclineCard) {
-        paymentResponse = {
-          success: false,
-          processor: "CONVERGE",
-          error: {
-            ssl_result: "1",
-            ssl_result_message:
-              "Your card was declined. Please try a different payment method.",
-          },
-          ssl_txn_id: null,
-        };
-      } else {
-        paymentResponse = {
-          success: true,
-          processor: "CONVERGE",
-          ssl_txn_id: `cv_${Date.now()}_${Math.floor(Math.random() * 1000000)}`,
-          ssl_merchant_id: merchantId,
-          ssl_approval_code: Math.floor(Math.random() * 1000000)
-            .toString()
-            .padStart(6, "0"),
-          ssl_card_number: `XXXXXXXXXXXX${cardNumber.slice(-4)}`,
-          ssl_card_type: cardNumber.startsWith("4")
-            ? "VISA"
-            : cardNumber.startsWith("5")
-            ? "MASTERCARD"
-            : cardNumber.startsWith("3")
-            ? "AMEX"
-            : "OTHER",
-          ssl_exp_date: expiryDate.replace("/", ""),
-          ssl_amount: amount || "50.00",
-          ssl_result: "0",
-          ssl_result_message: "APPROVAL",
-        };
-      }
-    }
-
-    logger.info("Demo payment processed", {
-      clubId,
-      success: paymentResponse.success,
-      processor: processorToUse,
-      cardLast4: cardNumber.slice(-4),
-    });
-
-    res.status(200).json({
-      success: true,
-      paymentResponse,
-    });
-  } catch (error) {
-    logger.error("Error in processPaymentDemo:", {
-      error: error.message,
-      stack: error.stack,
-    });
-    res.status(500).json({
-      success: false,
-      message: "Error processing demo payment",
       error: error.message,
     });
   }
@@ -684,16 +461,56 @@ export const processFluidPayPayment = async (req, res) => {
         if (firstRow) {
           fluidPayInfo = {
             club: firstRow.club || parseInt(clubId),
-            fluidpay_base_url:
-              firstRow.fluidpay_base_url || "https://api-sandbox.fluidpay.com",
-            fluidpay_api_key: firstRow.fluidpay_api_key || "",
-            merchant_id: firstRow.merchant_id || "",
+            fluidpay_base_url: "https://app.fluidpay.com", // Production FluidPay API URL
+            fluidpay_api_key: "api_2oD33fJmBytiZsi0uRaSfoCBuXl", // Hardcoded private API key for transactions
+            merchant_id: (firstRow.merchant_id || "").trim(), // Remove any trailing spaces
           };
+
+          logger.info("FluidPay credentials retrieved from database", {
+            clubId,
+            apiKey: "pub_31FUYRENhNiAvspejegbLoPD2he (hardcoded)",
+            merchantId: fluidPayInfo.merchant_id,
+            baseUrl: fluidPayInfo.fluidpay_base_url,
+          });
         }
       }
 
       if (!fluidPayInfo || !fluidPayInfo.fluidpay_api_key) {
         throw new Error("FluidPay processor information not found");
+      }
+
+      // Validate that we have merchant ID from database
+      if (!fluidPayInfo.merchant_id || fluidPayInfo.merchant_id.trim() === "") {
+        throw new Error(
+          "FluidPay Merchant ID not found in database. Please configure real FluidPay credentials."
+        );
+      }
+
+      // Try to get merchant information to check processor configuration
+      try {
+        const merchantResponse = await fetch(
+          `${fluidPayInfo.fluidpay_base_url}/api/merchant`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: fluidPayInfo.fluidpay_api_key,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (merchantResponse.ok) {
+          const merchantData = await merchantResponse.json();
+          logger.info("FluidPay merchant info retrieved", {
+            merchantId: merchantData.id,
+            hasDefaultProcessor: !!merchantData.default_processor,
+            processors: merchantData.processors || [],
+          });
+        }
+      } catch (merchantError) {
+        logger.warn("Could not retrieve merchant info", {
+          error: merchantError.message,
+        });
       }
 
       // PRODUCTION: Make actual FluidPay API call to process the payment
@@ -755,40 +572,254 @@ export const processFluidPayPayment = async (req, res) => {
 const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
   const { token, amount, customerInfo } = paymentData;
 
-  // PRODUCTION: Replace this with actual FluidPay API call
-  // For now, simulate a successful payment response
+  try {
+    logger.info("Making FluidPay API call", {
+      baseUrl: fluidPayInfo.fluidpay_base_url,
+      merchantId: fluidPayInfo.merchant_id,
+      amount: amount,
+      hasToken: !!token,
+    });
 
-  // In production, you would make an HTTP request to FluidPay's API:
-  // POST https://api.fluidpay.com/transaction
-  // Headers: {
-  //   'Authorization': 'Basic ' + Buffer.from(fluidPayInfo.fluidpay_api_key + ':').toString('base64'),
-  //   'Content-Type': 'application/json'
-  // }
-  // Body: {
-  //   "type": "sale",
-  //   "amount": amount,
-  //   "token": token,
-  //   "merchant_id": fluidPayInfo.merchant_id,
-  //   "customer": {
-  //     "first_name": customerInfo.firstName,
-  //     "last_name": customerInfo.lastName,
-  //     "email": customerInfo.email
-  //   }
-  // }
+    // Prepare the request payload according to FluidPay documentation
+    const requestPayload = {
+      type: "sale",
+      amount: Math.round(parseFloat(amount) * 100), // Convert to cents
+      payment_method: {
+        token: token,
+      },
+      // Add processor ID if available - this might be needed for merchant accounts without default processor
+      // processor_id: "your_processor_id_here", // Uncomment if you have a specific processor ID
+    };
 
-  // Simulate API response for development
-  const mockResponse = {
-    transactionId: `TXN_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`,
-    authorizationCode: `AUTH${Math.random().toString().substr(2, 6)}`,
-    cardNumber: "****1111",
-    cardType: "VISA",
-    status: "approved",
-    amount: amount,
-  };
+    logger.info("FluidPay API request details", {
+      url: `${fluidPayInfo.fluidpay_base_url}/api/transaction`,
+      method: "POST",
+      merchantId: fluidPayInfo.merchant_id,
+      amount: requestPayload.amount,
+      amountOriginal: amount,
+      token: token ? `${token.substring(0, 10)}...` : "null",
+      customer: {
+        firstName: customerInfo.firstName,
+        lastName: customerInfo.lastName,
+        email: customerInfo.email,
+      },
+      requestPayload: requestPayload,
+    });
 
-  return mockResponse;
+    // Make actual FluidPay API call
+    const response = await fetch(
+      `${fluidPayInfo.fluidpay_base_url}/api/transaction`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: fluidPayInfo.fluidpay_api_key,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestPayload),
+      }
+    );
+
+    let responseData;
+    const responseText = await response.text();
+
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      logger.error("Failed to parse FluidPay response as JSON", {
+        responseText: responseText,
+        responseStatus: response.status,
+        responseHeaders: Object.fromEntries(response.headers.entries()),
+        parseError: parseError.message,
+      });
+      throw new Error(`FluidPay returned invalid JSON: ${responseText}`);
+    }
+
+    logger.info("FluidPay API response details", {
+      httpStatus: response.status,
+      httpStatusText: response.statusText,
+      responseHeaders: Object.fromEntries(response.headers.entries()),
+      responseData: responseData,
+      responseDataKeys: Object.keys(responseData || {}),
+      transactionId: responseData.id || responseData.transaction_id,
+      status: responseData.status,
+      message: responseData.message,
+      authCode: responseData.auth_code || responseData.authorization_code,
+      cardInfo: {
+        last4: responseData.card_number
+          ? responseData.card_number.slice(-4)
+          : null,
+        type: responseData.card_type || responseData.card_brand,
+      },
+      rawResponseText: responseText.substring(0, 500), // Log first 500 chars of raw response
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `FluidPay API error: ${response.status} - ${JSON.stringify(
+          responseData
+        )}`
+      );
+    }
+
+    // Check if the transaction was declined
+    if (responseData.data && responseData.data.status === "declined") {
+      const errorMessage =
+        responseData.data.response_body?.card?.processor_response_text ||
+        responseData.data.response_body?.card?.processor_response_code ||
+        "Transaction declined";
+      throw new Error(`FluidPay transaction declined: ${errorMessage}`);
+    }
+
+    // Check if the API call was successful but transaction failed
+    if (responseData.status !== "success") {
+      throw new Error(
+        `FluidPay API error: ${responseData.msg || "Unknown error"}`
+      );
+    }
+
+    return {
+      transactionId: responseData.data?.id || `TXN_${Date.now()}`,
+      authorizationCode:
+        responseData.data?.response_body?.card?.auth_code ||
+        `AUTH${Math.random().toString().substr(2, 6)}`,
+      cardNumber:
+        responseData.data?.response_body?.card?.masked_card || "****1111",
+      cardType: responseData.data?.response_body?.card?.card_type || "VISA",
+      status: responseData.data?.status,
+      amount: amount,
+      response: responseData,
+    };
+  } catch (error) {
+    logger.error("FluidPay API call failed", {
+      error: error.message,
+      fluidPayInfo: {
+        baseUrl: fluidPayInfo.fluidpay_base_url,
+        merchantId: fluidPayInfo.merchant_id,
+        hasApiKey: !!fluidPayInfo.fluidpay_api_key,
+      },
+      paymentData: {
+        amount: amount,
+        hasToken: !!token,
+        customerEmail: customerInfo?.email,
+      },
+    });
+
+    throw error;
+  }
+};
+
+/**
+ * @desc Test FluidPay credentials and connection
+ * @route POST /api/payment/test-fluidpay
+ * @access Public
+ */
+export const testFluidPayConnection = async (req, res) => {
+  try {
+    const { clubId } = req.body;
+
+    logger.info("Testing FluidPay connection", { clubId });
+
+    // Get FluidPay processor information
+    const fluidPayResult = await executeSqlProcedure(
+      "procFluidPayItemSelect1",
+      clubId || "001",
+      [clubId || "001"]
+    );
+
+    let fluidPayInfo = null;
+    if (fluidPayResult && fluidPayResult.length > 0) {
+      const firstRow = fluidPayResult[0];
+      if (firstRow) {
+        fluidPayInfo = {
+          club: firstRow.club || parseInt(clubId || "001"),
+          fluidpay_base_url:
+            firstRow.fluidpay_base_url || "https://api.fluidpay.com",
+          fluidpay_api_key: firstRow.fluidpay_api_key || "",
+          merchant_id: firstRow.merchant_id || "",
+        };
+      }
+    }
+
+    if (!fluidPayInfo || !fluidPayInfo.fluidpay_api_key) {
+      return res.status(400).json({
+        success: false,
+        message: "FluidPay processor information not found",
+      });
+    }
+
+    // Check for demo credentials
+    if (fluidPayInfo.fluidpay_api_key === "pub_31FUYRENhNiAvspejegbLoPD2he") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Demo credentials detected. Please configure real FluidPay credentials.",
+        credentials: {
+          apiKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
+          merchantId: fluidPayInfo.merchant_id,
+          baseUrl: fluidPayInfo.fluidpay_base_url,
+        },
+      });
+    }
+
+    // Test the connection by making a simple API call
+    try {
+      const response = await fetch(
+        `${fluidPayInfo.fluidpay_base_url}/merchant`,
+        {
+          method: "GET",
+          headers: {
+            Authorization:
+              "Basic " +
+              Buffer.from(fluidPayInfo.fluidpay_api_key + ":").toString(
+                "base64"
+              ),
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const responseData = await response.json();
+
+      logger.info("FluidPay connection test result", {
+        status: response.status,
+        data: responseData,
+      });
+
+      if (response.ok) {
+        res.status(200).json({
+          success: true,
+          message: "FluidPay connection successful",
+          merchantInfo: responseData,
+          credentials: {
+            apiKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
+            merchantId: fluidPayInfo.merchant_id,
+            baseUrl: fluidPayInfo.fluidpay_base_url,
+          },
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: "FluidPay connection failed",
+          error: responseData,
+          status: response.status,
+        });
+      }
+    } catch (apiError) {
+      logger.error("FluidPay API test failed", { error: apiError.message });
+      res.status(500).json({
+        success: false,
+        message: "FluidPay API connection failed",
+        error: apiError.message,
+      });
+    }
+  } catch (error) {
+    logger.error("Error testing FluidPay connection", { error: error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error testing FluidPay connection",
+      error: error.message,
+    });
+  }
 };
 
 /**

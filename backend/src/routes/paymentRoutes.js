@@ -11,7 +11,7 @@ import {
   getConvergeInfo,
   getConvergeToken,
   processFluidPayPayment,
-  processPaymentDemo,
+  testFluidPayConnection,
 } from "../controllers/paymentController.js";
 
 const router = express.Router();
@@ -129,6 +129,27 @@ router.post("/converge-token", async (req, res) => {
 });
 
 /**
+ * @route POST /api/payment/test-fluidpay
+ * @desc Test FluidPay credentials and connection
+ * @access Public
+ */
+router.post("/test-fluidpay", async (req, res) => {
+  try {
+    return await testFluidPayConnection(req, res);
+  } catch (error) {
+    logger.error("Error in test-fluidpay route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message:
+        "An error occurred while testing the FluidPay connection. Please try again later.",
+    });
+  }
+});
+
+/**
  * @route POST /api/payment/process-fluidpay
  * @desc Process FluidPay payment with token
  * @access Public
@@ -145,27 +166,6 @@ router.post("/process-fluidpay", async (req, res) => {
       success: false,
       message:
         "An error occurred while processing the FluidPay payment. Please try again later.",
-    });
-  }
-});
-
-/**
- * @route POST /api/payment/process-demo
- * @desc Process a demo payment (no actual payment processing)
- * @access Public
- */
-router.post("/process-demo", validatePaymentData, async (req, res) => {
-  try {
-    return await processPaymentDemo(req, res);
-  } catch (error) {
-    logger.error("Error in process-demo route", {
-      error: error.message,
-      stack: error.stack,
-    });
-    return res.status(500).json({
-      success: false,
-      message:
-        "An error occurred while processing the demo payment. Please try again later.",
     });
   }
 });
