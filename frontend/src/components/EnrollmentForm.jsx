@@ -61,7 +61,8 @@ const validateAgeForMembershipType = (dateOfBirth, membershipType) => {
       if (age > 29) return `You are ${age} years old. Student/Young Professional membership requires you to be between 18-29 years old.`;
       break;
     case "J": // Junior
-      if (age >= 18) return `You are ${age} years old. Junior membership is only for those under 18 years old.`;
+      if (age < 12) return `You are ${age} years old. Junior membership requires you to be between 12-17 years old. Please select an Adult 18+ membership and add a child instead.`;
+      if (age >= 18) return `You are ${age} years old. Junior membership is only for those between 12-17 years old.`;
       break;
     case "S": // Senior
       if (age < 65) return `You are ${age} years old. Senior membership requires you to be 65 years or older.`;
@@ -139,11 +140,15 @@ const determineMembershipTypeByAge = (dateOfBirth) => {
   if (age === null) return null;
 
   // Define membership types based on age ranges
-  if (age < 18) {
+  if (age < 12) {
+    // For children under 12, don't auto-select a membership type
+    // They should be added as child members to an adult membership
+    return null;
+  } else if (age >= 12 && age <= 17) {
     return {
       id: 'junior',
       title: 'Junior',
-      description: 'For members under 18 years old',
+      description: 'For members between 12-17 years old',
       price: 0
     };
   } else if (age >= 18 && age <= 29) {
@@ -1021,6 +1026,20 @@ function EnrollmentForm() {
           setErrors(prevErrors => ({
             ...prevErrors,
             dateOfBirth: ageError
+          }));
+        } else {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: null
+          }));
+        }
+      } else {
+        // If no membership type is determined (e.g., under 12), show error
+        const age = calculateAge(value);
+        if (age !== null && age < 12) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            dateOfBirth: `You are ${age} years old. Children under 12 cannot enroll directly. Please have an adult 18+ enroll and add you as a child member.`
           }));
         } else {
           setErrors(prevErrors => ({
