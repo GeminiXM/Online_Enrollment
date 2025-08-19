@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
-//import PaymentProcessorDemo from './PaymentProcessorDemo';
+import PaymentProcessorDemo from './PaymentProcessorDemo';
 import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './PaymentPage.css';
 
@@ -729,11 +729,7 @@ const PaymentPage = () => {
         clearSensitiveData();
 
         // Complete enrollment after successful payment
-        await finishEnrollment({
-          transactionId: result.transaction_id,
-          authorizationCode: result.authorization_code,
-          paymentToken: result.payment_token
-        });
+        await completeEnrollment(result.transaction_id, result.authorization_code, result.payment_token);
       } else {
         // Payment failed
         setSubmitError(result.message || 'Payment failed. Please try again.');
@@ -791,42 +787,8 @@ const PaymentPage = () => {
   }
   
   return (
-    <>
-      <style>
-        {`
-          /* Ultra-specific CSS to override all other styles */
-          div.converge-embedded-form form.payment-form {
-            gap: 0 !important;
-          }
-          
-          div.converge-embedded-form form.payment-form div.form-group {
-            margin-bottom: 0 !important;
-          }
-          
-          div.converge-embedded-form form.payment-form div.form-group label {
-            margin-bottom: 0 !important;
-            font-size: 0.8rem !important;
-          }
-          
-          div.converge-embedded-form form.payment-form div.form-group input,
-          div.converge-embedded-form form.payment-form div.form-group select {
-            height: 1.8rem !important;
-            padding: 0.2rem !important;
-            margin-bottom: 0 !important;
-          }
-          
-          div.converge-embedded-form form.payment-form div.form-row {
-            gap: 0 !important;
-            margin-bottom: 0 !important;
-          }
-          
-          div.converge-embedded-form form.payment-form div.form-row div.form-group {
-            margin-bottom: 0 !important;
-          }
-        `}
-      </style>
-      <div className="payment-container">
-        <h1>Complete Your Membership</h1>
+    <div className="payment-container">
+      <h1>Complete Your Membership</h1>
       
       <div className="payment-layout">
         <div className="payment-summary">
@@ -953,7 +915,79 @@ const PaymentPage = () => {
             </div>
           </div>
 
-          {processorName === 'CONVERGE' ? (
+
+
+          {/* Only show card preview if using FluidPay (standard payment form) */}
+          {processorName === 'FLUIDPAY' && (
+            <div className={`card-preview ${getCardType()}`} style={{ height: "110px", marginBottom: "0.25rem" }}>
+              <div className="card-chip"></div>
+              <div className="card-number-display">
+                <span>{formatCardNumberDisplay()}</span>
+              </div>
+              <div className="card-details-row">
+                <div className="card-holder">
+                  {paymentFormData.nameOnCard || 'CARDHOLDER NAME'}
+                </div>
+                <div className="card-expiry">
+                  {paymentFormData.expiryDate || 'MM/YY'}
+                </div>
+              </div>
+              <div className="card-logo">
+                {getCardLogo()}
+              </div>
+            </div>
+          )}
+
+          {submitError && (
+            <div className="error-message payment-error">
+              {submitError}
+            </div>
+          )}
+          
+          {showProcessorDemo ? (
+            <div className="payment-processing-popup">
+              <div className="payment-processing-content">
+                <h3>Processing Payment</h3>
+                
+                {!paymentResponse ? (
+                  <div className="processing-loading">
+                    <div className="spinner"></div>
+                    <p>Processing your payment...</p>
+                    <p className="processing-details">
+                      Amount: ${calculateProratedAmount().toFixed(2) || "50.00"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="payment-result">
+                    <div className={`result-icon ${paymentResponse.success ? 'success' : 'error'}`}>
+                      {paymentResponse.success ? '✓' : '✗'}
+                    </div>
+                    <h4>{paymentResponse.success ? 'Payment Successful!' : 'Payment Failed'}</h4>
+                    <p>{paymentResponse.message || (paymentResponse.success ? 'Your payment has been processed successfully.' : 'There was an error processing your payment.')}</p>
+                    
+                    {paymentResponse.success && (
+                      <div className="payment-details">
+                        <p><strong>Transaction ID:</strong> {paymentResponse.transaction_id || paymentResponse.ssl_txn_id || 'N/A'}</p>
+                        <p><strong>Authorization Code:</strong> {paymentResponse.authorization_code || paymentResponse.ssl_approval_code || 'N/A'}</p>
+                        <p><strong>Last 4 Digits:</strong> {paymentResponse.card_info?.last_four || paymentResponse.ssl_card_number?.slice(-4) || 'N/A'}</p>
+                        {paymentResponse.payment_token && (
+                          <p><strong>Payment Token:</strong> {paymentResponse.payment_token}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="redirecting-message">Redirecting to confirmation page...</p>
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="error-message payment-error">
+                    {submitError}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : processorName === 'CONVERGE' ? (
             // Show embedded Converge payment form directly
             <div className="converge-embedded-form">
               <div className="form-header">
@@ -1222,7 +1256,6 @@ const PaymentPage = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };
 
