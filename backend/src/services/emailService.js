@@ -251,6 +251,10 @@ class EmailService {
           monthlyDues: formData?.monthlyDues,
           serviceAddons: formData?.serviceAddons?.length || 0,
           membershipType: formData?.membershipType,
+          specialtyMembership: formData?.specialtyMembership,
+          guardian: formData?.guardian ? "Present" : "Not present",
+          guardianFirstName: formData?.guardianFirstName,
+          guardianLastName: formData?.guardianLastName,
         },
         selectedClub: {
           name: selectedClub?.name,
@@ -297,6 +301,17 @@ class EmailService {
       // Email content
       const emailContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          ${
+            formData.specialtyMembership === "J"
+              ? `
+          <div style="background-color: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 10px; border-left: 4px solid #ffc107;">
+            <p style="color: #856404; margin: 0; font-size: 14px; font-style: italic;">
+              <strong>Note:</strong> This email has been sent to both the junior member and their legal guardian.
+            </p>
+          </div>
+          `
+              : ""
+          }
           <div style="background-color: #f8f9fa; padding: 20px; text-align: center;">
             <h1 style="color: #2c3e50; margin: 0;">Welcome to ${
               selectedClub?.name || formData.club || "Wellbridge"
@@ -337,6 +352,46 @@ class EmailService {
                 }</li>
               </ul>
             </div>
+            
+            ${
+              formData.specialtyMembership === "J" &&
+              (formData.guardian || formData.guardianFirstName)
+                ? `
+            <div style="background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; border-left: 4px solid #ffc107;">
+              <h3 style="color: #856404; margin-top: 0;">Legal Guardian Information</h3>
+              <p style="color: #856404; margin-bottom: 15px; font-size: 14px;">
+                As this is a Junior membership, the following legal guardian information has been recorded:
+              </p>
+              <ul style="list-style: none; padding: 0; color: #856404;">
+                <li><strong>Guardian Name:</strong> ${
+                  formData.guardian
+                    ? formData.guardian.firstName
+                    : formData.guardianFirstName
+                } ${
+                    formData.guardian
+                      ? formData.guardian.lastName
+                      : formData.guardianLastName
+                  }</li>
+                <li><strong>Relationship:</strong> ${
+                  formData.guardian
+                    ? formData.guardian.relationship
+                    : formData.guardianRelationship
+                }</li>
+                <li><strong>Email:</strong> ${
+                  formData.guardian
+                    ? formData.guardian.email
+                    : formData.guardianEmail
+                }</li>
+                <li><strong>Phone:</strong> ${
+                  formData.guardian
+                    ? formData.guardian.cellPhone || formData.guardian.homePhone
+                    : formData.guardianPhone || "Not provided"
+                }</li>
+              </ul>
+            </div>
+            `
+                : ""
+            }
             
             <div style="background-color: #f0f8ff; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <h3 style="color: #1e90ff; margin-top: 0;">Monthly Fee Going Forward</h3>
@@ -382,10 +437,29 @@ class EmailService {
         </div>
       `;
 
+      // Determine email recipients
+      let emailRecipients = [formData.email];
+
+      // For Junior memberships, also send to the legal guardian
+      if (
+        formData.specialtyMembership === "J" &&
+        (formData.guardian?.email || formData.guardianEmail) &&
+        (formData.guardian?.email || formData.guardianEmail) !== formData.email
+      ) {
+        const guardianEmail =
+          formData.guardian?.email || formData.guardianEmail;
+        emailRecipients.push(guardianEmail);
+        logger.info("Adding legal guardian to email recipients:", {
+          guardianEmail,
+          memberEmail: formData.email,
+          membershipNumber: enrollmentData.custCode,
+        });
+      }
+
       // Email options
       const mailOptions = {
         from: process.env.SMTP_FROM || "noreply@yourclub.com",
-        to: formData.email,
+        to: emailRecipients.join(", "),
         subject: `Welcome to ${
           selectedClub?.name || formData.club || "Our Club"
         } - Membership #${enrollmentData.custCode}`,
@@ -408,15 +482,19 @@ class EmailService {
         attachmentCount: mailOptions.attachments
           ? mailOptions.attachments.length
           : 0,
-        to: formData.email,
+        to: emailRecipients,
+        recipientCount: emailRecipients.length,
         membershipNumber: enrollmentData.custCode,
+        isJuniorMembership: formData.specialtyMembership === "J",
       });
 
       const info = await this.transporter.sendMail(mailOptions);
       logger.info("Welcome email sent successfully:", {
         messageId: info.messageId,
-        to: formData.email,
+        to: emailRecipients,
+        recipientCount: emailRecipients.length,
         membershipNumber: enrollmentData.custCode,
+        isJuniorMembership: formData.specialtyMembership === "J",
       });
 
       return true;

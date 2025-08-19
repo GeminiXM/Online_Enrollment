@@ -137,7 +137,16 @@ const formatDateWithoutTimezoneShift = (dateString) => {
 // Add this function near the other utility functions at the top of the file
 const determineMembershipTypeByAge = (dateOfBirth) => {
   const age = calculateAge(dateOfBirth);
-  if (age === null) return null;
+  
+  // If no date of birth is provided, default to standard membership
+  if (age === null) {
+    return {
+      id: 'standard',
+      title: 'Standard',
+      description: 'For members between 30-64 years old',
+      price: 0
+    };
+  }
 
   // Define membership types based on age ranges
   if (age < 12) {
@@ -3308,7 +3317,7 @@ function EnrollmentForm() {
   // Add this effect to set initial membership type
   useEffect(() => {
     // Always run this effect, but only act if needed
-    if (formData.dateOfBirth && !membershipType) {
+    if (!membershipType) {
       const initialMembershipType = determineMembershipTypeByAge(formData.dateOfBirth);
       if (initialMembershipType) {
         selectMembershipType(initialMembershipType);

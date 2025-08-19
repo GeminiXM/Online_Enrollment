@@ -59,6 +59,21 @@ const ConvergeLightboxPayment = () => {
     return enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount;
   };
 
+  // Calculate monthly amount for payment
+  const calculateMonthlyAmount = () => {
+    if (!formData) {
+      return 0;
+    }
+    
+    // Get monthly dues from formData
+    const monthlyDues = parseFloat(formData?.membershipDetails?.price || 0);
+    
+    // Get monthly add-ons
+    const monthlyAddOns = parseFloat(formData?.monthlyAddOns || 0);
+    
+    return monthlyDues + monthlyAddOns;
+  };
+
   // Calculate monthly amount (without tax)
   const calculateMonthlyAmount = () => {
     const monthlyDues = parseFloat(formData?.monthlyDues || 0);
@@ -432,6 +447,30 @@ const launchLightbox = async () => {
   
   return (
     <div className="payment-page">
+      <style>
+        {`
+          .due-today {
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+          }
+          
+          .due-today-amount {
+            font-size: 2rem !important;
+            font-weight: bold !important;
+            color: #007bff !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+          }
+          
+          .due-today .price-label {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+          }
+        `}
+      </style>
     <div className="payment-container">
         <div className="payment-header">
           <h1>Converge Lightbox Payment</h1>
@@ -440,6 +479,63 @@ const launchLightbox = async () => {
 
         <div className="payment-authorization">
           <p><strong>I hereby request and authorize {selectedClub?.name || 'New Mexico Sports and Wellness'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData?.membershipStartDate ? formatDateWithoutTimezoneShift(formData.membershipStartDate) : 'the start date'}. The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.name || 'New Mexico Sports and Wellness'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.</strong></p>
+        </div>
+
+        <div className="customer-info">
+          <h3>Customer Information</h3>
+          <div className="info-row">
+            <span className="info-label">Name:</span>
+            <span className="info-value">{customerInfo.firstName} {customerInfo.lastName}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Email:</span>
+            <span className="info-value">{customerInfo.email}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Phone:</span>
+            <span className="info-value">{customerInfo.phone}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Address:</span>
+            <span className="info-value">
+              {customerInfo.address}, {customerInfo.city}, {customerInfo.state} {customerInfo.zipCode}
+            </span>
+          </div>
+          
+          {/* Legal Guardian Information for Junior Memberships */}
+          {formData.specialtyMembership === "J" && (formData.guardianFirstName || formData.guardianLastName) && (
+            <>
+              <div className="info-row guardian-separator">
+                <span className="info-label">Legal Guardian:</span>
+                <span className="info-value">
+                  {formData.guardianFirstName} {formData.guardianLastName}
+                  {formData.guardianRelationship && ` (${formData.guardianRelationship})`}
+                </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Guardian Email:</span>
+                <span className="info-value">{formData.guardianEmail || "Not provided"}</span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Guardian Phone:</span>
+                <span className="info-value">{formData.guardianPhone || "Not provided"}</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className="payment-summary">
+          <h2>Payment Summary</h2>
+          <div className="price-details">
+            <div className="price-row due-today">
+              <span className="price-label">Due today (prorated):</span>
+              <span className="price-value due-today-amount">${calculateProratedAmount().toFixed(2)}</span>
+            </div>
+            <div className="price-row recurring">
+              <span className="price-label">Monthly fee going forward:</span>
+              <span className="price-value">${calculateMonthlyAmount().toFixed(2)}/month</span>
+            </div>
+          </div>
         </div>
 
         <div className="payment-details">

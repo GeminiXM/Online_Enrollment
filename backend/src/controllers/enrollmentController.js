@@ -308,31 +308,67 @@ export const getMembershipPrice = async (req, res) => {
     let proratedDuesTaxable = "";
 
     if (result && result.length > 0) {
-      const firstRow = result[0];
-      if (firstRow) {
+      let selectedRow = result[0]; // Default to first row
+
+      // For Junior membership (specialtyMembership = "J"), filter by specific description
+      if (specialtyMembership === "J" && result.length > 1) {
+        logger.info(
+          `Found ${result.length} results for Junior membership, filtering for club-specific description`
+        );
+
+        // Determine the expected description based on club location
+        // Colorado clubs use "Junior Age 12 to 17", New Mexico clubs use "Ind Dues Juniors MTM"
+        const isColoradoClub =
+          clubId === "252" || clubId === "253" || clubId === "254"; // Add other Colorado club IDs as needed
+        const expectedDescription = isColoradoClub
+          ? "junior age 12 to 17"
+          : "ind dues juniors mtm";
+
+        logger.info(
+          `Looking for description containing: "${expectedDescription}" for club ${clubId}`
+        );
+
+        const juniorRow = result.find(
+          (row) =>
+            row.invtr_desc &&
+            row.invtr_desc.trim().toLowerCase().includes(expectedDescription)
+        );
+        if (juniorRow) {
+          selectedRow = juniorRow;
+          logger.info(
+            `Selected Junior row with description: "${juniorRow.invtr_desc}"`
+          );
+        } else {
+          logger.warn(
+            `No row found with "${expectedDescription}" description, using first row: "${result[0].invtr_desc}"`
+          );
+        }
+      }
+
+      if (selectedRow) {
         // Extract the specific fields based on the procedure's return values
-        if (firstRow.invtr_price !== undefined) {
-          price = parseFloat(firstRow.invtr_price) || 0;
+        if (selectedRow.invtr_price !== undefined) {
+          price = parseFloat(selectedRow.invtr_price) || 0;
         }
 
-        if (firstRow.invtr_desc !== undefined) {
-          description = firstRow.invtr_desc.trim() || "";
+        if (selectedRow.invtr_desc !== undefined) {
+          description = selectedRow.invtr_desc.trim() || "";
         }
 
-        if (firstRow.invtr_upccode !== undefined) {
-          upcCode = firstRow.invtr_upccode.trim() || "";
+        if (selectedRow.invtr_upccode !== undefined) {
+          upcCode = selectedRow.invtr_upccode.trim() || "";
         }
 
-        if (firstRow.classr_tax_code !== undefined) {
-          taxCode = firstRow.classr_tax_code.trim() || "";
+        if (selectedRow.classr_tax_code !== undefined) {
+          taxCode = selectedRow.classr_tax_code.trim() || "";
         }
 
-        if (firstRow.prorated_dues_upccode !== undefined) {
-          proratedDuesUpcCode = firstRow.prorated_dues_upccode.trim() || "";
+        if (selectedRow.prorated_dues_upccode !== undefined) {
+          proratedDuesUpcCode = selectedRow.prorated_dues_upccode.trim() || "";
         }
 
-        if (firstRow.prorated_dues_taxable !== undefined) {
-          proratedDuesTaxable = firstRow.prorated_dues_taxable.trim() || "";
+        if (selectedRow.prorated_dues_taxable !== undefined) {
+          proratedDuesTaxable = selectedRow.prorated_dues_taxable.trim() || "";
         }
       }
     }

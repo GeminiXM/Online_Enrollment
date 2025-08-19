@@ -751,6 +751,30 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
   
   return (
     <div className="payment-container">
+      <style>
+        {`
+          .due-today {
+            background-color: #f8f9fa;
+            border: 2px solid #007bff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+          }
+          
+          .due-today-amount {
+            font-size: 2rem !important;
+            font-weight: bold !important;
+            color: #007bff !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+          }
+          
+          .due-today .price-label {
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            color: #495057 !important;
+          }
+        `}
+      </style>
       {/* Payment Result Popup */}
       {showResultPopup && (
         <div className="popup-overlay">
@@ -832,9 +856,9 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
             <p className="membership-club">{selectedClub?.name || 'Club'}</p>
             
             <div className="price-details">
-              <div className="price-row">
+              <div className="price-row due-today">
                 <span className="price-label">Due today (prorated):</span>
-                <span className="price-value">${calculateProratedAmount().toFixed(2)}</span>
+                <span className="price-value due-today-amount">${calculateProratedAmount().toFixed(2)}</span>
               </div>
               <div className="price-row recurring">
                 <span className="price-label">Monthly fee going forward:</span>
@@ -863,6 +887,27 @@ console.log('FluidPayPayment - amountBilled being passed to confirmation:', amou
                 {customerInfo.address}, {customerInfo.city}, {customerInfo.state} {customerInfo.zipCode}
               </span>
             </div>
+            
+            {/* Legal Guardian Information for Junior Memberships */}
+            {formData.specialtyMembership === "J" && (formData.guardianFirstName || formData.guardianLastName) && (
+              <>
+                <div className="info-row guardian-separator">
+                  <span className="info-label">Legal Guardian:</span>
+                  <span className="info-value">
+                    {formData.guardianFirstName} {formData.guardianLastName}
+                    {formData.guardianRelationship && ` (${formData.guardianRelationship})`}
+                  </span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Guardian Email:</span>
+                  <span className="info-value">{formData.guardianEmail || "Not provided"}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Guardian Phone:</span>
+                  <span className="info-value">{formData.guardianPhone || "Not provided"}</span>
+                </div>
+              </>
+            )}
           </div>
           
           <div className="agreement-summary">
