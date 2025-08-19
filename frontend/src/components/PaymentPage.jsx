@@ -794,31 +794,37 @@ const PaymentPage = () => {
     <>
       <style>
         {`
-          /* Ultra-specific CSS to override all other styles */
-          div.converge-embedded-form form.payment-form {
-            gap: 0 !important;
-          }
+                      /* Ultra-specific CSS to override all other styles */
+            div.converge-embedded-form form.payment-form {
+              gap: 1rem !important;
+            }
           
           div.converge-embedded-form form.payment-form div.form-group {
             margin-bottom: 0 !important;
           }
           
-          div.converge-embedded-form form.payment-form div.form-group label {
-            margin-bottom: 0 !important;
-            font-size: 0.8rem !important;
-          }
+                      div.converge-embedded-form form.payment-form div.form-group label {
+              margin-bottom: 0.5rem !important;
+              font-size: 0.9rem !important;
+              font-weight: 600 !important;
+              color: #495057 !important;
+            }
           
-          div.converge-embedded-form form.payment-form div.form-group input,
-          div.converge-embedded-form form.payment-form div.form-group select {
-            height: 1.8rem !important;
-            padding: 0.2rem !important;
-            margin-bottom: 0 !important;
-          }
+                      div.converge-embedded-form form.payment-form div.form-group input,
+            div.converge-embedded-form form.payment-form div.form-group select {
+              height: 2.5rem !important;
+              padding: 0.75rem !important;
+              margin-bottom: 0 !important;
+              border: 1px solid #ced4da !important;
+              border-radius: 4px !important;
+              font-size: 1rem !important;
+            }
           
-          div.converge-embedded-form form.payment-form div.form-row {
-            gap: 0 !important;
-            margin-bottom: 0 !important;
-          }
+                      div.converge-embedded-form form.payment-form div.form-row {
+              gap: 0.75rem !important;
+              margin-bottom: 0 !important;
+              display: flex !important;
+            }
           
           div.converge-embedded-form form.payment-form div.form-row div.form-group {
             margin-bottom: 0 !important;
