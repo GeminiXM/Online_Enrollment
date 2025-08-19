@@ -9,6 +9,7 @@ import PaymentPage from "./components/PaymentPage.jsx";
 //import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
+import ClubLinks from "./components/ClubLinks.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
@@ -82,6 +83,9 @@ function AppContent() {
                   <Link to="/enrollment">Enrollment</Link>
                 </li>
                 <li>
+                  <Link to="/club-links">Club Links</Link>
+                </li>
+                <li>
                   <Link to="/contract-save-test">Contract Save Test</Link>
                 </li>
               </ul>
@@ -98,6 +102,7 @@ function AppContent() {
           <Route path="/enrollment" element={<EnrollmentForm />} />
           <Route path="/contract" element={<ContractPage />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/club-links" element={<ClubLinks />} />
           <Route
             path="/payment-converge"
             element={<ConvergeLightboxPayment />}
