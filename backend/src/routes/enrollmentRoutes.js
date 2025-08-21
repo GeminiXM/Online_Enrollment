@@ -492,6 +492,7 @@ router.post("/send-welcome-email", async (req, res) => {
       transactionId,
       amountBilled,
       formData: actualFormData,
+      contractPDF,
     } = req.body;
 
     if (!membershipNumber || !email) {
@@ -519,12 +520,18 @@ router.post("/send-welcome-email", async (req, res) => {
       monthlyDues: 0,
     };
 
+    // Convert contractPDF array back to buffer if provided
+    let contractPDFBuffer = null;
+    if (contractPDF && Array.isArray(contractPDF)) {
+      contractPDFBuffer = Buffer.from(contractPDF);
+    }
+
     // Send welcome email with contract attachment
     const emailSent = await emailService.sendWelcomeEmail(
       enrollmentData,
       formData,
       {}, // signatureData (not needed for email)
-      null, // contractPDFBuffer (will be found from file)
+      contractPDFBuffer, // Use the provided contract PDF buffer
       selectedClub
     );
 
@@ -555,6 +562,110 @@ router.post("/send-welcome-email", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An error occurred while sending the welcome email",
+      error: error.message,
+    });
+  }
+});
+
+// Send contract email route
+router.post("/send-contract-email", async (req, res) => {
+  try {
+    const {
+      formData,
+      signatureData,
+      initialedSections,
+      membershipNumber,
+      clubId,
+      email,
+      contractPDF,
+    } = req.body;
+
+    if (
+      !formData ||
+      !signatureData ||
+      !initialedSections ||
+      !membershipNumber
+    ) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing required data: formData, signatureData, initialedSections, and membershipNumber are required",
+      });
+    }
+
+    // Create enrollment data object
+    const enrollmentData = {
+      custCode: membershipNumber,
+      transactionId: `PRETEND_${Date.now()}`,
+      amountBilled: formData.amountBilled || 0,
+    };
+
+    // Get club information
+    let selectedClub = null;
+    if (clubId) {
+      try {
+        const [clubRows] = await pool.query(
+          "SELECT * FROM clubs WHERE id = ?",
+          [clubId]
+        );
+        if (clubRows.length > 0) {
+          selectedClub = clubRows[0];
+        }
+      } catch (error) {
+        logger.error("Error fetching club information:", error);
+      }
+    }
+
+    // Use the provided PDF buffer or create a mock one if not provided
+    let pdfBuffer;
+    if (contractPDF && Array.isArray(contractPDF)) {
+      // Convert array back to Buffer
+      pdfBuffer = Buffer.from(contractPDF);
+    } else {
+      // Create a mock PDF buffer for the contract
+      pdfBuffer = Buffer.from(
+        "%PDF-1.4\n1 0 obj\n<<\n/Type /Catalog\n/Pages 2 0 R\n>>\nendobj\n2 0 obj\n<<\n/Type /Pages\n/Kids [3 0 R]\n/Count 1\n>>\nendobj\n3 0 obj\n<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 612 792]\n/Contents 4 0 R\n>>\nendobj\n4 0 obj\n<<\n/Length 44\n>>\nstream\nBT\n/F1 12 Tf\n72 720 Td\n(Membership Contract) Tj\nET\nendstream\nendobj\nxref\n0 5\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n0000000204 00000 n \ntrailer\n<<\n/Size 5\n/Root 1 0 R\n>>\nstartxref\n297\n%%EOF\n",
+        "binary"
+      );
+    }
+
+    const emailSent = await emailService.sendWelcomeEmail(
+      enrollmentData,
+      formData,
+      signatureData,
+      pdfBuffer,
+      selectedClub
+    );
+
+    if (emailSent) {
+      logger.info("Contract email sent successfully", {
+        membershipNumber,
+        email: formData.email,
+        clubId,
+      });
+      res.status(200).json({
+        success: true,
+        message: "Contract email sent successfully",
+      });
+    } else {
+      logger.error("Failed to send contract email", {
+        membershipNumber,
+        email: formData.email,
+        clubId,
+      });
+      res.status(500).json({
+        success: false,
+        message: "Failed to send contract email",
+      });
+    }
+  } catch (error) {
+    logger.error("Error sending contract email:", {
+      error: error.message,
+      stack: error.stack,
+    });
+    res.status(500).json({
+      success: false,
+      message: "Error sending contract email",
       error: error.message,
     });
   }

@@ -996,11 +996,13 @@ export const submitEnrollment = async (req, res) => {
     const proratedAddonsTax = parseFloat(req.body.proratedAddOnsTax) || 0.0;
     const proratedDuesAddon = proratedDues + proratedAddonsTotal;
     const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
-    const totalProrateBilled =
-      proratedDuesAddon +
-      proratedDuesAddonTax +
-      ptPackageAmount +
-      initiationFee;
+    // Use totalCollected from frontend if available, otherwise calculate
+    const totalProrateBilled = req.body.totalCollected
+      ? parseFloat(req.body.totalCollected)
+      : proratedDuesAddon +
+        proratedDuesAddonTax +
+        ptPackageAmount +
+        initiationFee;
 
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";

@@ -1,0 +1,250 @@
+/* frontend/src/App.css */
+/* Main application styles with teal and off-white color scheme */
+
+/* CSS Variables for consistent theming across the application */
+:root {
+  --primary-color: #008080; /* Teal - Main brand color used for headers and interactive elements */
+  --primary-dark: #006666; /* Darker teal - Used for hover states and emphasis */
+  --primary-light: #00a3a3; /* Lighter teal - Used for accents and subtle elements */
+  --secondary-color: #f5f5f5; /* Off-white - Used for backgrounds and containers */
+  --text-color: #333333; /* Dark gray - Used for main text content */
+  --border-color: #e0e0e0; /* Light gray - Used for borders and separators */
+}
+
+/* Main app container - Wraps the entire application */
+.App {
+  min-height: 100vh; /* Ensures the app fills the entire viewport height */
+  display: flex; /* Uses flexbox for layout */
+  flex-direction: column; /* Stacks header, main content, and footer vertically */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, readable font stack */
+  color: var(--text-color); /* Default text color */
+  background-color: var(--secondary-color); /* Light background color */
+}
+
+/* App header - Contains the main site title and navigation */
+.App-header {
+  background-color: var(--primary-color); /* Teal background for the header */
+  padding: 1rem 0; /* Vertical padding only */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Header content container for logo and navigation */
+.header-content {
+  display: flex; /* Uses flexbox for layout */
+  justify-content: space-between; /* Places logo and nav on opposite sides */
+  align-items: center; /* Centers items vertically */
+  max-width: 1200px; /* Limits width on larger screens */
+  margin: 0 auto; /* Centers the content horizontally */
+  padding: 0 1rem; /* Horizontal padding */
+}
+
+/* Header right section containing club selector and navigation */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* Club selector styling */
+.club-selector {
+  position: relative;
+  margin-right: 0.5rem;
+}
+
+.club-dropdown {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-width: 180px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.5em;
+}
+
+.club-dropdown:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.club-dropdown option {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* App header title - Main site title */
+.App-header h1 {
+  margin: 0; /* Removes default margins */
+  font-size: 1.8rem; /* Large font size for emphasis */
+  color: white; /* White text for contrast against teal */
+}
+
+/* Logo link styling */
+.logo-link {
+  color: white; /* White text for contrast */
+  text-decoration: none; /* Removes underline */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+.logo-link:hover {
+  color: rgba(255, 255, 255, 0.9); /* Slightly dimmed on hover */
+  text-decoration: none; /* Keeps no underline on hover */
+}
+
+/* Main navigation */
+.main-nav ul {
+  display: flex; /* Uses flexbox for horizontal layout */
+  list-style: none; /* Removes bullet points */
+  margin: 0; /* Removes default margins */
+  padding: 0; /* Removes default padding */
+  gap: 1.5rem; /* Space between nav items */
+}
+
+.main-nav li {
+  margin: 0; /* Removes default margins */
+}
+
+.main-nav a {
+  color: white; /* White text for contrast */
+  text-decoration: none; /* Removes underline */
+  font-weight: 500; /* Medium weight for emphasis */
+  padding: 0.5rem 0; /* Vertical padding only */
+  position: relative; /* For the hover underline effect */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+.main-nav a::after {
+  content: ''; /* Empty content for the underline */
+  position: absolute; /* Positioned absolutely relative to the link */
+  bottom: 0; /* Positioned at the bottom of the link */
+  left: 0; /* Starts from the left edge */
+  width: 0; /* Initially no width */
+  height: 2px; /* Height of the underline */
+  background-color: white; /* White underline */
+  transition: width 0.3s ease; /* Smooth width transition on hover */
+}
+
+.main-nav a:hover {
+  color: rgba(255, 255, 255, 0.9); /* Slightly dimmed on hover */
+  text-decoration: none; /* Keeps no underline on hover */
+}
+
+.main-nav a:hover::after {
+  width: 100%; /* Full width on hover */
+}
+
+/* Main content area - Contains the page content */
+main {
+  flex: 1; /* Allows the main content to expand and fill available space */
+  padding: 1rem 1rem 2rem; /* Compact top padding with more space at bottom */
+  max-width: 1200px; /* Limits width on larger screens */
+  margin: 0 auto; /* Centers the content horizontally */
+  width: 100%; /* Full width within constraints */
+}
+
+/* Footer - Contains copyright and other footer information */
+footer {
+  background-color: var(--primary-dark); /* Darker teal for the footer */
+  color: white; /* White text for contrast */
+  text-align: center; /* Centers the footer content */
+  padding: 1.5rem; /* Even padding all around */
+  margin-top: auto; /* Pushes the footer to the bottom */
+}
+
+/* Footer text */
+footer p {
+  margin: 0; /* Removes default margins */
+  font-size: 0.9rem; /* Slightly smaller text for footer */
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column; /* Stacks logo and nav vertically */
+    padding: 0.5rem 1rem; /* Reduced padding */
+  }
+  
+  .header-right {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  
+  .club-selector {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .club-dropdown {
+    width: 100%;
+  }
+  
+  .App-header h1 {
+    font-size: 1.5rem; /* Smaller font size on mobile */
+    margin-bottom: 0.5rem; /* Space below the logo */
+  }
+  
+  .main-nav ul {
+    gap: 1rem; /* Reduced space between nav items */
+  }
+  
+  main {
+    padding: 1rem 0.5rem; /* Reduced padding on smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-nav ul {
+    gap: 0.75rem; /* Further reduced space between nav items */
+  }
+  
+  .main-nav a {
+    font-size: 0.9rem; /* Smaller font size for nav items */
+  }
+}
+
+/* Utility classes for common text alignments */
+.text-center {
+  text-align: center; /* Centers text content */
+}
+
+/* Container class for consistent content width */
+.container {
+  max-width: 1200px; /* Limits width on larger screens */
+  margin: 0 auto; /* Centers the container */
+  padding: 0 1rem; /* Horizontal padding */
+}
+
+/* Link styles for consistent appearance */
+a {
+  color: var(--primary-color); /* Teal color for links */
+  text-decoration: none; /* Removes underline */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+/* Link hover state */
+a:hover {
+  color: var(--primary-dark); /* Darker teal on hover */
+  text-decoration: underline; /* Adds underline on hover */
+}
+
+/* Accessibility - Visually hidden elements (for screen readers) */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+} 

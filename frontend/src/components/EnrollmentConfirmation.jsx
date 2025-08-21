@@ -22,6 +22,11 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
 
   // Format the payment timestamp
   const formatTimestamp = () => {
+    // Use the payment timestamp if available, otherwise use current time
+    if (paymentResponse?.timestamp) {
+      return new Date(paymentResponse.timestamp).toLocaleString();
+    }
+    // Fallback to current time if no payment timestamp
     const now = new Date();
     return now.toLocaleString();
   };
@@ -160,6 +165,33 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
         
         console.log('Sending welcome email for:', { firstName, lastName, membershipNumber });
         
+        // Generate contract PDF for email
+        let emailContractPDFArray = null;
+        if (signatureData && initialedSections) {
+          try {
+            const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
+            
+            const pdfFormData = {
+              ...formData,
+              membershipId: membershipNumber
+            };
+            
+            const pdfBuffer = await generatePDFBuffer(
+              pdfFormData,
+              signatureData,
+              formatTimestamp(),
+              initialedSections,
+              selectedClub,
+              formData.membershipDetails?.price || formData.monthlyDues
+            );
+            
+            emailContractPDFArray = Array.from(new Uint8Array(pdfBuffer));
+            console.log('Contract PDF generated for email, length:', emailContractPDFArray.length);
+          } catch (pdfError) {
+            console.error('Error generating contract PDF for email:', pdfError);
+          }
+        }
+
         // Send welcome email with contract attachment
         try {
           const emailResponse = await fetch('/api/enrollment/send-welcome-email', {
@@ -175,7 +207,8 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
               selectedClub,
               transactionId,
               amountBilled,
-              formData
+              formData,
+              contractPDF: emailContractPDFArray
             }),
           });
           
@@ -212,8 +245,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
         </div>
 
         <div className="confirmation-message">
-          <h2>{successMessage || `Thank you for enrolling, ${memberName || 'new member'}!`}</h2>
-          {/* <p>Your enrollment has been successfully submitted to {selectedClub.name}.</p> */}
+          <h2>Welcome {memberName || 'new member'} to {selectedClub?.name || 'the club'}! You will use Membership #{membershipNumber} to take the next steps in your membership journey.</h2>
         </div>
 
         <div className="confirmation-details">
@@ -309,14 +341,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
           </div>
         )}
 
-        <div className="confirmation-actions">
-          <Link to="/" className="btn btn-primary">
-            Return to Home
-          </Link>
-          <Link to="/clubs" className="btn btn-secondary">
-            Find a Club
-          </Link>
-        </div>
+
       </div>
     </div>
   );

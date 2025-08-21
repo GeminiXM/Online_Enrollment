@@ -1,0 +1,209 @@
+.converge-api-access-test {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.converge-api-access-test h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.converge-api-access-test p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.test-controls {
+  display: flex;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: bold;
+  color: #333;
+}
+
+.input-group input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 200px;
+}
+
+.test-button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.test-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.test-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+}
+
+.test-results {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.test-results h3 {
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.credentials-info,
+.summary {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.credentials-info h4,
+.summary h4 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.credentials-info p,
+.summary p {
+  margin: 5px 0;
+  color: #555;
+}
+
+.test-details h4 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.test-result {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.test-result.success {
+  border-left: 4px solid #28a745;
+}
+
+.test-result.failure {
+  border-left: 4px solid #dc3545;
+}
+
+.test-result h5 {
+  margin: 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+}
+
+.test-info {
+  padding: 15px;
+}
+
+.test-info p {
+  margin: 8px 0;
+  color: #555;
+}
+
+.response-preview {
+  margin-top: 10px;
+}
+
+.response-preview pre {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.recommendations {
+  margin-top: 30px;
+  padding: 20px;
+  background-color: #e7f3ff;
+  border-radius: 4px;
+  border-left: 4px solid #007bff;
+}
+
+.recommendations h4 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.success-recommendation {
+  color: #155724;
+}
+
+.failure-recommendation {
+  color: #721c24;
+}
+
+.failure-recommendation ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.failure-recommendation li {
+  margin: 5px 0;
+}
+
+@media (max-width: 768px) {
+  .test-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .input-group input {
+    min-width: auto;
+  }
+  
+  .converge-api-access-test {
+    padding: 10px;
+  }
+}

@@ -304,6 +304,12 @@ body {
   font-size: 0.875rem; /* Smaller than regular text */
   margin-top: 0.5rem; /* Space between input and error */
   font-weight: bold; /* Bold for emphasis */
+  word-wrap: break-word; /* Allow long error messages to wrap */
+  white-space: normal; /* Allow text to wrap to multiple lines */
+  max-width: 100%; /* Ensure it doesn't overflow its container */
+  display: block; /* Ensure it's a block element */
+  position: relative; /* Ensure proper positioning */
+  z-index: 10; /* Ensure it appears above other elements */
 }
 
 /* Styles individual field messages */
@@ -936,6 +942,14 @@ button:focus-visible {
   max-width: 150px;
 }
 
+/* Ensure error messages in child forms have enough space */
+.child-form .dob-field .error-message {
+  min-width: 200px; /* Give error messages more space */
+  max-width: 250px; /* But don't let them get too wide */
+  white-space: normal; /* Allow wrapping */
+  word-wrap: break-word; /* Break long words if needed */
+}
+
 /* Make gender field wide enough to fit "Prefer not to say" */
 .gender-field {
   flex: 0 0 170px;
@@ -1433,13 +1447,15 @@ button:focus-visible {
   color: #333333;
   font-size: 0.9rem;
   text-align: center;
-  min-height: 40px;
+  min-height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid #e0e0e0;
-  transition: opacity 0.2s ease;
+  transition: all 0.3s ease;
   pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
 }
 
 .service-addons-container {

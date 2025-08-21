@@ -17,7 +17,8 @@ export default defineConfig({
       },
     },
     hmr: {
-      host: ["localhost", "vwbwebdev"],
+      host: "vwbwebdev",
+      port: 5000,
     },
     allowedHosts: ["localhost", "vwbwebdev"],
     // This middleware ensures SPA routes work correctly when accessed directly

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Converge Lightbox Demo</title>
+</head>
+<body>
+  <h1>Converge Lightbox Integration Demo</h1>
+  <button id="payNowBtn">Pay Now</button>
+
+  <!-- Include Converge Hosted Payments JS -->
+  <script src="https://api.convergepay.com/hosted-payments/presentation.js"></script>
+
+  <script>
+    // When the page loads, fetch an SSL transaction token from your server
+    async function fetchToken() {
+      try {
+        const res = await fetch('/api/converge-token');
+        const data = await res.json();
+        return data.ssl_txn_auth_token;
+      } catch (err) {
+        console.error('Error fetching token:', err);
+      }
+    }
+
+    document.getElementById('payNowBtn').addEventListener('click', async () => {
+      const token = await fetchToken();
+      if (!token) return;
+
+      // Launch the Converge Lightbox
+      launchConvergeLightbox({
+        ssl_txn_auth_token: token,
+        // Optional: customize the appearance
+        style: {
+          logoUrl: 'https://your-site.com/assets/logo.png',
+          buttonText: 'Complete Payment'
+        },
+        // Callback URL configured in your Converge Merchant Portal
+        ssl_callback_url: 'https://your-site.com/converge/callback'
+      });
+    });
+
+    /**
+     * Converge will post the transaction result to your callback endpoint.
+     * Example server-side payload handling (Node.js/Express):
+     *
+     * app.post('/converge/callback', express.urlencoded({ extended: true }), (req, res) => {
+     *   const { ssl_result, ssl_txn_id, ssl_txn_auth_token, ssl_amount } = req.body;
+     *   // Verify and update your order status here
+     *   res.sendStatus(200);
+     * });
+     */
+  </script>
+</body>
+</html>

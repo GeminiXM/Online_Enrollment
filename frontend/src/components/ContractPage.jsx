@@ -582,21 +582,10 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Determine which payment processor to use based on club location
-      const isNewMexicoClub = selectedClub?.state === 'NM' || false;
-      const isColoradoClub = selectedClub?.state === 'CO' || selectedClub?.city?.toLowerCase().includes('denver') || false;
+      // Route to pretend payment page for executive demo
+      const paymentRoute = '/pretend-payment';
       
-      let paymentRoute = '/payment'; // Default to standard payment
-      
-      if (isColoradoClub) {
-        // Route to FluidPay for Colorado/Denver clubs
-        paymentRoute = '/payment-fluidpay';
-      } else if (isNewMexicoClub) {
-        // Route to integrated payment page for New Mexico clubs (includes Converge option)
-        paymentRoute = '/payment';
-      }
-      
-      console.log(`Routing to ${paymentRoute} for club in ${selectedClub?.state} (${selectedClub?.city})`);
+      console.log(`Routing to ${paymentRoute} for executive demo`);
       console.log('ContractPage - Passing data to payment:', {
         hasFormData: !!formData,
         hasSignatureData: !!signatureData,
@@ -611,7 +600,7 @@ const ContractPage = () => {
       console.log('ContractPage - signatureData.initials:', signatureData?.initials);
       console.log('ContractPage - isSigned:', isSigned);
       
-      // Continue to appropriate payment page with all data
+      // Continue to pretend payment page with all data
       navigate(paymentRoute, {
         state: {
           formData: formData,

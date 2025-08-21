@@ -112,15 +112,13 @@ const ServiceAddonButtons = ({ addons, selectedAddons, onAddonClick }) => {
         ))}
       </div>
       
-      {hoveredAddon && (
-        <div 
-          className="addon-description-text"
-          onMouseEnter={() => setHoveredAddon(hoveredAddon)}
-          onMouseLeave={() => setHoveredAddon(null)}
-        >
-          {getDescription(hoveredAddon)}
-        </div>
-      )}
+      <div 
+        className="addon-description-text"
+        onMouseEnter={() => setHoveredAddon(hoveredAddon)}
+        onMouseLeave={() => setHoveredAddon(null)}
+      >
+        {hoveredAddon ? getDescription(hoveredAddon) : "Hover over an addon to see its description"}
+      </div>
       
       {/* Child Care Options section temporarily removed until later phase
       {unlimitedAddons.length > 0 && (

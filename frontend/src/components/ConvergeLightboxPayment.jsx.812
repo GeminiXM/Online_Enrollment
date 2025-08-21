@@ -1,0 +1,402 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useClub } from '../context/ClubContext';
+import api from '../services/api.js';
+import CanvasContractPDF from './CanvasContractPDF.jsx';
+import { generatePDFBuffer as generatePDFBufferNM } from './CanvasContractPDF.jsx';
+import './ConvergeLightboxPayment.css';
+import './SignatureSelector.css';
+
+const ConvergeLightboxPayment = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { selectedClub } = useClub();
+  
+  // State management
+  const [formData, setFormData] = useState(null);
+  const [processorInfo, setProcessorInfo] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentResult, setPaymentResult] = useState(null);
+  const [demoMode, setDemoMode] = useState(false);
+
+  // Customer info from form data
+  const customerInfo = {
+    firstName: formData?.firstName || '',
+    lastName: formData?.lastName || '',
+    email: formData?.email || '',
+    phone: formData?.phone || '',
+    address: formData?.address || '',
+    city: formData?.city || '',
+    state: formData?.state || '',
+    zipCode: formData?.zipCode || ''
+  };
+
+  // Calculate prorated amount for payment
+  const calculateProratedAmount = () => {
+    console.log('calculateProratedAmount called with formData:', formData);
+    
+    // Use totalCollected from ContractPage if available
+    if (formData?.totalCollected) {
+      console.log('Using totalCollected from ContractPage:', formData.totalCollected);
+      return parseFloat(formData.totalCollected);
+    }
+    
+    // Fallback calculation
+    const enrollmentFee = parseFloat(formData?.enrollmentFee || 0);
+    const proratedDues = parseFloat(formData?.proratedDues || 0);
+    const proratedAddOns = parseFloat(formData?.proratedAddOns || 0);
+    const ptPackageAmount = parseFloat(formData?.ptPackageAmount || 0);
+    
+    console.log('calculateProratedAmount using formData values:', {
+      enrollmentFee,
+      proratedDues,
+      proratedAddOns,
+      ptPackageAmount
+    });
+    
+    return enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount;
+  };
+
+  // Calculate monthly amount (without tax)
+  const calculateMonthlyAmount = () => {
+    const monthlyDues = parseFloat(formData?.monthlyDues || 0);
+    const monthlyAddOns = parseFloat(formData?.monthlyAddOns || 0);
+    return monthlyDues + monthlyAddOns;
+  };
+
+  // Handle successful payment response
+  const handlePaymentSuccess = async (paymentResponse) => {
+    console.log('Payment successful:', paymentResponse);
+    
+    // Extract the transaction token from the payment response
+    const transactionToken = paymentResponse.ssl_txn_auth_token;
+    
+    if (!transactionToken) {
+      console.error('No transaction token in payment response');
+      setErrorMessage('Payment completed but no transaction token received. Please contact support.');
+      return;
+    }
+
+    // Now we can pass this token to web_proc_InsertWebStrcustr
+    console.log('Transaction token for database:', transactionToken);
+    
+    // TODO: Pass token to enrollment process
+    // This will be handled in the enrollment submission process
+    
+    // For now, just show success
+    setPaymentSuccess(true);
+    setErrorMessage('');
+  };
+
+  // Finish enrollment process
+  const finishEnrollment = async (paymentResponse) => {
+    try {
+      console.log('Finishing enrollment with payment response:', paymentResponse);
+      
+      // Generate contract PDF
+      const contractPDF = await generatePDFBufferNM(formData);
+      
+      // Save contract PDF
+      const saveResponse = await api.saveContractPDF(
+        contractPDF,
+        formData?.membershipNumber || 'TEMP',
+        `${formData?.firstName} ${formData?.lastName}`
+      );
+      
+      console.log('Contract PDF saved:', saveResponse);
+      
+      // Navigate to confirmation page
+      navigate('/enrollment-confirmation', {
+        state: {
+          formData,
+          paymentResult: paymentResponse,
+          contractSaved: true
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error finishing enrollment:', error);
+      setErrorMessage('Payment successful but there was an error completing enrollment. Please contact support.');
+    }
+  };
+
+  // Handle lightbox response (for demo mode)
+  const handleLightboxResponse = (event) => {
+    if (event.origin !== window.location.origin) return;
+    
+    if (event.data.type === 'converge_payment_response') {
+      const response = event.data.response;
+      
+      if (response.success) {
+        setPaymentSuccess(true);
+        setErrorMessage('');
+        setTimeout(() => {
+          finishEnrollment(response);
+        }, 3000);
+      } else {
+        setErrorMessage(response.message || 'Payment failed');
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  // Load form data from location state
+  useEffect(() => {
+    if (location.state?.formData) {
+      console.log('Using form data from location state');
+      setFormData(location.state.formData);
+      console.log('Location state family members:', location.state.familyMembers || []);
+    } else {
+      console.log('No form data in location state, navigating back to enrollment');
+      navigate('/enrollment');
+    }
+  }, [location, navigate]);
+
+  // Fetch Converge processor information
+  useEffect(() => {
+    const fetchConvergeInfo = async () => {
+      if (!selectedClub?.id) return;
+      
+      console.log('Fetching Converge info for club:', selectedClub.id);
+      
+      try {
+        const response = await api.getConvergeInfo(selectedClub.id);
+        console.log('Converge API result:', response);
+        
+        if (response.success && response.convergeInfo) {
+          console.log('Setting Converge processor info:', response.convergeInfo);
+          setProcessorInfo(response.convergeInfo);
+        } else {
+          console.error('Failed to get Converge info:', response);
+          setErrorMessage('Unable to load payment processor information.');
+        }
+      } catch (error) {
+        console.error('Error fetching Converge info:', error);
+        setErrorMessage('Unable to load payment processor information.');
+      }
+    };
+
+    fetchConvergeInfo();
+  }, [selectedClub]);
+
+  // Cleanup event listener on unmount
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('message', handleLightboxResponse);
+    };
+  }, []);
+
+  // Launch Converge Lightbox
+  const launchLightbox = async () => {
+    console.log('Launching Converge Lightbox...');
+    
+    try {
+      // Payment fields for Converge Lightbox (Virtual Merchant API)
+      const paymentFields = {
+        ssl_merchant_id: processorInfo.merchant_id.trim(),
+        ssl_user_id: processorInfo.converge_user_id.trim(),
+        ssl_pin: processorInfo.converge_pin.trim(),
+        ssl_transaction_type: "ccsale",
+        ssl_amount: calculateProratedAmount().toFixed(2),
+        ssl_invoice_number: `INV-${Date.now()}`,
+        ssl_description: `Membership Enrollment - ${formData?.membershipDetails?.membershipId || 'Standard'}`,
+        ssl_first_name: customerInfo.firstName,
+        ssl_last_name: customerInfo.lastName,
+        ssl_avs_address: customerInfo.address,
+        ssl_city: customerInfo.city,
+        ssl_state: customerInfo.state,
+        ssl_avs_zip: customerInfo.zipCode,
+        ssl_phone: customerInfo.phone,
+        ssl_email: customerInfo.email,
+        ssl_cvv2_indicator: processorInfo.converge_cvv2_indicator || "N"
+      };
+      
+      console.log('Payment fields:', paymentFields);
+      console.log('Demo mode:', demoMode);
+      console.log('Converge credentials being used:', {
+        merchant_id: paymentFields.ssl_merchant_id,
+        user_id: paymentFields.ssl_user_id,
+        pin_length: paymentFields.ssl_pin.length,
+        amount: paymentFields.ssl_amount,
+        transaction_type: paymentFields.ssl_transaction_type
+      });
+      
+      if (demoMode) {
+        console.log('Using demo/simulation mode for Converge Lightbox');
+        
+        // Generate iframe URL for demo mode
+        const iframeUrl = `/online-enrollment/converge-demo-iframe.html?amount=${calculateProratedAmount().toFixed(2)}&merchant=${processorInfo?.merchant_id || 'demo'}`;
+        
+        // Create iframe for demo
+        const iframe = document.createElement('iframe');
+        iframe.src = iframeUrl;
+        iframe.style.position = 'fixed';
+        iframe.style.top = '0';
+        iframe.style.left = '0';
+        iframe.style.width = '100%';
+        iframe.style.height = '100%';
+        iframe.style.border = 'none';
+        iframe.style.zIndex = '10000';
+        iframe.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        
+        document.body.appendChild(iframe);
+        
+        // Set up postMessage listener for simulation
+        window.removeEventListener('message', handleLightboxResponse);
+        window.addEventListener('message', handleLightboxResponse, false);
+      } else {
+        console.log('Using real Converge Lightbox integration (Virtual Merchant API)');
+        
+        // Create a form that POSTs to Converge Virtual Merchant API
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = processorInfo.converge_url_process;
+        form.target = '_blank'; // Open in new tab
+        form.style.display = 'none';
+        
+        // Add required parameters for hosted payment page
+        paymentFields.ssl_result_format = "HTML";
+        paymentFields.ssl_show_form = "true";
+        paymentFields.ssl_show_receipt = "true";
+        paymentFields.ssl_receipt_link_method = "REDG";
+        paymentFields.ssl_receipt_link_url = window.location.origin + '/online-enrollment/payment-success';
+        paymentFields.ssl_receipt_link_text = "Return to Enrollment";
+        
+        // Add all payment fields to the form
+        Object.keys(paymentFields).forEach(key => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = paymentFields[key];
+          form.appendChild(input);
+        });
+        
+        // Add form to page and submit
+        document.body.appendChild(form);
+        form.submit();
+        
+        // Clean up the form
+        document.body.removeChild(form);
+        
+        // Show success message
+        setPaymentSuccess(true);
+        setErrorMessage('');
+        
+        // Show instructions to user
+        setTimeout(() => {
+          alert('Payment form opened in new tab. Please complete your payment in the new tab, then return here to continue with enrollment.');
+        }, 100);
+      }
+      
+    } catch (error) {
+      console.error('Error launching Converge Lightbox:', error);
+      setErrorMessage('Unable to launch payment form. Please try again later.');
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!processorInfo) {
+      setErrorMessage('Payment processor information not loaded. Please try again.');
+      return;
+    }
+    
+    setIsSubmitting(true);
+    setErrorMessage('');
+    
+    // Launch the Converge Lightbox
+    launchLightbox();
+  };
+
+  // Handle back button
+  const handleBack = () => {
+    navigate('/contract', { state: { formData } });
+  };
+
+  if (!formData) {
+    return (
+      <div className="payment-page">
+        <div className="loading">Loading payment information...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="payment-page">
+      <div className="payment-container">
+        <div className="payment-header">
+          <h1>Converge Lightbox Payment</h1>
+          <p>When you click the "Pay Now" button below, a secure payment form will appear where you can safely enter your credit card information. Your payment will be processed securely by Converge, our payment processor.</p>
+        </div>
+
+        <div className="payment-authorization">
+          <p><strong>I hereby request and authorize {selectedClub?.name || 'New Mexico Sports and Wellness'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData?.membershipStartDate ? formatDateWithoutTimezoneShift(formData.membershipStartDate) : 'the start date'}. The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.name || 'New Mexico Sports and Wellness'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.</strong></p>
+        </div>
+
+        <div className="payment-details">
+          <h2>Payment Method</h2>
+          <div className="payment-method">
+            <div className="payment-method-header">
+              <h3>Credit Card</h3>
+            </div>
+            
+            <div className="payment-summary">
+              <div className="payment-row">
+                <span>Credit Card Number</span>
+                <span>Expiration</span>
+              </div>
+              <div className="payment-row">
+                <span>Name on Account</span>
+                <span>{customerInfo.firstName} {customerInfo.lastName}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="payment-actions">
+          <button
+            type="button"
+            onClick={handleBack}
+            className="btn btn-secondary"
+            disabled={isSubmitting}
+          >
+            Back
+          </button>
+          
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="btn btn-primary"
+            disabled={isSubmitting || !processorInfo}
+          >
+            {isSubmitting ? 'Processing...' : 'Pay with Converge'}
+          </button>
+        </div>
+
+        {errorMessage && (
+          <div className="error-message">
+            {errorMessage}
+          </div>
+        )}
+
+        {paymentSuccess && (
+          <div className="success-message">
+            <h3>Payment Successful!</h3>
+            <p>Your payment has been processed successfully. You will be redirected to the confirmation page shortly.</p>
+          </div>
+        )}
+
+        <div className="payment-security">
+          <p>Your payment information is secure and encrypted</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ConvergeLightboxPayment;

@@ -22,16 +22,16 @@ const ConvergeLightboxPayment = () => {
   const [demoMode, setDemoMode] = useState(false);
 
   // Customer info from form data
-  const customerInfo = {
-    firstName: formData?.firstName || '',
-    lastName: formData?.lastName || '',
-    email: formData?.email || '',
-    phone: formData?.phone || '',
-    address: formData?.address || '',
-    city: formData?.city || '',
-    state: formData?.state || '',
-    zipCode: formData?.zipCode || ''
-  };
+  // const customerInfo = {
+  //   firstName: formData?.firstName || '',
+  //   lastName: formData?.lastName || '',
+  //   email: formData?.email || '',
+  //   phone: formData?.phone || '',
+  //   address: formData?.address || '',
+  //   city: formData?.city || '',
+  //   state: formData?.state || '',
+  //   zipCode: formData?.zipCode || ''
+  // };
 
   // Calculate prorated amount for payment
   const calculateProratedAmount = () => {
@@ -57,21 +57,6 @@ const ConvergeLightboxPayment = () => {
     });
     
     return enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount;
-  };
-
-  // Calculate monthly amount for payment
-  const calculateMonthlyAmount = () => {
-    if (!formData) {
-      return 0;
-    }
-    
-    // Get monthly dues from formData
-    const monthlyDues = parseFloat(formData?.membershipDetails?.price || 0);
-    
-    // Get monthly add-ons
-    const monthlyAddOns = parseFloat(formData?.monthlyAddOns || 0);
-    
-    return monthlyDues + monthlyAddOns;
   };
 
   // Calculate monthly amount (without tax)
@@ -283,6 +268,23 @@ const ConvergeLightboxPayment = () => {
     fetchConvergeInfo();
   }, [selectedClub]);
 
+  // Add this useEffect to create customerInfo when formData changes
+  useEffect(() => {
+    if (formData) {
+      const customerInfo = {
+        firstName: formData.firstName || '',
+        lastName: formData.lastName || '',
+        email: formData.email || '',
+        phone: formData.phone || '',
+        address: formData.address || '',
+        city: formData.city || '',
+        state: formData.state || '',
+        zipCode: formData.zipCode || ''
+      };
+      // You might need to add a state for customerInfo if you want to use it elsewhere
+    }
+  }, [formData]);
+
   // Cleanup event listener on unmount
   useEffect(() => {
     return () => {
@@ -304,14 +306,14 @@ const launchLightbox = async () => {
         ssl_amount: calculateProratedAmount().toFixed(2),
         ssl_invoice_number: `INV-${Date.now()}`,
         ssl_description: `Membership Enrollment - ${formData?.membershipDetails?.membershipId || 'Standard'}`,
-      ssl_first_name: customerInfo.firstName,
-      ssl_last_name: customerInfo.lastName,
-      ssl_avs_address: customerInfo.address,
-      ssl_city: customerInfo.city,
-      ssl_state: customerInfo.state,
-      ssl_avs_zip: customerInfo.zipCode,
-      ssl_phone: customerInfo.phone,
-        ssl_email: customerInfo.email,
+      ssl_first_name: formData?.firstName || '',
+      ssl_last_name: formData?.lastName || '',
+      ssl_avs_address: formData?.address || '',
+      ssl_city: formData?.city || '',
+      ssl_state: formData?.state || '',
+      ssl_avs_zip: formData?.zipCode || '',
+      ssl_phone: formData?.phone || '',
+        ssl_email: formData?.email || '',
         ssl_cvv2_indicator: processorInfo.converge_cvv2_indicator || "N"
     };
     
@@ -445,11 +447,12 @@ const launchLightbox = async () => {
     );
   }
   
+
   return (
     <div className="payment-page">
       <style>
         {`
-          .due-today {
+          .payment-summary .due-today {
             background-color: #f8f9fa;
             border: 2px solid #007bff;
             border-radius: 8px;
@@ -457,14 +460,14 @@ const launchLightbox = async () => {
             margin-bottom: 15px;
           }
           
-          .due-today-amount {
+          .payment-summary .due-today .due-today-amount {
             font-size: 2rem !important;
             font-weight: bold !important;
             color: #007bff !important;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1) !important;
           }
           
-          .due-today .price-label {
+          .payment-summary .due-today .price-label {
             font-size: 1.1rem !important;
             font-weight: 600 !important;
             color: #495057 !important;
@@ -479,83 +482,6 @@ const launchLightbox = async () => {
 
         <div className="payment-authorization">
           <p><strong>I hereby request and authorize {selectedClub?.name || 'New Mexico Sports and Wellness'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {formData?.membershipStartDate ? formatDateWithoutTimezoneShift(formData.membershipStartDate) : 'the start date'}. The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.name || 'New Mexico Sports and Wellness'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.</strong></p>
-        </div>
-
-        <div className="customer-info">
-          <h3>Customer Information</h3>
-          <div className="info-row">
-            <span className="info-label">Name:</span>
-            <span className="info-value">{customerInfo.firstName} {customerInfo.lastName}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Email:</span>
-            <span className="info-value">{customerInfo.email}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Phone:</span>
-            <span className="info-value">{customerInfo.phone}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">Address:</span>
-            <span className="info-value">
-              {customerInfo.address}, {customerInfo.city}, {customerInfo.state} {customerInfo.zipCode}
-            </span>
-          </div>
-          
-          {/* Legal Guardian Information for Junior Memberships */}
-          {formData.specialtyMembership === "J" && (formData.guardianFirstName || formData.guardianLastName) && (
-            <>
-              <div className="info-row guardian-separator">
-                <span className="info-label">Legal Guardian:</span>
-                <span className="info-value">
-                  {formData.guardianFirstName} {formData.guardianLastName}
-                  {formData.guardianRelationship && ` (${formData.guardianRelationship})`}
-                </span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Guardian Email:</span>
-                <span className="info-value">{formData.guardianEmail || "Not provided"}</span>
-              </div>
-              <div className="info-row">
-                <span className="info-label">Guardian Phone:</span>
-                <span className="info-value">{formData.guardianPhone || "Not provided"}</span>
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="payment-summary">
-          <h2>Payment Summary</h2>
-          <div className="price-details">
-            <div className="price-row due-today">
-              <span className="price-label">Due today (prorated):</span>
-              <span className="price-value due-today-amount">${calculateProratedAmount().toFixed(2)}</span>
-            </div>
-            <div className="price-row recurring">
-              <span className="price-label">Monthly fee going forward:</span>
-              <span className="price-value">${calculateMonthlyAmount().toFixed(2)}/month</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="payment-details">
-          <h2>Payment Method</h2>
-          <div className="payment-method">
-            <div className="payment-method-header">
-              <h3>Credit Card</h3>
-            </div>
-            
-            <div className="payment-summary">
-              <div className="payment-row">
-                <span>Credit Card Number</span>
-                <span>Expiration</span>
-              </div>
-              <div className="payment-row">
-                <span>Name on Account</span>
-                <span>{customerInfo.firstName} {customerInfo.lastName}</span>
-              </div>
-            </div>
-          </div>
         </div>
         
         <div className="payment-actions">

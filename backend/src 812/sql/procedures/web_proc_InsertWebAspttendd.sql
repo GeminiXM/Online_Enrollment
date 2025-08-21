@@ -1,0 +1,21 @@
+-- Stored procedure for inserting payment tender details
+execute procedure web_proc_InsertWebAspttendd(parTtenddTrans,
+             parTtenddType,
+             parTtenddAmt,
+             parTtenddDocNo,
+             parTtenddChgNo,
+             parTtenddChgExpires,
+             parTtenddDriveNo,
+             parTtenddDriveState,
+             parTtenddPostedDate,
+             parTtenddPostedTime,
+             parTtenddCustCode,
+             parTtenddChgRecNo,
+             parTtenddScan,
+             parTtenddChrgTransid,
+             parTtenddEncrypted,
+             parTtenddCcType,
+             parTtenddCcGuid,
+             parTtenddCcReceipt,
+             parTtenddToken
+);

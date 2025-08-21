@@ -6,6 +6,7 @@ import LandingPage from "./components/LandingPage.jsx";
 import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
 import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
+import PretendPaymentPage from "./components/PretendPaymentPage.jsx";
 //import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
@@ -83,6 +84,9 @@ function AppContent() {
                   <Link to="/enrollment">Enrollment</Link>
                 </li>
                 <li>
+                  <Link to="/pretend-payment">Pretend Payment</Link>
+                </li>
+                <li>
                   <Link to="/club-links">Club Links</Link>
                 </li>
                 <li>
@@ -102,6 +106,7 @@ function AppContent() {
           <Route path="/enrollment" element={<EnrollmentForm />} />
           <Route path="/contract" element={<ContractPage />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/pretend-payment" element={<PretendPaymentPage />} />
           <Route path="/club-links" element={<ClubLinks />} />
           <Route
             path="/payment-converge"

@@ -2352,3 +2352,54 @@
 2025-08-18 14:56:40:5640 [31merror[39m: [31mError connecting to database:[39m
 2025-08-18 14:56:40:5640 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
 2025-08-18 14:56:40:5640 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-19 16:55:00:550 [31merror[39m: [31mConverge returned HTML instead of JSON. This usually means authentication failed or credentials are invalid.[39m
+2025-08-19 16:55:00:550 [31merror[39m: [31mHTML response preview:[39m
+2025-08-19 16:59:10:5910 [31merror[39m: [31mConverge returned HTML instead of JSON. This usually means authentication failed or credentials are invalid.[39m
+2025-08-19 16:59:10:5910 [31merror[39m: [31mHTML response preview:[39m
+2025-08-19 17:04:41:441 [31merror[39m: [31mConverge returned HTML instead of JSON. This usually means authentication failed or credentials are invalid.[39m
+2025-08-19 17:04:41:441 [31merror[39m: [31mHTML response preview:[39m
+2025-08-19 17:06:45:645 [31merror[39m: [31mConverge returned HTML instead of JSON. This usually means authentication failed or credentials are invalid.[39m
+2025-08-19 17:06:45:645 [31merror[39m: [31mHTML response preview:[39m
+2025-08-19 17:14:43:1443 [31merror[39m: [31mConverge returned HTML instead of JSON. This usually means authentication failed or credentials are invalid.[39m
+2025-08-19 17:14:43:1443 [31merror[39m: [31mHTML response preview:[39m
+2025-08-19 18:12:39:1239 [31merror[39m: [31mError executing Converge procedure:[39m
+2025-08-19 18:12:39:1239 [31merror[39m: [31mError in getConvergeInfo:[39m
+2025-08-19 18:12:39:1239 [31merror[39m: [31mError in process-demo route:[39m
+2025-08-19 18:16:25:1625 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-08-19 18:16:25:1625 [31merror[39m: [31mError getting Converge info:[39m
+2025-08-19 18:16:25:1625 [31merror[39m: [31mError in process-demo route:[39m
+2025-08-19 18:20:25:2025 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-08-19 18:20:25:2025 [31merror[39m: [31mError getting Converge info:[39m
+2025-08-19 18:20:25:2025 [31merror[39m: [31mError in process-demo route:[39m
+2025-08-19 18:21:58:2158 [31merror[39m: [31mError in process-demo route:[39m
+2025-08-20 12:06:00:60 [31merror[39m: [31mConverge session token error response:[39m
+2025-08-20 12:06:00:60 [31merror[39m: [31mError calling Converge API for session token generation:[39m
+2025-08-20 12:06:00:60 [31merror[39m: [31mError generating Converge session token:[39m
+2025-08-20 12:09:29:929 [31merror[39m: [31mConverge session token error response:[39m
+2025-08-20 12:09:29:929 [31merror[39m: [31mError calling Converge API for session token generation:[39m
+2025-08-20 12:09:29:929 [31merror[39m: [31mError generating Converge session token:[39m
+2025-08-20 12:48:56:4856 [31merror[39m: [31mError creating Converge session token:[39m
+2025-08-20 12:54:53:5453 [31merror[39m: [31mError calling Converge API for direct payment:[39m
+2025-08-20 12:54:53:5453 [31merror[39m: [31mError processing direct Converge payment:[39m
+2025-08-20 12:58:57:5857 [31merror[39m: [31mConverge returned HTML error page instead of API response:[39m
+2025-08-20 12:58:57:5857 [31merror[39m: [31mError calling Converge API for direct payment:[39m
+2025-08-20 12:58:57:5857 [31merror[39m: [31mError processing direct Converge payment:[39m
+2025-08-20 13:10:33:1033 [31merror[39m: [31mConverge returned HTML error page instead of API response:[39m
+2025-08-20 13:10:33:1033 [31merror[39m: [31mError calling Converge API for direct payment:[39m
+2025-08-20 13:10:33:1033 [31merror[39m: [31mError processing direct Converge payment:[39m
+2025-08-20 14:51:04:514 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 14:51:04:514 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 14:51:04:514 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 14:51:04:514 [31merror[39m: [31mError fetching club information: Invalid club ID: SELECT * FROM clubs WHERE id = ?[39m
+2025-08-20 14:59:25:5925 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 14:59:25:5925 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 14:59:25:5925 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 14:59:25:5925 [31merror[39m: [31mError fetching club information: Invalid club ID: SELECT * FROM clubs WHERE id = ?[39m
+2025-08-20 20:34:57:3457 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 20:34:57:3457 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 20:34:57:3457 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 20:34:57:3457 [31merror[39m: [31mError fetching club information: Invalid club ID: SELECT * FROM clubs WHERE id = ?[39m
+2025-08-20 21:13:33:1333 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 21:13:33:1333 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 21:13:33:1333 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 21:13:33:1333 [31merror[39m: [31mError fetching club information: Invalid club ID: SELECT * FROM clubs WHERE id = ?[39m
