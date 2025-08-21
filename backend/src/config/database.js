@@ -40,7 +40,7 @@ const getDatabaseConfig = (clubId) => {
         protocol: process.env.INFORMIX_NM_PROTOCOL,
         authentication: process.env.INFORMIX_NM_AUTHENTICATION,
       };
-    } else if (club >= 252 && club <= 257) {
+    } else if ((club >= 252 && club <= 257) || club === 292) {
       validateEnvVariables("INFORMIX_DNV");
       return {
         server: process.env.INFORMIX_DNV_SERVER,

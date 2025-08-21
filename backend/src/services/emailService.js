@@ -271,10 +271,13 @@ class EmailService {
         const memberId = enrollmentData.custCode;
         const firstName = formData.firstName || "";
         const lastName = formData.lastName || "";
-        const date = new Date().toISOString().split("T")[0];
+        // Use Mountain Time instead of UTC
+        const mountainTime = new Date().toLocaleDateString("en-CA", {
+          timeZone: "America/Denver",
+        });
 
         // Convert date from YYYY-MM-DD to MM-DD-YYYY format
-        const dateParts = date.split("-");
+        const dateParts = mountainTime.split("-");
         const formattedDate = `${dateParts[1]}-${dateParts[2]}-${dateParts[0]}`;
 
         // Look for the contract file with the new naming format
@@ -456,6 +459,28 @@ class EmailService {
         });
       }
 
+      // Prepare attachments
+      const attachments = [];
+
+      // Use contract PDF buffer if provided, otherwise try to use file path
+      if (contractPDFBuffer) {
+        attachments.push({
+          filename: `${formData.firstName} ${formData.lastName} - Membership Agreement.pdf`,
+          content: contractPDFBuffer,
+          contentType: "application/pdf",
+        });
+        logger.info("Using contract PDF buffer for email attachment");
+      } else if (contractFilePath) {
+        attachments.push({
+          filename: `${formData.firstName} ${formData.lastName} - Membership Agreement.pdf`,
+          path: contractFilePath,
+          contentType: "application/pdf",
+        });
+        logger.info("Using contract file path for email attachment");
+      } else {
+        logger.warn("No contract PDF available for email attachment");
+      }
+
       // Email options
       const mailOptions = {
         from: process.env.SMTP_FROM || "noreply@yourclub.com",
@@ -464,15 +489,7 @@ class EmailService {
           selectedClub?.name || formData.club || "Our Club"
         } - Membership #${enrollmentData.custCode}`,
         html: emailContent,
-        attachments: contractFilePath
-          ? [
-              {
-                filename: `${formData.firstName} ${formData.lastName} - Membership Agreement.pdf`,
-                path: contractFilePath,
-                contentType: "application/pdf",
-              },
-            ]
-          : [],
+        attachments: attachments,
       };
 
       // Send email

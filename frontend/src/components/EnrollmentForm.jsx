@@ -433,16 +433,18 @@ function EnrollmentForm() {
     return daysRemaining / daysInMonth;
   };
 
- // Fetch addons from the API
+   // Fetch addons from the API
   useEffect(() => {
     const fetchAddons = async () => {
       try {
         // Use the selected club ID or default to "001"
         const clubId = selectedClub?.id || "001";
+        console.log("Fetching addons for club:", { clubId, selectedClub });
         const response = await fetch(`/api/enrollment/addons?clubId=${clubId}`);
         const data = await response.json();
         
         if (data.success) {
+          console.log("Addons fetched successfully:", { clubId, addonCount: data.addons.length });
           setAddons(data.addons);
         } else {
           console.error("Failed to fetch addons:", data.message);

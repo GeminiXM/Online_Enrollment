@@ -49,6 +49,7 @@ function ClubSelector() {
 function AppContent() {
   const { selectedClub, changeClub } = useClub();
   const location = window.location;
+  const [headerVisible, setHeaderVisible] = React.useState(true);
 
   // Handle club selection from URL parameters
   React.useEffect(() => {
@@ -64,39 +65,70 @@ function AppContent() {
     document.title = `${selectedClub.name} - Membership Enrollment`;
   }, [selectedClub]);
 
+  // Toggle header visibility
+  const toggleHeader = () => {
+    setHeaderVisible(!headerVisible);
+  };
+
+  // Keyboard shortcut to toggle header (H key)
+  React.useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === "h" || event.key === "H") {
+        toggleHeader();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [headerVisible]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <div className="header-content">
-          <h1>
-            <Link to="/" className="logo-link">
-              {selectedClub.name}
-            </Link>
-          </h1>
-          <div className="header-right">
-            <ClubSelector />
-            <nav className="main-nav">
-              <ul>
-                <li>
-                  <Link to="/">Home</Link>
-                </li>
-                <li>
-                  <Link to="/enrollment">Enrollment</Link>
-                </li>
-                <li>
-                  <Link to="/pretend-payment">Pretend Payment</Link>
-                </li>
-                <li>
-                  <Link to="/club-links">Club Links</Link>
-                </li>
-                <li>
-                  <Link to="/contract-save-test">Contract Save Test</Link>
-                </li>
-              </ul>
-            </nav>
+      {/* Header Toggle Button */}
+      <button
+        onClick={toggleHeader}
+        className="header-toggle-btn"
+        title={headerVisible ? "Hide Header" : "Show Header"}
+      >
+        {headerVisible ? "▼" : "▲"}
+      </button>
+
+      {/* Conditional Header */}
+      {headerVisible && (
+        <header className="App-header">
+          <div className="header-content">
+            <h1>
+              <Link to="/" className="logo-link">
+                {selectedClub.name}
+              </Link>
+            </h1>
+            <div className="header-right">
+              <ClubSelector />
+              <nav className="main-nav">
+                <ul>
+                  <li>
+                    <Link to="/">Home</Link>
+                  </li>
+                  <li>
+                    <Link to="/enrollment">Enrollment</Link>
+                  </li>
+                  <li>
+                    <Link to="/pretend-payment">Pretend Payment</Link>
+                  </li>
+                  <li>
+                    <Link to="/club-links">Club Links</Link>
+                  </li>
+                  <li>
+                    <Link to="/contract-save-test">Contract Save Test</Link>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
       <main>
         <Routes>
           {/* Define your routes here */}

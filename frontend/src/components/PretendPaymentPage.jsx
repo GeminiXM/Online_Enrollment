@@ -729,21 +729,10 @@ const processConvergePayment = async () => {
     }
   }, [formData?.club, processorName]);
 
-  // Auto-select payment method based on club location
+  // All clubs use the same payment method for pretend payment
   useEffect(() => {
-    if (selectedClub && processorName) {
-      const isNewMexicoClub = selectedClub.state === 'NM';
-      const isColoradoClub = selectedClub.state === 'CO';
-      
-      if (isNewMexicoClub && processorName === 'CONVERGE') {
-        setPaymentMethod('converge-lightbox');
-      } else if (isColoradoClub && processorName === 'FLUIDPAY') {
-        setPaymentMethod('standard'); // FluidPay uses standard form
-      } else {
-        setPaymentMethod('standard'); // Default fallback
-      }
-    }
-  }, [selectedClub, processorName]);
+    setPaymentMethod('converge-lightbox');
+  }, []);
   
   if (!formData) {
     return <div className="loading">Loading...</div>;
@@ -831,7 +820,7 @@ const processConvergePayment = async () => {
                 <span className="price-value due-today-amount">${calculateProratedAmount().toFixed(2)}</span>
               </div>
               <div className="price-row recurring">
-                <span className="price-label">Monthly dues going forward:</span>
+                <span className="price-label">Monthly fee going forward:</span>
                 <span className="price-value">${calculateMonthlyAmount().toFixed(2)}/month</span>
               </div>
             </div>
@@ -930,243 +919,121 @@ const processConvergePayment = async () => {
           
 
 
-          {processorName === 'CONVERGE' ? (
-            // Show embedded Converge payment form directly
-            <div className="converge-embedded-form">
-              <div className="form-header">
-                <h4>Complete Your Payment</h4>
-                <p>Please enter your payment information below. Your card data is securely tokenized and never stored on our servers.</p>
+          <div className="converge-embedded-form">
+            <div className="form-header">
+              <h4>Complete Your Payment</h4>
+              <p>Please enter your payment information below. Your card data is securely tokenized and never stored on our servers.</p>
+            </div>
+            
+            <form onSubmit={(e) => { e.preventDefault(); processPayment(); }} className="payment-form">
+              <div className="form-group">
+                <label htmlFor="cardholderName">Cardholder Name <span className="required">*</span></label>
+                <input
+                  type="text"
+                  id="cardholderName"
+                  value={paymentFormData.nameOnCard}
+                  onChange={(e) => setPaymentFormData(prev => ({ ...prev, nameOnCard: e.target.value }))}
+                  placeholder="Name on card"
+                  required
+                />
               </div>
               
-              <form onSubmit={(e) => { e.preventDefault(); processConvergePayment(); }} className="payment-form">
-                <div className="form-group">
-                  <label htmlFor="cardholderName">Cardholder Name <span className="required">*</span></label>
+              <div className="form-group">
+                <label htmlFor="cardNumber">Card Number <span className="required">*</span></label>
+                <div className="input-icon-container">
                   <input
                     type="text"
-                    id="cardholderName"
-                    value={convergePaymentData.cardholderName}
-                    onChange={(e) => setConvergePaymentData(prev => ({ ...prev, cardholderName: e.target.value }))}
-                    placeholder="Name on card"
+                    id="cardNumber"
+                    value={paymentFormData.cardNumber}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
+                      setPaymentFormData(prev => ({ ...prev, cardNumber: value }));
+                    }}
+                    placeholder="1234 5678 9012 3456"
+                    maxLength="19"
+                    required
+                  />
+                  <div className="card-type-icon">
+                    {/* Card type icons will be shown here */}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="expiryMonth">Expiry Month <span className="required">*</span></label>
+                  <select
+                    id="expiryMonth"
+                    value={paymentFormData.expiryDate ? paymentFormData.expiryDate.split('/')[0] : ''}
+                    onChange={(e) => {
+                      const month = e.target.value;
+                      const year = paymentFormData.expiryDate ? paymentFormData.expiryDate.split('/')[1] : '';
+                      setPaymentFormData(prev => ({ ...prev, expiryDate: month && year ? `${month}/${year}` : month }));
+                    }}
+                    required
+                  >
+                    <option value="">Month</option>
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+                      <option key={month} value={month.toString().padStart(2, '0')}>
+                        {month.toString().padStart(2, '0')}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="expiryYear">Expiry Year <span className="required">*</span></label>
+                  <select
+                    id="expiryYear"
+                    value={paymentFormData.expiryDate ? paymentFormData.expiryDate.split('/')[1] : ''}
+                    onChange={(e) => {
+                      const year = e.target.value;
+                      const month = paymentFormData.expiryDate ? paymentFormData.expiryDate.split('/')[0] : '';
+                      setPaymentFormData(prev => ({ ...prev, expiryDate: month && year ? `${month}/${year}` : year }));
+                    }}
+                    required
+                  >
+                    <option value="">Year</option>
+                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
+                      <option key={year} value={year.toString().slice(-2)}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="cvv">CVV <span className="required">*</span></label>
+                  <input
+                    type="text"
+                    id="cvv"
+                    value={paymentFormData.cvv}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/\D/g, '').slice(0, 4);
+                      setPaymentFormData(prev => ({ ...prev, cvv: value }));
+                    }}
+                    placeholder="123"
+                    maxLength="4"
                     required
                   />
                 </div>
-                
-                <div className="form-group">
-                  <label htmlFor="cardNumber">Card Number <span className="required">*</span></label>
-                  <div className="input-icon-container">
-                    <input
-                      type="text"
-                      id="cardNumber"
-                      value={convergePaymentData.cardNumber}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-                        setConvergePaymentData(prev => ({ ...prev, cardNumber: value }));
-                      }}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength="19"
-                      required
-                    />
-                    <div className="card-type-icon">
-                      {/* Card type icons will be shown here */}
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="expiryMonth">Expiry Month <span className="required">*</span></label>
-                    <select
-                      id="expiryMonth"
-                      value={convergePaymentData.expiryMonth}
-                      onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryMonth: e.target.value }))}
-                      required
-                    >
-                      <option value="">Month</option>
-                      {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                        <option key={month} value={month.toString().padStart(2, '0')}>
-                          {month.toString().padStart(2, '0')}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="expiryYear">Expiry Year <span className="required">*</span></label>
-                    <select
-                      id="expiryYear"
-                      value={convergePaymentData.expiryYear}
-                      onChange={(e) => setConvergePaymentData(prev => ({ ...prev, expiryYear: e.target.value }))}
-                      required
-                    >
-                      <option value="">Year</option>
-                      {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
-                        <option key={year} value={year.toString().slice(-2)}>
-                          {year}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="cvv">CVV <span className="required">*</span></label>
-                    <input
-                      type="text"
-                      id="cvv"
-                      value={convergePaymentData.cvv}
-                      onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, '').slice(0, 4);
-                        setConvergePaymentData(prev => ({ ...prev, cvv: value }));
-                      }}
-                      placeholder="123"
-                      maxLength="4"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="form-actions">
-                  <button 
-                    type="button" 
-                    className="secondary-button"
-                    onClick={() => navigate(-1)}
-                  >
-                    Back
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="primary-button"
-                    disabled={isSubmitting || isLoadingConverge || !convergeInfo}
-                  >
-                    {isSubmitting ? 'Processing Payment...' : `Pay $${calculateProratedAmount().toFixed(2)}`}
-                  </button>
-                </div>
-                
-                <div className="security-notice">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                  </svg>
-                  Your payment information is secure and encrypted
-                </div>
-              </form>
-            </div>
-          ) : (
-            <form className="payment-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="cardNumber">
-                Card Number <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="cardNumber"
-                name="cardNumber"
-                value={paymentFormData.cardNumber}
-                onChange={handleInputChange}
-                placeholder="**** **** **** ****"
-                maxLength="19"
-              />
-              {errors.cardNumber && (
-                <div className="error-message">{errors.cardNumber}</div>
-              )}
-            </div>
-            
-           <div style={{ display: "flex", gap: "5px", margin: 0 }}>
-              <div className="form-group" style={{ flex: 0.8, margin: 0 }}>
-                <label htmlFor="expiryDate" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
-                  Expiration Date <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="expiryDate"
-                  name="expiryDate"
-                  value={paymentFormData.expiryDate}
-                  onChange={handleInputChange}
-                  placeholder="MM/YY"
-                  maxLength="5"
-                  style={{ padding: "0.25rem 0.5rem", height: "28px" }}
-                />
-                {errors.expiryDate && (
-                  <div className="error-message" style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    {errors.expiryDate}
-                  </div>
-                )}
               </div>
               
-              <div className="form-group" style={{ flex: 0.5, margin: 0 }}>
-                <label htmlFor="cvv" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
-                  CVV <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  id="cvv"
-                  name="cvv"
-                  value={paymentFormData.cvv}
-                  onChange={handleInputChange}
-                  placeholder="***"
-                  maxLength="4"
-                  style={{ padding: "0.25rem 0.5rem", height: "28px" }}
-                />
-                {errors.cvv && (
-                  <div className="error-message" style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    {errors.cvv}
-                  </div>
-                )}
-              </div>
-              
-              <div className="form-group" style={{ flex: 0.7, margin: 0 }}>
-                <label htmlFor="billingZipCode" style={{ fontSize: "0.8rem", marginBottom: "0.1rem" }}>
-                  ZIP <span className="required">*</span>
-                </label>
+              <div className="form-group">
+                <label htmlFor="billingZipCode">Billing ZIP Code <span className="required">*</span></label>
                 <input
                   type="text"
                   id="billingZipCode"
-                  name="billingZipCode"
                   value={paymentFormData.billingZipCode}
-                  onChange={handleInputChange}
-                  placeholder="ZIP"
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 5);
+                    setPaymentFormData(prev => ({ ...prev, billingZipCode: value }));
+                  }}
+                  placeholder="12345"
                   maxLength="5"
-                  style={{ padding: "0.25rem 0.5rem", height: "28px" }}
+                  required
                 />
-                {errors.billingZipCode && (
-                  <div className="error-message" style={{ fontSize: "0.7rem", marginTop: "0.1rem" }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <line x1="12" y1="8" x2="12" y2="12"></line>
-                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    {errors.billingZipCode}
-                  </div>
-                )}
               </div>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="nameOnCard">
-                Name on Card <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="nameOnCard"
-                name="nameOnCard"
-                value={paymentFormData.nameOnCard}
-                onChange={handleInputChange}
-                placeholder="Enter name as it appears on card"
-              />
-              {errors.nameOnCard && (
-                <div className="error-message">{errors.nameOnCard}</div>
-              )}
-            </div>
-            
             
             <div className="form-actions">
               <button 
@@ -1181,7 +1048,7 @@ const processConvergePayment = async () => {
                 className="primary-button"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? "Processing..." : processorName === 'CONVERGE' ? "Open Secure Payment Form" : "Submit Enrollment"}
+                {isSubmitting ? "Processing..." : "Process Payment"}
               </button>
             </div>
             
@@ -1195,7 +1062,7 @@ const processConvergePayment = async () => {
               </p>
             </div>
             </form>
-          )}
+          </div>
         </div>
       </div>
     </div>

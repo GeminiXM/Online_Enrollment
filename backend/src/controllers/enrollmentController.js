@@ -762,9 +762,9 @@ export const submitEnrollment = async (req, res) => {
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
           custCode, // parCustCode
           nextMbrCode, // parMbrCode (Sequential)
-          member.firstName, // parFname
-          member.middleInitial || "", // parMname
-          member.lastName, // parLname
+          member.firstName.toUpperCase(), // parFname (uppercase)
+          (member.middleInitial || "").toUpperCase(), // parMname (uppercase)
+          member.lastName.toUpperCase(), // parLname (uppercase)
           convertGenderValue(member.gender), // parSex - Apply conversion here
           member.dateOfBirth, // parBdate
           member.homePhone || "", // parHomePhone
@@ -1477,6 +1477,14 @@ export const getAddons = async (req, res) => {
 
     // Execute the stored procedure from SQL file
     const addons = await executeSqlProcedure("web_proc_GetAddons", clubId);
+
+    logger.info("Addons retrieved from database:", {
+      clubId,
+      addonCount: addons.length,
+      addonDescriptions: addons
+        .map((addon) => addon.invtr_desc || addon.description)
+        .slice(0, 5), // Log first 5 addon descriptions
+    });
 
     logger.info("Addons retrieved successfully", {
       count: addons.length,

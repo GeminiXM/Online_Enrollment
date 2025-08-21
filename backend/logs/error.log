@@ -2403,3 +2403,248 @@
 2025-08-20 21:13:33:1333 [31merror[39m: [31mError creating connection string:[39m
 2025-08-20 21:13:33:1333 [31merror[39m: [31mError in getConnection:[39m
 2025-08-20 21:13:33:1333 [31merror[39m: [31mError fetching club information: Invalid club ID: SELECT * FROM clubs WHERE id = ?[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:07:52:752 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:07:59:759 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:08:07:87 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:08:08:88 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:08:33:833 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:08:33:833 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:08:33:833 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:08:33:833 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:08:33:833 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:14:24:1424 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:14:38:1438 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:14:40:1440 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:14:43:1443 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:15:22:1522 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:15:24:1524 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:15:25:1525 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: web_proc_GetTaxRate[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getTaxRate:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError executing SQL procedure: web_proc_GetAddons[39m
+2025-08-20 22:16:43:1643 [31merror[39m: [31mError in getAddons:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError getting database config:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError creating connection string:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getConnection:[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getMembershipPrice:[39m
