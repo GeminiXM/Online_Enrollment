@@ -155,6 +155,78 @@ const apiService = {
     }
   },
 
+  // Real Converge payment processing - Step 1: Tokenize card data
+  tokenizeConvergeCard: async (cardData, convergeInfo) => {
+    try {
+      const response = await api.post("/payment/converge-tokenize", {
+        cardData,
+        convergeInfo,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error tokenizing Converge card:", error);
+      throw error;
+    }
+  },
+
+  // Real Converge payment processing - Step 2: Process payment with token
+  processConvergePaymentWithToken: async (
+    token,
+    amount,
+    convergeInfo,
+    customerData
+  ) => {
+    try {
+      const response = await api.post("/payment/converge-pay-with-token", {
+        token,
+        amount,
+        convergeInfo,
+        customerData,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error processing Converge payment with token:", error);
+      throw error;
+    }
+  },
+
+  // Test Converge credentials
+  testConvergeCredentials: async (convergeInfo) => {
+    try {
+      const response = await api.post("/payment/converge-test", {
+        convergeInfo,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error testing Converge credentials:", error);
+      throw error;
+    }
+  },
+
+  // Converge tokenization and payment with vault token
+  processConvergeTokenizeAndPay: async (
+    cardData,
+    amount,
+    convergeInfo,
+    customerData
+  ) => {
+    try {
+      const response = await api.post("/payment/converge-tokenize-and-pay", {
+        cardData,
+        amount,
+        convergeInfo,
+        customerData,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(
+        "Error processing Converge tokenization and payment:",
+        error
+      );
+      throw error;
+    }
+  },
+
   // Get tax rate for New Mexico clubs
   getTaxRate: async (clubId) => {
     try {

@@ -11,6 +11,8 @@ import PretendPaymentPage from "./components/PretendPaymentPage.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
 import ClubLinks from "./components/ClubLinks.jsx";
+import ConvergeCheckoutTest from "./components/ConvergeCheckoutTest.jsx";
+import DirectPaymentTest from "./components/DirectPaymentTest.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
@@ -108,21 +110,30 @@ function AppContent() {
               <ClubSelector />
               <nav className="main-nav">
                 <ul>
-                  <li>
+{/*                   <li>
                     <Link to="/">Home</Link>
-                  </li>
+                  </li> */}
                   <li>
                     <Link to="/enrollment">Enrollment</Link>
                   </li>
-                  <li>
+                  {/*   <li>
                     <Link to="/pretend-payment">Pretend Payment</Link>
                   </li>
+                  */}
                   <li>
                     <Link to="/club-links">Club Links</Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link to="/contract-save-test">Contract Save Test</Link>
                   </li>
+                  <li>
+                    <Link to="/converge-checkout-test">
+                      Converge Checkout Test
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/direct-payment-test">Direct Payment Test</Link>
+                  </li> */}
                 </ul>
               </nav>
             </div>
@@ -149,6 +160,11 @@ function AppContent() {
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}
           />
+          <Route
+            path="/converge-checkout-test"
+            element={<ConvergeCheckoutTest />}
+          />
+          <Route path="/direct-payment-test" element={<DirectPaymentTest />} />
           {/* Add more routes as needed */}
         </Routes>
       </main>

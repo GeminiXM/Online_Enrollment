@@ -629,4 +629,427 @@ router.post("/process-demo", validatePaymentData, async (req, res) => {
   }
 });
 
+// Get session token for Checkout.js
+router.post("/get-session-token", async (req, res) => {
+  try {
+    // Get credentials from database (using club 203 for now)
+    const clubId = 203;
+
+    // Get Converge processor information
+    const convergeResult = await executeSqlProcedure(
+      "procConvergeItemSelect1",
+      clubId,
+      [clubId]
+    );
+
+    let convergeInfo = null;
+    if (convergeResult && convergeResult.length > 0) {
+      const firstRow = convergeResult[0];
+      if (firstRow) {
+        convergeInfo = {
+          merchant_id: firstRow.merchant_id || "",
+          converge_user_id: firstRow.converge_user_id || "",
+          converge_pin: firstRow.converge_pin || "",
+          converge_url_process: firstRow.converge_url_process || "",
+        };
+      }
+    }
+
+    if (
+      !convergeInfo ||
+      !convergeInfo.merchant_id ||
+      !convergeInfo.converge_user_id ||
+      !convergeInfo.converge_pin
+    ) {
+      throw new Error("Converge processor information not found or incomplete");
+    }
+
+    logger.info("Getting session token for Checkout.js:", {
+      clubId,
+      merchant_id: convergeInfo.merchant_id,
+      user_id: convergeInfo.converge_user_id,
+      pin_length: convergeInfo.converge_pin
+        ? convergeInfo.converge_pin.length
+        : 0,
+    });
+
+    // Request session token from Converge using demo credentials
+    const params = new URLSearchParams({
+      ssl_transaction_type: "ccsale",
+      ssl_merchant_id: "0020159", // Standard demo merchant ID
+      ssl_user_id: "webpage", // Standard demo user ID
+      ssl_pin: "123456", // Standard demo PIN
+      ssl_vendor_id: "0020159", // Standard demo vendor ID
+      ssl_amount: "1.00", // Default amount for session token
+      ssl_add_token: "Y",
+      ssl_get_token: "Y",
+      ssl_test_mode: "true", // Enable test mode for demo environment
+    });
+
+    logger.info("Session token request parameters:", {
+      ssl_transaction_type: "ccsale",
+      ssl_account_id: convergeInfo.merchant_id.trim(),
+      ssl_user_id: convergeInfo.converge_user_id.trim(),
+      ssl_pin_length: convergeInfo.converge_pin.trim().length,
+      ssl_vendor_id: convergeInfo.merchant_id.trim(),
+      ssl_amount: "1.00",
+      ssl_add_token: "Y",
+      ssl_get_token: "Y",
+    });
+
+    const response = await axios.post(
+      "https://api.demo.convergepay.com/hosted-payments/transaction_token",
+      params.toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+
+    logger.info("Session token received successfully");
+
+    // Response is a plain string (the token)
+    res.json({ sessionToken: response.data });
+  } catch (error) {
+    logger.error("Error getting session token:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to get session token: " + error.message });
+  }
+});
+
+// Process payment with temp token and get vault token
+router.post("/process-payment", async (req, res) => {
+  try {
+    const { tempToken, amount, billingInfo } = req.body;
+
+    if (!tempToken || !amount || !billingInfo) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    // Get credentials from database (using club 203 for now)
+    const clubId = 203;
+
+    // Get Converge processor information
+    const convergeResult = await executeSqlProcedure(
+      "procConvergeItemSelect1",
+      clubId,
+      [clubId]
+    );
+
+    let convergeInfo = null;
+    if (convergeResult && convergeResult.length > 0) {
+      const firstRow = convergeResult[0];
+      if (firstRow) {
+        convergeInfo = {
+          merchant_id: firstRow.merchant_id || "",
+          converge_user_id: firstRow.converge_user_id || "",
+          converge_pin: firstRow.converge_pin || "",
+          converge_url_process: firstRow.converge_url_process || "",
+        };
+      }
+    }
+
+    if (
+      !convergeInfo ||
+      !convergeInfo.merchant_id ||
+      !convergeInfo.converge_user_id ||
+      !convergeInfo.converge_pin
+    ) {
+      throw new Error("Converge processor information not found or incomplete");
+    }
+
+    logger.info("Processing payment with temp token:", {
+      clubId,
+      amount,
+      tempTokenLength: tempToken ? tempToken.length : 0,
+      merchant_id: convergeInfo.merchant_id,
+    });
+
+    // Create XML request for payment processing using demo credentials
+    const xmlBody = `<?xml version="1.0" encoding="UTF-8"?>
+<txn>
+  <ssl_merchant_id>0020159</ssl_merchant_id>
+  <ssl_user_id>webpage</ssl_user_id>
+  <ssl_pin>123456</ssl_pin>
+  <ssl_transaction_type>ccsale</ssl_transaction_type>
+  <ssl_token>${tempToken}</ssl_token>
+  <ssl_amount>${amount}</ssl_amount>
+  <ssl_add_token>Y</ssl_add_token>
+  <ssl_first_name>${billingInfo.firstName || ""}</ssl_first_name>
+  <ssl_last_name>${billingInfo.lastName || ""}</ssl_last_name>
+  <ssl_avs_address>${billingInfo.address || ""}</ssl_avs_address>
+  <ssl_city>${billingInfo.city || ""}</ssl_city>
+  <ssl_state>${billingInfo.state || ""}</ssl_state>
+  <ssl_avs_zip>${billingInfo.zipCode || ""}</ssl_avs_zip>
+  <ssl_email>${billingInfo.email || ""}</ssl_email>
+  <ssl_description>Checkout.js Test Payment</ssl_description>
+  <ssl_result_format>JSON</ssl_result_format>
+  <ssl_test_mode>true</ssl_test_mode>
+</txn>`;
+
+    logger.info("Sending XML payment request:", {
+      xmlLength: xmlBody.length,
+      endpoint:
+        "https://api.demo.convergepay.com/VirtualMerchant/processxml.do",
+    });
+
+    const response = await axios.post(
+      "https://api.demo.convergepay.com/VirtualMerchant/processxml.do",
+      xmlBody,
+      {
+        headers: {
+          "Content-Type": "text/xml",
+        },
+      }
+    );
+
+    logger.info("Payment response received:", {
+      status: response.status,
+      contentType: response.headers["content-type"],
+      dataLength: response.data ? response.data.length : 0,
+    });
+
+    // Parse XML response
+    const responseData = response.data;
+    let parsedResponse;
+
+    if (typeof responseData === "string" && responseData.includes("<?xml")) {
+      // Parse XML response
+      const resultMatch = responseData.match(
+        /<ssl_result>([^<]+)<\/ssl_result>/
+      );
+      const messageMatch = responseData.match(
+        /<ssl_result_message>([^<]+)<\/ssl_result_message>/
+      );
+      const txnIdMatch = responseData.match(
+        /<ssl_txn_id>([^<]+)<\/ssl_txn_id>/
+      );
+      const tokenMatch = responseData.match(/<ssl_token>([^<]+)<\/ssl_token>/);
+
+      parsedResponse = {
+        ssl_result: resultMatch ? resultMatch[1] : null,
+        ssl_result_message: messageMatch ? messageMatch[1] : null,
+        ssl_txn_id: txnIdMatch ? txnIdMatch[1] : null,
+        ssl_token: tokenMatch ? tokenMatch[1] : null,
+      };
+    } else {
+      // JSON response
+      parsedResponse = responseData;
+    }
+
+    logger.info("Parsed payment response:", parsedResponse);
+
+    const success = parsedResponse.ssl_result === "0";
+    const vaultToken = parsedResponse.ssl_token;
+
+    if (success && vaultToken) {
+      logger.info("Payment successful, vault token generated:", {
+        txnId: parsedResponse.ssl_txn_id,
+        vaultTokenLength: vaultToken.length,
+      });
+
+      res.json({
+        success: true,
+        vaultToken,
+        txnId: parsedResponse.ssl_txn_id,
+        message:
+          parsedResponse.ssl_result_message || "Payment processed successfully",
+      });
+    } else {
+      logger.error("Payment failed:", {
+        result: parsedResponse.ssl_result,
+        message: parsedResponse.ssl_result_message,
+      });
+
+      res.json({
+        success: false,
+        message: parsedResponse.ssl_result_message || "Payment failed",
+      });
+    }
+  } catch (error) {
+    logger.error("Error processing payment:", error);
+    res.status(500).json({ error: "Payment failed: " + error.message });
+  }
+});
+
+/**
+ * @route POST /api/payment/converge-tokenize-and-pay
+ * @desc Process payment and generate vault token in one step
+ * @access Public
+ */
+router.post("/converge-tokenize-and-pay", async (req, res) => {
+  try {
+    const { cardData, amount, convergeInfo, customerData } = req.body;
+
+    logger.info("Processing Converge tokenize and pay:", {
+      amount,
+      cardNumberLength: cardData?.cardNumber ? cardData.cardNumber.length : 0,
+      lastFour: cardData?.cardNumber ? cardData.cardNumber.slice(-4) : "N/A",
+      customerName: customerData
+        ? `${customerData.firstName} ${customerData.lastName}`
+        : "N/A",
+    });
+
+    // Get Converge processor information from database if not provided
+    let processorInfo = convergeInfo;
+    if (!processorInfo) {
+      try {
+        // Default to club ID 1 for testing - you may want to make this configurable
+        const clubId = 1;
+        const convergeResult = await executeSqlProcedure(
+          "procConvergeItemSelect1",
+          clubId,
+          [clubId]
+        );
+
+        if (convergeResult && convergeResult.length > 0) {
+          const firstRow = convergeResult[0];
+          processorInfo = {
+            ssl_account_id: firstRow.merchant_id || "",
+            ssl_user_id: firstRow.converge_user_id || "",
+            ssl_pin: firstRow.converge_pin || "",
+            ssl_vendor_id: firstRow.converge_vendor_id || "",
+            ssl_url_process:
+              firstRow.converge_url_process ||
+              "https://api.convergepay.com/VirtualMerchant/processxml.do",
+          };
+        }
+      } catch (error) {
+        logger.error("Error getting Converge info from database:", error);
+        throw new Error("Failed to retrieve Converge processor information");
+      }
+    }
+
+    if (!processorInfo) {
+      throw new Error("Converge processor information not found");
+    }
+
+    // Extract values for XML construction
+    const merchantId = processorInfo.ssl_account_id?.trim();
+    const userId = processorInfo.ssl_user_id?.trim();
+    const pin = processorInfo.ssl_pin?.trim();
+    const vendorId = processorInfo.ssl_vendor_id?.trim();
+
+    logger.info("Using Converge credentials:", {
+      merchantId: merchantId ? `${merchantId.substring(0, 4)}****` : "N/A",
+      userId: userId ? `${userId.substring(0, 4)}****` : "N/A",
+      vendorId: vendorId ? `${vendorId.substring(0, 4)}****` : "N/A",
+    });
+
+    // Parse expiry date (MMYY format)
+    const expiryDate = cardData.expiryDate;
+    const expiryMonth = expiryDate.substring(0, 2);
+    const expiryYear = expiryDate.substring(2, 4);
+
+    // Create XML request for payment with vault token generation
+    const xmlBody = `<?xml version="1.0"?>
+<txn>
+  <ssl_merchant_id>${merchantId}</ssl_merchant_id>
+  <ssl_user_id>${userId}</ssl_user_id>
+  <ssl_pin>${pin}</ssl_pin>
+  <ssl_vendor_id>${vendorId}</ssl_vendor_id>
+  <ssl_transaction_type>ccsale</ssl_transaction_type>
+  <ssl_amount>${amount}</ssl_amount>
+  <ssl_card_number>${cardData.cardNumber}</ssl_card_number>
+  <ssl_exp_date>${expiryMonth}${expiryYear}</ssl_exp_date>
+  <ssl_cvv2cvc2>${cardData.cvv}</ssl_cvv2cvc2>
+  <ssl_cvv2cvc2_indicator>1</ssl_cvv2cvc2_indicator>
+  <ssl_add_token>Y</ssl_add_token>
+  <ssl_first_name>${customerData.firstName || ""}</ssl_first_name>
+  <ssl_last_name>${customerData.lastName || ""}</ssl_last_name>
+  <ssl_avs_address>${customerData.address || ""}</ssl_avs_address>
+  <ssl_city>${customerData.city || ""}</ssl_city>
+  <ssl_state>${customerData.state || ""}</ssl_state>
+  <ssl_avs_zip>${customerData.zipCode || ""}</ssl_avs_zip>
+  <ssl_email>${customerData.email || ""}</ssl_email>
+  <ssl_description>Direct Payment Test</ssl_description>
+  <ssl_result_format>JSON</ssl_result_format>
+</txn>`;
+
+    logger.info("Sending XML payment request:", {
+      xmlLength: xmlBody.length,
+      endpoint: processorInfo.ssl_url_process,
+    });
+
+    const response = await axios.post(processorInfo.ssl_url_process, xmlBody, {
+      headers: {
+        "Content-Type": "text/xml",
+      },
+    });
+
+    logger.info("Payment response received:", {
+      status: response.status,
+      contentType: response.headers["content-type"],
+      dataLength: response.data ? response.data.length : 0,
+    });
+
+    // Parse XML response
+    const responseData = response.data;
+    let parsedResponse;
+
+    if (typeof responseData === "string" && responseData.includes("<?xml")) {
+      // Parse XML response
+      const resultMatch = responseData.match(
+        /<ssl_result>([^<]+)<\/ssl_result>/
+      );
+      const messageMatch = responseData.match(
+        /<ssl_result_message>([^<]+)<\/ssl_result_message>/
+      );
+      const txnIdMatch = responseData.match(
+        /<ssl_txn_id>([^<]+)<\/ssl_txn_id>/
+      );
+      const tokenMatch = responseData.match(/<ssl_token>([^<]+)<\/ssl_token>/);
+
+      parsedResponse = {
+        ssl_result: resultMatch ? resultMatch[1] : null,
+        ssl_result_message: messageMatch ? messageMatch[1] : null,
+        ssl_txn_id: txnIdMatch ? txnIdMatch[1] : null,
+        ssl_token: tokenMatch ? tokenMatch[1] : null,
+      };
+    } else {
+      // JSON response
+      parsedResponse = responseData;
+    }
+
+    logger.info("Parsed payment response:", parsedResponse);
+
+    const success = parsedResponse.ssl_result === "0";
+    const vaultToken = parsedResponse.ssl_token;
+
+    if (success && vaultToken) {
+      logger.info("Payment successful, vault token generated:", {
+        txnId: parsedResponse.ssl_txn_id,
+        vaultTokenLength: vaultToken.length,
+      });
+
+      res.json({
+        success: true,
+        vaultToken,
+        txnId: parsedResponse.ssl_txn_id,
+        message:
+          parsedResponse.ssl_result_message || "Payment processed successfully",
+      });
+    } else {
+      logger.error("Payment failed:", {
+        result: parsedResponse.ssl_result,
+        message: parsedResponse.ssl_result_message,
+      });
+
+      res.json({
+        success: false,
+        message: parsedResponse.ssl_result_message || "Payment failed",
+      });
+    }
+  } catch (error) {
+    logger.error("Error processing Converge tokenize and pay:", error);
+    res.status(500).json({
+      success: false,
+      message: "Payment processing failed. Please try again.",
+      error: error.message,
+    });
+  }
+});
+
 export default router;

@@ -49,10 +49,10 @@ const clubList = [
   },
   {
     id: "252",
-    name: "Colorado Athletic Club - Denver Tech Center",
+    name: "Colorado Athletic Club - DTC",
     address: "5555 DTC Parkway, Greenwood Village, CO 80111",
     state: "CO",
-    shortName: "Denver Tech Center",
+    shortName: "DTC",
     phone: "303-779-0700",
     email: "cdcgm@wellbridge.com",
   },
@@ -82,14 +82,6 @@ const clubList = [
     shortName: "Monaco",
     phone: "303-758-7080",
     email: "cmogm@wellbridge.com",
-  },
-  {
-    id: "375",
-    name: "MAC",
-    address: "",
-    state: "CO",
-    phone: "303-000-0000",
-    email: "",
   },
 ];
 

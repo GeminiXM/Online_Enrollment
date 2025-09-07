@@ -3621,7 +3621,8 @@ function EnrollmentForm() {
         </div>
       )}
 
-      <h1>{selectedClub.name} Membership Enrollment Form</h1>
+      <h1>{selectedClub.name}</h1>
+      <h2>Membership Enrollment Form</h2>
 
       <p className="form-instructions">
         Please fill out the form below to become a member at the club. 

@@ -645,7 +645,7 @@ const PaymentPage = () => {
     });
   };
 
-    // Process Converge payment using hosted fields
+        // Process real Converge payment with tokenization and vault token
 const processConvergePayment = async () => {
   // Validate Converge payment form specifically
   if (!convergePaymentData.cardNumber || !convergePaymentData.expiryMonth ||
@@ -655,86 +655,103 @@ const processConvergePayment = async () => {
     return;
   }
 
+  if (!convergeInfo) {
+    setSubmitError('Payment processor information not available');
+    return;
+  }
+
   setIsSubmitting(true);
   setSubmitError('');
 
   try {
-    console.log('Processing Converge payment with direct ccsale...');
+    console.log('Processing Converge payment with tokenization...');
     
-    // Process the payment using the demo endpoint (direct ccsale)
-    const paymentData = {
-      clubId: formData.club || selectedClub?.id || "001",
+    // Prepare card data for tokenization
+    const cardData = {
       cardNumber: convergePaymentData.cardNumber.replace(/\s/g, ''),
-      expiryDate: `${convergePaymentData.expiryMonth}/${convergePaymentData.expiryYear}`,
+      expiryDate: `${convergePaymentData.expiryMonth}${convergePaymentData.expiryYear}`,
       cvv: convergePaymentData.cvv,
-      nameOnCard: convergePaymentData.cardholderName,
-      billingZipCode: formData.zipCode || '',
-      amount: calculateProratedAmount().toFixed(2) || "50.00",
-      membershipDetails: formData.membershipDetails,
-      processorName: processorName
+      firstName: formData.firstName,
+      lastName: formData.lastName
     };
-    
-    console.log('Payment data being sent:', {
-      clubId: paymentData.clubId,
-      amount: paymentData.amount,
-      cardNumberLength: paymentData.cardNumber.length,
-      lastFour: paymentData.cardNumber.slice(-4)
+
+    const convergeInfoForAPI = {
+      ssl_account_id: convergeInfo.merchant_id?.trim(),
+      ssl_user_id: convergeInfo.converge_user_id?.trim(),
+      ssl_pin: convergeInfo.converge_pin?.trim(),
+      ssl_vendor_id: convergeInfo.merchant_id?.trim(),
+      converge_url_process: convergeInfo.converge_url_process
+    };
+
+    console.log('Converge info being sent:', {
+      account_id: convergeInfoForAPI.ssl_account_id,
+      user_id: convergeInfoForAPI.ssl_user_id,
+      vendor_id: convergeInfoForAPI.ssl_vendor_id,
+      url: convergeInfoForAPI.converge_url_process,
+      has_pin: !!convergeInfoForAPI.ssl_pin
     });
-    
-    // Show payment processing popup
-    setShowProcessorDemo(true);
-    
-    // Process payment using the working endpoint
-    const result = await api.processPaymentDemo(paymentData);
-    
-    console.log('Payment result:', result);
-    
-    if (result.success) {
-      // Create and submit form to Converge hosted payment page
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = result.hostedFormUrl;
-      form.target = '_blank'; // Open in new tab
-      form.style.display = 'none';
-      
-      // Add all payment data to the form
-      Object.keys(result.paymentData).forEach(key => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = result.paymentData[key];
-        form.appendChild(input);
-      });
-      
-      // Add form to page and submit
-      document.body.appendChild(form);
-      form.submit();
-      
-      // Remove the form from DOM
-      document.body.removeChild(form);
-      
-      // Show success message
-      setPaymentResponse({
+
+    // Prepare customer data for payment
+    const customerData = {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      address: formData.address || '',
+      city: formData.city || '',
+      state: formData.state || '',
+      zipCode: formData.zipCode || '',
+      email: formData.email || '',
+      phone: formData.phone || ''
+    };
+
+    const amount = calculateProratedAmount().toFixed(2) || "50.00";
+
+    // Process tokenization and payment in one call
+    const paymentResult = await api.processConvergeTokenizeAndPay(
+      cardData,
+      amount,
+      convergeInfoForAPI,
+      customerData
+    );
+
+    console.log('Payment result:', paymentResult);
+
+    if (paymentResult.success) {
+      // Payment successful with vault token
+      const paymentResponse = {
         success: true,
-        message: 'Redirecting to Converge payment form...'
-      });
-      
-      // Note: The actual payment result will come back via the receipt link
-      // For now, we'll assume success and continue with enrollment
+        transaction_id: paymentResult.transaction_id,
+        authorization_code: paymentResult.authorization_code,
+        vault_token: paymentResult.vault_token, // This is the vault token for future rebilling
+        card_info: {
+          last_four: convergePaymentData.cardNumber.replace(/\s/g, '').slice(-4),
+          card_type: 'Credit Card'
+        },
+        amount: amount,
+        message: 'Payment processed successfully with vault token!'
+      };
+
+      setPaymentResponse(paymentResponse);
+        
+      console.log('PAYMENT SUCCESSFUL WITH VAULT TOKEN:', paymentResult.vault_token);
+        
+      // Clear sensitive data immediately
+      clearSensitiveData();
+        
+      // Delay to allow user to see the result
       setTimeout(() => {
-        finishEnrollment({
-          success: true,
-          message: 'Payment form opened successfully'
-        });
-      }, 2000);
+        finishEnrollment(paymentResponse);
+      }, 3000);
     } else {
-      throw new Error(result.message || 'Payment processing failed');
+      throw new Error(paymentResult.message || 'Payment processing failed');
     }
   } catch (error) {
     console.error('Payment processing error:', error);
     setSubmitError(error.message || 'An error occurred while processing your payment. Please try again.');
     setShowProcessorDemo(false);
     setIsSubmitting(false);
+    
+    // Clear sensitive data on error
+    clearSensitiveData();
   }
 };
   
@@ -758,6 +775,37 @@ const processConvergePayment = async () => {
       fetchConvergeInfo();
     }
   }, [formData?.club, processorName]);
+
+  // Test Converge credentials
+  const testConvergeCredentials = async () => {
+    if (!convergeInfo) {
+      alert('Converge info not loaded');
+      return;
+    }
+
+    try {
+      const convergeInfoForAPI = {
+        ssl_account_id: convergeInfo.merchant_id?.trim(),
+        ssl_user_id: convergeInfo.converge_user_id?.trim(),
+        ssl_pin: convergeInfo.converge_pin?.trim(),
+        ssl_vendor_id: convergeInfo.merchant_id?.trim(),
+        ssl_url_process: convergeInfo.converge_url_process
+      };
+
+      console.log('Testing Converge credentials...');
+      const result = await api.testConvergeCredentials(convergeInfoForAPI);
+      console.log('Converge test result:', result);
+      
+      if (result.success) {
+        alert('Converge test completed successfully. Check console for details.');
+      } else {
+        alert('Converge test failed: ' + result.message);
+      }
+    } catch (error) {
+      console.error('Converge test error:', error);
+      alert('Converge test error: ' + error.message);
+    }
+  };
 
   // Auto-select payment method based on club location
   useEffect(() => {
@@ -1151,6 +1199,16 @@ const processConvergePayment = async () => {
                   >
                     Back
                   </button>
+                  {convergeInfo && (
+                    <button 
+                      type="button" 
+                      className="secondary-button"
+                      onClick={testConvergeCredentials}
+                      style={{ marginRight: '10px' }}
+                    >
+                      Test Converge
+                    </button>
+                  )}
                   <button 
                     type="submit" 
                     className="primary-button"
@@ -1295,6 +1353,16 @@ const processConvergePayment = async () => {
               >
                 Back
               </button>
+              {processorName === 'CONVERGE' && convergeInfo && (
+                <button 
+                  type="button" 
+                  className="secondary-button"
+                  onClick={testConvergeCredentials}
+                  style={{ marginRight: '10px' }}
+                >
+                  Test Converge
+                </button>
+              )}
               <button 
                 type="submit" 
                 className="primary-button"
@@ -1315,6 +1383,52 @@ const processConvergePayment = async () => {
             </div>
             </form>
           )}
+          
+          {showProcessorDemo ? (
+            <div className="payment-processing-popup">
+              <div className="payment-processing-content">
+                <h3>Processing Payment</h3>
+                
+                {!paymentResponse ? (
+                  <div className="processing-loading">
+                    <div className="spinner"></div>
+                    <p>Processing your payment with Converge...</p>
+                    <p className="processing-details">
+                      Amount: ${calculateProratedAmount().toFixed(2) || "50.00"}<br/>
+                      Card: **** **** **** {convergePaymentData.cardNumber.slice(-4)}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="payment-result">
+                    <div className={`result-icon ${paymentResponse.success ? 'success' : 'error'}`}>
+                      {paymentResponse.success ? '✓' : '✗'}
+                    </div>
+                    <h4>{paymentResponse.success ? 'Payment Successful!' : 'Payment Failed'}</h4>
+                    <p>{paymentResponse.message || (paymentResponse.success ? 'Your payment has been processed successfully.' : 'There was an error processing your payment.')}</p>
+                    
+                    {paymentResponse.success && (
+                      <div className="payment-details">
+                        <p><strong>Transaction ID:</strong> {paymentResponse.transaction_id || paymentResponse.ssl_txn_id || 'N/A'}</p>
+                        <p><strong>Authorization Code:</strong> {paymentResponse.authorization_code || paymentResponse.ssl_approval_code || 'N/A'}</p>
+                        <p><strong>Last 4 Digits:</strong> {paymentResponse.card_info?.last_four || paymentResponse.ssl_card_number?.slice(-4) || 'N/A'}</p>
+                        {paymentResponse.payment_token && (
+                          <p><strong>Vault Token:</strong> {paymentResponse.payment_token}</p>
+                        )}
+                      </div>
+                    )}
+                    
+                    <p className="redirecting-message">Redirecting to confirmation page...</p>
+                  </div>
+                )}
+                
+                {submitError && (
+                  <div className="error-message payment-error">
+                    {submitError}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

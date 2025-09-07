@@ -2648,3 +2648,42 @@
 2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getConnection:[39m
 2025-08-20 22:16:46:1646 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
 2025-08-20 22:16:46:1646 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-21 11:02:38:238 [31merror[39m: [31mError connecting to database:[39m
+2025-08-21 11:02:38:238 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-08-21 11:02:38:238 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-08-27 11:04:05:45 [31merror[39m: [31mError connecting to database:[39m
+2025-08-27 11:04:05:45 [31merror[39m: [31mError executing SQL procedure: web_proc_GetCCProcessorName[39m
+2025-08-27 11:04:05:45 [31merror[39m: [31mError executing web_proc_GetCCProcessorName procedure:[39m
+2025-08-27 11:15:11:1511 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:23:28:2328 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:26:34:2634 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:30:13:3013 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:46:11:4611 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:49:47:4947 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:54:13:5413 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 11:58:12:5812 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:13:48:1348 [31merror[39m: [31mConverge tokenization failed:[39m
+2025-08-27 12:15:42:1542 [31merror[39m: [31mConverge tokenization failed:[39m
+2025-08-27 12:17:00:170 [31merror[39m: [31mConverge tokenization failed:[39m
+2025-08-27 12:18:55:1855 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:20:24:2024 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:21:54:2154 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:23:26:2326 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:32:26:3226 [31merror[39m: [31mConverge tokenization and payment error: tokenMatch is not defined[39m
+2025-08-27 12:35:11:3511 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:37:02:372 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:40:34:4034 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:42:11:4211 [31merror[39m: [31mConverge payment failed:[39m
+2025-08-27 12:50:51:5051 [31merror[39m: [31mConverge authentication error 6042:[39m
+2025-08-27 12:50:51:5051 [31merror[39m: [31mConverge tokenization and payment error: Converge authentication failed: Error 6042[39m
+2025-08-27 12:56:36:5636 [31merror[39m: [31mConverge authentication error 6042:[39m
+2025-08-27 12:56:36:5636 [31merror[39m: [31mConverge tokenization and payment error: Converge authentication failed: Error 6042[39m
+2025-08-27 14:20:08:208 [31merror[39m: [31mConverge authentication error 6042:[39m
+2025-08-27 14:20:08:208 [31merror[39m: [31mConverge tokenization and payment error: Converge authentication failed: Error 6042[39m
+2025-08-27 15:05:41:541 [31merror[39m: [31mError getting session token: Request failed with status code 400[39m
+2025-08-27 15:08:30:830 [31merror[39m: [31mError getting session token: Request failed with status code 400[39m
+2025-08-27 15:10:46:1046 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
+2025-08-27 15:14:30:1430 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
+2025-08-27 15:16:10:1610 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
+2025-08-27 15:21:29:2129 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
+2025-08-27 15:23:00:230 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
