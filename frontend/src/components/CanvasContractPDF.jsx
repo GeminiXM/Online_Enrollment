@@ -422,26 +422,27 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
         [
           { content: 'Enrollment Fee', styles: { fontStyle: 'normal' } },
           { content: `$${formData.initiationFee || '19.00'}`, styles: { fontStyle: 'normal' } },
-          { content: `${formData.displayMembershipType || 'Individual'} Dues ${formData.displayAgreementType || 'Month-to-month'}`, styles: { fontStyle: 'normal' } },
-          { content: `$${formData.monthlyDues || '0.00'}`, styles: { fontStyle: 'normal' } }
-        ],
-        [
-          { content: 'Pro-rated Dues', styles: { fontStyle: 'normal' } },
-          { content: `$${formData.proratedDues || '0.00'}`, styles: { fontStyle: 'normal' } },
           { content: 'Total Monthly Membership Dues Rate', styles: { fontStyle: 'normal' } },
           { content: `$${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}`, styles: { fontStyle: 'bold' } }
         ],
         [
+                  { content: '', styles: { fontStyle: 'normal' } },
           { content: '', styles: { fontStyle: 'normal' } },
-          { content: '', styles: { fontStyle: 'normal' } },
+
           { content: '(applicable taxes not included)', styles: { fontStyle: 'italic' } },
           { content: '', styles: { fontStyle: 'normal' } }
         ],
         [
-          { content: 'Pro-rated Add-Ons', styles: { fontStyle: 'normal' } },
-          { content: `$${formData.proratedAddOns || '0.00'}`, styles: { fontStyle: 'normal' } },
+          { content: 'Pro-rated Dues', styles: { fontStyle: 'normal' } },
+          { content: `$${formData.proratedDues || '0.00'}`, styles: { fontStyle: 'normal' } },
           { content: 'Membership Start Date', styles: { fontStyle: 'normal' } },
           { content: formatDate(formData.requestedStartDate) || '', styles: { fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'Pro-rated Add-Ons', styles: { fontStyle: 'normal' } },
+          { content: `$${formData.proratedAddOns || '0.00'}`, styles: { fontStyle: 'normal' } },
+            { content: '', styles: { fontStyle: 'normal' } },
+            { content: '', styles: { fontStyle: 'normal' } }
         ],
 
         ...(formData.hasPTAddon && formData.ptPackage ? [
