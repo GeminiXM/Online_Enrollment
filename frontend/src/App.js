@@ -11,8 +11,8 @@ import PretendPaymentPage from "./components/PretendPaymentPage.jsx";
 import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
 import ClubLinks from "./components/ClubLinks.jsx";
-import ConvergeCheckoutTest from "./components/ConvergeCheckoutTest.jsx";
-import DirectPaymentTest from "./components/DirectPaymentTest.jsx";
+//import ConvergeCheckoutTest from "./components/ConvergeCheckoutTest.jsx";
+//import DirectPaymentTest from "./components/DirectPaymentTest.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
@@ -110,7 +110,7 @@ function AppContent() {
               <ClubSelector />
               <nav className="main-nav">
                 <ul>
-{/*                   <li>
+                  {/*                   <li>
                     <Link to="/">Home</Link>
                   </li> */}
                   <li>
@@ -160,11 +160,11 @@ function AppContent() {
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}
           />
-          <Route
+          {/* <Route
             path="/converge-checkout-test"
             element={<ConvergeCheckoutTest />}
           />
-          <Route path="/direct-payment-test" element={<DirectPaymentTest />} />
+          <Route path="/direct-payment-test" element={<DirectPaymentTest />} /> */}
           {/* Add more routes as needed */}
         </Routes>
       </main>

@@ -230,6 +230,7 @@ function EnrollmentForm() {
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(true);
   const [lastSaved, setLastSaved] = useState(null);
   const [showRestorePrompt, setShowRestorePrompt] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -3362,7 +3363,7 @@ function EnrollmentForm() {
       console.log("Child member:", childMember);
       console.log("Youth member:", youthMember);
       
-      if (hasData) {
+      if (hasData && !isRestoring) {
         const timeoutId = setTimeout(() => {
                   const additionalData = {
           selectedChildAddons,
@@ -3402,7 +3403,7 @@ function EnrollmentForm() {
         return () => clearTimeout(timeoutId);
       }
     }
-  }, [formData, selectedChildAddons, selectedServiceAddons, membershipType, selectedClub, autoSaveEnabled, childForms, adultMember, childMember, youthMember, activeTab]);
+  }, [formData, selectedChildAddons, selectedServiceAddons, membershipType, selectedClub, autoSaveEnabled, childForms, adultMember, childMember, youthMember, activeTab, isRestoring]);
 
   // Restore data on component mount
   useEffect(() => {
@@ -3426,6 +3427,7 @@ function EnrollmentForm() {
   // Handle restore prompt
   const handleRestoreData = async () => {
     console.log("Attempting to restore data...");
+    setIsRestoring(true);
     
     // Try localStorage first
     let restoredData = restoreFormData();
@@ -3489,6 +3491,11 @@ function EnrollmentForm() {
         console.log("No data to restore");
         setShowRestorePrompt(false);
       }
+      
+      // Clear the restoring flag after a short delay to allow state updates to complete
+      setTimeout(() => {
+        setIsRestoring(false);
+      }, 1000);
   };
 
   const handleDiscardData = () => {

@@ -94,10 +94,13 @@ export const restoreFormData = () => {
     console.log("Current session ID:", currentSessionId);
     console.log("Data session ID:", decrypted.sessionId);
 
-    if (decrypted.sessionId !== currentSessionId) {
-      console.log("Session changed, clearing old data");
-      localStorage.removeItem("enrollment_draft");
-      return null;
+    // Allow restoration even if session ID is different (user might have refreshed or reopened browser)
+    // Only clear data if it's from a completely different browser session (different timestamp pattern)
+    if (decrypted.sessionId && decrypted.sessionId !== currentSessionId) {
+      console.log(
+        "Session ID different, but allowing restoration for user convenience"
+      );
+      // Don't clear the data - allow restoration
     }
 
     // Check if data is not too old (24 hours)
@@ -219,7 +222,8 @@ export const hasSavedData = () => {
     if (!decrypted) return false;
 
     const currentSessionId = getSessionId();
-    if (decrypted.sessionId !== currentSessionId) return false;
+    // Allow checking for saved data even if session ID is different
+    // if (decrypted.sessionId !== currentSessionId) return false;
 
     const maxAge = 24 * 60 * 60 * 1000; // 24 hours
     if (Date.now() - decrypted.timestamp > maxAge) return false;

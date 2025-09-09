@@ -1,1 +1,0 @@
-execute procedure web_proc_GetAddons();
