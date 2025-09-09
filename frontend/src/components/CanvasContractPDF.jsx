@@ -419,7 +419,12 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
         ]
       ],
       body: [
-
+        [
+          { content: 'Enrollment Fee', styles: { fontStyle: 'normal' } },
+          { content: `$${formData.initiationFee || '19.00'}`, styles: { fontStyle: 'normal' } },
+          { content: `${formData.displayMembershipType || 'Individual'} Dues ${formData.displayAgreementType || 'Month-to-month'}`, styles: { fontStyle: 'normal' } },
+          { content: `$${formData.monthlyDues || '0.00'}`, styles: { fontStyle: 'normal' } }
+        ],
         [
           { content: 'Pro-rated Dues', styles: { fontStyle: 'normal' } },
           { content: `$${formData.proratedDues || '0.00'}`, styles: { fontStyle: 'normal' } },
