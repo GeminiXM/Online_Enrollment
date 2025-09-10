@@ -502,7 +502,8 @@ const processPaymentWithToken = async (token, tokenizerResponse) => {
         authorizationCode: response.authorizationCode,
         cardNumber: response.cardNumber,
         cardType: response.cardType,
-        token: token // Include the token in the payment result
+        token: token, // Include the tokenizer token in the payment result
+        vaultToken: response.vaultToken // Include the vault token for database storage
       });
       
       setPopupType('success');
@@ -591,7 +592,8 @@ const launchPayment = async () => {
           last4: last4,
           cardType: cardType,
           expirationDate: expirationDate,
-          token: paymentResult.token || "" // Include the FluidPay token
+          token: paymentResult.token || "", // Include the FluidPay tokenizer token
+          vaultToken: paymentResult.vaultToken || "" // Include the FluidPay vault token for rebilling
         }
       };
       

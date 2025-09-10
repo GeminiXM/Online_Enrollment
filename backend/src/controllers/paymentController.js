@@ -523,10 +523,33 @@ export const processFluidPayPayment = async (req, res) => {
         billing,
       });
 
+      // Create customer in vault for future rebilling
+      let vaultToken = null;
+      try {
+        const vaultResponse = await createFluidPayCustomerVault(fluidPayInfo, {
+          token,
+          customerInfo,
+          user,
+          billing,
+        });
+        vaultToken = vaultResponse.vaultToken;
+        logger.info("Customer vault created successfully", {
+          clubId,
+          vaultToken: vaultToken ? `${vaultToken.substring(0, 10)}...` : null,
+        });
+      } catch (vaultError) {
+        logger.warn("Failed to create customer vault, but payment succeeded", {
+          error: vaultError.message,
+          clubId,
+        });
+        // Don't fail the payment if vault creation fails
+      }
+
       logger.info("FluidPay payment processed successfully", {
         clubId,
         transactionId: paymentResponse.transactionId,
         amount,
+        vaultToken: vaultToken ? `${vaultToken.substring(0, 10)}...` : null,
       });
 
       res.status(200).json({
@@ -536,6 +559,7 @@ export const processFluidPayPayment = async (req, res) => {
         cardNumber: paymentResponse.cardNumber,
         cardType: paymentResponse.cardType,
         amount: amount,
+        vaultToken: vaultToken, // Include vault token for database storage
         message: "Payment processed successfully",
       });
     } catch (procError) {
@@ -699,6 +723,137 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       },
       paymentData: {
         amount: amount,
+        hasToken: !!token,
+        customerEmail: customerInfo?.email,
+      },
+    });
+
+    throw error;
+  }
+};
+
+/**
+ * @desc Create FluidPay customer vault
+ * @param {Object} fluidPayInfo - FluidPay processor information
+ * @param {Object} vaultData - Customer vault data including token
+ * @returns {Object} Vault response with vault token
+ */
+const createFluidPayCustomerVault = async (fluidPayInfo, vaultData) => {
+  const { token, customerInfo, user, billing } = vaultData;
+
+  try {
+    logger.info("Creating FluidPay customer vault", {
+      baseUrl: fluidPayInfo.fluidpay_base_url,
+      merchantId: fluidPayInfo.merchant_id,
+      hasToken: !!token,
+      customerEmail: customerInfo?.email,
+    });
+
+    // Prepare the vault request payload according to FluidPay documentation
+    const vaultPayload = {
+      description: `${customerInfo.firstName} ${customerInfo.lastName} - Club Member`,
+      payment_method: {
+        token: token,
+      },
+      billing_address: {
+        first_name: customerInfo.firstName || "",
+        last_name: customerInfo.lastName || "",
+        company: "",
+        address_line_1: customerInfo.address || "",
+        address_line_2: "",
+        city: customerInfo.city || "",
+        state: customerInfo.state || "",
+        postal_code: customerInfo.zipCode || "",
+        country: "US",
+        email: customerInfo.email || "",
+        phone: customerInfo.phone || "",
+        fax: "",
+      },
+    };
+
+    logger.info("FluidPay vault request details", {
+      url: `${fluidPayInfo.fluidpay_base_url}/api/vault/customer`,
+      method: "POST",
+      merchantId: fluidPayInfo.merchant_id,
+      token: token ? `${token.substring(0, 10)}...` : "null",
+      customer: {
+        firstName: customerInfo.firstName,
+        lastName: customerInfo.lastName,
+        email: customerInfo.email,
+      },
+      vaultPayload: vaultPayload,
+    });
+
+    // Make FluidPay vault API call
+    const response = await fetch(
+      `${fluidPayInfo.fluidpay_base_url}/api/vault/customer`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: fluidPayInfo.fluidpay_api_key,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(vaultPayload),
+      }
+    );
+
+    let responseData;
+    const responseText = await response.text();
+
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (parseError) {
+      logger.error("Failed to parse FluidPay vault response as JSON", {
+        responseText: responseText,
+        responseStatus: response.status,
+        parseError: parseError.message,
+      });
+      throw new Error(`FluidPay vault returned invalid JSON: ${responseText}`);
+    }
+
+    logger.info("FluidPay vault API response details", {
+      httpStatus: response.status,
+      responseData: responseData,
+      vaultId: responseData.data?.id,
+      status: responseData.status,
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `FluidPay vault API error: ${response.status} - ${JSON.stringify(
+          responseData
+        )}`
+      );
+    }
+
+    // Check if the vault creation was successful
+    if (responseData.status !== "success") {
+      throw new Error(
+        `FluidPay vault creation failed: ${responseData.msg || "Unknown error"}`
+      );
+    }
+
+    // Extract vault token from response
+    const vaultToken = responseData.data?.id;
+    if (!vaultToken) {
+      throw new Error("No vault token returned from FluidPay");
+    }
+
+    return {
+      vaultToken: vaultToken,
+      vaultId: responseData.data?.id,
+      status: responseData.status,
+      response: responseData,
+    };
+  } catch (error) {
+    logger.error("FluidPay vault creation failed", {
+      error: error.message,
+      fluidPayInfo: {
+        baseUrl: fluidPayInfo.fluidpay_base_url,
+        merchantId: fluidPayInfo.merchant_id,
+        hasApiKey: !!fluidPayInfo.fluidpay_api_key,
+      },
+      vaultData: {
         hasToken: !!token,
         customerEmail: customerInfo?.email,
       },
