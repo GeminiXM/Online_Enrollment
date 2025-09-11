@@ -500,6 +500,10 @@ button:focus-visible {
 /* Adjust spacing between sections */
 .start-date-row {
   margin-bottom: 0.75rem; /* Increased from 0.5rem */
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between; /* Spread items across the row */
 }
 
 .name-row {
@@ -975,6 +979,13 @@ button:focus-visible {
   flex: 0 0 170px;
   min-width: 170px;
   max-width: 170px;
+}
+
+/* Sales rep dropdown in start date row */
+.start-date-row .form-group:not(.date-field) {
+  flex: 0 0 160px; /* Fixed width, don't grow or shrink */
+  max-width: 160px;
+  margin-left: auto; /* Push to the right side */
 }
 
 /* Special handling for address fields */

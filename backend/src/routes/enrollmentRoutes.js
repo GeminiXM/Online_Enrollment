@@ -748,4 +748,65 @@ router.post("/test-email", async (req, res) => {
   }
 });
 
+/**
+ * @route GET /api/enrollment/sales-reps
+ * @desc Get sales reps for a specific club
+ * @access Public
+ */
+router.get("/sales-reps", async (req, res) => {
+  try {
+    const { clubId } = req.query;
+
+    if (!clubId) {
+      return res.status(400).json({
+        success: false,
+        message: "Club ID is required",
+      });
+    }
+
+    logger.info("Getting sales reps for club:", { clubId });
+
+    // Execute the stored procedure to get sales reps
+    const result = await pool.query(
+      clubId,
+      "EXECUTE PROCEDURE web_proc_GetSalesReps(?)",
+      [clubId]
+    );
+
+    if (!result || result.length === 0) {
+      return res.json({
+        success: true,
+        salesReps: [],
+      });
+    }
+
+    // Transform the result to include both sales_rep and emp_code
+    const salesReps = result.map((row) => ({
+      salesRep: row.sales_reps,
+      empCode: row.emp_code,
+    }));
+
+    logger.info("Sales reps retrieved successfully:", {
+      clubId,
+      count: salesReps.length,
+    });
+
+    return res.json({
+      success: true,
+      salesReps,
+    });
+  } catch (error) {
+    logger.error("Error getting sales reps:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve sales reps",
+      error: error.message,
+    });
+  }
+});
+
 export default router;

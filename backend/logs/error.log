@@ -2687,3 +2687,7 @@
 2025-08-27 15:16:10:1610 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
 2025-08-27 15:21:29:2129 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
 2025-08-27 15:23:00:230 [31merror[39m: [31mError getting session token: Request failed with status code 401[39m
+2025-09-11 16:20:36:2036 [31merror[39m: [31mError getting database config:[39m
+2025-09-11 16:20:36:2036 [31merror[39m: [31mError creating connection string:[39m
+2025-09-11 16:20:36:2036 [31merror[39m: [31mError in getConnection:[39m
+2025-09-11 16:20:36:2036 [31merror[39m: [31mError getting sales reps:[39m

@@ -474,6 +474,7 @@ function EnrollmentForm() {
   const [formData, setFormData] = useState({
     // Primary Member Information
     requestedStartDate: "",
+    salesRep: "", // Sales rep who helped with enrollment
     firstName: "",
     middleInitial: "",
     lastName: "",
@@ -514,6 +515,10 @@ function EnrollmentForm() {
 
   // State for form validation errors
   const [errors, setErrors] = useState({});
+  
+  // State for sales reps
+  const [salesReps, setSalesReps] = useState([]);
+  const [loadingSalesReps, setLoadingSalesReps] = useState(false);
   
   // Determine membership type (I/D/F) based on member composition
   const determineMembershipType = useCallback(() => {
@@ -771,6 +776,28 @@ function EnrollmentForm() {
     };
     
     fetchTaxRate();
+  }, [selectedClub]);
+
+  // Fetch sales reps when club changes
+  useEffect(() => {
+    const fetchSalesReps = async () => {
+      if (!selectedClub) return;
+      
+      setLoadingSalesReps(true);
+      try {
+        const response = await api.get(`/enrollment/sales-reps?clubId=${selectedClub.id}`);
+        if (response.data.success) {
+          setSalesReps(response.data.salesReps);
+        }
+      } catch (error) {
+        console.error('Error fetching sales reps:', error);
+        setSalesReps([]);
+      } finally {
+        setLoadingSalesReps(false);
+      }
+    };
+
+    fetchSalesReps();
   }, [selectedClub]);
 
   // State for form submission status
@@ -3765,6 +3792,40 @@ function EnrollmentForm() {
               {errors.requestedStartDate && (
                 <div id="requestedStartDate-error" className="error-message">
                   {errors.requestedStartDate}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="salesRep">
+                Did a Rep help you?
+              </label>
+              <select
+                id="salesRep"
+                name="salesRep"
+                value={formData.salesRep}
+                onChange={handleChange}
+                disabled={loadingSalesReps}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #bfc8d6',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  backgroundColor: loadingSalesReps ? '#f5f5f5' : 'white',
+                  cursor: loadingSalesReps ? 'not-allowed' : 'pointer'
+                }}
+              >
+                <option value="">Select a sales rep (optional)</option>
+                {salesReps.map((rep, index) => (
+                  <option key={index} value={rep.empCode}>
+                    {rep.salesRep}
+                  </option>
+                ))}
+              </select>
+              {loadingSalesReps && (
+                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                  Loading sales reps...
                 </div>
               )}
             </div>

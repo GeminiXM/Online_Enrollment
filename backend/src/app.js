@@ -23,6 +23,11 @@ const app = express();
 // Set port
 const PORT = process.env.PORT || 5001;
 
+// Converge configuration
+const CONVERGE_BASE = (
+  process.env.CONVERGE_BASE || "https://api.convergepay.com"
+).trim();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -57,43 +62,42 @@ const uploadAny = multer({
 });
 
 // Middleware
+// Security and CORS middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? function (origin, callback) {
-            const allowedOrigins = process.env.CORS_ORIGIN.split(",");
-            if (!origin) return callback(null, true);
-            if (allowedOrigins.indexOf(origin) !== -1) {
-              callback(null, true);
-            } else {
-              callback(new Error("Not allowed by CORS"));
-            }
-          }
-        : true,
-    credentials: true,
-  })
-);
 
-// Middleware
-app.use(helmet()); // Security headers
+// CORS configuration with Cloudflare tunnel support
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowedConvergeOrigins = (process.env.CORS_ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+// Combine all allowed origins
+const allAllowedOrigins = [...allowedOrigins, ...allowedConvergeOrigins];
+
 app.use(
   cors({
-    // Allow specific origins in production, or all origins in development
-    origin:
-      process.env.NODE_ENV === "production"
-        ? function (origin, callback) {
-            const allowedOrigins = process.env.CORS_ORIGIN.split(",");
-            // Allow requests with no origin (like mobile apps or curl requests)
-            if (!origin) return callback(null, true);
-            if (allowedOrigins.indexOf(origin) !== -1) {
-              callback(null, true);
-            } else {
-              callback(new Error("Not allowed by CORS"));
-            }
-          }
-        : true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // In development, allow all origins
+      if (process.env.NODE_ENV !== "production") {
+        return callback(null, true);
+      }
+
+      // In production, check against allowed origins
+      if (allAllowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log(`CORS blocked origin: ${origin}`);
+        console.log(`Allowed origins: ${allAllowedOrigins.join(", ")}`);
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
     credentials: true,
   })
 );

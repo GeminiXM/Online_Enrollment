@@ -4,6 +4,7 @@
 import express from "express";
 import { body } from "express-validator";
 import axios from "axios";
+import qs from "qs";
 import path from "path";
 import fs from "fs";
 import logger from "../utils/logger.js";
@@ -1048,6 +1049,382 @@ router.post("/converge-tokenize-and-pay", async (req, res) => {
       success: false,
       message: "Payment processing failed. Please try again.",
       error: error.message,
+    });
+  }
+});
+
+// ---- Converge HPP (Hosted Payment Page) Integration ----
+
+/**
+ * @route POST /api/payment/converge-hpp/session-token
+ * @desc Create Converge HPP session token for hosted payment page
+ * @access Public
+ */
+router.post("/converge-hpp/session-token", async (req, res) => {
+  try {
+    const {
+      amount,
+      orderId,
+      customerId,
+      clubId,
+      addToken = true,
+      memberData,
+    } = req.body || {};
+
+    if (!amount || !orderId || !clubId) {
+      return res.status(400).json({
+        ok: false,
+        error: "amount, orderId, and clubId are required",
+      });
+    }
+
+    logger.info("Creating Converge HPP session token:", {
+      amount,
+      orderId,
+      customerId,
+      clubId,
+      addToken,
+    });
+
+    // Get Converge processor information from database
+    const convergeResult = await executeSqlProcedure(
+      "procConvergeItemSelect1",
+      clubId,
+      [clubId]
+    );
+
+    if (!convergeResult || convergeResult.length === 0) {
+      return res.status(404).json({
+        ok: false,
+        error: "Converge processor information not found for this club",
+      });
+    }
+
+    const firstRow = convergeResult[0];
+    const convergeInfo = {
+      merchant_id: firstRow.merchant_id || "",
+      converge_user_id: firstRow.converge_user_id || "",
+      converge_pin: firstRow.converge_pin || "",
+      converge_url_process:
+        firstRow.converge_url_process || "https://api.convergepay.com",
+    };
+
+    if (
+      !convergeInfo.merchant_id ||
+      !convergeInfo.converge_user_id ||
+      !convergeInfo.converge_pin
+    ) {
+      return res.status(400).json({
+        ok: false,
+        error: "Incomplete Converge processor configuration",
+      });
+    }
+
+    // Create session token request with real member data
+    const form = {
+      ssl_merchant_id: convergeInfo.merchant_id.trim(),
+      ssl_user_id: convergeInfo.converge_user_id.trim(),
+      ssl_pin: convergeInfo.converge_pin.trim(),
+      ssl_transaction_type: "ccsale",
+      ssl_amount: amount,
+      ssl_currency_code: "USD",
+      ssl_invoice_number: orderId,
+      ssl_get_token: addToken ? "Y" : "N",
+      ssl_add_token: addToken ? "Y" : "N",
+      ssl_customer_id: customerId || undefined,
+      // Use real member data for AVS fields
+      ssl_first_name: memberData?.firstName || "",
+      ssl_last_name: memberData?.lastName || "",
+      ssl_avs_address: memberData?.address || "",
+      ssl_avs_zip: memberData?.zipCode || "",
+      ssl_avs_city: memberData?.city || "",
+      ssl_avs_state: memberData?.state || "",
+      ssl_avs_country: "US",
+      ssl_email: memberData?.email || "",
+      ssl_phone: memberData?.phone || "",
+    };
+
+    const url = `${convergeInfo.converge_url_process}/hosted-payments/transaction_token`;
+
+    logger.info("Sending session token request to Converge:", {
+      url,
+      merchant_id: form.ssl_merchant_id,
+      amount: form.ssl_amount,
+      orderId: form.ssl_invoice_number,
+    });
+
+    const response = await axios.post(url, qs.stringify(form), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      timeout: 15000,
+      responseType: "text",
+      transformResponse: [(d) => d],
+    });
+
+    logger.info(
+      "Converge session token response:",
+      response.data?.toString?.() || response.data
+    );
+
+    // Extract token from response
+    const extractTxnToken = (raw) => {
+      if (raw == null) return null;
+      if (typeof raw === "string") {
+        const s = raw.trim();
+        const m = s.match(/ssl_txn_auth_token\s*=\s*(.+)/i);
+        return (m ? m[1] : s).trim();
+      }
+      if (typeof raw === "object" && raw.ssl_txn_auth_token)
+        return raw.ssl_txn_auth_token;
+      return null;
+    };
+
+    const token = extractTxnToken(response.data);
+    if (!token) {
+      return res.status(502).json({
+        ok: false,
+        error: "Could not parse session token from Converge response",
+        upstream: response.data,
+      });
+    }
+
+    logger.info("Session token created successfully:", {
+      tokenLength: token.length,
+      tokenPreview: token.substring(0, 20) + "...",
+    });
+
+    return res.json({ ok: true, ssl_txn_auth_token: token });
+  } catch (err) {
+    const status = err?.response?.status || 500;
+    const upstream = err?.response?.data;
+
+    logger.error("Error creating Converge HPP session token:", {
+      status,
+      error: err.message,
+      upstream: upstream || err.message,
+    });
+
+    return res.status(status).json({
+      ok: false,
+      error: "Converge session token request failed",
+      status,
+      upstream,
+    });
+  }
+});
+
+/**
+ * @route POST /api/payment/converge-hpp/store-vault-token
+ * @desc Store vault token using insert webstrcustr stored procedure
+ * @access Public
+ */
+router.post("/converge-hpp/store-vault-token", async (req, res) => {
+  try {
+    const {
+      customerId,
+      vaultToken,
+      transactionId,
+      amount,
+      clubId,
+      memberData,
+    } = req.body || {};
+
+    if (!vaultToken || !clubId) {
+      return res.status(400).json({
+        ok: false,
+        error: "vaultToken and clubId are required",
+      });
+    }
+
+    logger.info("Storing vault token:", {
+      customerId,
+      vaultTokenLength: vaultToken ? vaultToken.length : 0,
+      transactionId,
+      amount,
+      clubId,
+      memberData: memberData
+        ? {
+            firstName: memberData.firstName,
+            lastName: memberData.lastName,
+            email: memberData.email,
+          }
+        : null,
+    });
+
+    // Use the web_proc_InsertWebStrcustr stored procedure to store the vault token
+    // This will store the token in the database for future use
+    const result = await executeSqlProcedure(
+      "web_proc_InsertWebStrcustr",
+      clubId,
+      [
+        customerId || "UNKNOWN", // parCustCode
+        "", // parBridgeCode
+        memberData?.firstName + " " + memberData?.lastName || "", // parBusName
+        "", // parCreditRep
+        memberData?.phone || "", // parPhone
+        memberData?.address || "", // parAddress1
+        "", // parAddress2
+        memberData?.city || "", // parCity
+        memberData?.state || "", // parState
+        memberData?.zipCode || "", // parPostCode
+        new Date().toISOString().split("T")[0], // parObtainedDate (today's date)
+        "", // parCcExpDate
+        "", // parCardNo
+        "", // parExpDate
+        memberData?.firstName + " " + memberData?.lastName || "", // parCardHolder
+        "CONVERGE", // parCcMethod
+        "WEB_ENROLLMENT", // parCreatedBy
+        "", // parSalesPersnCode
+        memberData?.email || "", // parEmail
+        clubId, // parClub
+        transactionId || "", // parOrigPosTrans
+        "", // parPin
+        vaultToken, // parToken
+        "", // parSpecialtyMembership
+        "Y", // parNewPt
+      ]
+    );
+
+    logger.info("Vault token stored successfully:", {
+      customerId,
+      transactionId,
+      amount,
+      result: result ? "success" : "no result",
+    });
+
+    return res.json({
+      ok: true,
+      message: "Vault token stored successfully",
+      customerId,
+      transactionId,
+    });
+  } catch (error) {
+    logger.error("Error storing vault token:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      ok: false,
+      error: "Failed to store vault token",
+      details: error.message,
+    });
+  }
+});
+
+/**
+ * @route POST /api/payment/converge-hpp/log-payment-response
+ * @desc Log payment responses for debugging and monitoring
+ * @access Public
+ */
+router.post("/converge-hpp/log-payment-response", async (req, res) => {
+  try {
+    const { status, result, customerId, amount, timestamp, clubId } =
+      req.body || {};
+
+    logger.info("Converge HPP Payment Response:", {
+      status,
+      customerId,
+      amount,
+      timestamp: timestamp || new Date().toISOString(),
+      resultMessage: result?.ssl_result_message,
+      resultCode: result?.ssl_result,
+      approvalCode: result?.ssl_approval_code,
+      transactionId: result?.ssl_transaction_id,
+      cardType: result?.ssl_card_type,
+      last4: result?.ssl_last4,
+      avsResponse: result?.ssl_avs_response,
+      cvv2Response: result?.ssl_cvv2_response,
+      clubId,
+      fullResult: result,
+    });
+
+    return res.json({ ok: true });
+  } catch (error) {
+    logger.error("Error logging payment response:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      ok: false,
+      error: "Failed to log payment response",
+    });
+  }
+});
+
+/**
+ * @route GET /api/payment/converge-hpp/test
+ * @desc Test endpoint to verify Converge HPP integration is working
+ * @access Public
+ */
+router.get("/converge-hpp/test", async (req, res) => {
+  try {
+    const clubId = req.query.clubId || "001";
+
+    logger.info("Testing Converge HPP integration:", { clubId });
+
+    // Test database connection and Converge info retrieval
+    const convergeResult = await executeSqlProcedure(
+      "procConvergeItemSelect1",
+      clubId,
+      [clubId]
+    );
+
+    if (!convergeResult || convergeResult.length === 0) {
+      return res.json({
+        ok: false,
+        error: "Converge processor information not found for this club",
+        clubId,
+      });
+    }
+
+    const firstRow = convergeResult[0];
+    const convergeInfo = {
+      merchant_id: firstRow.merchant_id || "",
+      converge_user_id: firstRow.converge_user_id || "",
+      converge_pin: firstRow.converge_pin || "",
+      converge_url_process:
+        firstRow.converge_url_process || "https://api.convergepay.com",
+    };
+
+    // Check if credentials are configured
+    const hasCredentials = !!(
+      convergeInfo.merchant_id &&
+      convergeInfo.converge_user_id &&
+      convergeInfo.converge_pin
+    );
+
+    return res.json({
+      ok: true,
+      message: "Converge HPP integration test successful",
+      clubId,
+      convergeInfo: {
+        merchant_id: convergeInfo.merchant_id
+          ? `${convergeInfo.merchant_id.substring(0, 4)}****`
+          : "Not configured",
+        converge_user_id: convergeInfo.converge_user_id
+          ? `${convergeInfo.converge_user_id.substring(0, 4)}****`
+          : "Not configured",
+        converge_pin: convergeInfo.converge_pin ? "****" : "Not configured",
+        converge_url_process: convergeInfo.converge_url_process,
+      },
+      hasCredentials,
+      endpoints: {
+        sessionToken: "/api/payment/converge-hpp/session-token",
+        storeVaultToken: "/api/payment/converge-hpp/store-vault-token",
+        logPaymentResponse: "/api/payment/converge-hpp/log-payment-response",
+      },
+    });
+  } catch (error) {
+    logger.error("Error testing Converge HPP integration:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      ok: false,
+      error: "Converge HPP integration test failed",
+      details: error.message,
     });
   }
 });
