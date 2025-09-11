@@ -460,6 +460,7 @@ export const submitEnrollment = async (req, res) => {
       paymentInfo, // Extract payment information
       hasPTAddon, // Extract PT selection
       ptPackage, // Extract PT package data
+      salesRep, // Extract sales rep emp code
     } = req.body;
 
     // Extract payment data for database insertion
@@ -475,6 +476,10 @@ export const submitEnrollment = async (req, res) => {
 
     logger.info("Payment data extracted:", paymentData);
     logger.info("PT selection:", { hasPTAddon, ptPackage });
+    logger.info("Sales rep selection:", {
+      salesRep,
+      salesRepEmpCode: salesRep || "1109779",
+    });
 
     // Log specialty membership for debugging
     logger.info("Specialty membership data:", {
@@ -1143,6 +1148,7 @@ export const submitEnrollment = async (req, res) => {
           grossMonthlyTotal.toFixed(2), // parGrossMonthlyTotal
           hasPTAddon ? "Y" : "N", // parNewPT - Y if PT was selected, N if not
           hasPTAddon && ptPackage ? (ptPackage.invtr_upccode || "").trim() : "", // parPTUpc - PT UPC code if PT was selected
+          salesRep || "1109779", // parSalesRepEmpCode - Use selected sales rep emp code or default to 1109779
         ]
       );
 

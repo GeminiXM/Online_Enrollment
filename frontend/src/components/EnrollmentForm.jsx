@@ -926,6 +926,8 @@ function EnrollmentForm() {
       // Keep specialty membership separate
       specialtyMembership: membershipType ? SPECIALTY_MEMBERSHIP_MAP[membershipType.id] : '',
       requestedStartDate: formData.requestedStartDate,
+      // Include sales rep selection
+      salesRep: formData.salesRep || '',
       // Ensure club ID is a 3-digit string
       club: selectedClub?.id ? String(selectedClub.id).padStart(3, '0') : '',
       familyMembers: [],
@@ -3798,7 +3800,7 @@ function EnrollmentForm() {
             
             <div className="form-group">
               <label htmlFor="salesRep">
-                Did a Rep help you?
+                Did a Club Representative help you?
               </label>
               <select
                 id="salesRep"

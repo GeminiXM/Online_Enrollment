@@ -983,8 +983,8 @@ button:focus-visible {
 
 /* Sales rep dropdown in start date row */
 .start-date-row .form-group:not(.date-field) {
-  flex: 0 0 160px; /* Fixed width, don't grow or shrink */
-  max-width: 160px;
+  flex: 0 0 240px; /* Fixed width, don't grow or shrink */
+  max-width: 240px;
   margin-left: auto; /* Push to the right side */
 }
 
