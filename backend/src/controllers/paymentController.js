@@ -175,7 +175,7 @@ export const getFluidPayInfo = async (req, res) => {
           fluidPayInfo = {
             club: firstRow.club || parseInt(clubId),
             fluidpay_base_url: firstRow.fluidpay_base_url || "",
-            fluidpay_api_key: firstRow.fluidpay_api_key || "",
+            fluidpay_api_key: firstRow.fluidpay_api_key || "", // Private key for backend
             merchant_id: firstRow.merchant_id || "",
           };
         }
@@ -190,8 +190,8 @@ export const getFluidPayInfo = async (req, res) => {
         );
       }
 
-      // Use hardcoded public API key for frontend tokenizer
-      fluidPayInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
+      // Use the API key from database (remove hardcoded demo key)
+      // fluidPayInfo.fluidpay_api_key = "pub_31FUYRENhNiAvspejegbLoPD2he";
 
       logger.info("FluidPay info retrieved successfully", {
         clubId,
@@ -461,14 +461,17 @@ export const processFluidPayPayment = async (req, res) => {
         if (firstRow) {
           fluidPayInfo = {
             club: firstRow.club || parseInt(clubId),
-            fluidpay_base_url: "https://app.fluidpay.com", // Production FluidPay API URL
-            fluidpay_api_key: "api_2oD33fJmBytiZsi0uRaSfoCBuXl", // Hardcoded private API key for transactions
+            fluidpay_base_url:
+              firstRow.fluidpay_base_url || "https://app.fluidpay.com", // Use database URL or default
+            fluidpay_api_key: (firstRow.fluidpay_api_key || "").trim(), // Use API key from database
             merchant_id: (firstRow.merchant_id || "").trim(), // Remove any trailing spaces
           };
 
           logger.info("FluidPay credentials retrieved from database", {
             clubId,
-            apiKey: "pub_31FUYRENhNiAvspejegbLoPD2he (hardcoded)",
+            apiKey: fluidPayInfo.fluidpay_api_key
+              ? `${fluidPayInfo.fluidpay_api_key.substring(0, 10)}...`
+              : "Not found",
             merchantId: fluidPayInfo.merchant_id,
             baseUrl: fluidPayInfo.fluidpay_base_url,
           });
@@ -902,41 +905,40 @@ export const testFluidPayConnection = async (req, res) => {
       });
     }
 
-    // Check for demo credentials
-    if (fluidPayInfo.fluidpay_api_key === "pub_31FUYRENhNiAvspejegbLoPD2he") {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Demo credentials detected. Please configure real FluidPay credentials.",
-        credentials: {
-          apiKey: fluidPayInfo.fluidpay_api_key.substring(0, 10) + "...",
-          merchantId: fluidPayInfo.merchant_id,
-          baseUrl: fluidPayInfo.fluidpay_base_url,
-        },
-      });
-    }
+    // Note: Demo credentials check removed - now using database values
 
     // Test the connection by making a simple API call
     try {
       const response = await fetch(
-        `${fluidPayInfo.fluidpay_base_url}/merchant`,
+        `${fluidPayInfo.fluidpay_base_url}/api/merchant`,
         {
           method: "GET",
           headers: {
-            Authorization:
-              "Basic " +
-              Buffer.from(fluidPayInfo.fluidpay_api_key + ":").toString(
-                "base64"
-              ),
+            Authorization: fluidPayInfo.fluidpay_api_key,
             "Content-Type": "application/json",
           },
         }
       );
 
-      const responseData = await response.json();
+      let responseData;
+      const contentType = response.headers.get("content-type");
+
+      if (contentType && contentType.includes("application/json")) {
+        responseData = await response.json();
+      } else {
+        // Handle HTML responses (error pages)
+        const htmlResponse = await response.text();
+        responseData = {
+          error: "Received HTML response instead of JSON",
+          status: response.status,
+          contentType: contentType,
+          htmlPreview: htmlResponse.substring(0, 200) + "...",
+        };
+      }
 
       logger.info("FluidPay connection test result", {
         status: response.status,
+        contentType: contentType,
         data: responseData,
       });
 
@@ -960,11 +962,19 @@ export const testFluidPayConnection = async (req, res) => {
         });
       }
     } catch (apiError) {
-      logger.error("FluidPay API test failed", { error: apiError.message });
+      logger.error("FluidPay API test failed", {
+        error: apiError.message,
+        stack: apiError.stack,
+        url: `${fluidPayInfo.fluidpay_base_url}/merchant`,
+      });
       res.status(500).json({
         success: false,
         message: "FluidPay API connection failed",
         error: apiError.message,
+        url: `${fluidPayInfo.fluidpay_base_url}/api/merchant`,
+        apiKey: fluidPayInfo.fluidpay_api_key
+          ? `${fluidPayInfo.fluidpay_api_key.substring(0, 10)}...`
+          : "Not found",
       });
     }
   } catch (error) {

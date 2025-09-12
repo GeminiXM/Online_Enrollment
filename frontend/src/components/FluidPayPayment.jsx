@@ -254,9 +254,7 @@ const FluidPayPayment = () => {
               console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
               setProcessorInfo(fluidPayResult.fluidPayInfo);
             } else {
-              // PRODUCTION DATA REQUIRED: 
-              // Replace these demo values with actual FluidPay credentials
-              // For production, this fallback should either be removed or use environment-specific values
+              // Set fallback info for FluidPay with hardcoded public key
               setProcessorInfo({
                 merchant_id: 'cdiggns6lr8tirs7uuog', // PRODUCTION: Your actual FluidPay Merchant ID
                 fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he',      // PRODUCTION: Your actual FluidPay Public API Key

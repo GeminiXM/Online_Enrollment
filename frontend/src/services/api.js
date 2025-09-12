@@ -25,11 +25,15 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Handle 401 Unauthorized errors
+    // Handle 401 Unauthorized errors - but only redirect for auth endpoints
     if (error.response && error.response.status === 401) {
-      // Clear local storage and redirect to login
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+      // Only redirect to login for authentication-related endpoints
+      const url = error.config?.url || "";
+      if (url.includes("/auth/") || url.includes("/login")) {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+      }
+      // For other 401 errors (like payment processing), just reject the promise
     }
     return Promise.reject(error);
   }

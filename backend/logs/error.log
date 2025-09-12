@@ -2691,3 +2691,26 @@
 2025-09-11 16:20:36:2036 [31merror[39m: [31mError creating connection string:[39m
 2025-09-11 16:20:36:2036 [31merror[39m: [31mError in getConnection:[39m
 2025-09-11 16:20:36:2036 [31merror[39m: [31mError getting sales reps:[39m
+2025-09-12 10:11:26:1126 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:11:45:1145 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:14:31:1431 [31merror[39m: [31mError getting database config:[39m
+2025-09-12 10:14:31:1431 [31merror[39m: [31mError creating connection string:[39m
+2025-09-12 10:14:31:1431 [31merror[39m: [31mError in getConnection:[39m
+2025-09-12 10:14:31:1431 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-09-12 10:14:31:1431 [31merror[39m: [31mError testing Converge HPP integration:[39m
+2025-09-12 10:16:41:1641 [31merror[39m: [31mError getting database config:[39m
+2025-09-12 10:16:41:1641 [31merror[39m: [31mError creating connection string:[39m
+2025-09-12 10:16:41:1641 [31merror[39m: [31mError in getConnection:[39m
+2025-09-12 10:16:41:1641 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-09-12 10:16:41:1641 [31merror[39m: [31mError testing Converge HPP integration:[39m
+2025-09-12 10:17:23:1723 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:18:32:1832 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:20:43:2043 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:24:45:2445 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:28:38:2838 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-12 10:51:57:5157 [31merror[39m: [31mFluidPay API test failed[39m
+2025-09-12 10:52:12:5212 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 10:52:12:5212 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-12 10:58:27:5827 [31merror[39m: [31mFluidPay API test failed[39m
+2025-09-12 11:09:59:959 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 11:09:59:959 [31merror[39m: [31mError processing FluidPay payment:[39m

@@ -3,10 +3,6 @@ import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import './ConvergeHPPTest.css';
 
-// Cloudflare tunnel configuration for Converge HPP testing
-// Update this URL to match your Cloudflare tunnel for the backend
-const BACKEND_HTTPS = process.env.REACT_APP_BACKEND_HTTPS || 'https://frederick-pam-ones-testing.trycloudflare.com';
-
 const ConvergeHPPTest = () => {
   const { selectedClub } = useClub();
   const [testResult, setTestResult] = useState(null);
@@ -33,7 +29,7 @@ const ConvergeHPPTest = () => {
     setTestResult(null);
 
     try {
-      const response = await api.get(`${BACKEND_HTTPS}/api/payment/converge-hpp/test?clubId=${selectedClub?.id || '001'}`);
+      const response = await api.get(`/payment/converge-hpp/test?clubId=${selectedClub?.id || '254'}`);
       setTestResult(response.data);
     } catch (err) {
       setError(err.response?.data?.error || err.message || 'Test failed');
@@ -47,11 +43,11 @@ const ConvergeHPPTest = () => {
     setError('');
 
     try {
-      const response = await api.post(`${BACKEND_HTTPS}/api/payment/converge-hpp/session-token`, {
+      const response = await api.post(`/payment/converge-hpp/session-token`, {
         amount: testAmount,
         orderId: `TEST-${Date.now()}`,
         customerId: `${testMemberData.firstName} ${testMemberData.lastName}`,
-        clubId: selectedClub?.id || '001',
+        clubId: selectedClub?.id || '254',
         addToken: true,
         memberData: testMemberData
       });

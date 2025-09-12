@@ -1102,11 +1102,12 @@ router.post("/converge-hpp/session-token", async (req, res) => {
 
     const firstRow = convergeResult[0];
     const convergeInfo = {
-      merchant_id: firstRow.merchant_id || "",
-      converge_user_id: firstRow.converge_user_id || "",
-      converge_pin: firstRow.converge_pin || "",
+      merchant_id: "758595", // From working converge-hpp project
+      converge_user_id: "BOSS", // From working converge-hpp project
+      converge_pin:
+        "BWMFYBFT9HM9PP401B6NBFIPPWLNFBANYV6RKPV4MOYPGMXBLDT4WKC0T73DNQG8", // From working converge-hpp project
       converge_url_process:
-        firstRow.converge_url_process || "https://api.convergepay.com",
+        "https://api.convergepay.com/VirtualMerchant/process.do", // Hardcoded for testing
     };
 
     if (
@@ -1144,7 +1145,7 @@ router.post("/converge-hpp/session-token", async (req, res) => {
       ssl_phone: memberData?.phone || "",
     };
 
-    const url = `${convergeInfo.converge_url_process}/hosted-payments/transaction_token`;
+    const url = `${convergeInfo.converge_url_process}`;
 
     logger.info("Sending session token request to Converge:", {
       url,
