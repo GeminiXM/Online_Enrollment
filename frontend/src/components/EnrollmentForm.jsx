@@ -459,7 +459,15 @@ function EnrollmentForm() {
   }, [selectedClub]);
 
   // Get today's date in YYYY-MM-DD format for the min attribute of date inputs
-  const today = new Date().toISOString().split('T')[0];
+  // Use UTC to avoid timezone issues between server and client
+  const getTodayString = () => {
+    const now = new Date();
+    const utcYear = now.getUTCFullYear();
+    const utcMonth = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const utcDay = String(now.getUTCDate()).padStart(2, '0');
+    return `${utcYear}-${utcMonth}-${utcDay}`;
+  };
+  const today = getTodayString();
   
   // Calculate date 7 days from today for max attribute of date inputs
   const sevenDaysFromToday = new Date();
@@ -1094,11 +1102,10 @@ function EnrollmentForm() {
     // If this is a start date change, validate it's not in the past
     if (name === 'requestedStartDate') {
       if (value) {
-        const selectedDate = new Date(value);
+        // Use UTC for consistent date comparison to avoid timezone issues
+        const selectedDate = new Date(value + 'T00:00:00.000Z'); // Force UTC
         const today = new Date();
-        // Reset time to start of day for accurate comparison
-        today.setHours(0, 0, 0, 0);
-        selectedDate.setHours(0, 0, 0, 0);
+        today.setUTCHours(0, 0, 0, 0); // Reset to start of UTC day
         
         if (selectedDate < today) {
           setErrors(prevErrors => ({
@@ -1443,11 +1450,10 @@ function EnrollmentForm() {
       if (!formData.requestedStartDate) {
         newErrors.requestedStartDate = "Requested start date is required";
       } else {
-        const selectedDate = new Date(formData.requestedStartDate);
+        // Use UTC for consistent date comparison to avoid timezone issues
+        const selectedDate = new Date(formData.requestedStartDate + 'T00:00:00.000Z'); // Force UTC
         const today = new Date();
-        // Reset time to start of day for accurate comparison
-        today.setHours(0, 0, 0, 0);
-        selectedDate.setHours(0, 0, 0, 0);
+        today.setUTCHours(0, 0, 0, 0); // Reset to start of UTC day
         
         if (selectedDate < today) {
           newErrors.requestedStartDate = "Start date cannot be in the past. Please select today or a future date.";
@@ -3733,7 +3739,7 @@ function EnrollmentForm() {
                   name="requestedStartDate"
                   value={formData.requestedStartDate}
                   onChange={handleChange}
-                  min={today}
+                  min={getTodayString()}
                   max={maxDate}
                   aria-required="true"
                   aria-invalid={!!errors.requestedStartDate}
@@ -4598,7 +4604,7 @@ function EnrollmentForm() {
                   </div>
                   <div className="price-row">
                     {selectedClub?.state === 'NM' ? (
-                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                      <span>Tax ({(taxRate * 100).toFixed(3)}%)</span>
                     ) : (
                       <span>Tax</span>
                     )}
@@ -4622,7 +4628,7 @@ function EnrollmentForm() {
                   </div>
                   <div className="price-row">
                     {selectedClub?.state === 'NM' ? (
-                      <span>Tax ({(taxRate * 100).toFixed(2)}%)</span>
+                      <span>Tax ({(taxRate * 100).toFixed(3)}%)</span>
                     ) : (
                       <span>Tax</span>
                     )}

@@ -2714,3 +2714,27 @@
 2025-09-12 10:58:27:5827 [31merror[39m: [31mFluidPay API test failed[39m
 2025-09-12 11:09:59:959 [31merror[39m: [31mFluidPay API call failed[39m
 2025-09-12 11:09:59:959 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-12 11:29:10:2910 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 11:29:10:2910 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-12 11:29:14:2914 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 11:29:14:2914 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-12 11:52:59:5259 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 11:52:59:5259 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-12 12:19:31:1931 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-12 12:19:31:1931 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-15 10:49:18:4918 [31merror[39m: [31mError executing query:[39m
+2025-09-15 10:49:18:4918 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertProduction[39m
+2025-09-15 10:49:27:4927 [31merror[39m: [31mError connecting to database:[39m
+2025-09-15 10:49:27:4927 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-09-15 10:49:27:4927 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-09-15 10:50:38:5038 [31merror[39m: [31mError connecting to database:[39m
+2025-09-15 10:50:38:5038 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-09-15 10:50:38:5038 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-09-15 10:51:29:5129 [31merror[39m: [31mError connecting to database:[39m
+2025-09-15 10:51:29:5129 [31merror[39m: [31mError executing SQL procedure: procInventoryDuesPriceListSelect1[39m
+2025-09-15 10:51:29:5129 [31merror[39m: [31mError in getMembershipPrice:[39m
+2025-09-16 12:22:12:2212 [31merror[39m: [31mError executing query:[39m
+2025-09-16 12:22:12:2212 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertProduction[39m
+2025-09-17 08:59:32:5932 [31merror[39m: [31mError connecting to database:[39m
+2025-09-17 08:59:32:5932 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
+2025-09-17 08:59:32:5932 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m

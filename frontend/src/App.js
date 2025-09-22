@@ -13,6 +13,7 @@ import FluidPayPayment from "./components/FluidPayPayment.jsx";
 import ClubLinks from "./components/ClubLinks.jsx";
 import ConvergeHPPTest from "./components/ConvergeHPPTest.jsx";
 import FluidPayTest from "./components/FluidPayTest.jsx";
+import FluidPayModalTest from "./components/FluidPayModalTest.jsx";
 //import ConvergeCheckoutTest from "./components/ConvergeCheckoutTest.jsx";
 //import DirectPaymentTest from "./components/DirectPaymentTest.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
@@ -131,6 +132,11 @@ function AppContent() {
                   <li>
                     <Link to="/fluidpaytest">FluidPay Test</Link>
                   </li>
+                  <li>
+                    <Link to="/fluidpaymodal">
+                      FluidPay Modal (Real Payments)
+                    </Link>
+                  </li>
                   {/* <li>
                     <Link to="/contract-save-test">Contract Save Test</Link>
                   </li>
@@ -166,6 +172,7 @@ function AppContent() {
           <Route path="/payment-fluidpay" element={<FluidPayPayment />} />
           <Route path="/convergehpptest" element={<ConvergeHPPTest />} />
           <Route path="/fluidpaytest" element={<FluidPayTest />} />
+          <Route path="/fluidpaymodal" element={<FluidPayModalTest />} />
           <Route
             path="/enrollment-confirmation"
             element={<EnrollmentConfirmation />}

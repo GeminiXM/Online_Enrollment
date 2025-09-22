@@ -781,7 +781,7 @@ const ContractPage = () => {
       taxInfo: {
         taxRate: taxRate,
         isNewMexicoClub: isNewMexicoClub,
-        taxRatePercentage: (taxRate * 100).toFixed(2) + '%'
+        taxRatePercentage: (taxRate * 100).toFixed(3) + '%'
       },
       
       // Service Addons Breakdown
