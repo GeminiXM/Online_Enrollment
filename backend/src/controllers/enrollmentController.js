@@ -112,32 +112,27 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
       ),
     });
 
-    // Execute the procedure
-    let query;
-    if (params.length > 0) {
-      // For procedures with parameters, construct the query with actual values
-      const paramValues = params.map((p) => {
-        if (p === null || p === undefined) {
-          return "NULL";
-        } else if (typeof p === "string") {
-          return `'${p}'`;
-        } else {
-          return p;
-        }
-      });
-      query = `EXECUTE PROCEDURE ${actualProcedureName}(${paramValues.join(
-        ", "
-      )})`;
-      return await pool.query(clubId, query);
-    } else {
-      // For procedures without parameters, use the original approach
-      query = `EXECUTE PROCEDURE ${actualProcedureName}()`;
-      return await pool.query(clubId, query);
-    }
+    // Execute the procedure using parameterized queries
+    const query = `EXECUTE PROCEDURE ${actualProcedureName}(${Array(
+      params.length
+    )
+      .fill("?")
+      .join(", ")})`;
+    return await pool.query(clubId, query, params);
   } catch (error) {
     logger.error(`Error executing SQL procedure: ${procedureName}`, {
       error: error.message,
       stack: error.stack,
+      errorType: error.constructor.name,
+      sqlState: error.sqlState || "Unknown",
+      errorCode: error.errorCode || "Unknown",
+      sqlError: error.sqlError || "Unknown",
+      isamError: error.isamError || "Unknown",
+      fullError: error,
+      query: `EXECUTE PROCEDURE ${actualProcedureName}(${Array(params.length)
+        .fill("?")
+        .join(", ")})`,
+      params: params,
     });
     throw error;
   }
@@ -1128,7 +1123,7 @@ export const submitEnrollment = async (req, res) => {
           formattedCreatedDate, // parCreatedDate
           grossDues.toFixed(2), // parPrice
           totalTaxAmount.toFixed(2), // parTax
-          club, // parClub
+          parseInt(club), // parClub - convert to integer
           paymentData.cardType, // parCC_Issuer
           paymentData.cardExpDate, // parCC_Exp
           paymentData.cardNumber, // parCC
@@ -1148,7 +1143,9 @@ export const submitEnrollment = async (req, res) => {
           grossMonthlyTotal.toFixed(2), // parGrossMonthlyTotal
           hasPTAddon ? "Y" : "N", // parNewPT - Y if PT was selected, N if not
           hasPTAddon && ptPackage ? (ptPackage.invtr_upccode || "").trim() : "", // parPTUpc - PT UPC code if PT was selected
-          salesRep || "1109779", // parSalesRepEmpCode - Use selected sales rep emp code or default to 1109779
+          typeof salesRep === "string" && !isNaN(parseInt(salesRep))
+            ? parseInt(salesRep)
+            : 1109779, // parSalesRepEmpCode - Use selected sales rep emp code or default to 1109779
         ]
       );
 
@@ -1277,6 +1274,35 @@ export const submitEnrollment = async (req, res) => {
           logger.info("Membership dues item inserted successfully");
         }
 
+        // Insert enrollment fee item with location-specific UPC code
+        const isColoradoClub =
+          club === "252" || club === "253" || club === "254"; // Denver/Colorado clubs
+        const enrollmentFeeUpcCode = isColoradoClub
+          ? "202500000713"
+          : "202500000522"; // Denver vs New Mexico
+        const enrollmentFee = 19.0; // $19 enrollment fee
+        const enrollmentFeeTax = parseFloat(req.body.initiationFeeTax || 0);
+
+        logger.info(
+          "Inserting enrollment fee item with UPC code:",
+          enrollmentFeeUpcCode,
+          "Club:",
+          club,
+          "Is Colorado club:",
+          isColoradoClub,
+          "Tax amount:",
+          enrollmentFeeTax
+        );
+
+        await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
+          transactionId, // parTrans
+          enrollmentFeeUpcCode, // parUPC - Location-specific enrollment fee UPC
+          enrollmentFee.toFixed(2), // parPrice - $19 enrollment fee
+          enrollmentFeeTax.toFixed(2), // parTax - enrollment fee tax
+          1, // parQty
+        ]);
+        logger.info("Enrollment fee item inserted successfully");
+
         // Insert addon items
         if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons)) {
           for (const addon of req.body.serviceAddons) {
@@ -1331,40 +1357,36 @@ export const submitEnrollment = async (req, res) => {
         }
       }
     } catch (productionError) {
-      // Check if this is the specific rstrans undefined error
-      const isRstransError =
-        productionError.message &&
-        productionError.message.includes("rstrans") &&
-        productionError.message.includes("undefined value");
+      // Production migration failed - this is a critical error
+      logger.error(
+        "Production migration failed - enrollment cannot be completed",
+        {
+          error: productionError.message,
+          stack: productionError.stack,
+          custCode,
+          club,
+          procedureName: "web_proc_InsertProduction",
+          errorType: productionError.constructor.name,
+          sqlState: productionError.sqlState || "Unknown",
+          errorCode: productionError.errorCode || "Unknown",
+        }
+      );
 
-      if (isRstransError) {
-        logger.warn(
-          "Production migration procedure has internal variable issue (rstrans undefined), continuing with enrollment",
-          {
-            error: productionError.message,
-            custCode,
-            note: "The procedure exists but needs internal variable initialization",
-          }
-        );
-      } else {
-        logger.warn(
-          "Production migration procedure not available yet, continuing with enrollment",
-          {
-            error: productionError.message,
-            custCode,
-            note: "This is expected until the procedure is created in the database",
-          }
-        );
-      }
-
-      // Continue with enrollment even if production migration fails
-      // The enrollment data is still saved in the staging tables
-      updatedCustCode = custCode;
-      transactionId = `TEMP_${Date.now()}`; // Generate temporary transaction ID
-      resultCode = -1; // Indicate production migration not completed
-      errorMessage = isRstransError
-        ? "Production migration pending - procedure needs internal variable fix"
-        : "Production migration pending - procedure not yet created in database";
+      // Return error response to customer - enrollment cannot continue
+      return res.status(500).json({
+        success: false,
+        message:
+          "Enrollment processing failed. Please contact support with reference number: " +
+          custCode,
+        error: "Production migration failed",
+        referenceNumber: custCode,
+        timestamp: new Date().toISOString(),
+        errorDetails: {
+          procedure: "web_proc_InsertProduction",
+          club: club,
+          errorType: productionError.constructor.name,
+        },
+      });
     }
 
     // Save contract PDF to contracts folder

@@ -26,8 +26,7 @@
 -- rsUpdatedCustCode: Final customer code used
 -- rsTrans: Transaction ID created
 
-EXECUTE PROCEDURE web_proc_InsertProduction (
-	parCustCode, 
+execute procedure web_proc_InsertProduction (parCustCode, 
 	parStartDate, 
 	parCreatedDate,
 	parPrice, 

@@ -2738,3 +2738,12 @@
 2025-09-17 08:59:32:5932 [31merror[39m: [31mError connecting to database:[39m
 2025-09-17 08:59:32:5932 [31merror[39m: [31mError executing SQL procedure: web_proc_GetSpecialtyMembershipBridgeCode[39m
 2025-09-17 08:59:32:5932 [31merror[39m: [31mError in getSpecialtyMembershipBridgeCode:[39m
+2025-09-22 11:32:03:323 [31merror[39m: [31mError executing query:[39m
+2025-09-22 11:32:03:323 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertProduction[39m
+2025-09-22 11:46:09:469 [31merror[39m: [31mError executing query:[39m
+2025-09-22 11:46:09:469 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertProduction[39m
+2025-09-22 11:53:40:5340 [31merror[39m: [31mError executing query:[39m
+2025-09-22 11:53:40:5340 [31merror[39m: [31mError executing SQL procedure: web_proc_InsertProduction[39m
+2025-09-22 11:53:40:5340 [31merror[39m: [31mProduction migration failed - enrollment cannot be completed[39m
+2025-09-22 11:59:46:5946 [31merror[39m: [31mError executing query:[39m
+2025-09-22 11:59:46:5946 [31merror[39m: [31mProduction migration failed - enrollment cannot be completed[39m
