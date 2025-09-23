@@ -17,7 +17,7 @@ The Converge HPP integration has been successfully implemented based on the work
 ### Required URLs
 
 The integration uses the following Cloudflare tunnel URL from the working project:
-- **Backend URL**: `https://frederick-pam-ones-testing.trycloudflare.com`
+- **Backend URL**: `https://rare-give-corresponding-practitioner.trycloudflare.com`
 
 ### Environment Variables
 
@@ -25,7 +25,7 @@ The integration uses the following Cloudflare tunnel URL from the working projec
 ```env
 # CORS Configuration for Cloudflare tunnels
 CORS_ORIGIN=http://localhost:3000,http://localhost:5173,https://your-frontend-tunnel.trycloudflare.com
-CORS_ALLOWED_ORIGINS=https://frederick-pam-ones-testing.trycloudflare.com,https://your-frontend-tunnel.trycloudflare.com
+CORS_ALLOWED_ORIGINS=https://rare-give-corresponding-practitioner.trycloudflare.com,https://your-frontend-tunnel.trycloudflare.com
 
 # Converge API Configuration
 CONVERGE_BASE=https://api.convergepay.com
@@ -38,7 +38,7 @@ NODE_ENV=development
 #### Frontend (.env)
 ```env
 # Cloudflare tunnel URL for backend
-REACT_APP_BACKEND_HTTPS=https://frederick-pam-ones-testing.trycloudflare.com
+REACT_APP_BACKEND_HTTPS=https://rare-give-corresponding-practitioner.trycloudflare.com
 ```
 
 ### Setting Up Cloudflare Tunnels
@@ -89,7 +89,7 @@ The following new endpoints have been added:
 ### Test Endpoint
 You can test the integration by visiting:
 ```
-GET https://frederick-pam-ones-testing.trycloudflare.com/api/payment/converge-hpp/test?clubId=001
+GET https://rare-give-corresponding-practitioner.trycloudflare.com/api/payment/converge-hpp/test?clubId=001
 ```
 
 ## Components
@@ -124,7 +124,7 @@ The integration uses existing stored procedures:
 
 1. **Test Integration Status**:
    ```bash
-   curl "https://frederick-pam-ones-testing.trycloudflare.com/api/payment/converge-hpp/test?clubId=001"
+   curl "https://rare-give-corresponding-practitioner.trycloudflare.com/api/payment/converge-hpp/test?clubId=001"
    ```
 
 2. **Test Session Token Creation**:
@@ -138,7 +138,7 @@ The integration uses existing stored procedures:
 When ready for production:
 
 1. **Update Cloudflare Tunnel URLs**:
-   - Replace `frederick-pam-ones-testing.trycloudflare.com` with your production tunnel URLs
+   - Replace `rare-give-corresponding-practitioner.trycloudflare.com` with your production tunnel URLs
    - Update CORS configuration accordingly
 
 2. **Configure Converge Credentials**:

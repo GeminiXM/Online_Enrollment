@@ -6,11 +6,13 @@
 const config = {
   // API base URL - automatically uses the correct URL based on environment
   apiUrl:
-    process.env.NODE_ENV === "production"
+    import.meta.env.MODE === "production"
       ? "/api" // In production, use relative path (handled by proxy)
-      : window.location.hostname === "localhost" 
-        ? "http://localhost:5001/api" // When accessed locally
-        : `http://${window.location.hostname}:5001/api`, // When accessed from another computer
+      : window.location.hostname === "localhost"
+      ? "http://localhost:5001/api" // When accessed locally
+      : window.location.hostname.includes("trycloudflare.com")
+      ? "https://rare-give-corresponding-practitioner.trycloudflare.com/api" // When accessed via Cloudflare tunnel
+      : `http://${window.location.hostname}:5001/api`, // When accessed from another computer
 
   // Application name
   appName: "Fitness Facility Enrollment",

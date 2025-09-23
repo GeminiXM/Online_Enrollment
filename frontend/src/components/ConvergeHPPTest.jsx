@@ -163,7 +163,7 @@ const ConvergeHPPTest = () => {
             <li>It replaces hardcoded values with real member data from the enrollment process</li>
             <li>Vault tokens are stored using the <code>web_proc_InsertWebStrcustr</code> stored procedure</li>
             <li>The integration is ready for use but not yet in production</li>
-            <li>It can replace the existing ConvergeLightboxPayment component when ready</li>
+            <li>It can replace the existing payment components when ready</li>
           </ul>
         </div>
       </div>
@@ -176,7 +176,7 @@ const ConvergeHPPTest = () => {
             <li>Test the session token creation with real member data</li>
             <li>Test the full payment flow in a development environment</li>
             <li>Integrate the ConvergeHPP component into the enrollment flow</li>
-            <li>Replace ConvergeLightboxPayment when ready for production</li>
+            <li>Replace existing payment components when ready for production</li>
           </ol>
         </div>
       </div>

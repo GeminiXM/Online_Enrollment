@@ -483,9 +483,19 @@ export const submitEnrollment = async (req, res) => {
       note: "membershipType should be (I,D,F), specialtyMembership should be (J,S,Y) if applicable",
     });
 
+    // Log all received fields for debugging
+    logger.info("Received enrollment fields:", {
+      firstName: firstName ? "present" : "missing",
+      lastName: lastName ? "present" : "missing",
+      middleInitial: middleInitial ? "present" : "missing",
+      email: email ? "present" : "missing",
+      membershipType: membershipType ? "present" : "missing",
+      club: club ? "present" : "missing",
+    });
+
     // Prepare common data - convert names to uppercase for Informix database
-    const firstNameUpper = firstName.toUpperCase();
-    const lastNameUpper = lastName.toUpperCase();
+    const firstNameUpper = (firstName || "").toUpperCase();
+    const lastNameUpper = (lastName || "").toUpperCase();
     const middleInitialUpper = middleInitial ? middleInitial.toUpperCase() : "";
 
     const busName = `${firstNameUpper} ${
@@ -717,9 +727,9 @@ export const submitEnrollment = async (req, res) => {
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
           custCode, // parCustCode
           nextMbrCode, // parMbrCode (Sequential)
-          member.firstName.toUpperCase(), // parFname (uppercase)
+          (member.firstName || "").toUpperCase(), // parFname (uppercase)
           (member.middleInitial || "").toUpperCase(), // parMname (uppercase)
-          member.lastName.toUpperCase(), // parLname (uppercase)
+          (member.lastName || "").toUpperCase(), // parLname (uppercase)
           convertGenderValue(member.gender), // parSex - Apply conversion here
           member.dateOfBirth, // parBdate
           member.homePhone || "", // parHomePhone
@@ -762,9 +772,9 @@ export const submitEnrollment = async (req, res) => {
         await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
           custCode, // parCustCode
           nextMbrCode, // parMbrCode (Sequential)
-          member.firstName.toUpperCase(), // parFname (uppercase)
+          (member.firstName || "").toUpperCase(), // parFname (uppercase)
           (member.middleInitial || "").toUpperCase(), // parMname (uppercase)
-          member.lastName.toUpperCase(), // parLname (uppercase)
+          (member.lastName || "").toUpperCase(), // parLname (uppercase)
           convertGenderValue(member.gender), // parSex - Apply conversion here
           member.dateOfBirth, // parBdate
           member.homePhone || "", // parHomePhone
@@ -794,9 +804,9 @@ export const submitEnrollment = async (req, res) => {
       await executeSqlProcedure("web_proc_InsertWebAsamembr", club, [
         custCode, // parCustCode
         1, // parMbrCode (1 for guardian)
-        guardian.firstName.toUpperCase(), // parFname (uppercase)
+        (guardian.firstName || "").toUpperCase(), // parFname (uppercase)
         (guardian.middleInitial || "").toUpperCase(), // parMname (uppercase)
-        guardian.lastName.toUpperCase(), // parLname (uppercase)
+        (guardian.lastName || "").toUpperCase(), // parLname (uppercase)
         convertGenderValue(guardian.gender), // parSex - Apply conversion here
         guardian.dateOfBirth, // parBdate
         guardian.homePhone || "", // parHomePhone

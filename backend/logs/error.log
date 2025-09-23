@@ -2747,3 +2747,25 @@
 2025-09-22 11:53:40:5340 [31merror[39m: [31mProduction migration failed - enrollment cannot be completed[39m
 2025-09-22 11:59:46:5946 [31merror[39m: [31mError executing query:[39m
 2025-09-22 11:59:46:5946 [31merror[39m: [31mProduction migration failed - enrollment cannot be completed[39m
+2025-09-22 12:27:06:276 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-22 12:27:06:276 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-22 15:46:16:4616 [31merror[39m: [31mError creating Converge HPP session token:[39m
+2025-09-22 16:10:40:1040 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-22 16:10:40:1040 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-22 16:12:19:1219 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-22 16:12:19:1219 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-23 10:39:27:3927 [31merror[39m: [31mError getting database config:[39m
+2025-09-23 10:39:27:3927 [31merror[39m: [31mError creating connection string:[39m
+2025-09-23 10:39:27:3927 [31merror[39m: [31mError in getConnection:[39m
+2025-09-23 10:39:27:3927 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-09-23 10:39:27:3927 [31merror[39m: [31mError testing Converge HPP integration:[39m
+2025-09-23 12:10:42:1042 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-09-23 12:19:07:197 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError getting database config:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError creating connection string:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError in getConnection:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError calling procNextMembershipId:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError getting database config:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError creating connection string:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError in getConnection:[39m
+2025-09-23 12:28:45:2845 [31merror[39m: [31mError in submitEnrollment:[39m

@@ -1145,7 +1145,8 @@ router.post("/converge-hpp/session-token", async (req, res) => {
       ssl_phone: memberData?.phone || "",
     };
 
-    const url = `${convergeInfo.converge_url_process}`;
+    // Use the correct HPP endpoint for session tokens
+    const url = "https://api.convergepay.com/hosted-payments/transaction_token";
 
     logger.info("Sending session token request to Converge:", {
       url,

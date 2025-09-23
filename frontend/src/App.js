@@ -6,12 +6,11 @@ import LandingPage from "./components/LandingPage.jsx";
 import EnrollmentConfirmation from "./components/EnrollmentConfirmation.jsx";
 import ContractPage from "./components/ContractPage.jsx";
 import PaymentPage from "./components/PaymentPage.jsx";
-import PretendPaymentPage from "./components/PretendPaymentPage.jsx";
 //import PaymentProcessorDemo from "./components/PaymentProcessorDemo.jsx";
-import ConvergeLightboxPayment from "./components/ConvergeLightboxPayment.jsx";
 import FluidPayPayment from "./components/FluidPayPayment.jsx";
 import ClubLinks from "./components/ClubLinks.jsx";
 import ConvergeHPPTest from "./components/ConvergeHPPTest.jsx";
+import ConvergePaymentPage from "./components/ConvergePaymentPage.jsx";
 import FluidPayTest from "./components/FluidPayTest.jsx";
 import FluidPayModalTest from "./components/FluidPayModalTest.jsx";
 //import ConvergeCheckoutTest from "./components/ConvergeCheckoutTest.jsx";
@@ -71,9 +70,9 @@ function AppContent() {
   }, [selectedClub]);
 
   // Toggle header visibility
-  const toggleHeader = () => {
+  const toggleHeader = React.useCallback(() => {
     setHeaderVisible(!headerVisible);
-  };
+  }, [headerVisible]);
 
   // Keyboard shortcut to toggle header (H key)
   React.useEffect(() => {
@@ -87,7 +86,7 @@ function AppContent() {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [headerVisible]);
+  }, [headerVisible, toggleHeader]);
 
   return (
     <div className="App">
@@ -119,15 +118,15 @@ function AppContent() {
                   <li>
                     <Link to="/enrollment">Enrollment</Link>
                   </li>
-                  {/*   <li>
-                    <Link to="/pretend-payment">Pretend Payment</Link>
-                  </li>
-                  */}
                   <li>
                     <Link to="/club-links">Club Links</Link>
                   </li>
                   <li>
                     <Link to="/convergehpptest">Converge HPP Test</Link>
+                  </li>
+
+                  <li>
+                    <Link to="/converge-payment">Converge Payment</Link>
                   </li>
                   <li>
                     <Link to="/fluidpaytest">FluidPay Test</Link>
@@ -163,14 +162,10 @@ function AppContent() {
           <Route path="/enrollment" element={<EnrollmentForm />} />
           <Route path="/contract" element={<ContractPage />} />
           <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/pretend-payment" element={<PretendPaymentPage />} />
           <Route path="/club-links" element={<ClubLinks />} />
-          <Route
-            path="/payment-converge"
-            element={<ConvergeLightboxPayment />}
-          />
           <Route path="/payment-fluidpay" element={<FluidPayPayment />} />
           <Route path="/convergehpptest" element={<ConvergeHPPTest />} />
+          <Route path="/converge-payment" element={<ConvergePaymentPage />} />
           <Route path="/fluidpaytest" element={<FluidPayTest />} />
           <Route path="/fluidpaymodal" element={<FluidPayModalTest />} />
           <Route

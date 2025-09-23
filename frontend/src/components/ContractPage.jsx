@@ -582,10 +582,10 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Route to pretend payment page for executive demo
-      const paymentRoute = '/pretend-payment';
+      // Route to Converge payment page
+      const paymentRoute = '/converge-payment';
       
-      console.log(`Routing to ${paymentRoute} for executive demo`);
+      console.log(`Routing to ${paymentRoute}`);
       console.log('ContractPage - Passing data to payment:', {
         hasFormData: !!formData,
         hasSignatureData: !!signatureData,
@@ -600,7 +600,7 @@ const ContractPage = () => {
       console.log('ContractPage - signatureData.initials:', signatureData?.initials);
       console.log('ContractPage - isSigned:', isSigned);
       
-      // Continue to pretend payment page with all data
+      // Continue to Converge payment page with all data
       navigate(paymentRoute, {
         state: {
           formData: formData,

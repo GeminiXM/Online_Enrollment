@@ -17,10 +17,15 @@ export default defineConfig({
       },
     },
     hmr: {
-      host: "vwbwebdev",
+      host: "localhost",
       port: 5000,
+      protocol: "http",
     },
-    allowedHosts: ["localhost", "vwbwebdev"],
+    allowedHosts: [
+      "localhost",
+      "vwbwebdev",
+      "tribune-hebrew-revealed-necessarily.trycloudflare.com",
+    ],
     // This middleware ensures SPA routes work correctly when accessed directly
     middlewares: [
       {
