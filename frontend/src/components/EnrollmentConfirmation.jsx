@@ -38,9 +38,8 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
     if (paymentResponse.processor === 'FLUIDPAY') {
       return paymentResponse.card_info?.last_four || 'XXXX';
     } else {
-      // Handle CONVERGE
-      const cardNumber = paymentResponse.ssl_card_number || '';
-      return cardNumber.slice(-4) || 'XXXX';
+      // Handle CONVERGE - use last4 field directly
+      return paymentResponse.last4 || 'XXXX';
     }
   };
   
