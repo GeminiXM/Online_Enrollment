@@ -349,11 +349,9 @@ const ConvergePaymentPage = () => {
       
       if (approved) {
         console.log("Payment approved:", result);
-        console.log("Available result fields:", Object.keys(result));
-        console.log("Full result object:", JSON.stringify(result, null, 2));
         // Create payment response for enrollment completion
         // Extract the real vault token - if we don't get one, don't proceed
-        const vaultToken = result.ssl_token || result.ssl_txn_token || result.token;
+        const vaultToken = result.ssl_token;
         if (!vaultToken) {
           console.error("No vault token received from Converge - cannot proceed");
           setSubmitError('Payment was approved but no vault token was received. Please contact support.');
@@ -361,14 +359,38 @@ const ConvergePaymentPage = () => {
           return;
         }
 
+        // Extract last 4 digits from ssl_card_number (format: "43**********2156")
+        let last4 = '****';
+        let maskedCardNumber = '************';
+        if (result.ssl_card_number && result.ssl_card_number.length >= 4) {
+          last4 = result.ssl_card_number.slice(-4);
+          maskedCardNumber = '************' + last4; // 12 asterisks + last 4 digits
+        }
+
+        // Format expiration date from "1227" to "2027-12-31" (YYYY-MM-DD format, last day of month)
+        let formattedExpDate = '';
+        if (result.ssl_exp_date && result.ssl_exp_date.length === 4) {
+          const month = result.ssl_exp_date.substring(0, 2);
+          const year = result.ssl_exp_date.substring(2, 4);
+          const fullYear = '20' + year; // Convert YY to YYYY
+          
+          // Get last day of the month (same logic as database)
+          const monthNum = parseInt(month, 10);
+          const yearNum = parseInt(fullYear, 10);
+          const lastDay = new Date(yearNum, monthNum, 0).getDate();
+          
+          formattedExpDate = `${fullYear}-${month.padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
+        }
+
         const paymentResponse = {
           processor: 'CONVERGE',
           success: true,
-          transaction_id: result.ssl_transaction_id || 'CONVERGE_' + Date.now(),
+          transaction_id: result.ssl_txn_id || 'CONVERGE_' + Date.now(),
           authorization_code: result.ssl_approval_code,
-          last4: result.ssl_last4 || result.ssl_card_number_last4 || '****',
-          cardType: result.ssl_card_type || result.ssl_card_brand || 'Credit Card',
-          expirationDate: result.ssl_exp_date || result.ssl_card_exp_date || result.exp_date || '',
+          last4: last4,
+          maskedCardNumber: maskedCardNumber, // Full masked card number (************2156)
+          cardType: result.ssl_card_short_description || 'Credit Card', // Use ssl_card_short_description (VISA)
+          expirationDate: formattedExpDate, // Formatted as MM/01/YYYY
           amount: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00",
           timestamp: new Date().toISOString(),
           vault_token: vaultToken
@@ -501,7 +523,9 @@ const ConvergePaymentPage = () => {
           processorName: 'CONVERGE',
           transactionId: paymentResult.transaction_id,
           authorizationCode: paymentResult.authorization_code,
-          last4: paymentResult.card_info?.last_four,
+          last4: paymentResult.maskedCardNumber, // Use full masked card number (************2156)
+          cardType: paymentResult.cardType,
+          expirationDate: paymentResult.expirationDate,
           vaultToken: paymentResult.vault_token
         }
       };

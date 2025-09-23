@@ -460,11 +460,9 @@ export const submitEnrollment = async (req, res) => {
 
     // Extract payment data for database insertion
     const paymentData = {
-      token: paymentInfo?.transactionId || "",
-      cardExpDate: paymentInfo?.expirationDate
-        ? formatExpirationDate(paymentInfo.expirationDate)
-        : "",
-      cardNumber: paymentInfo?.last4 ? formatCardNumber(paymentInfo.last4) : "",
+      token: paymentInfo?.vaultToken || "", // Use vault token, not transaction ID
+      cardExpDate: paymentInfo?.expirationDate || "", // Already formatted as YYYY-MM-DD
+      cardNumber: paymentInfo?.last4 || "", // Already formatted as ************2156
       cardType: formatCardType(paymentInfo?.cardType || ""),
       processorName: paymentInfo?.processorName || "",
     };

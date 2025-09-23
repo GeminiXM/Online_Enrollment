@@ -2769,3 +2769,13 @@
 2025-09-23 12:28:45:2845 [31merror[39m: [31mError creating connection string:[39m
 2025-09-23 12:28:45:2845 [31merror[39m: [31mError in getConnection:[39m
 2025-09-23 12:28:45:2845 [31merror[39m: [31mError in submitEnrollment:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError getting database config:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError creating connection string:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError in getConnection:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError testing Converge HPP integration:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError getting database config:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError creating connection string:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError in getConnection:[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
+2025-09-23 16:26:20:2620 [31merror[39m: [31mError testing Converge HPP integration:[39m
