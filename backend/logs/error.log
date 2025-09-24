@@ -2779,3 +2779,5 @@
 2025-09-23 16:26:20:2620 [31merror[39m: [31mError in getConnection:[39m
 2025-09-23 16:26:20:2620 [31merror[39m: [31mError executing SQL procedure: procConvergeItemSelect1[39m
 2025-09-23 16:26:20:2620 [31merror[39m: [31mError testing Converge HPP integration:[39m
+2025-09-23 17:16:34:1634 [31merror[39m: [31mFluidPay API call failed[39m
+2025-09-23 17:16:34:1634 [31merror[39m: [31mError processing FluidPay payment:[39m

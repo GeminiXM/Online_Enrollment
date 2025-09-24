@@ -303,7 +303,7 @@ class EmailService {
 
       // Email content
       const emailContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
           ${
             formData.specialtyMembership === "J"
               ? `
@@ -328,29 +328,29 @@ class EmailService {
             
             <p>Thank you for choosing to join our fitness community! We're excited to have you as a member.</p>
             
-            <div style="background-color: #e8f5e8; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h3 style="color: #27ae60; margin-top: 0;">Your Membership Details</h3>
-              <ul style="list-style: none; padding: 0;">
-                <li><strong>Membership Number:</strong> ${
+            <div style="background-color: #e8f5e8; padding: 20px; border-radius: 5px; margin: 20px 0;">
+              <h3 style="color: #27ae60; margin-top: 0; margin-bottom: 15px;">Your Membership Details</h3>
+              <ul style="list-style: none; padding: 0; line-height: 1.8;">
+                <li style="margin-bottom: 8px;"><strong>Membership Number:</strong> ${
                   enrollmentData.custCode
                 }</li>
-                <li><strong>Membership Type:</strong> ${this.getMembershipTypeDisplay(
+                <li style="margin-bottom: 8px;"><strong>Membership Type:</strong> ${this.getMembershipTypeDisplay(
                   formData.membershipType,
                   selectedClub
                 )}</li>
-                <li><strong>Transaction ID:</strong> ${
+                <li style="margin-bottom: 8px;"><strong>Transaction ID:</strong> ${
                   enrollmentData.transactionId
                 }</li>
-                <li><strong>Start Date:</strong> ${this.formatDateForEmail(
+                <li style="margin-bottom: 8px;"><strong>Start Date:</strong> ${this.formatDateForEmail(
                   formData.requestedStartDate
                 )}</li>
-                <li><strong>Home Club:</strong> ${
+                <li style="margin-bottom: 8px;"><strong>Home Club:</strong> ${
                   selectedClub?.name || formData.club || "Wellbridge"
                 }</li>
-                <li><strong>Club Address:</strong> ${
+                <li style="margin-bottom: 8px;"><strong>Club Address:</strong> ${
                   selectedClub?.address || "Address not available"
                 }</li>
-                <li><strong>Amount Paid Today:</strong> $${
+                <li style="margin-bottom: 8px;"><strong>Amount Paid Today:</strong> $${
                   enrollmentData.amountBilled || 0
                 }</li>
               </ul>
@@ -406,31 +406,82 @@ class EmailService {
               </p>
             </div>
             
-            <h3>What's Next?</h3>
-            <ol>
-              <li><strong>Visit the Club:</strong> Bring a photo ID and your membership number to complete your registration at ${
-                selectedClub?.address || "our club location"
-              }.</li>
-              <li><strong>Orientation:</strong> Schedule a free orientation session to learn about our facilities and programs.</li>
-              <li><strong>Schedule a Personal Training Session:</strong> Fill out the form here <a href="https://wellbridge.com/personal-coaching-session/" style="color: #1e90ff;">https://wellbridge.com/personal-coaching-session/</a> to get Started!</li>
-                            
-            </ol>
+            <h3 style="margin-top: 30px; margin-bottom: 20px;">What's Next?</h3>
             
-            <h3>Important Information</h3>
-            <ul>
-              <li>Your membership agreement is attached to this email for your records.</li>
-              <li>Monthly dues will be automatically charged to your provided payment method.</li>
-              <li>For further questions about your membership or to get involved with club programs, please come to the club or contact us at ${
-                selectedClub?.phone || "XXX-XXXX"
-              } or ${
+            <div style="background-color: #e8f4f8; padding: 25px; border-radius: 8px; margin: 25px 0; line-height: 1.7; border-left: 4px solid #1e90ff;">
+              <h4 style="color: #2c3e50; margin-top: 0; margin-bottom: 20px; font-size: 18px;">To make check-in easier, please follow the steps below:</h4>
+              
+              <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 1 – Download the App</p>
+                <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
+                  <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
+                      <td style="padding: 0; font-family: Arial, sans-serif;">
+                        • On your smartphone, open the App Store (iPhone) or Google Play Store (Android).<br><br>
+                        • Search for "Colorado Athletic Club" or "New Mexico Sports & Wellness".<br><br>
+                        • Tap Download (iPhone) or Install (Android).
+                      </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 2 – Register Your Account</p>
+                <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
+                  <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
+                      <td style="padding: 0; font-family: Arial, sans-serif;">
+                        • Open the app and tap "Sign Up Now".<br><br>
+                        • Enter your name and membership number(s) (provided above) to complete registration.
+                      </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 3 – Check In at the Club</p>
+                <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
+                  <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
+                      <td style="padding: 0; font-family: Arial, sans-serif;">
+                        • Once registered, tap "Check In" in the top-right corner of the app.<br><br>
+                        • Show the barcode that appears to a Hospitality Desk Teammate for scanning.<br><br>
+                    <br>
+                        That's it—you're all set!
+                      </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+            
+            <h4 style="margin-top: 30px; margin-bottom: 15px;">Additional Next Steps:</h4>
+            <table style="width: 100%; margin: 0 0 30px 0; font-family: Arial, sans-serif;">
+              <tr><td style="width: 20px; padding: 0; vertical-align: top;">&nbsp;</td>
+                  <td style="padding: 0; line-height: 1.7; font-family: Arial, sans-serif;">
+                    1. <strong>Visit the Club:</strong> Bring a photo ID and your membership number to complete your registration at ${
+                      selectedClub?.address || "our club location"
+                    }.<br><br>
+                    2. <strong>Orientation:</strong> Schedule a free orientation session to learn about our facilities and programs.<br><br>
+                    3. <strong>Schedule a Personal Training Session:</strong> Fill out the form here <a href="https://wellbridge.com/personal-coaching-session/" style="color: #1e90ff;">https://wellbridge.com/personal-coaching-session/</a> to get Started!
+                  </td>
+              </tr>
+            </table>
+            
+            <h3 style="margin-top: 30px; margin-bottom: 15px;">Important Information</h3>
+            <table style="width: 100%; margin: 0 0 30px 0; font-family: Arial, sans-serif;">
+              <tr><td style="width: 20px; padding: 0; vertical-align: top;">&nbsp;</td>
+                  <td style="padding: 0; line-height: 1.7; font-family: Arial, sans-serif;">
+                    • Your membership agreement is attached to this email for your records.<br><br>
+                    • Monthly dues will be automatically charged to your provided payment method.<br><br>
+                    • For further questions about your membership or to get involved with club programs, please come to the club or contact us at ${
+                      selectedClub?.phone || "XXX-XXXX"
+                    } or ${
         selectedClub?.email || "gm@wellbridge.com"
       } to get started today.
-
-            </ul>
+                  </td>
+              </tr>
+            </table>
             
 
             
-            <p>We look forward to helping you achieve your fitness goals!</p>
+            <p style="margin: 30px 0 20px 0; font-size: 16px; text-align: center; font-style: italic;">We look forward to helping you achieve your fitness goals!</p>
             
             <p>Best regards,<br>
             The ${selectedClub?.name || formData.club || "Wellbridge"} Team</p>
