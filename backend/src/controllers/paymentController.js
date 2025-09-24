@@ -432,7 +432,25 @@ export const getConvergeToken = async (req, res) => {
 export const processFluidPayPayment = async (req, res) => {
   try {
     // Log initial request
-    logger.info("Received FluidPay payment processing request");
+    logger.info("=== FLUIDPAY PAYMENT PROCESSING REQUEST ===", {
+      requestBody: {
+        clubId: req.body.clubId,
+        amount: req.body.amount,
+        hasToken: !!req.body.token,
+        tokenPrefix: req.body.token
+          ? req.body.token.substring(0, 10) + "..."
+          : "null",
+        customerInfo: req.body.customerInfo,
+        user: req.body.user,
+        billing: req.body.billing,
+      },
+      headers: {
+        contentType: req.headers["content-type"],
+        userAgent: req.headers["user-agent"],
+        origin: req.headers.origin,
+      },
+      timestamp: new Date().toISOString(),
+    });
 
     const { clubId, amount, token, customerInfo, user, billing } = req.body;
 
@@ -449,11 +467,23 @@ export const processFluidPayPayment = async (req, res) => {
 
     try {
       // Get FluidPay processor information
+      logger.info("=== FLUIDPAY CREDENTIALS RETRIEVAL ===", {
+        clubId: clubId,
+        procedure: "procFluidPayItemSelect1",
+        timestamp: new Date().toISOString(),
+      });
+
       const fluidPayResult = await executeSqlProcedure(
         "procFluidPayItemSelect1",
         clubId,
         [clubId]
       );
+
+      logger.info("=== FLUIDPAY DATABASE RESULT ===", {
+        resultLength: fluidPayResult ? fluidPayResult.length : 0,
+        resultData: fluidPayResult,
+        timestamp: new Date().toISOString(),
+      });
 
       let fluidPayInfo = null;
       if (fluidPayResult && fluidPayResult.length > 0) {
@@ -467,15 +497,30 @@ export const processFluidPayPayment = async (req, res) => {
             merchant_id: (firstRow.merchant_id || "").trim(), // Remove any trailing spaces
           };
 
-          logger.info("FluidPay credentials retrieved from database", {
-            clubId,
-            apiKey: fluidPayInfo.fluidpay_api_key
-              ? `${fluidPayInfo.fluidpay_api_key.substring(0, 10)}...`
+          logger.info("=== FLUIDPAY CREDENTIALS CONFIGURED ===", {
+            clubId: clubId,
+            club: fluidPayInfo.club,
+            apiKeyPrefix: fluidPayInfo.fluidpay_api_key
+              ? `${fluidPayInfo.fluidpay_api_key.substring(0, 15)}...`
               : "Not found",
+            apiKeyLength: fluidPayInfo.fluidpay_api_key
+              ? fluidPayInfo.fluidpay_api_key.length
+              : 0,
             merchantId: fluidPayInfo.merchant_id,
+            merchantIdLength: fluidPayInfo.merchant_id
+              ? fluidPayInfo.merchant_id.length
+              : 0,
             baseUrl: fluidPayInfo.fluidpay_base_url,
+            timestamp: new Date().toISOString(),
           });
         }
+      } else {
+        logger.error("=== FLUIDPAY CREDENTIALS NOT FOUND ===", {
+          clubId: clubId,
+          resultLength: fluidPayResult ? fluidPayResult.length : 0,
+          resultData: fluidPayResult,
+          timestamp: new Date().toISOString(),
+        });
       }
 
       if (!fluidPayInfo || !fluidPayInfo.fluidpay_api_key) {
@@ -614,8 +659,8 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       payment_method: {
         token: token,
       },
-      // Add processor ID if available - this might be needed for merchant accounts without default processor
-      // processor_id: "your_processor_id_here", // Uncomment if you have a specific processor ID
+      // Add processor ID - this is required for merchant accounts without default processor
+      processor_id: fluidPayInfo.merchant_id.trim(), // Use the merchant_id as processor_id
     };
 
     logger.info("FluidPay API request details", {
@@ -634,29 +679,62 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
     });
 
     // Make actual FluidPay API call
-    const response = await fetch(
-      `${fluidPayInfo.fluidpay_base_url}/api/transaction`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: fluidPayInfo.fluidpay_api_key,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestPayload),
-      }
-    );
+    const apiUrl = `${fluidPayInfo.fluidpay_base_url}/api/transaction`;
+    const requestHeaders = {
+      Authorization: fluidPayInfo.fluidpay_api_key,
+      "Content-Type": "application/json",
+    };
+
+    logger.info("=== FLUIDPAY API REQUEST DETAILS ===", {
+      url: apiUrl,
+      method: "POST",
+      headers: {
+        Authorization: `${fluidPayInfo.fluidpay_api_key.substring(0, 15)}...`,
+        "Content-Type": "application/json",
+      },
+      requestBody: requestPayload,
+      merchantId: fluidPayInfo.merchant_id,
+      apiKeyPrefix: fluidPayInfo.fluidpay_api_key.substring(0, 15),
+      timestamp: new Date().toISOString(),
+    });
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: requestHeaders,
+      body: JSON.stringify(requestPayload),
+    });
 
     let responseData;
     const responseText = await response.text();
+    const responseHeaders = {};
+
+    // Capture response headers
+    for (let [key, value] of response.headers.entries()) {
+      responseHeaders[key] = value;
+    }
+
+    logger.info("=== FLUIDPAY API RESPONSE DETAILS ===", {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+      responseBody: responseText,
+      url: response.url,
+      timestamp: new Date().toISOString(),
+    });
 
     try {
       responseData = JSON.parse(responseText);
+
+      logger.info("=== FLUIDPAY PARSED RESPONSE ===", {
+        parsedResponse: responseData,
+        success: response.ok,
+        statusCode: response.status,
+      });
     } catch (parseError) {
-      logger.error("Failed to parse FluidPay response as JSON", {
+      logger.error("=== FLUIDPAY JSON PARSE ERROR ===", {
         responseText: responseText,
-        responseStatus: response.status,
-        responseHeaders: Object.fromEntries(response.headers.entries()),
         parseError: parseError.message,
+        stack: parseError.stack,
       });
       throw new Error(`FluidPay returned invalid JSON: ${responseText}`);
     }
@@ -681,6 +759,17 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
     });
 
     if (!response.ok) {
+      logger.error("=== FLUIDPAY API ERROR RESPONSE ===", {
+        httpStatus: response.status,
+        httpStatusText: response.statusText,
+        responseData: responseData,
+        responseText: responseText,
+        requestUrl: apiUrl,
+        requestPayload: requestPayload,
+        merchantId: fluidPayInfo.merchant_id,
+        timestamp: new Date().toISOString(),
+      });
+
       throw new Error(
         `FluidPay API error: ${response.status} - ${JSON.stringify(
           responseData
@@ -690,6 +779,16 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
 
     // Check if the transaction was declined
     if (responseData.data && responseData.data.status === "declined") {
+      logger.error("=== FLUIDPAY TRANSACTION DECLINED ===", {
+        transactionStatus: responseData.data.status,
+        processorResponseText:
+          responseData.data.response_body?.card?.processor_response_text,
+        processorResponseCode:
+          responseData.data.response_body?.card?.processor_response_code,
+        fullResponseData: responseData,
+        timestamp: new Date().toISOString(),
+      });
+
       const errorMessage =
         responseData.data.response_body?.card?.processor_response_text ||
         responseData.data.response_body?.card?.processor_response_code ||
@@ -699,6 +798,13 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
 
     // Check if the API call was successful but transaction failed
     if (responseData.status !== "success") {
+      logger.error("=== FLUIDPAY TRANSACTION FAILED ===", {
+        responseStatus: responseData.status,
+        responseMessage: responseData.msg,
+        fullResponseData: responseData,
+        timestamp: new Date().toISOString(),
+      });
+
       throw new Error(
         `FluidPay API error: ${responseData.msg || "Unknown error"}`
       );
@@ -982,6 +1088,83 @@ export const testFluidPayConnection = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error testing FluidPay connection",
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * @desc Test FluidPay transaction processing with detailed logging
+ * @route POST /api/payment/test-fluidpay-transaction
+ * @access Public
+ */
+export const testFluidPayTransaction = async (req, res) => {
+  try {
+    logger.info("=== FLUIDPAY TRANSACTION TEST REQUEST ===", {
+      requestBody: req.body,
+      timestamp: new Date().toISOString(),
+    });
+
+    const { clubId, amount, token, customerInfo } = req.body;
+
+    if (!clubId || !amount || !token) {
+      return res.status(400).json({
+        success: false,
+        message: "Club ID, amount, and token are required",
+      });
+    }
+
+    // Get FluidPay processor information
+    const fluidPayResult = await executeSqlProcedure(
+      "procFluidPayItemSelect1",
+      clubId,
+      [clubId]
+    );
+
+    let fluidPayInfo = null;
+    if (fluidPayResult && fluidPayResult.length > 0) {
+      const firstRow = fluidPayResult[0];
+      if (firstRow) {
+        fluidPayInfo = {
+          club: firstRow.club || parseInt(clubId),
+          fluidpay_base_url:
+            firstRow.fluidpay_base_url || "https://app.fluidpay.com",
+          fluidpay_api_key: (firstRow.fluidpay_api_key || "").trim(),
+          merchant_id: (firstRow.merchant_id || "").trim(),
+        };
+      }
+    }
+
+    if (!fluidPayInfo || !fluidPayInfo.fluidpay_api_key) {
+      return res.status(400).json({
+        success: false,
+        message: "FluidPay processor information not found",
+      });
+    }
+
+    // Test transaction processing with detailed logging
+    const paymentData = {
+      token: token,
+      amount: amount,
+      customerInfo: customerInfo || {
+        firstName: "Test",
+        lastName: "User",
+        email: "test@example.com",
+      },
+    };
+
+    const result = await processFluidPayTransaction(fluidPayInfo, paymentData);
+
+    return res.json({
+      success: true,
+      message: "FluidPay transaction test completed",
+      result: result,
+    });
+  } catch (error) {
+    logger.error("FluidPay transaction test error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "FluidPay transaction test failed",
       error: error.message,
     });
   }

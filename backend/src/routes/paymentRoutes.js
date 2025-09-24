@@ -16,6 +16,7 @@ import {
   getConvergeToken,
   processFluidPayPayment,
   testFluidPayConnection,
+  testFluidPayTransaction,
 } from "../controllers/paymentController.js";
 
 const router = express.Router();
@@ -197,6 +198,27 @@ router.post("/test-fluidpay", async (req, res) => {
       success: false,
       message:
         "An error occurred while testing the FluidPay connection. Please try again later.",
+    });
+  }
+});
+
+/**
+ * @route POST /api/payment/test-fluidpay-transaction
+ * @desc Test FluidPay transaction processing with detailed logging
+ * @access Public
+ */
+router.post("/test-fluidpay-transaction", async (req, res) => {
+  try {
+    return await testFluidPayTransaction(req, res);
+  } catch (error) {
+    logger.error("Error in test-fluidpay-transaction route", {
+      error: error.message,
+      stack: error.stack,
+    });
+    return res.status(500).json({
+      success: false,
+      message:
+        "An error occurred while testing FluidPay transaction. Please try again later.",
     });
   }
 });
