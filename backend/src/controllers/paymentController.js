@@ -810,6 +810,21 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       );
     }
 
+    // Format expiration date from FluidPay response (if available)
+    let formattedExpDate = "";
+    const expDate = responseData.data?.response_body?.card?.exp_date;
+    if (expDate && expDate.length === 4) {
+      // Convert MMYY to YYYY-MM-DD format (last day of month)
+      const month = expDate.substring(0, 2);
+      const year = "20" + expDate.substring(2, 4);
+      const monthNum = parseInt(month, 10);
+      const yearNum = parseInt(year, 10);
+      const lastDay = new Date(yearNum, monthNum, 0).getDate();
+      formattedExpDate = `${year}-${month.padStart(2, "0")}-${lastDay
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
     return {
       transactionId: responseData.data?.id || `TXN_${Date.now()}`,
       authorizationCode:
@@ -818,6 +833,7 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       cardNumber:
         responseData.data?.response_body?.card?.masked_card || "****1111",
       cardType: responseData.data?.response_body?.card?.card_type || "VISA",
+      expirationDate: formattedExpDate,
       status: responseData.data?.status,
       amount: amount,
       response: responseData,

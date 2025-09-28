@@ -1,35 +1,94 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
-import './PaymentPage.css';
+import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
+import FluidPayModal from './FluidPayModal.jsx';
+import './ConvergePaymentPage.css'; // Reuse the same CSS
 
 const FluidPayPaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
   
-  // State management
+  // Data from previous screens
   const [formData, setFormData] = useState(null);
+  const [signatureData, setSignatureData] = useState(null);
+  const [initialedSections, setInitialedSections] = useState(null);
+  
+  // FluidPay payment state
   const [fluidPayInfo, setFluidPayInfo] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [paymentResult, setPaymentResult] = useState(null);
   const [isLoadingFluidPay, setIsLoadingFluidPay] = useState(false);
+  const [fluidPayError, setFluidPayError] = useState('');
+  
+  // Other state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [paymentResponse, setPaymentResponse] = useState(null);
+  const [processorName, setProcessorName] = useState('FLUIDPAY');
+  const [processorInfo, setProcessorInfo] = useState(null);
+  const [errors, setErrors] = useState({});
+  
+  // FluidPay modal state
+  const [isFluidPayModalOpen, setIsFluidPayModalOpen] = useState(false);
 
-  // Get enrollment data passed from ContractPage
+  // Get enrollment data and fetch payment processor info
   useEffect(() => {
-    if (location.state && location.state.formData) {
-      console.log("FluidPayPaymentPage - FormData received:", location.state.formData);
-      setFormData(location.state.formData);
+    console.log('FluidPayPaymentPage - location.state:', location.state);
+    console.log('FluidPayPaymentPage - location.state keys:', location.state ? Object.keys(location.state) : 'null');
+    
+    if (location.state) {
+      const { formData, signatureData, initialedSections } = location.state;
+      
+      console.log('FluidPayPaymentPage - destructured formData:', formData);
+      console.log('FluidPayPaymentPage - destructured signatureData:', signatureData);
+      console.log('FluidPayPaymentPage - destructured initialedSections:', initialedSections);
+      
+      if (formData) {
+        console.log('Setting formData in state:', formData);
+        setFormData(formData);
+        
+        // Fetch FluidPay processor info
+        const fetchFluidPayInfo = async () => {
+          try {
+            const clubId = formData.club || selectedClub?.id || "001";
+            console.log('Fetching FluidPay info for club:', clubId);
+            
+            const fluidPayResult = await api.getFluidPayInfo(clubId);
+            console.log('FluidPay API result:', fluidPayResult);
+            
+            if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
+              console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
+              setFluidPayInfo(fluidPayResult.fluidPayInfo);
+              setProcessorInfo(fluidPayResult.fluidPayInfo);
+            } else {
+              throw new Error('FluidPay info not found');
+            }
+          } catch (error) {
+            console.error('Error fetching FluidPay info:', error);
+            setFluidPayError('Unable to load FluidPay payment processor. Please contact support.');
+          }
+        };
+
+        fetchFluidPayInfo();
+      }
+      
+      if (signatureData) {
+        console.log('Setting signatureData in state:', signatureData);
+        setSignatureData(signatureData);
+      }
+      
+      if (initialedSections) {
+        console.log('Setting initialedSections in state:', initialedSections);
+        setInitialedSections(initialedSections);
+      }
     } else {
-      console.error("FluidPayPaymentPage - No form data received");
+      console.error('FluidPayPaymentPage - No location state received, redirecting to enrollment');
       navigate('/enrollment');
     }
-  }, [location.state, navigate]);
+  }, [location.state, navigate, selectedClub]);
 
-  // Calculate prorated amount for payment
+  // Calculate prorated amount
   const calculateProratedAmount = () => {
     if (!formData) return 0;
     
@@ -47,303 +106,372 @@ const FluidPayPaymentPage = () => {
     return enrollmentFee + proratedDues + proratedAddOns + ptPackageAmount;
   };
 
-  // Fetch FluidPay processor information
-  const fetchFluidPayInfo = async () => {
-    if (!formData?.club) return;
+  // Calculate monthly amount
+  const calculateMonthlyAmount = () => {
+    if (!formData) return 0;
     
-    setIsLoadingFluidPay(true);
-    try {
-      const response = await api.get(`/payment/fluidpay-info?clubId=${formData.club}`);
-      console.log('FluidPay info result:', response.data);
-      
-      if (response.data && response.data.success) {
-        setFluidPayInfo(response.data.fluidPayInfo);
-      } else {
-        setErrorMessage('Failed to load FluidPay payment processor information');
-      }
-    } catch (error) {
-      console.error('Error fetching FluidPay info:', error);
-      setErrorMessage('Failed to load payment processor information');
-    } finally {
-      setIsLoadingFluidPay(false);
-    }
+    const monthlyDues = parseFloat(formData.monthlyDues || formData.membershipDetails?.monthlyDues || 0);
+    const monthlyAddOns = parseFloat(formData.monthlyAddOns || 0);
+    
+    return monthlyDues + monthlyAddOns;
   };
 
   // Process FluidPay payment
-  const processFluidPayPayment = async () => {
-    if (!formData || !fluidPayInfo) return;
-    
-    setIsSubmitting(true);
-    setErrorMessage('');
-    
-    try {
-      const amount = calculateProratedAmount();
-      
-      console.log('Processing FluidPay payment:', {
-        amount,
-        clubId: formData.club
-      });
-      
-      const response = await api.post('/payment/fluidpay', {
-        amount: amount.toFixed(2),
-        clubId: formData.club,
-        memberData: {
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone || formData.cellPhone,
-          address: formData.address || formData.address1,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode
-        }
-      });
-      
-      if (response.data && response.data.success) {
-        console.log('FluidPay payment successful:', response.data);
-        setPaymentSuccess(true);
-        setPaymentResult(response.data);
-        
-        // Submit enrollment to backend
-        await submitEnrollment(response.data);
-      } else {
-        throw new Error(response.data?.message || 'Payment failed');
-      }
-    } catch (error) {
-      console.error('FluidPay payment error:', error);
-      setErrorMessage(error.response?.data?.message || 'Payment failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const processFluidPayPayment = useCallback(async () => {
+    setSubmitError('');
+    setFluidPayError('');
 
-  // Submit enrollment data to backend
-  const submitEnrollment = async (paymentData) => {
-    if (!formData) return;
+    // Open FluidPay modal for real payment processing
+    console.log('Opening FluidPay modal for payment processing');
+    setIsFluidPayModalOpen(true);
+  }, []);
+
+  // Handle FluidPay payment success
+  const handleFluidPaySuccess = useCallback(async (paymentResult) => {
+    console.log('FluidPay payment successful:', paymentResult);
     
     setIsSubmitting(true);
-    setErrorMessage('');
-    
+    setIsFluidPayModalOpen(false);
+
     try {
-      // Prepare enrollment data
-      const enrollmentData = {
-        ...formData,
-        paymentInfo: {
-          transactionId: paymentData.transaction_id || paymentData.id,
-          last4: paymentData.last4 || '',
-          cardType: paymentData.card_type || '',
-          expirationDate: paymentData.expiration_date || '',
-          processorName: 'FLUIDPAY'
-        },
-        contractPDF: null // Will be generated in confirmation page
+      // Check if formData is available, if not try to restore from location.state
+      let currentFormData = formData;
+      let currentSignatureData = signatureData;
+      
+      if (!currentFormData && location.state) {
+        console.log('Form data missing, attempting to restore from location.state');
+        const { formData: restoredFormData, signatureData: restoredSignatureData } = location.state;
+        currentFormData = restoredFormData;
+        currentSignatureData = restoredSignatureData;
+        setFormData(restoredFormData);
+        setSignatureData(restoredSignatureData);
+        
+        if (currentFormData) {
+          console.log('Successfully restored form data from location.state');
+        } else {
+          console.log('No form data found in location.state either');
+        }
+      }
+      
+      // Extract last 4 digits from the masked card number (format: "****1111" or "************1111")
+      let last4 = '****';
+      let maskedCardNumber = '************';
+      if (paymentResult.cardNumber) {
+        // Extract last 4 digits from masked card number
+        last4 = paymentResult.cardNumber.slice(-4);
+        maskedCardNumber = '************' + last4; // Ensure 12 asterisks + last 4 digits
+      } else if (paymentResult.cardInfo?.last4) {
+        last4 = paymentResult.cardInfo.last4;
+        maskedCardNumber = '************' + last4;
+      }
+
+      // Format the payment data to match database expectations
+      const formattedPaymentResponse = {
+        processor: 'FLUIDPAY',
+        success: true,
+        transaction_id: paymentResult.transactionId,
+        authorization_code: paymentResult.authorizationCode,
+        last4: last4,
+        maskedCardNumber: maskedCardNumber, // 12 asterisks + last 4 digits
+        cardType: paymentResult.cardType || paymentResult.cardInfo?.type || 'Credit Card',
+        expirationDate: paymentResult.expirationDate || '', // Formatted expiration date from backend
+        amount: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00",
+        timestamp: new Date().toISOString(),
+        vault_token: paymentResult.vaultToken
       };
       
-      console.log('Submitting enrollment data to database:', enrollmentData);
+      console.log('Formatted payment response:', formattedPaymentResponse);
+      setPaymentResponse(formattedPaymentResponse);
       
-      const response = await api.post('/enrollment', enrollmentData);
+      // Complete the enrollment with formatted payment data
+      await finishEnrollment(formattedPaymentResponse, currentFormData, currentSignatureData);
+    } catch (error) {
+      console.error('Error completing enrollment after payment:', error);
+      setSubmitError('Payment was successful, but there was an error completing your enrollment. Please contact support.');
+      setIsSubmitting(false);
+    }
+  }, [formData, signatureData, location.state]);
+
+  // Handle FluidPay modal close
+  const handleFluidPayModalClose = useCallback(() => {
+    setIsFluidPayModalOpen(false);
+  }, []);
+
+  // Complete enrollment process
+  const finishEnrollment = async (paymentResult, overrideFormData = null, overrideSignatureData = null) => {
+    try {
+      // Use override data if provided, otherwise use state
+      const currentFormData = overrideFormData || formData;
+      const currentSignatureData = overrideSignatureData || signatureData;
       
-      if (response.data && response.data.success) {
-        console.log('Enrollment submitted successfully:', response.data);
-        
-        // Navigate to confirmation page
-        navigate('/enrollment-confirmation', { 
-          state: { 
-            enrollmentData: response.data,
-            memberName: `${formData.firstName} ${formData.lastName}`,
-            successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${formData.firstName}! Your enrollment has been successfully submitted.`,
-            paymentResponse: paymentData,
-            formData: formData,              
-            signatureData: location.state.signatureData,     
-            initialedSections: location.state.initialedSections,
-            membershipNumber: response.data.custCode,
-            transactionId: response.data.transactionId,
-            amountBilled: calculateProratedAmount().toFixed(2)
-          } 
-        });
-      } else {
-        throw new Error(response.data?.message || 'Enrollment submission failed');
+      if (!currentFormData) {
+        throw new Error('Form data is missing');
       }
+
+      console.log('Finishing enrollment with data:', {
+        hasFormData: !!currentFormData,
+        hasSignatureData: !!currentSignatureData,
+        hasInitialedSections: !!initialedSections,
+        paymentResult: paymentResult
+      });
+
+      // Generate contract PDF
+      let contractPDF = null;
+      try {
+        console.log('Generating contract PDF...');
+        contractPDF = await generateContractPDFBuffer(currentFormData, currentSignatureData, initialedSections);
+        console.log('Contract PDF generated successfully');
+      } catch (pdfError) {
+        console.error('Error generating contract PDF:', pdfError);
+        // Continue without PDF - it can be generated later
+      }
+
+      // Prepare enrollment submission data
+      const submissionData = {
+        ...currentFormData,
+        signatureData: currentSignatureData,
+        initialedSections: initialedSections,
+        selectedClub: selectedClub,
+        contractPDF: contractPDF,
+        totalCollected: currentFormData.totalCollected || calculateProratedAmount().toString(),
+        paymentInfo: {
+          processorName: 'FLUIDPAY',
+          transactionId: paymentResult.transaction_id,
+          authorizationCode: paymentResult.authorization_code,
+          last4: paymentResult.maskedCardNumber, // Use the full masked card number (************2156)
+          cardType: paymentResult.cardType,
+          expirationDate: paymentResult.expirationDate,
+          vaultToken: paymentResult.vault_token
+        }
+      };
+
+      console.log('Submitting enrollment data to database:', submissionData);
+      
+      // Submit the form data to the database
+      const response = await api.post('/enrollment', submissionData);
+      
+      // Navigate to confirmation page
+      navigate('/enrollment-confirmation', { 
+        state: { 
+          enrollmentData: response.data,
+          memberName: `${currentFormData.firstName} ${currentFormData.lastName}`,
+          successMessage: `Welcome to ${selectedClub?.name || 'the club'}, ${currentFormData.firstName}! Your enrollment has been successfully submitted.`,
+          paymentResponse: paymentResult,
+          formData: currentFormData,              
+          signatureData: currentSignatureData,     
+          initialedSections: initialedSections,
+          membershipNumber: response.data.custCode,
+          transactionId: response.data.transactionId,
+          amountBilled: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00"
+        } 
+      });
     } catch (error) {
       console.error('Enrollment submission error:', error);
-      setErrorMessage('Payment was processed successfully, but there was an error completing your enrollment. Please contact customer support.');
-    } finally {
+      setSubmitError('Payment was processed successfully, but there was an error completing your enrollment. Please contact customer support.');
       setIsSubmitting(false);
     }
   };
 
-  // Load FluidPay info when component mounts
-  useEffect(() => {
-    if (formData?.club) {
-      fetchFluidPayInfo();
-    }
-  }, [formData?.club]);
-
+  // Calculate the 1st of the next month for payment authorization
+  const getFirstOfNextMonth = () => {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    return nextMonth.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  };
+  
   if (!formData) {
-    return <div className="loading">Loading...</div>;
-  }
-
-  return (
-    <div className="payment-container">
-      <h1>Complete Your Membership</h1>
-      
-      <div className="payment-layout">
-        <div className="payment-summary">
-          <h2>Payment Summary</h2>
-          
-          <div className="processor-info">
-            <h3>Payment Processor Information</h3>
-            <div className="processor-details">
-              <p className="processor-name">
-                <span className="detail-label">Processor:</span> 
-                <span className="detail-value">FluidPay</span>
-              </p>
-              
-              {fluidPayInfo && (
-                <div className="processor-config">
-                  <p className="detail-item">
-                    <span className="detail-label">Merchant ID:</span>
-                    <span className="detail-value">{fluidPayInfo.merchant_id}</span>
-                  </p>
-                  <p className="detail-item">
-                    <span className="detail-label">Base URL:</span>
-                    <span className="detail-value">{fluidPayInfo.fluidpay_base_url ? '✓ Configured' : '⚠️ Missing'}</span>
-                  </p>
-                  <p className="detail-item">
-                    <span className="detail-label">API Key:</span>
-                    <span className="detail-value">{fluidPayInfo.fluidpay_api_key ? '✓ Configured' : '⚠️ Missing'}</span>
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="due-today">
-            <div className="due-today-amount">${calculateProratedAmount().toFixed(2)}</div>
-            <div className="price-label">Due Today</div>
-          </div>
-
-          <div className="payment-breakdown">
-            <h3>Payment Breakdown</h3>
-            <div className="breakdown-item">
-              <span>Enrollment Fee</span>
-              <span>${parseFloat(formData.enrollmentFee || 0).toFixed(2)}</span>
-            </div>
-            <div className="breakdown-item">
-              <span>Prorated Dues</span>
-              <span>${parseFloat(formData.proratedDues || 0).toFixed(2)}</span>
-            </div>
-            {parseFloat(formData.proratedAddOns || 0) > 0 && (
-              <div className="breakdown-item">
-                <span>Prorated Add-ons</span>
-                <span>${parseFloat(formData.proratedAddOns || 0).toFixed(2)}</span>
-              </div>
-            )}
-            {parseFloat(formData.ptPackageAmount || 0) > 0 && (
-              <div className="breakdown-item">
-                <span>Personal Training</span>
-                <span>${parseFloat(formData.ptPackageAmount || 0).toFixed(2)}</span>
-              </div>
-            )}
-            <div className="breakdown-total">
-              <span><strong>Total Due Today</strong></span>
-              <span><strong>${calculateProratedAmount().toFixed(2)}</strong></span>
-            </div>
-          </div>
-
-          <div className="monthly-summary">
-            <h3>Going Forward</h3>
-            <div className="monthly-amount">
-              <span>Monthly Dues</span>
-              <span>${parseFloat(formData.monthlyDues || formData.membershipDetails?.price || 0).toFixed(2)}</span>
-            </div>
-            {formData.serviceAddons && formData.serviceAddons.length > 0 && (
-              <div className="monthly-addons">
-                {formData.serviceAddons.map((addon, index) => (
-                  <div key={index} className="breakdown-item">
-                    <span>{addon.description || addon.name}</span>
-                    <span>${parseFloat(addon.price || addon.monthly || 0).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="member-info">
-            <h3>Member Information</h3>
-            <div className="member-details">
-              <p><strong>Name:</strong> {formData.firstName} {formData.lastName}</p>
-              <p><strong>Email:</strong> {formData.email}</p>
-              <p><strong>Phone:</strong> {formData.phone || formData.cellPhone}</p>
-              <p><strong>Club:</strong> {selectedClub?.name}</p>
+    return (
+      <div className="payment-container">
+        <h1>FluidPay Payment Page</h1>
+        <div className="payment-layout">
+          <div className="payment-summary">
+            <h2>No Enrollment Data</h2>
+            <p>This page requires enrollment data from the enrollment flow.</p>
+            <p>To test this page properly:</p>
+            <ol>
+              <li>Go to <a href="/enrollment">Enrollment Form</a></li>
+              <li>Fill out the form and proceed through the contract</li>
+              <li>You'll be directed to this payment page with the proper data</li>
+            </ol>
+            <div className="form-actions">
+              <button 
+                type="button" 
+                className="primary-button"
+                onClick={() => navigate('/enrollment')}
+              >
+                Go to Enrollment Form
+              </button>
             </div>
           </div>
         </div>
-
-        <div className="payment-form-section">
-          <div className="legal-notice">
-            <h2>Payment Authorization</h2>
-            <p>
-              By completing this payment, you authorize ongoing monthly billing for your membership 
-              and any selected services. Your membership will continue until you provide written 
-              notice of cancellation as outlined in your membership agreement.
-            </p>
-            <p>
-              <strong>Payment Method:</strong> Your payment information will be securely stored 
-              for future monthly billing. You may update your payment method at any time by 
-              contacting the club.
-            </p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="payment-container">
+      <h1>Complete Your Membership</h1>
+    
+    <div className="payment-layout">
+      <div className="payment-summary">
+        <h2>Payment Summary</h2>
+        
+        <div className="membership-summary">
+          <h3>Membership Details</h3>
+          <p className="membership-type">{formData.membershipDetails?.description || 'Standard Membership'}</p>
+          <p className="membership-club">{selectedClub?.name || 'Club'}</p>
+          
+          <div className="price-details">
+            <div className="price-row due-today">
+              <span className="price-label">Due today (prorated):</span>
+              <span className="price-value due-today-amount">${calculateProratedAmount().toFixed(2)}</span>
+            </div>
+            <div className="price-row recurring">
+              <span className="price-label">Monthly fee going forward:</span>
+              <span className="price-value">${calculateMonthlyAmount().toFixed(2)}/month</span>
+            </div>
           </div>
-
-          <div className="payment-form">
-            <h2>Secure Payment</h2>
-            
-            {isLoadingFluidPay && (
-              <div className="loading-message">
-                <p>Loading FluidPay payment processor...</p>
+        </div>
+        
+        {/* Customer Information Section */}
+        <div className="customer-info">
+          <h3>Customer Information</h3>
+          <div className="info-row">
+            <span className="info-label">Name:</span>
+            <span className="info-value">{formData?.firstName || ''} {formData?.lastName || ''}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Email:</span>
+            <span className="info-value">{formData?.email || ''}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Phone:</span>
+            <span className="info-value">{formData?.phone || ''}</span>
+          </div>
+          <div className="info-row">
+            <span className="info-label">Address:</span>
+            <span className="info-value">
+              {formData?.address || ''}, {formData?.city || ''}, {formData?.state || ''} {formData?.zipCode || ''}
+            </span>
+          </div>
+          
+          {/* Legal Guardian Information for Junior Memberships */}
+          {formData?.specialtyMembership === "J" && (formData?.guardianFirstName || formData?.guardianLastName) && (
+            <>
+              <div className="info-row guardian-separator">
+                <span className="info-label">Legal Guardian:</span>
+                <span className="info-value">
+                  {formData.guardianFirstName} {formData.guardianLastName}
+                  {formData.guardianRelationship && ` (${formData.guardianRelationship})`}
+                </span>
               </div>
-            )}
-            
-            {errorMessage && (
-              <div className="error-message">
-                <p>{errorMessage}</p>
-                <button 
-                  onClick={() => {
-                    setErrorMessage('');
-                    processFluidPayPayment();
-                  }}
-                  className="retry-button"
-                >
-                  Try Again
-                </button>
+              <div className="info-row">
+                <span className="info-label">Guardian Email:</span>
+                <span className="info-value">{formData.guardianEmail || "Not provided"}</span>
               </div>
-            )}
-            
-            {fluidPayInfo && !isLoadingFluidPay && !errorMessage && (
-              <div className="fluidpay-payment-section">
-                <p>FluidPay payment processor is ready.</p>
-                <p><strong>Note:</strong> The FluidPay processor needs to be activated in your FluidPay dashboard before processing real payments.</p>
-                
-                <button 
-                  onClick={processFluidPayPayment}
-                  disabled={isSubmitting}
-                  className="process-payment-button"
-                >
-                  {isSubmitting ? 'Processing Payment...' : 'Process Payment'}
-                </button>
+              <div className="info-row">
+                <span className="info-label">Guardian Phone:</span>
+                <span className="info-value">{formData.guardianPhone || "Not provided"}</span>
               </div>
-            )}
-            
-            {isSubmitting && (
-              <div className="submitting-message">
-                <p>Processing your enrollment...</p>
-              </div>
-            )}
+            </>
+          )}
+        </div>
+        
+        <div className="agreement-summary">
+          <h3>Agreement</h3>
+          <p>You have agreed to the membership terms and conditions with your electronic signature.</p>
+          {signatureData?.signature && (
+        <div className="signature-preview" style={{ 
+              fontFamily: signatureData.selectedFont?.font || signatureData.signature?.font || 'inherit',
+              fontSize: '2rem',
+              lineHeight: '1.2'
+            }}>
+              {signatureData.signature?.text || ''}
+            </div>
+          )}
+        </div>
+      </div>
+      
+      <div className="payment-form-container">
+        <h2>Payment Information</h2>
+        
+        {/* Payment Authorization Section */}
+        <div className="info-section payment-auth-section">
+          <div className="info-row">
+            <div className="auth-text">
+              I hereby request and authorize {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} to charge my account via Electronic Funds Transfer on a monthly basis beginning {getFirstOfNextMonth()}.
+              <br /><br />
+              The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to {selectedClub?.state === 'NM' ? 'New Mexico Sports and Wellness' : 'Colorado Athletic Club'} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.
+            </div>
+          </div>
+        </div>
+        
+        {/* FluidPay Payment Section */}
+        <div className="converge-payment-section">
+          <div className="form-header">
+            <h4>Secure Payment Processing</h4>
+            <p>Your payment will be processed securely through FluidPay's hosted payment page. Your card information is never stored on our servers.</p>
+          </div>
+          
+          {fluidPayError && (
+            <div className="error-message">
+              <h3>Error</h3>
+              <p>{fluidPayError}</p>
+            </div>
+          )}
+          
+          {submitError && (
+            <div className="error-message">
+              <h3>Error</h3>
+              <p>{submitError}</p>
+            </div>
+          )}
+          
+          <div className="form-actions">
+            <button 
+              type="button" 
+              className="secondary-button"
+              onClick={() => navigate(-1)}
+            >
+              Back
+            </button>
+            <button 
+              type="button" 
+              className="primary-button"
+              onClick={processFluidPayPayment}
+              disabled={isSubmitting || isLoadingFluidPay || !fluidPayInfo}
+            >
+              {isSubmitting ? "Processing..." : "Process Payment"}
+            </button>
+          </div>
+          
+          <div className="payment-security-notice">
+            <p>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              Your payment information is secure and encrypted
+            </p>
           </div>
         </div>
       </div>
     </div>
+
+    {/* FluidPay Modal */}
+    <FluidPayModal
+      isOpen={isFluidPayModalOpen}
+      onClose={handleFluidPayModalClose}
+      onSuccess={handleFluidPaySuccess}
+      clubId={formData?.club || selectedClub?.id || "254"}
+      amount={parseFloat(calculateProratedAmount().toFixed(2))}
+    />
+  </div>
   );
 };
 
 export default FluidPayPaymentPage;
-

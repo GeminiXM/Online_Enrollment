@@ -35,24 +35,36 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
   const getLastFour = () => {
     if (!paymentResponse) return 'XXXX';
     
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.card_info?.last_four || 'XXXX';
-    } else {
-      // Handle CONVERGE - use last4 field directly
-      return paymentResponse.last4 || 'XXXX';
+    // For both CONVERGE and FLUIDPAY, use the last4 field
+    // For CONVERGE: last4 contains just the last 4 digits (e.g., "2156")
+    // For FLUIDPAY: last4 contains just the last 4 digits (e.g., "2156")
+    if (paymentResponse.last4 && paymentResponse.last4.length === 4) {
+      return paymentResponse.last4;
     }
+    
+    // Fallback: try to extract from masked card number if available
+    if (paymentResponse.maskedCardNumber && paymentResponse.maskedCardNumber.length >= 4) {
+      return paymentResponse.maskedCardNumber.slice(-4);
+    }
+    
+    return 'XXXX';
   };
   
   // Get the card type
   const getCardType = () => {
     if (!paymentResponse) return 'Credit Card';
     
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.card_info?.card_type || 'Credit Card';
-    } else {
-      // Handle CONVERGE
-      return paymentResponse.ssl_card_type || 'Credit Card';
+    // For both CONVERGE and FLUIDPAY, use the cardType field
+    if (paymentResponse.cardType) {
+      return paymentResponse.cardType;
     }
+    
+    // Fallback for CONVERGE legacy field names
+    if (paymentResponse.ssl_card_type) {
+      return paymentResponse.ssl_card_type;
+    }
+    
+    return 'Credit Card';
   };
   
   // // Get transaction ID

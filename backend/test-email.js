@@ -24,14 +24,20 @@ async function testEmail() {
       firstName: "John",
       lastName: "Doe",
       email: "mmoore@wellbridge.com",
-      membershipType: "Individual",
-      club: "Test Club",
+      membershipType: "I", // Individual membership code
+      club: "Colorado Athletic Club - Denver",
       address: "123 Test St",
-      city: "Test City",
-      state: "TX",
-      zipCode: "12345",
+      city: "Denver",
+      state: "CO",
+      zipCode: "80202",
       cellPhone: "555-123-4567",
       dateOfBirth: "1990-01-01",
+      monthlyDues: 89.99,
+      serviceAddons: [
+        { name: "Personal Training", price: 25.00 },
+        { name: "Group Classes", price: 15.00 }
+      ],
+      requestedStartDate: "2025-09-27"
     };
 
     const testSignatureData = {
@@ -40,11 +46,21 @@ async function testEmail() {
       selectedFont: { font: "Arial" },
     };
 
+    const testSelectedClub = {
+      name: "Colorado Athletic Club - Denver",
+      state: "CO",
+      address: "1234 Main Street, Denver, CO 80202",
+      phone: "303-555-0123",
+      email: "denver@coloradoathleticclub.com"
+    };
+
     console.log("Sending test email...");
     const emailSent = await emailService.sendWelcomeEmail(
       testData,
       testFormData,
-      testSignatureData
+      testSignatureData,
+      null, // No PDF buffer for this test
+      testSelectedClub
     );
 
     if (emailSent) {

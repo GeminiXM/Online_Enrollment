@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './FluidPayModal.css';
 
-const FluidPayModal = ({ isOpen, onClose, onSuccess, clubId }) => {
+const FluidPayModal = ({ isOpen, onClose, onSuccess, clubId, amount: propAmount = 10.00 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [tokenizer, setTokenizer] = useState(null);
   const [isTokenizerLoaded, setIsTokenizerLoaded] = useState(false);
-  const [amount, setAmount] = useState('10.00');
+  const [amount, setAmount] = useState(propAmount.toString());
   const [customerInfo, setCustomerInfo] = useState({
     firstName: '',
     lastName: '',
@@ -20,6 +20,11 @@ const FluidPayModal = ({ isOpen, onClose, onSuccess, clubId }) => {
     zip: '',
     country: 'US'
   });
+
+  // Update amount when prop changes
+  useEffect(() => {
+    setAmount(parseFloat(propAmount).toFixed(2));
+  }, [propAmount]);
 
   // Load FluidPay tokenizer script
   useEffect(() => {
@@ -144,6 +149,9 @@ const FluidPayModal = ({ isOpen, onClose, onSuccess, clubId }) => {
             vaultToken: result.vaultToken,
             authorizationCode: result.authorizationCode,
             cardInfo: result.cardInfo,
+            cardNumber: result.cardNumber, // Include the masked card number from backend
+            cardType: result.cardType, // Include the card type from backend
+            expirationDate: result.expirationDate, // Include the formatted expiration date from backend
             amount: amount,
             customerInfo: paymentData.customerInfo,
             billing: paymentData.billing

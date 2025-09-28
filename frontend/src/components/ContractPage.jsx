@@ -582,10 +582,20 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Route to Converge payment page
-      const paymentRoute = '/converge-payment';
+      // Route to appropriate payment processor based on club location
+      const isNewMexicoClub = selectedClub?.state === 'NM' || false;
+      const isDenverClub = selectedClub?.state === 'CO' || false;
       
-      console.log(`Routing to ${paymentRoute}`);
+      let paymentRoute;
+      if (isNewMexicoClub) {
+        paymentRoute = '/converge-payment'; // New Mexico uses Converge
+      } else if (isDenverClub) {
+        paymentRoute = '/fluidpay-payment'; // Denver uses FluidPay
+      } else {
+        paymentRoute = '/converge-payment'; // Default to Converge
+      }
+      
+      console.log(`Club state: ${selectedClub?.state}, Routing to ${paymentRoute}`);
       console.log('ContractPage - Passing data to payment:', {
         hasFormData: !!formData,
         hasSignatureData: !!signatureData,

@@ -409,10 +409,10 @@ class EmailService {
             <h3 style="margin-top: 30px; margin-bottom: 20px;">What's Next?</h3>
             
             <div style="background-color: #e8f4f8; padding: 25px; border-radius: 8px; margin: 25px 0; line-height: 1.7; border-left: 4px solid #1e90ff;">
-              <h4 style="color: #2c3e50; margin-top: 0; margin-bottom: 20px; font-size: 18px;">To make check-in easier, please follow the steps below:</h4>
+             
               
               <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 1 – Download the App</p>
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 1 – Download our Club App</p>
                 <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
                   <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
                       <td style="padding: 0; font-family: Arial, sans-serif;">
@@ -429,7 +429,7 @@ class EmailService {
                 <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
                   <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
                       <td style="padding: 0; font-family: Arial, sans-serif;">
-                        • Open the app and tap "Sign Up Now".<br><br>
+                        • Open the App and tap "Sign Up Now".<br><br>
                         • Enter your name and membership number(s) (provided above) to complete registration.
                       </td>
                   </tr>
@@ -437,33 +437,35 @@ class EmailService {
               </div>
               
               <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 3 – Check In at the Club</p>
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 3 – Visit the Club</p>
                 <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
                   <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
                       <td style="padding: 0; font-family: Arial, sans-serif;">
+                      • Bring a photo ID and your membership number to complete your registration at our club location.<br><br>
                         • Once registered, tap "Check In" in the top-right corner of the app.<br><br>
                         • Show the barcode that appears to a Hospitality Desk Teammate for scanning.<br><br>
-                    <br>
-                        That's it—you're all set!
+                        • <strong>Smile—</strong> Have your picture taken on your first visit.
+                        
                       </td>
                   </tr>
                 </table>
               </div>
+
+                            <div style="background-color: white; padding: 20px; border-radius: 6px; margin: 15px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #1e90ff;">Step 4 – Orientation</p>
+                <table style="width: 100%; margin: 0; font-family: Arial, sans-serif;">
+                  <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
+                      <td style="padding: 0; font-family: Arial, sans-serif;">
+                      • Schedule a free orientation session to learn about our facilities and programs. Fill out the form here <a href="https://wellbridge.com/personal-coaching-session/" style="color: #1e90ff;">https://wellbridge.com/personal-coaching-session/</a> to get Started!
+<br><br><br>
+                       <strong> That's it—you're all set!</strong>
+                      </td>
+                  </tr>
+                </table>
+              </div>
+
             </div>
-            
-            <h4 style="margin-top: 30px; margin-bottom: 15px;">Additional Next Steps:</h4>
-            <table style="width: 100%; margin: 0 0 30px 0; font-family: Arial, sans-serif;">
-              <tr><td style="width: 20px; padding: 0; vertical-align: top;">&nbsp;</td>
-                  <td style="padding: 0; line-height: 1.7; font-family: Arial, sans-serif;">
-                    1. <strong>Visit the Club:</strong> Bring a photo ID and your membership number to complete your registration at ${
-                      selectedClub?.address || "our club location"
-                    }.<br><br>
-                    2. <strong>Orientation:</strong> Schedule a free orientation session to learn about our facilities and programs.<br><br>
-                    3. <strong>Schedule a Personal Training Session:</strong> Fill out the form here <a href="https://wellbridge.com/personal-coaching-session/" style="color: #1e90ff;">https://wellbridge.com/personal-coaching-session/</a> to get Started!
-                  </td>
-              </tr>
-            </table>
-            
+           
             <h3 style="margin-top: 30px; margin-bottom: 15px;">Important Information</h3>
             <table style="width: 100%; margin: 0 0 30px 0; font-family: Arial, sans-serif;">
               <tr><td style="width: 20px; padding: 0; vertical-align: top;">&nbsp;</td>
@@ -481,9 +483,9 @@ class EmailService {
             
 
             
-            <p style="margin: 30px 0 20px 0; font-size: 16px; text-align: center; font-style: italic;">We look forward to helping you achieve your fitness goals!</p>
+            <p style="margin: 30px 0 20px 0; font-size: 16px; text-align: center; font-style: italic;">We look forward to inspiring your active lifestyle</p>
             
-            <p>Best regards,<br>
+            <p>Sincerely,<br>
             The ${selectedClub?.name || formData.club || "Wellbridge"} Team</p>
           </div>
           
