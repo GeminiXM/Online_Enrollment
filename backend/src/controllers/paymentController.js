@@ -597,6 +597,7 @@ export const processFluidPayPayment = async (req, res) => {
         clubId,
         transactionId: paymentResponse.transactionId,
         amount,
+        expirationDate: paymentResponse.expirationDate,
         vaultToken: vaultToken ? `${vaultToken.substring(0, 10)}...` : null,
       });
 
@@ -606,6 +607,7 @@ export const processFluidPayPayment = async (req, res) => {
         authorizationCode: paymentResponse.authorizationCode,
         cardNumber: paymentResponse.cardNumber,
         cardType: paymentResponse.cardType,
+        expirationDate: paymentResponse.expirationDate, // Include formatted expiration date
         amount: amount,
         vaultToken: vaultToken, // Include vault token for database storage
         message: "Payment processed successfully",
@@ -812,18 +814,53 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
 
     // Format expiration date from FluidPay response (if available)
     let formattedExpDate = "";
-    const expDate = responseData.data?.response_body?.card?.exp_date;
-    if (expDate && expDate.length === 4) {
-      // Convert MMYY to YYYY-MM-DD format (last day of month)
-      const month = expDate.substring(0, 2);
-      const year = "20" + expDate.substring(2, 4);
-      const monthNum = parseInt(month, 10);
-      const yearNum = parseInt(year, 10);
-      const lastDay = new Date(yearNum, monthNum, 0).getDate();
-      formattedExpDate = `${year}-${month.padStart(2, "0")}-${lastDay
-        .toString()
-        .padStart(2, "0")}`;
+
+    // Try multiple possible paths for expiration date in FluidPay response
+    let expDate =
+      responseData.data?.response_body?.card?.expiration_date ||
+      responseData.data?.response_body?.card?.exp_date ||
+      responseData.data?.expiration_date ||
+      responseData.expiration_date;
+
+    if (expDate) {
+      // Handle MM/YY format (e.g., "12/27")
+      if (expDate.includes("/")) {
+        const [month, year] = expDate.split("/");
+        if (month && year && month.length === 2 && year.length === 2) {
+          const fullYear = "20" + year;
+          const monthNum = parseInt(month, 10);
+          const yearNum = parseInt(fullYear, 10);
+          const lastDay = new Date(yearNum, monthNum, 0).getDate();
+          formattedExpDate = `${fullYear}-${month.padStart(2, "0")}-${lastDay
+            .toString()
+            .padStart(2, "0")}`;
+        }
+      }
+      // Handle MMYY format (e.g., "1227")
+      else if (expDate.length === 4) {
+        const month = expDate.substring(0, 2);
+        const year = "20" + expDate.substring(2, 4);
+        const monthNum = parseInt(month, 10);
+        const yearNum = parseInt(year, 10);
+        const lastDay = new Date(yearNum, monthNum, 0).getDate();
+        formattedExpDate = `${year}-${month.padStart(2, "0")}-${lastDay
+          .toString()
+          .padStart(2, "0")}`;
+      }
     }
+
+    // Log the expiration date processing for debugging
+    logger.info("FluidPay expiration date processing:", {
+      originalExpDate: expDate,
+      formattedExpDate: formattedExpDate,
+      responseDataKeys: responseData.data ? Object.keys(responseData.data) : [],
+      cardKeys: responseData.data?.response_body?.card
+        ? Object.keys(responseData.data.response_body.card)
+        : [],
+      cardExpirationDate:
+        responseData.data?.response_body?.card?.expiration_date,
+      cardExpDate: responseData.data?.response_body?.card?.exp_date,
+    });
 
     return {
       transactionId: responseData.data?.id || `TXN_${Date.now()}`,

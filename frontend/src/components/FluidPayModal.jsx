@@ -141,6 +141,8 @@ const FluidPayModal = ({ isOpen, onClose, onSuccess, clubId, amount: propAmount 
 
         const result = await response_data.json();
         console.log('Payment processing result:', result);
+        console.log('Backend returned expiration date:', result.expirationDate);
+        console.log('Backend response keys:', Object.keys(result));
 
         if (result.success) {
           // Success - show vault token and other details

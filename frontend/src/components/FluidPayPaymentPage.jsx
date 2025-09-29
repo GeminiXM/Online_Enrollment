@@ -181,6 +181,8 @@ const FluidPayPaymentPage = () => {
       };
       
       console.log('Formatted payment response:', formattedPaymentResponse);
+      console.log('Payment result expiration date:', paymentResult.expirationDate);
+      console.log('Payment result keys:', Object.keys(paymentResult));
       setPaymentResponse(formattedPaymentResponse);
       
       // Complete the enrollment with formatted payment data
@@ -246,6 +248,8 @@ const FluidPayPaymentPage = () => {
       };
 
       console.log('Submitting enrollment data to database:', submissionData);
+      console.log('Payment info being sent:', submissionData.paymentInfo);
+      console.log('Expiration date being sent:', submissionData.paymentInfo?.expirationDate);
       
       // Submit the form data to the database
       const response = await api.post('/enrollment', submissionData);
