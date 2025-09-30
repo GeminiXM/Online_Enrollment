@@ -19,6 +19,7 @@ import FluidPayModalTest from "./components/FluidPayModalTest.jsx";
 // import ContractSaveTest from "./components/ContractSaveTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
+import ErrorBoundary from "./components/ErrorBoundary.jsx";
 
 // Import pages
 // Example: import Home from './pages/Home.js';
@@ -54,7 +55,9 @@ function ClubSelector() {
 function AppContent() {
   const { selectedClub, changeClub } = useClub();
   const location = window.location;
-  const [headerVisible, setHeaderVisible] = React.useState(true);
+  // Check if we're in development mode - header only shows in development
+  const isDevelopment = process.env.NODE_ENV === "development";
+  const [headerVisible, setHeaderVisible] = React.useState(isDevelopment);
 
   // Handle club selection from URL parameters
   React.useEffect(() => {
@@ -70,13 +73,17 @@ function AppContent() {
     document.title = `${selectedClub.name} - Membership Enrollment`;
   }, [selectedClub]);
 
-  // Toggle header visibility
+  // Toggle header visibility (only in development)
   const toggleHeader = React.useCallback(() => {
-    setHeaderVisible(!headerVisible);
-  }, [headerVisible]);
+    if (isDevelopment) {
+      setHeaderVisible(!headerVisible);
+    }
+  }, [headerVisible, isDevelopment]);
 
-  // Keyboard shortcut to toggle header (H key)
+  // Keyboard shortcut to toggle header (H key) - only in development
   React.useEffect(() => {
+    if (!isDevelopment) return;
+
     const handleKeyPress = (event) => {
       if (event.key === "h" || event.key === "H") {
         toggleHeader();
@@ -87,18 +94,20 @@ function AppContent() {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [headerVisible, toggleHeader]);
+  }, [headerVisible, toggleHeader, isDevelopment]);
 
   return (
     <div className="App">
-      {/* Header Toggle Button */}
-      <button
-        onClick={toggleHeader}
-        className="header-toggle-btn"
-        title={headerVisible ? "Hide Header" : "Show Header"}
-      >
-        {headerVisible ? "▼" : "▲"}
-      </button>
+      {/* Header Toggle Button - only in development */}
+      {isDevelopment && (
+        <button
+          onClick={toggleHeader}
+          className="header-toggle-btn"
+          title={headerVisible ? "Hide Header" : "Show Header"}
+        >
+          {headerVisible ? "▼" : "▲"}
+        </button>
+      )}
 
       {/* Conditional Header */}
       {headerVisible && (
@@ -191,11 +200,13 @@ function AppContent() {
 
 function App() {
   return (
-    <ClubProvider>
-      <MembershipProvider>
-        <AppContent />
-      </MembershipProvider>
-    </ClubProvider>
+    <ErrorBoundary>
+      <ClubProvider>
+        <MembershipProvider>
+          <AppContent />
+        </MembershipProvider>
+      </ClubProvider>
+    </ErrorBoundary>
   );
 }
 

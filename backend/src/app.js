@@ -14,6 +14,9 @@ import { fileURLToPath } from "url";
 import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 
+// Import error handling middleware
+import { errorHandler, notFoundHandler } from "./middlewares/errorHandler.js";
+
 // Configure dotenv
 dotenv.config();
 
@@ -206,14 +209,11 @@ app.post("/api/save-contract", uploadAny.any(), (req, res) => {
 app.use("/api/enrollment", enrollmentRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  logger.error(`${err.message}`, { stack: err.stack });
-  res.status(500).json({
-    status: "error",
-    message: err.message || "Internal Server Error",
-  });
-});
+// 404 handler - must be after all routes
+app.use(notFoundHandler);
+
+// Global error handling middleware - must be last
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {

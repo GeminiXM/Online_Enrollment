@@ -15,6 +15,7 @@ import {
 } from "../controllers/enrollmentController.js";
 import { pool } from "../config/database.js";
 import emailService from "../services/emailService.js";
+import errorNotificationService from "../services/errorNotificationService.js";
 
 const router = express.Router();
 
@@ -744,6 +745,184 @@ router.post("/test-email", async (req, res) => {
       success: false,
       message: "Error sending test email",
       error: error.message,
+    });
+  }
+});
+
+/**
+ * @route POST /api/enrollment/test-error-notification
+ * @desc Send a test error notification email
+ * @access Public
+ */
+router.post("/test-error-notification", async (req, res) => {
+  try {
+    // Create a sample error
+    const testError = new Error(
+      "This is a test error notification from the Online Enrollment System"
+    );
+    testError.name = "TestError";
+    testError.stack = `Error: This is a test error notification from the Online Enrollment System
+    at testErrorNotification (enrollment.js:123:15)
+    at processEnrollment (enrollment.js:456:20)
+    at submitForm (form.js:789:10)`;
+
+    // Create sample request context
+    const sampleContext = {
+      context: "Test Error Notification",
+      userInfo: {
+        email: "test.user@wellbridge.com",
+        name: "Test User",
+        membershipNumber: "TEST123456",
+        sessionId: "SESSION-TEST-12345",
+        ipAddress: req.ip || "192.168.1.100",
+        userAgent: req.get("user-agent") || "Mozilla/5.0 (Test Browser)",
+      },
+    };
+
+    // Create mock request object
+    const mockReq = {
+      method: "POST",
+      originalUrl: "/api/enrollment/submit",
+      url: "/api/enrollment/submit",
+      route: { path: "/api/enrollment/submit" },
+      params: {},
+      query: { clubId: "254" },
+      body: {
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@example.com",
+        membershipType: "Individual",
+        cardNumber: "***REDACTED***", // This would be automatically redacted
+      },
+      ip: req.ip || "192.168.1.100",
+      get: (header) => {
+        if (header === "user-agent") return "Mozilla/5.0 (Test Browser)";
+        return null;
+      },
+      sessionId: "SESSION-TEST-12345",
+      session: { id: "SESSION-TEST-12345" },
+    };
+
+    logger.info("Sending test error notification email");
+
+    // Send the test error notification
+    const sent = await errorNotificationService.notifyBackendError(
+      testError,
+      mockReq,
+      sampleContext
+    );
+
+    if (sent) {
+      return res.status(200).json({
+        success: true,
+        message:
+          "Test error notification email sent successfully! Check your inbox.",
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message:
+          "Test notification was processed but not sent (likely in development mode). Set SEND_ERROR_EMAILS=true in .env to force sending in development.",
+      });
+    }
+  } catch (error) {
+    logger.error("Error sending test notification:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send test error notification",
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * @route POST /api/enrollment/report-logs
+ * @desc Receive and store frontend console logs
+ * @access Public
+ */
+router.post("/report-logs", async (req, res) => {
+  try {
+    const { sessionId, logs, userAgent, url, timestamp } = req.body;
+
+    logger.info("Frontend logs received", {
+      sessionId,
+      logCount: logs?.length || 0,
+      url,
+      userAgent,
+    });
+
+    // Log each entry to our backend logs
+    if (logs && Array.isArray(logs)) {
+      logs.forEach((log) => {
+        const logLevel = log.level || "info";
+        const message = `[Frontend ${sessionId}] ${log.message}`;
+
+        switch (logLevel) {
+          case "error":
+            logger.error(message, { url: log.url, timestamp: log.timestamp });
+            break;
+          case "warn":
+            logger.warn(message, { url: log.url, timestamp: log.timestamp });
+            break;
+          default:
+            logger.info(message, { url: log.url, timestamp: log.timestamp });
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Logs received successfully",
+    });
+  } catch (error) {
+    logger.error("Error processing frontend logs:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to process logs",
+    });
+  }
+});
+
+/**
+ * @route POST /api/enrollment/report-error
+ * @desc Report frontend errors for email notification
+ * @access Public
+ */
+router.post("/report-error", async (req, res) => {
+  try {
+    const errorPayload = req.body;
+
+    logger.error("Frontend error reported", {
+      errorId: errorPayload.errorId,
+      errorMessage: errorPayload.errorMessage,
+      url: errorPayload.url,
+      userAgent: errorPayload.userAgent,
+    });
+
+    // Send error notification email
+    await errorNotificationService.notifyFrontendError(errorPayload);
+
+    return res.status(200).json({
+      success: true,
+      message: "Error reported successfully",
+    });
+  } catch (error) {
+    logger.error("Error reporting frontend error:", {
+      error: error.message,
+      stack: error.stack,
+    });
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to report error",
     });
   }
 });

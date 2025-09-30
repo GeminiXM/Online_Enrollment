@@ -4,6 +4,10 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.js";
 import reportWebVitals from "./reportWebVitals.js";
 import "./index.css";
+// Initialize global error logger
+import "./utils/errorLogger.js";
+// Initialize console logger (captures console.log, console.error, etc. in production)
+import "./utils/consoleLogger.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(

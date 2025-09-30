@@ -1,10 +1,12 @@
 // backend/src/utils/logger.js
 // This file contains a logging utility for the backend application.
 // It provides consistent logging with appropriate formatting and levels.
+// Includes log rotation and production-ready configurations.
 
 import winston from "winston";
 import path from "path";
 import { fileURLToPath } from "url";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 // Get the directory name in ES module
 const __filename = fileURLToPath(import.meta.url);
@@ -53,6 +55,25 @@ const format = winston.format.combine(
   })
 );
 
+// Production log format without colors (for files)
+const fileFormat = winston.format.combine(
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.printf((info) => {
+    const { timestamp, level, message, ...meta } = info;
+    const metaString = Object.keys(meta).length
+      ? JSON.stringify(meta, null, 2)
+      : "";
+    if (typeof message === "object") {
+      return `${timestamp} ${level}: ${JSON.stringify(
+        message,
+        null,
+        2
+      )} ${metaString}`;
+    }
+    return `${timestamp} ${level}: ${message} ${metaString}`;
+  })
+);
+
 // Define which transports the logger must use
 const transports = [
   // Console transport with more detailed output
@@ -63,15 +84,34 @@ const transports = [
     ),
   }),
 
-  // File transport for all logs
-  new winston.transports.File({
-    filename: path.join(__dirname, "../../logs/all.log"),
+  // Daily rotating file for all logs with automatic cleanup
+  new DailyRotateFile({
+    filename: path.join(__dirname, "../../logs/application-%DATE%.log"),
+    datePattern: "YYYY-MM-DD",
+    maxSize: "20m", // Rotate when file reaches 20MB
+    maxFiles: "14d", // Keep logs for 14 days
+    format: fileFormat,
+    level: "info", // Log info and above to files
   }),
 
-  // File transport for error logs
-  new winston.transports.File({
-    filename: path.join(__dirname, "../../logs/error.log"),
+  // Daily rotating file for error logs only
+  new DailyRotateFile({
+    filename: path.join(__dirname, "../../logs/error-%DATE%.log"),
+    datePattern: "YYYY-MM-DD",
+    maxSize: "20m",
+    maxFiles: "30d", // Keep error logs longer (30 days)
     level: "error",
+    format: fileFormat,
+  }),
+
+  // Daily rotating file for HTTP requests
+  new DailyRotateFile({
+    filename: path.join(__dirname, "../../logs/http-%DATE%.log"),
+    datePattern: "YYYY-MM-DD",
+    maxSize: "20m",
+    maxFiles: "7d", // Keep HTTP logs for 7 days
+    level: "http",
+    format: fileFormat,
   }),
 ];
 

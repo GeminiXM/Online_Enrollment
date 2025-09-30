@@ -1,0 +1,27 @@
+# Server Configuration
+PORT=5001
+NODE_ENV=development
+
+# Database Configuration
+# Informix database connection settings for each club
+# Format: DATABASE=dbname;HOSTNAME=host;SERVER=server;PROTOCOL=TCPIP;PORT=port;UID=user;PWD=password;
+
+# SMTP Email Configuration
+SMTP_HOST=wellbridge.prxy.com
+SMTP_PORT=25
+SMTP_USER=onlineenrollment@wellbridge.com
+SMTP_PASS=W3llbridge&0nl1n3
+
+# Error Notification Configuration
+# Comma-separated list of email addresses to receive error notifications
+ERROR_NOTIFICATION_EMAILS=mmoore@wellbridge.com,admin@wellbridge.com
+# Set to 'true' to send error emails even in development (default: only in production)
+SEND_ERROR_EMAILS=false
+
+# CORS Configuration
+CORS_ORIGIN=http://localhost:5000,http://localhost:3000
+CORS_ALLOWED_ORIGINS=https://your-cloudflare-tunnel.trycloudflare.com
+
+# Payment Processor Configuration
+CONVERGE_BASE=https://api.convergepay.com
+# Add other payment processor settings as needed

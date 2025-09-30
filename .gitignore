@@ -64,4 +64,9 @@ Thumbs.db
 
 # Excel temporary files
 ~$*.xlsx
-~$*.xls 
+~$*.xls
+
+# Log files
+backend/logs/
+*.log
+!backend/logs/.gitkeep 

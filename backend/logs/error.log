@@ -2786,3 +2786,5 @@
 2025-09-24 10:47:18:4718 [31merror[39m: [31m=== FLUIDPAY API ERROR RESPONSE ===[39m
 2025-09-24 10:47:18:4718 [31merror[39m: [31mFluidPay API call failed[39m
 2025-09-24 10:47:18:4718 [31merror[39m: [31mError processing FluidPay payment:[39m
+2025-09-29 14:25:53:2553 [31merror[39m: [31mError connecting to database:[39m
+2025-09-29 14:25:53:2553 [31merror[39m: [31mError in getTaxRate:[39m
