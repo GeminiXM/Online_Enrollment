@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
+import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './ConvergePaymentPage.css';
 
 const ConvergePaymentPage = () => {
@@ -43,11 +44,6 @@ const ConvergePaymentPage = () => {
       if (formData) {
         console.log('Setting formData in state:', formData);
         setFormData(formData);
-        try {
-          sessionStorage.setItem('enrollment_formData', JSON.stringify(formData));
-        } catch (e) {
-          console.warn('Failed to persist formData to sessionStorage');
-        }
         
         // Fetch the credit card processor for the club
         const fetchProcessor = async () => {
@@ -73,38 +69,23 @@ const ConvergePaymentPage = () => {
               // Then fetch the appropriate processor info
               if (processorToUse === 'FLUIDPAY') {
                 try {
-                  console.log('Fetching FluidPay info for club:', clubId);
                   const fluidPayResult = await api.getFluidPayInfo(clubId);
-                  console.log('FluidPay API result:', fluidPayResult);
                   
                   if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
-                    console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
                     setProcessorInfo(fluidPayResult.fluidPayInfo);
                   } else {
-                    // Set fallback info for FluidPay
-                    setProcessorInfo({
-                      merchant_id: 'Demo FluidPay Merchant',
-                      fluidpay_base_url: 'https://api.fluidpay.com',
-                      fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he'
-                    });
+                    throw new Error('FluidPay processor information not available');
                   }
                 } catch (error) {
-                  console.error('Error fetching FluidPay info:', error);
-                  setProcessorInfo({
-                    merchant_id: 'Demo FluidPay Merchant (Fallback)',
-                    fluidpay_base_url: 'https://api.fluidpay.com',
-                    fluidpay_api_key: 'pub_31FUYRENhNiAvspejegbLoPD2he'
-                  });
+                  setSubmitError('Unable to load payment processor information for this club. Please contact support.');
+                  setProcessorInfo(null);
                 }
               } else {
                 // Use CONVERGE as default if not FluidPay
                 try {
-                  console.log('Fetching Converge info for club:', clubId);
                   const convergeResult = await api.getConvergeInfo(clubId);
-                  console.log('Converge API result:', convergeResult);
                   
                   if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
-                    console.log('Setting Converge processor info:', convergeResult.convergeInfo);
                     // Override the URL to use HPP instead of VirtualMerchant
                     const hppInfo = {
                       ...convergeResult.convergeInfo,
@@ -113,106 +94,54 @@ const ConvergePaymentPage = () => {
                     setConvergeInfo(hppInfo);
                     setProcessorInfo(hppInfo);
                   } else {
-                    // Set fallback info for Converge with HPP URL
-                    const fallbackInfo = {
-                      merchant_id: '758595',
-                      converge_user_id: 'BOSS',
-                      converge_url_process: 'https://api.convergepay.com/hosted-payments/transaction_token'
-                    };
-                    setConvergeInfo(fallbackInfo);
-                    setProcessorInfo(fallbackInfo);
+                    throw new Error('Converge processor information not available');
                   }
                 } catch (error) {
-                  console.error('Error fetching Converge info:', error);
-                  const fallbackInfo = {
-                    merchant_id: '758595',
-                    converge_user_id: 'BOSS',
-                    converge_url_process: 'https://api.convergepay.com/hosted-payments/transaction_token'
-                  };
-                  setConvergeInfo(fallbackInfo);
-                  setProcessorInfo(fallbackInfo);
+                  setSubmitError('Unable to load payment processor information for this club. Please contact support.');
+                  setConvergeInfo(null);
+                  setProcessorInfo(null);
                 }
               }
             } else {
-              // No processor name from API, use default
-              console.log('No processor name returned, using default CONVERGE');
-              
+              // No processor name from API, use default CONVERGE
               try {
                 const convergeResult = await api.getConvergeInfo(clubId);
                 if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
                   setConvergeInfo(convergeResult.convergeInfo);
                   setProcessorInfo(convergeResult.convergeInfo);
                 } else {
-                  const fallbackInfo = {
-                    merchant_id: 'Demo Converge Merchant (Default)',
-                    converge_user_id: 'webuser',
-                    converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                  };
-                  setConvergeInfo(fallbackInfo);
-                  setProcessorInfo(fallbackInfo);
+                  throw new Error('Converge processor information not available');
                 }
               } catch (error) {
-                console.error('Error fetching default Converge info:', error);
-                const fallbackInfo = {
-                  merchant_id: 'Demo Converge Merchant (Fallback)',
-                  converge_user_id: 'webuser',
-                  converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-                };
-                setConvergeInfo(fallbackInfo);
-                setProcessorInfo(fallbackInfo);
+                setSubmitError('Unable to load payment processor information for this club. Please contact support.');
+                setConvergeInfo(null);
+                setProcessorInfo(null);
               }
             }
           } catch (error) {
-            console.error('Error in fetchProcessor:', error);
-            // Ensure we at least have a processor name and info
+            setSubmitError('Unable to load payment processor information. Please contact support.');
             setProcessorName('CONVERGE');
-            const fallbackInfo = {
-              merchant_id: 'Demo Converge Merchant (Error Fallback)',
-              converge_user_id: 'webuser',
-              converge_url_process: 'https://api.demo.convergepay.com/VirtualMerchantDemo'
-            };
-            setConvergeInfo(fallbackInfo);
-            setProcessorInfo(fallbackInfo);
+            setConvergeInfo(null);
+            setProcessorInfo(null);
           }
         };
         
         fetchProcessor();
       }
       
-      if (signatureData) {
-        setSignatureData(signatureData);
-        try {
-          sessionStorage.setItem('enrollment_signatureData', JSON.stringify(signatureData));
-        } catch (e) {
-          console.warn('Failed to persist signatureData to sessionStorage');
+        if (signatureData) {
+          setSignatureData(signatureData);
         }
-      }
-      if (initialedSections) {
-        setInitialedSections(initialedSections);
-        try {
-          sessionStorage.setItem('enrollment_initialedSections', JSON.stringify(initialedSections));
-        } catch (e) {
-          console.warn('Failed to persist initialedSections to sessionStorage');
+        if (initialedSections) {
+          setInitialedSections(initialedSections);
         }
-      }
     } else {
       // If no data, show a message or redirect to enrollment
       console.log('No enrollment data found. This page requires data from the enrollment flow.');
       // For now, we'll allow the page to load with empty data for testing
       // navigate('/enrollment');
-      // Try to rehydrate from sessionStorage to handle HPP callback state loss
-      try {
-        const storedFormData = sessionStorage.getItem('enrollment_formData');
-        const storedSignatureData = sessionStorage.getItem('enrollment_signatureData');
-        const storedInitialed = sessionStorage.getItem('enrollment_initialedSections');
-        if (storedFormData) setFormData(JSON.parse(storedFormData));
-        if (storedSignatureData) setSignatureData(JSON.parse(storedSignatureData));
-        if (storedInitialed) setInitialedSections(JSON.parse(storedInitialed));
-      } catch (e) {
-        console.warn('Failed to rehydrate state from sessionStorage');
-      }
     }
-  }, [location, navigate, selectedClub]);
+  }, [location.state, navigate, selectedClub]);
 
   // Calculate prorated amount due now
   const calculateProratedAmount = () => {
@@ -351,29 +280,84 @@ const ConvergePaymentPage = () => {
   // Handle payment response from Converge
   const handlePaymentResponse = async (response) => {
     try {
+      console.log("handlePaymentResponse called - formData state:", formData);
+      console.log("handlePaymentResponse called - signatureData state:", signatureData);
+      console.log("handlePaymentResponse called - location.state:", location.state);
+      
+      // If formData is lost, try to restore it from location.state
+      let currentFormData = formData;
+      let currentSignatureData = signatureData;
+      
+      if (!currentFormData && location.state) {
+        console.log("FormData lost, restoring from location.state");
+        const { formData: restoredFormData, signatureData: restoredSignatureData } = location.state;
+        currentFormData = restoredFormData;
+        currentSignatureData = restoredSignatureData;
+        setFormData(restoredFormData);
+        setSignatureData(restoredSignatureData);
+      }
+      
       const result = response?.data || response || {};
       const approved = !!(result.ssl_approval_code || (result.ssl_result_message && /approved/i.test(result.ssl_result_message)));
       const declined = !!(result.ssl_result_message && /declin/i.test(result.ssl_result_message));
       
       if (approved) {
         console.log("Payment approved:", result);
-        // Create mock payment response for enrollment completion
-        const mockPaymentResponse = {
+        // Create payment response for enrollment completion
+        // Extract the real vault token - if we don't get one, don't proceed
+        const vaultToken = result.ssl_token;
+        if (!vaultToken) {
+          console.error("No vault token received from Converge - cannot proceed");
+          setSubmitError('Payment was approved but no vault token was received. Please contact support.');
+          setIsSubmitting(false);
+          return;
+        }
+
+        // Extract last 4 digits from ssl_card_number (format: "43**********2156")
+        let last4 = '****';
+        let maskedCardNumber = '************';
+        if (result.ssl_card_number && result.ssl_card_number.length >= 4) {
+          last4 = result.ssl_card_number.slice(-4);
+          maskedCardNumber = '************' + last4; // 12 asterisks + last 4 digits
+        }
+
+        // Format expiration date from "1227" to "2027-12-31" (YYYY-MM-DD format, last day of month)
+        let formattedExpDate = '';
+        if (result.ssl_exp_date && result.ssl_exp_date.length === 4) {
+          const month = result.ssl_exp_date.substring(0, 2);
+          const year = result.ssl_exp_date.substring(2, 4);
+          const fullYear = '20' + year; // Convert YY to YYYY
+          
+          // Get last day of the month (same logic as database)
+          const monthNum = parseInt(month, 10);
+          const yearNum = parseInt(fullYear, 10);
+          const lastDay = new Date(yearNum, monthNum, 0).getDate();
+          
+          formattedExpDate = `${fullYear}-${month.padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
+        }
+
+        const paymentResponse = {
           processor: 'CONVERGE',
           success: true,
-          transaction_id: result.ssl_transaction_id || 'CONVERGE_' + Date.now(),
+          transaction_id: result.ssl_txn_id || 'CONVERGE_' + Date.now(),
           authorization_code: result.ssl_approval_code,
-          card_info: {
-            last_four: result.ssl_last4 || '****',
-            card_type: result.ssl_card_type || 'Credit Card'
-          },
-          amount: calculateProratedAmount().toFixed(2),
+          last4: last4,
+          maskedCardNumber: maskedCardNumber, // Full masked card number (************2156)
+          cardType: result.ssl_card_short_description || 'Credit Card', // Use ssl_card_short_description (VISA)
+          expirationDate: formattedExpDate, // Formatted as MM/01/YYYY
+          amount: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00",
           timestamp: new Date().toISOString(),
-          vault_token: result.ssl_token
+          vault_token: vaultToken
         };
         
-        setPaymentResponse(mockPaymentResponse);
-        await finishEnrollment(mockPaymentResponse);
+        console.log("Payment response created:", paymentResponse);
+        console.log("Vault token extracted:", paymentResponse.vault_token);
+        console.log("Card last4:", paymentResponse.last4);
+        console.log("Card type:", paymentResponse.cardType);
+        console.log("Expiration date:", paymentResponse.expirationDate);
+        
+        setPaymentResponse(paymentResponse);
+        await finishEnrollment(paymentResponse, currentFormData, currentSignatureData);
       } else if (declined) {
         console.error("Payment declined:", result);
         setSubmitError(`Payment declined: ${result.ssl_result_message || 'Unknown reason'}`);
@@ -426,34 +410,14 @@ const ConvergePaymentPage = () => {
   };
 
   // Complete enrollment after Converge payment
-  const finishEnrollment = async (paymentResult) => {
+  const finishEnrollment = async (paymentResult, overrideFormData = null, overrideSignatureData = null) => {
     try {
-      // Rehydrate if state was lost during HPP flow
-      let currentFormData = formData;
-      let currentSignatureData = signatureData;
-      let currentInitialedSections = initialedSections;
-      if (!currentFormData || !currentSignatureData || !currentInitialedSections) {
-        try {
-          if (!currentFormData) {
-            const stored = sessionStorage.getItem('enrollment_formData');
-            if (stored) currentFormData = JSON.parse(stored);
-          }
-          if (!currentSignatureData) {
-            const stored = sessionStorage.getItem('enrollment_signatureData');
-            if (stored) currentSignatureData = JSON.parse(stored);
-          }
-          if (!currentInitialedSections) {
-            const stored = sessionStorage.getItem('enrollment_initialedSections');
-            if (stored) currentInitialedSections = JSON.parse(stored);
-          }
-        } catch (e) {
-          console.warn('finishEnrollment: failed to rehydrate from sessionStorage');
-        }
-      }
-
-      console.log('finishEnrollment - hasFormData:', !!currentFormData);
-      console.log('finishEnrollment - hasSignatureData:', !!currentSignatureData);
-      console.log('finishEnrollment - hasInitialedSections:', !!currentInitialedSections);
+      // Use override data if provided, otherwise use state
+      const currentFormData = overrideFormData || formData;
+      const currentSignatureData = overrideSignatureData || signatureData;
+      
+      console.log('finishEnrollment - formData:', currentFormData);
+      console.log('finishEnrollment - signatureData:', currentSignatureData);
       console.log('finishEnrollment - selectedClub:', selectedClub);
       
       if (!currentFormData) {
@@ -466,27 +430,65 @@ const ConvergePaymentPage = () => {
       // Generate membership number
       const membershipNumber = 'M' + Date.now().toString().slice(-8);
       
+      // Generate contract PDF buffer
+      let contractPDFBuffer = null;
+      try {
+        const signatureDate = new Date().toLocaleDateString();
+        const membershipPrice = currentFormData?.membershipDetails?.price || currentFormData?.monthlyDues || 0;
+        
+        contractPDFBuffer = await generateContractPDFBuffer(
+          currentFormData,
+          currentSignatureData,
+          signatureDate,
+          initialedSections,
+          selectedClub,
+          membershipPrice
+        );
+        
+        console.log('Contract PDF generated successfully');
+      } catch (pdfError) {
+        console.error('Error generating contract PDF:', pdfError);
+        // Continue without PDF if generation fails
+      }
+
+      // Convert ArrayBuffer to array for JSON serialization
+      let contractPDFArray = null;
+      if (contractPDFBuffer) {
+        const uint8Array = new Uint8Array(contractPDFBuffer);
+        contractPDFArray = Array.from(uint8Array);
+      }
+
       // Combine all data for submission to database
+      console.log('About to create submissionData - formData:', currentFormData);
+      console.log('formData keys:', currentFormData ? Object.keys(currentFormData) : 'formData is null');
+      
       const submissionData = {
         ...currentFormData,
         // Add signature data
         signatureData: currentSignatureData,
         // Add selected club data
         selectedClub: selectedClub,
+        // Add contract PDF as array
+        contractPDF: contractPDFArray,
         // Add the correct total amount
-        totalCollected: calculateProratedAmount().toFixed(2),
+        totalCollected: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00",
         // Add payment data
         paymentInfo: {
           processorName: 'CONVERGE',
           transactionId: paymentResult.transaction_id,
           authorizationCode: paymentResult.authorization_code,
-          last4: paymentResult.card_info?.last_four,
+          last4: paymentResult.maskedCardNumber, // Use full masked card number (************2156)
+          cardType: paymentResult.cardType,
+          expirationDate: paymentResult.expirationDate,
           vaultToken: paymentResult.vault_token
         }
       };
 
       
       console.log('Submitting enrollment data to database:', submissionData);
+      console.log('submissionData.formData keys:', submissionData ? Object.keys(submissionData) : 'submissionData is null');
+      console.log('submissionData.firstName:', submissionData?.firstName);
+      console.log('submissionData.club:', submissionData?.club);
       
       // Submit the form data to the database
       const response = await api.post('/enrollment', submissionData);
@@ -500,10 +502,10 @@ const ConvergePaymentPage = () => {
           paymentResponse: paymentResult,
           formData: currentFormData,              
           signatureData: currentSignatureData,     
-          initialedSections: currentInitialedSections,
+          initialedSections: initialedSections,
           membershipNumber: response.data.custCode,
           transactionId: response.data.transactionId,
-          amountBilled: calculateProratedAmount().toFixed(2)
+          amountBilled: currentFormData ? (parseFloat(currentFormData.totalCollected || 0) || 0).toFixed(2) : "0.00"
         } 
       });
     } catch (error) {
@@ -519,7 +521,33 @@ const ConvergePaymentPage = () => {
     setSubmitError('');
 
     try {
-      // Open the Converge modal
+      // TEST MODE: Skip actual payment and use mock data
+      const isTestMode = false; // Set to false for production
+      
+      if (isTestMode) {
+        console.log('TEST MODE: Using mock payment response');
+        
+        // Create mock payment response for testing
+        const mockPaymentResponse = {
+          processor: 'CONVERGE',
+          success: true,
+          transaction_id: 'TEST_CONVERGE_' + Date.now(),
+          authorization_code: 'TEST123',
+          card_info: {
+            last_four: '2156',
+            card_type: 'Visa'
+          },
+          amount: calculateProratedAmount().toFixed(2),
+          timestamp: new Date().toISOString(),
+          vault_token: 'TEST_VAULT_' + Date.now()
+        };
+        
+        setPaymentResponse(mockPaymentResponse);
+        await finishEnrollment(mockPaymentResponse);
+        return;
+      }
+      
+      // Production mode: Open the Converge modal
       await openConvergeModal();
       
       // Note: The actual payment processing will happen in the Converge modal
@@ -684,13 +712,6 @@ const ConvergePaymentPage = () => {
             </div>
           )}
           
-          {convergeInfo && (
-            <div className="converge-info">
-              <h4>Payment Processor: Converge</h4>
-              <p>Merchant ID: {convergeInfo.merchant_id}</p>
-              <p>Processing URL: {convergeInfo.converge_url_process}</p>
-            </div>
-          )}
           
           <div className="form-actions">
             <button 

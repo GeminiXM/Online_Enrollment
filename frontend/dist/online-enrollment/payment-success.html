@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful - Membership Enrollment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .success-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #28a745;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
+        
+        h1 {
+            color: #28a745;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+        
+        .message {
+            color: #6c757d;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .payment-details {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .payment-details h3 {
+            color: #343a40;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .detail-value {
+            color: #6c757d;
+        }
+        
+        .close-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 20px;
+        }
+        
+        .close-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .auto-close {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 15px;
+        }
+        
+        .countdown {
+            font-weight: bold;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">✓</div>
+        <h1>Payment Successful!</h1>
+        <div class="message">
+            <p>Your payment has been processed successfully. Your membership enrollment is now complete.</p>
+            <p>You will receive a confirmation email shortly with your membership details.</p>
+        </div>
+        
+        <div class="payment-details">
+            <h3>Payment Details</h3>
+            <div class="detail-row">
+                <span class="detail-label">Transaction ID:</span>
+                <span class="detail-value" id="transactionId">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Amount:</span>
+                <span class="detail-value" id="amount">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Date:</span>
+                <span class="detail-value" id="date">Loading...</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="detail-value" style="color: #28a745; font-weight: bold;">Approved</span>
+            </div>
+        </div>
+        
+        <button class="close-button" onclick="closeWindow()">Close Window</button>
+        <div class="auto-close">
+            This window will automatically close in <span class="countdown" id="countdown">10</span> seconds
+        </div>
+    </div>
+
+    <script>
+        // Extract payment details from URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // Display payment details
+        function displayPaymentDetails() {
+            const transactionId = getUrlParameter('ssl_txn_id') || 'N/A';
+            const amount = getUrlParameter('ssl_amount') || 'N/A';
+            const date = getUrlParameter('ssl_txn_time') || new Date().toLocaleString();
+            
+            document.getElementById('transactionId').textContent = transactionId;
+            document.getElementById('amount').textContent = `$${amount}`;
+            document.getElementById('date').textContent = date;
+        }
+        
+        // Auto-close countdown
+        function startCountdown() {
+            let countdown = 10;
+            const countdownElement = document.getElementById('countdown');
+            
+            const timer = setInterval(() => {
+                countdown--;
+                countdownElement.textContent = countdown;
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    closeWindow();
+                }
+            }, 1000);
+        }
+        
+        // Close window function
+        function closeWindow() {
+            window.close();
+            // Fallback: redirect to parent window if close fails
+            if (window.opener) {
+                window.opener.focus();
+            }
+        }
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            displayPaymentDetails();
+            startCountdown();
+        });
+    </script>
+</body>
+</html>
+
+
+
+

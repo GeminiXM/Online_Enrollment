@@ -1,0 +1,176 @@
+.admin-email-resend {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+}
+
+.admin-container h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.admin-description {
+  color: #666;
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.resend-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 10px;
+}
+
+.resend-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.resend-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.error-message h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.error-message p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.success-message h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.2rem;
+  color: #155724;
+}
+
+.result-details {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  margin: 16px 0;
+  border-left: 4px solid #28a745;
+}
+
+.result-details p {
+  margin: 8px 0;
+  font-size: 1rem;
+}
+
+.result-details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.success-note {
+  margin: 16px 0 0 0;
+  font-style: italic;
+  color: #155724;
+  font-size: 0.95rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-email-resend {
+    padding: 10px;
+  }
+  
+  .admin-container {
+    padding: 20px;
+  }
+  
+  .admin-container h1 {
+    font-size: 1.5rem;
+  }
+  
+  .admin-description {
+    font-size: 0.9rem;
+  }
+}
+
+
