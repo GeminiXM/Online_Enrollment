@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import SignatureSelector from './SignatureSelector';
@@ -200,8 +201,8 @@ const ContractPage = () => {
   useEffect(() => {
     if (location.state && location.state.formData) {
       // Log formData to understand structure
-      console.log("FormData received:", location.state.formData);
-      console.log("PT data in formData:", {
+      devLogger.form("ContractPage - FormData received", location.state.formData);
+      devLogger.log("PT data in formData:", {
         hasPTAddon: location.state.formData.hasPTAddon,
         ptPackage: location.state.formData.ptPackage
       });
@@ -366,7 +367,7 @@ const ContractPage = () => {
         ptPackageTax = 0;
       }
       
-      console.log('PT package calculation:', {
+      devLogger.log('PT package calculation:', {
         hasPTAddon: data.hasPTAddon,
         ptPackage: data.ptPackage,
         ptPackageAmount: ptPackageAmount,

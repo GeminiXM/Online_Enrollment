@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import devLogger from "../utils/devLogger";
 import { useLocation, Link } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import CanvasContractPDF from './CanvasContractPDF';
@@ -14,11 +15,11 @@ function EnrollmentConfirmation() {
   const { selectedClub } = useClub();
   
 // Debug logging
-console.log('EnrollmentConfirmation - location.state:', location.state);
-console.log('EnrollmentConfirmation - initialedSections:', initialedSections);
-console.log('EnrollmentConfirmation - signatureData:', signatureData);
-console.log('EnrollmentConfirmation - amountBilled:', amountBilled);
-console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
+devLogger.log('EnrollmentConfirmation - location.state:', location.state);
+devLogger.log('EnrollmentConfirmation - initialedSections:', initialedSections);
+devLogger.log('EnrollmentConfirmation - signatureData:', signatureData);
+devLogger.log('EnrollmentConfirmation - amountBilled:', amountBilled);
+devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
 
   // Format the payment timestamp
   const formatTimestamp = () => {
@@ -84,7 +85,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
   
   useEffect(() => {
     const saveContractAndSendEmail = async () => {
-      console.log('EnrollmentConfirmation - saveContractAndSendEmail called with:', {
+      devLogger.log('EnrollmentConfirmation - saveContractAndSendEmail called with:', {
         hasFormData: !!formData,
         membershipNumber,
         hasSaved: hasSavedRef.current
@@ -98,7 +99,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
         let contractPDFArray = null;
         if (signatureData && initialedSections) {
           try {
-            console.log('Generating contract PDF for payment processor:', paymentResponse?.processor);
+            devLogger.log('Generating contract PDF for payment processor:', paymentResponse?.processor);
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
             const pdfFormData = {
@@ -106,7 +107,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
               membershipId: membershipNumber // Add membership ID to formData
             };
             
-            console.log('PDF generation - formData with membershipId:', {
+            devLogger.log('PDF generation - formData with membershipId:', {
               membershipId: pdfFormData.membershipId,
               membershipNumber,
               hasMembershipId: !!pdfFormData.membershipId
@@ -122,7 +123,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             );
             
             contractPDFArray = new Uint8Array(pdfBuffer);
-            console.log('Contract PDF generated for payment:', {
+            devLogger.log('Contract PDF generated for payment:', {
               size: contractPDFArray.length,
               clubState: selectedClub?.state,
               processor: paymentResponse?.processor
@@ -142,15 +143,15 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
               });
               
               if (saveResponse.ok) {
-                console.log('Contract PDF saved to server successfully');
+                devLogger.log('Contract PDF saved to server successfully');
               } else {
-                console.error('Failed to save contract PDF to server');
+                devLogger.error('Failed to save contract PDF to server');
               }
             } catch (saveError) {
-              console.error('Error saving contract PDF to server:', saveError);
+              devLogger.error('Error saving contract PDF to server:', saveError);
             }
           } catch (pdfError) {
-            console.error('Error generating contract PDF for payment:', pdfError);
+            devLogger.error('Error generating contract PDF for payment:', pdfError);
           }
         }
 
@@ -164,7 +165,7 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
                         formData.lastName || 
                         '';
         
-        console.log('Sending welcome email for:', { firstName, lastName, membershipNumber });
+        devLogger.log('Sending welcome email for:', { firstName, lastName, membershipNumber });
         
         // Generate contract PDF for email
         let emailContractPDFArray = null;
@@ -187,9 +188,9 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
             );
             
             emailContractPDFArray = Array.from(new Uint8Array(pdfBuffer));
-            console.log('Contract PDF generated for email, length:', emailContractPDFArray.length);
+            devLogger.log('Contract PDF generated for email, length:', emailContractPDFArray.length);
           } catch (pdfError) {
-            console.error('Error generating contract PDF for email:', pdfError);
+            devLogger.error('Error generating contract PDF for email:', pdfError);
           }
         }
 
@@ -214,15 +215,15 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
           });
           
           if (emailResponse.ok) {
-            console.log('Welcome email sent successfully');
+            devLogger.log('Welcome email sent successfully');
           } else {
-            console.error('Failed to send welcome email');
+            devLogger.error('Failed to send welcome email');
           }
         } catch (emailError) {
-          console.error('Error sending welcome email:', emailError);
+          devLogger.error('Error sending welcome email:', emailError);
         }
       } catch (error) {
-        console.error('Error in saveContractAndSendEmail:', error);
+        devLogger.error('Error in saveContractAndSendEmail:', error);
       }
     };
 

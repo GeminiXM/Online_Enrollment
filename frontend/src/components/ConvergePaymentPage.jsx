@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
@@ -35,18 +36,18 @@ const ConvergePaymentPage = () => {
 
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
-    console.log('ConvergePaymentPage - location.state:', location.state);
-    console.log('ConvergePaymentPage - location.state keys:', location.state ? Object.keys(location.state) : 'null');
+    devLogger.log('ConvergePaymentPage - location.state:', location.state);
+    devLogger.log('ConvergePaymentPage - location.state keys:', location.state ? Object.keys(location.state) : 'null');
     
     if (location.state) {
       const { formData, signatureData, initialedSections } = location.state;
       
-      console.log('ConvergePaymentPage - destructured formData:', formData);
-      console.log('ConvergePaymentPage - destructured signatureData:', signatureData);
-      console.log('ConvergePaymentPage - destructured initialedSections:', initialedSections);
+      devLogger.log('ConvergePaymentPage - destructured formData:', formData);
+      devLogger.log('ConvergePaymentPage - destructured signatureData:', signatureData);
+      devLogger.log('ConvergePaymentPage - destructured initialedSections:', initialedSections);
       
       if (formData) {
-        console.log('Setting formData in state:', formData);
+        devLogger.log('Setting formData in state:', formData);
         setFormData(formData);
         try {
           sessionStorage.setItem('enrollment_formData', JSON.stringify(formData));
@@ -58,19 +59,19 @@ const ConvergePaymentPage = () => {
         const fetchProcessor = async () => {
           try {
             const clubId = formData.club || selectedClub?.id || "001";
-            console.log('Fetching CC processor for club:', clubId);
+            devLogger.log('Fetching CC processor for club:', clubId);
             
             // Set a default processor in case API calls fail
             setProcessorName('CONVERGE'); // Default processor
             
             // First, get the processor name
             const result = await api.getCCProcessorName(clubId);
-            console.log('CC processor API result:', result);
+            devLogger.log('CC processor API result:', result);
             
             if (result && result.success && result.processorName) {
               // Trim any whitespace from the processor name
               const processorToUse = result.processorName.trim();
-              console.log('Cleaned processor name:', processorToUse);
+              devLogger.log('Cleaned processor name:', processorToUse);
               
               // Update state with the cleaned processor name
               setProcessorName(processorToUse);
@@ -78,12 +79,12 @@ const ConvergePaymentPage = () => {
               // Then fetch the appropriate processor info
               if (processorToUse === 'FLUIDPAY') {
                 try {
-                  console.log('Fetching FluidPay info for club:', clubId);
+                  devLogger.log('Fetching FluidPay info for club:', clubId);
                   const fluidPayResult = await api.getFluidPayInfo(clubId);
-                  console.log('FluidPay API result:', fluidPayResult);
+                  devLogger.log('FluidPay API result:', fluidPayResult);
                   
                   if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
-                    console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
+                    devLogger.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
                     setProcessorInfo(fluidPayResult.fluidPayInfo);
                   } else {
                     // Set fallback info for FluidPay
@@ -104,12 +105,12 @@ const ConvergePaymentPage = () => {
               } else {
                 // Use CONVERGE as default if not FluidPay
                 try {
-                  console.log('Fetching Converge info for club:', clubId);
+                  devLogger.log('Fetching Converge info for club:', clubId);
                   const convergeResult = await api.getConvergeInfo(clubId);
-                  console.log('Converge API result:', convergeResult);
+                  devLogger.log('Converge API result:', convergeResult);
                   
                   if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
-                    console.log('Setting Converge processor info:', convergeResult.convergeInfo);
+                    devLogger.log('Setting Converge processor info:', convergeResult.convergeInfo);
                     // Override the URL to use HPP instead of VirtualMerchant
                     const hppInfo = {
                       ...convergeResult.convergeInfo,
@@ -140,7 +141,7 @@ const ConvergePaymentPage = () => {
               }
             } else {
               // No processor name from API, use default
-              console.log('No processor name returned, using default CONVERGE');
+              devLogger.log('No processor name returned, using default CONVERGE');
               
               try {
                 const convergeResult = await api.getConvergeInfo(clubId);
@@ -202,7 +203,7 @@ const ConvergePaymentPage = () => {
       }
     } else {
       // If no data, show a message or redirect to enrollment
-      console.log('No enrollment data found. This page requires data from the enrollment flow.');
+      devLogger.log('No enrollment data found. This page requires data from the enrollment flow.');
       // For now, we'll allow the page to load with empty data for testing
       // navigate('/enrollment');
       // Try to rehydrate from sessionStorage to handle HPP callback state loss
@@ -311,7 +312,7 @@ const ConvergePaymentPage = () => {
     script.src = 'https://api.convergepay.com/hosted-payments/PayWithConverge.js';
     script.async = true;
     script.onload = () => {
-      console.log('Converge hosted payment script loaded');
+      devLogger.log('Converge hosted payment script loaded');
     };
     script.onerror = () => {
       console.error('Failed to load Converge hosted payment script');
@@ -321,16 +322,16 @@ const ConvergePaymentPage = () => {
 
     // Add message listener for Converge postMessage events
     const handleMessage = (event) => {
-      console.log("Window message received:", event.data, event.origin);
+      devLogger.log("Window message received:", event.data, event.origin);
       
       if (event.origin && event.origin.includes('convergepay.com')) {
-        console.log("Message from Converge iframe:", event.data);
+        devLogger.log("Message from Converge iframe:", event.data);
         
         if (event.data && event.data.converge === true) {
           const { approved, cancelled, errored, error, response } = event.data;
           
           if (cancelled) {
-            console.log("Payment cancelled by user");
+            devLogger.log("Payment cancelled by user");
             setSubmitError('Payment was cancelled');
             setIsSubmitting(false);
           } else if (errored) {
@@ -338,7 +339,7 @@ const ConvergePaymentPage = () => {
             setSubmitError(`Payment error: ${error || 'Unknown error'}`);
             setIsSubmitting(false);
           } else if (response) {
-            console.log("Payment response received:", response);
+            devLogger.log("Payment response received:", response);
             handlePaymentResponse(response);
           }
         }
@@ -361,7 +362,7 @@ const ConvergePaymentPage = () => {
       const declined = !!(result.ssl_result_message && /declin/i.test(result.ssl_result_message));
       
       if (approved) {
-        console.log("Payment approved:", result);
+        devLogger.log("Payment approved:", result);
         // Create mock payment response for enrollment completion
         const mockPaymentResponse = {
           processor: 'CONVERGE',
@@ -384,7 +385,7 @@ const ConvergePaymentPage = () => {
         setSubmitError(`Payment declined: ${result.ssl_result_message || 'Unknown reason'}`);
         setIsSubmitting(false);
       } else {
-        console.log("Payment processed with token:", result);
+        devLogger.log("Payment processed with token:", result);
         setSubmitError('Payment processed but status unclear. Please contact support.');
         setIsSubmitting(false);
       }
@@ -409,12 +410,12 @@ const ConvergePaymentPage = () => {
     }
 
     try {
-      console.log("Opening Converge modal with token:", token);
+      devLogger.log("Opening Converge modal with token:", token);
       
       window.PayWithConverge.open(
         { ssl_txn_auth_token: token },
         (result) => {
-          console.log("Payment success callback:", result);
+          devLogger.log("Payment success callback:", result);
           handlePaymentResponse(result);
         },
         (error) => {
@@ -482,10 +483,10 @@ const ConvergePaymentPage = () => {
         }
       }
 
-      console.log('finishEnrollment - hasFormData:', !!currentFormData);
-      console.log('finishEnrollment - hasSignatureData:', !!currentSignatureData);
-      console.log('finishEnrollment - hasInitialedSections:', !!currentInitialedSections);
-      console.log('finishEnrollment - selectedClub:', selectedClub);
+      devLogger.log('finishEnrollment - hasFormData:', !!currentFormData);
+      devLogger.log('finishEnrollment - hasSignatureData:', !!currentSignatureData);
+      devLogger.log('finishEnrollment - hasInitialedSections:', !!currentInitialedSections);
+      devLogger.log('finishEnrollment - selectedClub:', selectedClub);
       
       if (!currentFormData) {
         console.error('finishEnrollment - formData is null, cannot proceed');
@@ -517,7 +518,7 @@ const ConvergePaymentPage = () => {
       };
 
       
-      console.log('Submitting enrollment data to database:', submissionData);
+      devLogger.log('Submitting enrollment data to database:', submissionData);
       
       // Submit the form data to the database
       const response = await api.post('/enrollment', submissionData);

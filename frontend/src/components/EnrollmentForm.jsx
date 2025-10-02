@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
+import devLogger from "../utils/devLogger";
 import "./EnrollmentForm.css";
 import { useClub } from "../context/ClubContext";
 import { useMembership } from "../context/MembershipContext";
@@ -242,7 +243,7 @@ function EnrollmentForm() {
     // Check for form data when returning from contract page
     if (location.state && location.state.formData) {
       const contractData = location.state.formData;
-      console.log("Form data returned from contract page:", contractData);
+      devLogger.form("EnrollmentForm - Contract Return", devLogger.sanitize(contractData));
       
       // Reconstruct form data from contract data
       const reconstructedFormData = {
@@ -300,7 +301,7 @@ function EnrollmentForm() {
       
       // Restore PT data if available
       if (contractData.hasPTAddon && contractData.ptPackage) {
-        console.log("Restoring PT data from contract:", {
+        devLogger.log("Restoring PT data from contract:", {
           hasPTAddon: contractData.hasPTAddon,
           ptPackage: contractData.ptPackage
         });
