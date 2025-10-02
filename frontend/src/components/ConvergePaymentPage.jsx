@@ -52,7 +52,7 @@ const ConvergePaymentPage = () => {
         try {
           sessionStorage.setItem('enrollment_formData', JSON.stringify(formData));
         } catch (e) {
-          console.warn('Failed to persist formData to sessionStorage');
+          devLogger.warn('Failed to persist formData to sessionStorage');
         }
         
         // Fetch the credit card processor for the club
@@ -95,7 +95,7 @@ const ConvergePaymentPage = () => {
                     });
                   }
                 } catch (error) {
-                  console.error('Error fetching FluidPay info:', error);
+                  devLogger.error('Error fetching FluidPay info:', error);
                   setProcessorInfo({
                     merchant_id: 'Demo FluidPay Merchant (Fallback)',
                     fluidpay_base_url: 'https://api.fluidpay.com',
@@ -129,7 +129,7 @@ const ConvergePaymentPage = () => {
                     setProcessorInfo(fallbackInfo);
                   }
                 } catch (error) {
-                  console.error('Error fetching Converge info:', error);
+                  devLogger.error('Error fetching Converge info:', error);
                   const fallbackInfo = {
                     merchant_id: '758595',
                     converge_user_id: 'BOSS',
@@ -169,7 +169,7 @@ const ConvergePaymentPage = () => {
               }
             }
           } catch (error) {
-            console.error('Error in fetchProcessor:', error);
+            devLogger.error('Error in fetchProcessor:', error);
             // Ensure we at least have a processor name and info
             setProcessorName('CONVERGE');
             const fallbackInfo = {
@@ -190,7 +190,7 @@ const ConvergePaymentPage = () => {
         try {
           sessionStorage.setItem('enrollment_signatureData', JSON.stringify(signatureData));
         } catch (e) {
-          console.warn('Failed to persist signatureData to sessionStorage');
+          devLogger.warn('Failed to persist signatureData to sessionStorage');
         }
       }
       if (initialedSections) {
@@ -198,7 +198,7 @@ const ConvergePaymentPage = () => {
         try {
           sessionStorage.setItem('enrollment_initialedSections', JSON.stringify(initialedSections));
         } catch (e) {
-          console.warn('Failed to persist initialedSections to sessionStorage');
+          devLogger.warn('Failed to persist initialedSections to sessionStorage');
         }
       }
     } else {
@@ -215,7 +215,7 @@ const ConvergePaymentPage = () => {
         if (storedSignatureData) setSignatureData(JSON.parse(storedSignatureData));
         if (storedInitialed) setInitialedSections(JSON.parse(storedInitialed));
       } catch (e) {
-        console.warn('Failed to rehydrate state from sessionStorage');
+        devLogger.warn('Failed to rehydrate state from sessionStorage');
       }
     }
   }, [location, navigate, selectedClub]);
@@ -298,7 +298,7 @@ const ConvergePaymentPage = () => {
         throw new Error('No session token received from server');
       }
     } catch (err) {
-      console.error('Error creating session token:', err);
+      devLogger.error('Error creating session token:', err);
       setConvergeError(err.response?.data?.error || err.message || 'Failed to create payment session');
       return null;
     } finally {
@@ -315,7 +315,7 @@ const ConvergePaymentPage = () => {
       devLogger.log('Converge hosted payment script loaded');
     };
     script.onerror = () => {
-      console.error('Failed to load Converge hosted payment script');
+      devLogger.error('Failed to load Converge hosted payment script');
       setConvergeError('Failed to load payment system. Please refresh and try again.');
     };
     document.head.appendChild(script);
@@ -335,7 +335,7 @@ const ConvergePaymentPage = () => {
             setSubmitError('Payment was cancelled');
             setIsSubmitting(false);
           } else if (errored) {
-            console.error("Payment error:", error);
+            devLogger.error("Payment error:", error);
             setSubmitError(`Payment error: ${error || 'Unknown error'}`);
             setIsSubmitting(false);
           } else if (response) {
@@ -381,7 +381,7 @@ const ConvergePaymentPage = () => {
         setPaymentResponse(mockPaymentResponse);
         await finishEnrollment(mockPaymentResponse);
       } else if (declined) {
-        console.error("Payment declined:", result);
+        devLogger.error("Payment declined:", result);
         setSubmitError(`Payment declined: ${result.ssl_result_message || 'Unknown reason'}`);
         setIsSubmitting(false);
       } else {
@@ -390,7 +390,7 @@ const ConvergePaymentPage = () => {
         setIsSubmitting(false);
       }
     } catch (error) {
-      console.error('Error handling payment response:', error);
+      devLogger.error('Error handling payment response:', error);
       setSubmitError('Error processing payment response');
       setIsSubmitting(false);
     }
@@ -419,13 +419,13 @@ const ConvergePaymentPage = () => {
           handlePaymentResponse(result);
         },
         (error) => {
-          console.error("Payment error/cancel callback:", error);
+          devLogger.error("Payment error/cancel callback:", error);
           setSubmitError('Payment was cancelled or failed');
           setIsSubmitting(false);
         }
       );
     } catch (error) {
-      console.error('Error opening Converge modal:', error);
+      devLogger.error('Error opening Converge modal:', error);
       setSubmitError('Failed to open payment modal');
       setIsSubmitting(false);
     }
@@ -451,7 +451,7 @@ const ConvergePaymentPage = () => {
       };
       await finishEnrollment(mockPaymentResponse);
     } catch (e) {
-      console.error('Bypass payment (test mode) failed:', e);
+      devLogger.error('Bypass payment (test mode) failed:', e);
       setSubmitError('Test mode bypass failed');
       setIsSubmitting(false);
     }
@@ -479,7 +479,7 @@ const ConvergePaymentPage = () => {
             if (stored) currentInitialedSections = JSON.parse(stored);
           }
         } catch (e) {
-          console.warn('finishEnrollment: failed to rehydrate from sessionStorage');
+          devLogger.warn('finishEnrollment: failed to rehydrate from sessionStorage');
         }
       }
 
@@ -489,7 +489,7 @@ const ConvergePaymentPage = () => {
       devLogger.log('finishEnrollment - selectedClub:', selectedClub);
       
       if (!currentFormData) {
-        console.error('finishEnrollment - formData is null, cannot proceed');
+        devLogger.error('finishEnrollment - formData is null, cannot proceed');
         setSubmitError('Missing enrollment data. Please go back and try again.');
         setIsSubmitting(false);
         return;
@@ -539,7 +539,7 @@ const ConvergePaymentPage = () => {
         } 
       });
     } catch (error) {
-      console.error('Enrollment submission error:', error);
+      devLogger.error('Enrollment submission error:', error);
       setSubmitError('Payment was processed successfully, but there was an error completing your enrollment. Please contact customer support.');
       setIsSubmitting(false);
     }
@@ -558,7 +558,7 @@ const ConvergePaymentPage = () => {
       // and the user will be redirected back to our success/error pages
       
     } catch (error) {
-      console.error('Payment processing error:', error);
+      devLogger.error('Payment processing error:', error);
       setSubmitError(error.message || 'An error occurred while processing your payment. Please try again.');
       setIsSubmitting(false);
     }
@@ -716,13 +716,7 @@ const ConvergePaymentPage = () => {
             </div>
           )}
           
-          {convergeInfo && (
-            <div className="converge-info">
-              <h4>Payment Processor: Converge</h4>
-              <p>Merchant ID: {convergeInfo.merchant_id}</p>
-              <p>Processing URL: {convergeInfo.converge_url_process}</p>
-            </div>
-          )}
+          {/* Processor details removed from customer view */}
           
           <div className="form-actions">
             <button 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
+import devLogger from "../utils/devLogger";
 import api from '../services/api.js';
 //import PaymentProcessorDemo from './PaymentProcessorDemo';
 import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
@@ -139,19 +140,19 @@ const PaymentPage = () => {
         const fetchProcessor = async () => {
           try {
             const clubId = formData.club || selectedClub?.id || "001";
-            console.log('Fetching CC processor for club:', clubId);
+            devLogger.log('Fetching CC processor for club:', clubId);
             
             // Set a default processor in case API calls fail
             setProcessorName('CONVERGE'); // Default processor
             
             // First, get the processor name
             const result = await api.getCCProcessorName(clubId);
-            console.log('CC processor API result:', result);
+            devLogger.log('CC processor API result:', result);
             
             if (result && result.success && result.processorName) {
               // Trim any whitespace from the processor name
               const processorToUse = result.processorName.trim();
-              console.log('Cleaned processor name:', processorToUse);
+              devLogger.log('Cleaned processor name:', processorToUse);
               
               // Update state with the cleaned processor name
               setProcessorName(processorToUse);
@@ -159,12 +160,12 @@ const PaymentPage = () => {
               // Then fetch the appropriate processor info
               if (processorToUse === 'FLUIDPAY') {
                 try {
-                  console.log('Fetching FluidPay info for club:', clubId);
+                  devLogger.log('Fetching FluidPay info for club:', clubId);
                   const fluidPayResult = await api.getFluidPayInfo(clubId);
-                  console.log('FluidPay API result:', fluidPayResult);
+                  devLogger.log('FluidPay API result:', fluidPayResult);
                   
                   if (fluidPayResult && fluidPayResult.success && fluidPayResult.fluidPayInfo) {
-                    console.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
+                    devLogger.log('Setting FluidPay processor info:', fluidPayResult.fluidPayInfo);
                     setProcessorInfo(fluidPayResult.fluidPayInfo);
                   } else {
                     // Set fallback info for FluidPay
@@ -175,7 +176,7 @@ const PaymentPage = () => {
                     });
                   }
                 } catch (error) {
-                  console.error('Error fetching FluidPay info:', error);
+                  devLogger.error('Error fetching FluidPay info:', error);
                   setProcessorInfo({
                     merchant_id: 'Demo FluidPay Merchant (Fallback)',
                     fluidpay_base_url: 'https://api.fluidpay.com',
@@ -185,12 +186,12 @@ const PaymentPage = () => {
               } else {
                 // Use CONVERGE as default if not FluidPay
                 try {
-                  console.log('Fetching Converge info for club:', clubId);
+                  devLogger.log('Fetching Converge info for club:', clubId);
                   const convergeResult = await api.getConvergeInfo(clubId);
-                  console.log('Converge API result:', convergeResult);
+                  devLogger.log('Converge API result:', convergeResult);
                   
                   if (convergeResult && convergeResult.success && convergeResult.convergeInfo) {
-                    console.log('Setting Converge processor info:', convergeResult.convergeInfo);
+                    devLogger.log('Setting Converge processor info:', convergeResult.convergeInfo);
                     setConvergeInfo(convergeResult.convergeInfo);
                     setProcessorInfo(convergeResult.convergeInfo);
                   } else {
@@ -204,7 +205,7 @@ const PaymentPage = () => {
                     setProcessorInfo(fallbackInfo);
                   }
                 } catch (error) {
-                  console.error('Error fetching Converge info:', error);
+                  devLogger.error('Error fetching Converge info:', error);
                   const fallbackInfo = {
                     merchant_id: 'Demo Converge Merchant (Fallback)',
                     converge_user_id: 'webuser',
@@ -216,7 +217,7 @@ const PaymentPage = () => {
               }
             } else {
               // No processor name from API, use default
-              console.log('No processor name returned, using default CONVERGE');
+              devLogger.log('No processor name returned, using default CONVERGE');
               
               try {
                 const convergeResult = await api.getConvergeInfo(clubId);
@@ -244,7 +245,7 @@ const PaymentPage = () => {
               }
             }
           } catch (error) {
-            console.error('Error in fetchProcessor:', error);
+            devLogger.error('Error in fetchProcessor:', error);
             // Ensure we at least have a processor name and info
             setProcessorName('CONVERGE');
             const fallbackInfo = {
@@ -540,11 +541,11 @@ const PaymentPage = () => {
           membershipPrice
         );
         
-        console.log('Contract PDF generated successfully');
-        console.log('PDF buffer type:', typeof contractPDFBuffer);
-        console.log('PDF buffer length:', contractPDFBuffer?.byteLength || 0);
+        devLogger.log('Contract PDF generated successfully');
+        devLogger.log('PDF buffer type:', typeof contractPDFBuffer);
+        devLogger.log('PDF buffer length:', contractPDFBuffer?.byteLength || 0);
       } catch (pdfError) {
-        console.error('Error generating contract PDF:', pdfError);
+        devLogger.error('Error generating contract PDF:', pdfError);
         // Continue without PDF if generation fails
       }
 
@@ -553,7 +554,7 @@ const PaymentPage = () => {
       if (contractPDFBuffer) {
         const uint8Array = new Uint8Array(contractPDFBuffer);
         contractPDFArray = Array.from(uint8Array);
-        console.log('Converted to array, length:', contractPDFArray.length);
+        devLogger.log('Converted to array, length:', contractPDFArray.length);
       }
 
       // Combine all data for submission
@@ -578,7 +579,7 @@ const PaymentPage = () => {
         }
       };
       
-      console.log('Submitting enrollment data:', submissionData);
+      devLogger.log('Submitting enrollment data:', submissionData);
       
       // Submit the form data to the server
       const response = await api.post('/enrollment', submissionData);
@@ -599,7 +600,7 @@ const PaymentPage = () => {
         } 
       });
     } catch (error) {
-      console.error('Enrollment submission error:', error);
+      devLogger.error('Enrollment submission error:', error);
       setSubmitError('Payment was processed successfully, but there was an error saving your enrollment. Please contact customer support.');
       setIsSubmitting(false);
     }
@@ -616,9 +617,9 @@ const PaymentPage = () => {
     try {
       const response = await api.get(`/payment/converge-info?clubId=${formData.club}`);
       setConvergeInfo(response.data);
-      console.log('Converge API result:', response.data);
+      devLogger.log('Converge API result:', response.data);
     } catch (error) {
-      console.error('Error fetching Converge info:', error);
+      devLogger.error('Error fetching Converge info:', error);
       setSubmitError('Failed to load payment processor information');
     } finally {
       setIsLoadingConverge(false);
@@ -664,7 +665,7 @@ const processConvergePayment = async () => {
   setSubmitError('');
 
   try {
-    console.log('Processing Converge payment with tokenization...');
+    devLogger.log('Processing Converge payment with tokenization...');
     
     // Prepare card data for tokenization
     const cardData = {
@@ -683,7 +684,7 @@ const processConvergePayment = async () => {
       converge_url_process: convergeInfo.converge_url_process
     };
 
-    console.log('Converge info being sent:', {
+    devLogger.log('Converge info being sent:', {
       account_id: convergeInfoForAPI.ssl_account_id,
       user_id: convergeInfoForAPI.ssl_user_id,
       vendor_id: convergeInfoForAPI.ssl_vendor_id,
@@ -713,7 +714,7 @@ const processConvergePayment = async () => {
       customerData
     );
 
-    console.log('Payment result:', paymentResult);
+    devLogger.log('Payment result:', paymentResult);
 
     if (paymentResult.success) {
       // Payment successful with vault token
@@ -732,7 +733,7 @@ const processConvergePayment = async () => {
 
       setPaymentResponse(paymentResponse);
         
-      console.log('PAYMENT SUCCESSFUL WITH VAULT TOKEN:', paymentResult.vault_token);
+      devLogger.log('PAYMENT SUCCESSFUL WITH VAULT TOKEN:', paymentResult.vault_token);
         
       // Clear sensitive data immediately
       clearSensitiveData();
@@ -745,7 +746,7 @@ const processConvergePayment = async () => {
       throw new Error(paymentResult.message || 'Payment processing failed');
     }
   } catch (error) {
-    console.error('Payment processing error:', error);
+    devLogger.error('Payment processing error:', error);
     setSubmitError(error.message || 'An error occurred while processing your payment. Please try again.');
     setShowProcessorDemo(false);
     setIsSubmitting(false);
@@ -792,9 +793,9 @@ const processConvergePayment = async () => {
         ssl_url_process: convergeInfo.converge_url_process
       };
 
-      console.log('Testing Converge credentials...');
+      devLogger.log('Testing Converge credentials...');
       const result = await api.testConvergeCredentials(convergeInfoForAPI);
-      console.log('Converge test result:', result);
+      devLogger.log('Converge test result:', result);
       
       if (result.success) {
         alert('Converge test completed successfully. Check console for details.');
@@ -802,7 +803,7 @@ const processConvergePayment = async () => {
         alert('Converge test failed: ' + result.message);
       }
     } catch (error) {
-      console.error('Converge test error:', error);
+      devLogger.error('Converge test error:', error);
       alert('Converge test error: ' + error.message);
     }
   };
@@ -896,57 +897,7 @@ const processConvergePayment = async () => {
         <div className="payment-summary">
           <h2>Payment Summary</h2>
           
-          {processorName && (
-            <div className="processor-info">
-              <h3>Payment Processor Information</h3>
-              <div className="processor-details">
-                <p className="processor-name">
-                  <span className="detail-label">Processor:</span> 
-                  <span className="detail-value">{processorName === 'FLUIDPAY' ? 'FluidPay' : 'Converge (Elavon)'}</span>
-                </p>
-                
-                {processorInfo && (
-                  <div className="processor-config">
-                    {processorName === 'FLUIDPAY' ? (
-                      <>
-                        <p className="detail-item">
-                          <span className="detail-label">Merchant ID:</span>
-                          <span className="detail-value">{processorInfo.merchant_id}</span>
-                        </p>
-                        <p className="detail-item">
-                          <span className="detail-label">Base URL:</span>
-                          <span className="detail-value">{processorInfo.fluidpay_base_url ? '✓ Configured' : '⚠️ Missing'}</span>
-                        </p>
-                        <p className="detail-item">
-                          <span className="detail-label">API Key:</span>
-                          <span className="detail-value">{processorInfo.fluidpay_api_key ? '✓ Configured' : '⚠️ Missing'}</span>
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="detail-item">
-                          <span className="detail-label">Merchant ID:</span>
-                          <span className="detail-value">{processorInfo.merchant_id}</span>
-                        </p>
-                        <p className="detail-item">
-                          <span className="detail-label">User ID:</span>
-                          <span className="detail-value">{processorInfo.converge_user_id ? '✓ Configured' : '⚠️ Missing'}</span>
-                        </p>
-                        <p className="detail-item">
-                          <span className="detail-label">Process URL:</span>
-                          <span className="detail-value">{processorInfo.converge_url_process ? '✓ Configured' : '⚠️ Missing'}</span>
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )}
-                
-                {!processorInfo && (
-                  <p className="processor-warning">⚠️ Processor configuration not found for this club.</p>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Processor details removed from customer view */}
           
           <div className="membership-summary">
             <h3>Membership Details</h3>

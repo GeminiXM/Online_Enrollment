@@ -365,7 +365,7 @@ function EnrollmentForm() {
         // Get the specialty membership code from the map
         const specialtyMembership = SPECIALTY_MEMBERSHIP_MAP[membershipType.id] || "";
         
-        console.log("Fetching bridge code for:", {
+        devLogger.log("Fetching bridge code for:", {
           clubId: selectedClub.id,
           specialtyMembership
         });
@@ -377,13 +377,13 @@ function EnrollmentForm() {
         );
         
         if (response.success) {
-          console.log("Bridge code fetched:", response.bridgeCode);
+          devLogger.log("Bridge code fetched:", response.bridgeCode);
           setBridgeCode(response.bridgeCode);
         } else {
-          console.error("Failed to fetch bridge code:", response.message);
+          devLogger.error("Failed to fetch bridge code:", response.message);
         }
       } catch (error) {
-        console.error("Error fetching bridge code:", error);
+        devLogger.error("Error fetching bridge code:", error);
       }
     };
     
@@ -441,18 +441,18 @@ function EnrollmentForm() {
       try {
         // Use the selected club ID or default to "001"
         const clubId = selectedClub?.id || "001";
-        console.log("Fetching addons for club:", { clubId, selectedClub });
+        devLogger.log("Fetching addons for club:", { clubId, selectedClub });
         const response = await fetch(`/api/enrollment/addons?clubId=${clubId}`);
         const data = await response.json();
         
         if (data.success) {
-          console.log("Addons fetched successfully:", { clubId, addonCount: data.addons.length });
+          devLogger.log("Addons fetched successfully:", { clubId, addonCount: data.addons.length });
           setAddons(data.addons);
         } else {
-          console.error("Failed to fetch addons:", data.message);
+          devLogger.error("Failed to fetch addons:", data.message);
         }
       } catch (error) {
-        console.error("Error fetching addons:", error);
+        devLogger.error("Error fetching addons:", error);
       }
     };
 
@@ -576,7 +576,7 @@ function EnrollmentForm() {
   // Update membership type when family composition changes
   useEffect(() => {
     const newMembershipTypeValue = determineMembershipType();
-    console.log(`Determined membership type: ${newMembershipTypeValue} based on family composition`);
+    devLogger.log(`Determined membership type: ${newMembershipTypeValue} based on family composition`);
     
     // Check for New Mexico clubs
     const isNewMexicoClub = selectedClub?.state === 'NM';
@@ -586,12 +586,12 @@ function EnrollmentForm() {
       // If changing to Family, remove Child Addon from shopping cart
       if (newMembershipTypeValue === 'F') {
         setSelectedChildAddons([]);
-        console.log('Removed Child Addon from cart for Family membership in New Mexico');
+        devLogger.log('Removed Child Addon from cart for Family membership in New Mexico');
       }
       
       // Always reset child forms when membership type changes for New Mexico clubs
       setChildForms([]);
-      console.log(`Membership type changed from ${determinedMembershipType} to ${newMembershipTypeValue} - reset child forms`);
+      devLogger.log(`Membership type changed from ${determinedMembershipType} to ${newMembershipTypeValue} - reset child forms`);
     }
     
     // Store the determined membership type in state
@@ -602,7 +602,7 @@ function EnrollmentForm() {
   useEffect(() => {
     // Skip on initial render
     if (membershipType && selectedClub && bridgeCode) {
-      console.log(`Refreshing price based on new membership type: ${determinedMembershipType}`);
+      devLogger.log(`Refreshing price based on new membership type: ${determinedMembershipType}`);
       
       // Force an explicit price refresh by calling the API directly
       const fetchUpdatedPrice = async () => {
