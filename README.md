@@ -153,3 +153,103 @@ Online_Enrollment/
 Mark Moore
 Senior Engineer
 Wellbridge
+
+## Contract PDF Flow and Troubleshooting
+
+This section documents the end-to-end flow for contract PDF generation, saving, copying to network shares, emailing, and adding the entry to the needs list, along with quick diagnostics and recovery steps.
+
+### End-to-End Flow (Current, Working)
+
+- Contract build and handoff
+  - `frontend/src/components/ContractPage.jsx`
+    - User reviews and signs the contract.
+    - Captures and passes forward: `formData`, `signatureData`, `initialedSections`, `selectedClub` via React Router `location.state`.
+
+- Payment processing
+  - `frontend/src/components/ConvergePaymentPage.jsx`
+    - Persists `formData`, `signatureData`, `initialedSections` to `sessionStorage` on mount to prevent loss during the hosted modal flow.
+    - On approved payment (or Test Mode), posts to backend `POST /api/enrollment` with enrollment and payment info.
+    - Navigates to `/enrollment-confirmation` with:
+      - `formData`, `signatureData`, `initialedSections`, `selectedClub`
+      - `membershipNumber` (`custCode` from backend)
+      - `transactionId`, `amountBilled`
+  - `frontend/src/components/FluidPayPaymentPage.jsx`
+    - Same handoff pattern as Converge.
+
+- Final PDF creation and distribution
+  - `frontend/src/components/EnrollmentConfirmation.jsx`
+    - Determines which generator to use:
+      - New Mexico: `frontend/src/components/CanvasContractPDF.jsx` → `export const generatePDFBuffer`
+      - Denver: `frontend/src/components/CanvasContractDenverPDF.jsx` → `export const generatePDFBuffer`
+    - Generates PDF using the REAL `membershipNumber` and the signed `signatureData` and `initialedSections`.
+    - Saves to backend via `POST /api/save-contract-pdf` with raw `Uint8Array` body and headers:
+      - `Content-Type: application/pdf`
+      - `X-Contract-Id`: `membershipNumber`
+      - `X-Member-Id`: `First_Last`
+      - `X-Club-Id`: club id (used for club-specific UNC copy)
+    - Generates another PDF for email attachment (Array.from(Uint8Array)) and calls `POST /api/enrollment/send-welcome-email`.
+    - Renders the download button using the same canvas component.
+
+- Backend save and copy
+  - `backend/src/app.js`
+    - Endpoint `POST /api/save-contract-pdf` writes to `backend/src/contracts` as:
+      - `MM-DD-YYYY <custCode> <First> <Last> ONLINE.pdf`
+    - Duplicate prevention: if a same-named file exists with identical size, skip re-write and skip UNC copies.
+    - Copies the already-saved local file (no regeneration) to two UNC targets:
+      - `\\vwbwebprod\Electronic Agreements\ContractPDF`
+      - `\\vwbwebsvc\c$\Data\ElectronicContracts\Contract\<clubId>`
+    - Copy is retried up to 3 times with a 500ms delay; logs success or warnings.
+
+- Enrollment and needs list
+  - `backend/src/controllers/enrollmentController.js` (function `submitEnrollment`)
+    - Inserts membership, members, contract, and receipt docs.
+    - Calls `web_proc_InsertProduction`.
+    - Calls `web_proc_AddNeedsList` with only `custCode` (non-blocking try/catch).
+
+### Common Failure Modes and Fast Fixes
+
+- 1‑page or incomplete PDFs (usually NM)
+  - Cause: Using `utils/contractPDFGenerator.js` instead of the NM canvas generator.
+  - Fix: Ensure `EnrollmentConfirmation.jsx` imports:
+    - `generatePDFBuffer as generatePDFBufferNM` from `./CanvasContractPDF`
+    - `generatePDFBuffer as generatePDFBufferDenver` from `./CanvasContractDenverPDF`
+  - Ensure PDFs are generated on `EnrollmentConfirmation`, not inside payment pages.
+
+- Missing membership number in PDF
+  - Cause: Generating the PDF before backend returns the real `custCode`.
+  - Fix: Generate PDFs in `EnrollmentConfirmation.jsx` (after `/api/enrollment`), and pass `membershipId: membershipNumber` into the contract formData.
+
+- Corrupted/1‑page attachment when emailing
+  - Cause: Sending `ArrayBuffer` directly in JSON.
+  - Fix: Convert to `Array.from(new Uint8Array(pdfBuffer))` for JSON payloads. For backend save, send raw `Uint8Array` body with `Content-Type: application/pdf`.
+
+- State loss after hosted payment modal
+  - Cause: React state reset during modal flow.
+  - Fix: `ConvergePaymentPage.jsx` persists to `sessionStorage` and rehydrates before finishing; ensure this code remains intact.
+
+- Duplicates on UNC shares
+  - Cause: Re-saves or re-copies of an identical file.
+  - Fix: Backend now checks destination size and skips if identical; confirm filenames are consistent and that old files aren’t being re-used under the same name across days.
+
+- Needs list entry missing
+  - Cause: Procedure not called or signature mismatch.
+  - Fix: Backend calls `web_proc_AddNeedsList` with only `custCode`. Check logs for `web_proc_AddNeedsList executed` or warning.
+
+### How to Verify and Recover Quickly
+
+- Frontend sanity
+  - `EnrollmentConfirmation.jsx` imports correct generators; PDFs generated there with real `membershipNumber`.
+  - Save: raw `Uint8Array` to `/api/save-contract-pdf` with headers (`X-Contract-Id`, `X-Member-Id`, `X-Club-Id`).
+  - Email: Array payload in JSON.
+
+- Backend sanity
+  - `app.js` logs: `PDF contract saved`, and `PDF copied to ...` or `already present ... skipping`.
+  - `enrollmentController.js` logs: Production migration and `web_proc_AddNeedsList executed`.
+
+### Test Mode (No Real Charges)
+
+- Enabled only when requested; off by default.
+- Enable temporarily in browser console:
+  - `localStorage.setItem('TEST_MODE','true')` then refresh.
+- A “Bypass Payment (Test Mode)” button appears on `ConvergePaymentPage` and feeds a mock approved payment into the finish flow.
+- Disable: `localStorage.removeItem('TEST_MODE')` then refresh.

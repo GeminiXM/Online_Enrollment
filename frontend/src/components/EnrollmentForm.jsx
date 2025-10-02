@@ -1562,6 +1562,8 @@ function EnrollmentForm() {
         setShowPTModal(true);
       } else {
         console.log("PT already in cart, proceeding directly to contract");
+        // Clear saved data before navigation (Safari fix)
+        await clearSavedData();
         // Navigate directly to contract since PT is already selected
         navigate('/contract', { 
           state: { 
@@ -1573,9 +1575,6 @@ function EnrollmentForm() {
           } 
         });
       }
-      
-      // Clear saved data since we're proceeding with submission
-      await clearSavedData();
     } catch (error) {
       console.error("Error during form submission:", error);
       setSubmitError("An unexpected error occurred. Please try again.");
@@ -1624,6 +1623,8 @@ function EnrollmentForm() {
     
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
+      // Clear saved data before navigation (Safari fix)
+      await clearSavedData();
       navigate('/contract', { 
         state: { 
           formData: {
@@ -1636,11 +1637,13 @@ function EnrollmentForm() {
     }
   };
 
-  const handlePTDecline = () => {
+  const handlePTDecline = async () => {
     setShowPTModal(false);
     setHasPTAddon(false); // Ensure PT is marked as declined
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
+      // Clear saved data before navigation (Safari fix)
+      await clearSavedData();
       navigate('/contract', { 
         state: { 
           formData: {
@@ -3533,8 +3536,8 @@ function EnrollmentForm() {
       }, 1000);
   };
 
-  const handleDiscardData = () => {
-    clearSavedData();
+  const handleDiscardData = async () => {
+    await clearSavedData();
     setShowRestorePrompt(false);
   };
 
