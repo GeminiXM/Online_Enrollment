@@ -28,6 +28,11 @@ const ConvergePaymentPage = () => {
   const [processorInfo, setProcessorInfo] = useState(null);
   const [errors, setErrors] = useState({});
 
+  // Non-invasive Test Mode flag (off by default). Enable via Vite env or localStorage.
+  const isTestMode =
+    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_TEST_MODE === 'true') ||
+    (typeof window !== 'undefined' && window.localStorage && localStorage.getItem('TEST_MODE') === 'true');
+
   // Get enrollment data and fetch payment processor info
   useEffect(() => {
     console.log('ConvergePaymentPage - location.state:', location.state);
@@ -425,6 +430,32 @@ const ConvergePaymentPage = () => {
     }
   };
 
+  // Bypass payment for testing without charging a card (only when test mode is enabled)
+  const bypassPaymentForTest = async () => {
+    try {
+      setIsSubmitting(true);
+      // Rehydrate if needed; finishEnrollment will also rehydrate
+      const mockPaymentResponse = {
+        processor: 'CONVERGE',
+        success: true,
+        transaction_id: 'TEST_' + Date.now(),
+        authorization_code: 'TESTAUTH',
+        card_info: {
+          last_four: '1111',
+          card_type: 'Visa',
+        },
+        amount: calculateProratedAmount().toFixed(2),
+        timestamp: new Date().toISOString(),
+        vault_token: 'TEST_TOKEN',
+      };
+      await finishEnrollment(mockPaymentResponse);
+    } catch (e) {
+      console.error('Bypass payment (test mode) failed:', e);
+      setSubmitError('Test mode bypass failed');
+      setIsSubmitting(false);
+    }
+  };
+
   // Complete enrollment after Converge payment
   const finishEnrollment = async (paymentResult) => {
     try {
@@ -708,6 +739,17 @@ const ConvergePaymentPage = () => {
             >
               {isSubmitting || isLoadingConverge ? "Processing..." : "Process Payment"}
             </button>
+          {isTestMode && (
+            <button
+              type="button"
+              className="primary-button"
+              onClick={bypassPaymentForTest}
+              disabled={isSubmitting}
+              title="Bypass card processing (Test Mode)"
+            >
+              Bypass Payment (Test Mode)
+            </button>
+          )}
           </div>
           
           <div className="payment-security-notice">

@@ -1397,6 +1397,23 @@ export const submitEnrollment = async (req, res) => {
       });
     }
 
+    // 9. Add to needs list (post-production), non-blocking
+    try {
+      await executeSqlProcedure("web_proc_AddNeedsList", club, [
+        updatedCustCode,
+      ]);
+      logger.info("web_proc_AddNeedsList executed", {
+        custCode: updatedCustCode,
+        club,
+      });
+    } catch (needsErr) {
+      logger.warn("web_proc_AddNeedsList failed (non-blocking)", {
+        error: needsErr.message,
+        custCode: updatedCustCode,
+        club,
+      });
+    }
+
     // Save contract PDF to contracts folder
     try {
       // Get the contract PDF buffer from frontend

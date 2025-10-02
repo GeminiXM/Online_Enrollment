@@ -135,7 +135,8 @@ console.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
                 headers: {
                   'Content-Type': 'application/pdf',
                   'X-Contract-Id': membershipNumber,
-                  'X-Member-Id': `${formData.firstName}_${formData.lastName}`
+                  'X-Member-Id': `${formData.firstName}_${formData.lastName}`,
+                  'X-Club-Id': selectedClub?.id || ''
                 },
                 body: contractPDFArray,
               });

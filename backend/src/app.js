@@ -121,6 +121,7 @@ app.post(
     try {
       const membershipNumber = req.header("x-contract-id") || "unknown";
       const memberName = req.header("x-member-id") || "unknown";
+      const clubIdHeader = req.header("x-club-id") || "";
 
       // Parse member name (format: "firstName_lastName")
       const nameParts = memberName.split("_");
@@ -138,8 +139,108 @@ app.post(
       const fileName = `${formattedDate} ${membershipNumber} ${firstName} ${lastName} ONLINE.pdf`;
       const savePath = path.join(uploadDir, fileName);
 
-      await fs.promises.writeFile(savePath, req.body);
-      logger.info(`PDF contract saved: ${fileName}`);
+      // Avoid duplicate write if same file already exists with same size
+      let wroteFile = false;
+      try {
+        const exists = fs.existsSync(savePath);
+        if (exists) {
+          const stat = fs.statSync(savePath);
+          const incomingSize = Buffer.isBuffer(req.body) ? req.body.length : 0;
+          if (stat.size === incomingSize && incomingSize > 0) {
+            logger.info(
+              `PDF already exists with same size, skipping write: ${fileName}`
+            );
+          } else {
+            await fs.promises.writeFile(savePath, req.body);
+            wroteFile = true;
+            logger.info(`PDF contract saved (overwrite): ${fileName}`);
+          }
+        } else {
+          await fs.promises.writeFile(savePath, req.body);
+          wroteFile = true;
+          logger.info(`PDF contract saved: ${fileName}`);
+        }
+      } catch (writeErr) {
+        // If initial write failed for transient reasons, try once more
+        await fs.promises.writeFile(savePath, req.body);
+        wroteFile = true;
+        logger.info(`PDF contract saved after retry: ${fileName}`);
+      }
+
+      // Copy the saved file to network shares; do not regenerate
+      try {
+        const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+        const tryCopy = async (from, to) => {
+          const maxAttempts = 3;
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+              await fs.promises.copyFile(from, to);
+              return true;
+            } catch (err) {
+              if (attempt === maxAttempts) throw err;
+              await sleep(500);
+            }
+          }
+        };
+
+        const networkShareDir =
+          "\\\\vwbwebprod\\Electronic Agreements\\ContractPDF";
+        try {
+          await fs.promises.mkdir(networkShareDir, { recursive: true });
+        } catch {}
+        try {
+          const destGlobal = path.join(networkShareDir, fileName);
+          // Skip copy if destination exists with same size
+          let doCopy = true;
+          try {
+            const stat = fs.statSync(destGlobal);
+            const srcStat = fs.statSync(savePath);
+            if (stat.size === srcStat.size) doCopy = false;
+          } catch {}
+          if (doCopy) {
+            await tryCopy(savePath, destGlobal);
+            logger.info(`PDF copied to network share: ${destGlobal}`);
+          } else {
+            logger.info(
+              `PDF already present on network share, skipping: ${destGlobal}`
+            );
+          }
+        } catch (e1) {
+          logger.warn(`Copy to global share failed: ${e1.message}`);
+        }
+        if (clubIdHeader) {
+          const clubBaseDir =
+            "\\\\vwbwebsvc\\c$\\Data\\ElectronicContracts\\Contract";
+          const clubDir = path.join(clubBaseDir, String(clubIdHeader));
+          try {
+            await fs.promises.mkdir(clubDir, { recursive: true });
+            const destClub = path.join(clubDir, fileName);
+            // Skip if destination exists with same size
+            let doCopyClub = true;
+            try {
+              const statC = fs.statSync(destClub);
+              const srcStatC = fs.statSync(savePath);
+              if (statC.size === srcStatC.size) doCopyClub = false;
+            } catch {}
+            if (doCopyClub) {
+              await tryCopy(savePath, destClub);
+              logger.info(`PDF copied to club folder: ${destClub}`);
+            } else {
+              logger.info(
+                `PDF already present in club folder, skipping: ${destClub}`
+              );
+            }
+          } catch (e2) {
+            logger.warn(
+              `Copy to club folder failed (${clubIdHeader}): ${e2.message}`
+            );
+          }
+        }
+      } catch (copyErr) {
+        logger.warn(
+          `Multi-location copy encountered an error: ${copyErr.message}`
+        );
+      }
       res.json({
         ok: true,
         savedAs: fileName,
