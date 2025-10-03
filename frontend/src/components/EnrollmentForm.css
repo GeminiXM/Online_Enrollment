@@ -1501,9 +1501,10 @@ button:focus-visible {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
-  align-items: center;
+  align-items: flex-start; /* position modal nearer top */
   justify-content: center;
   z-index: 1000;
+  padding-top: 140px; /* place near the start date area */
 }
 
 .restore-prompt-modal {

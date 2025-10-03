@@ -456,6 +456,12 @@ const ConvergePaymentPage = () => {
 
     try {
       devLogger.log("Opening Converge modal with token:", token);
+      // Ensure the modal is immediately visible by scrolling to top where Converge anchors its overlay
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (_) {
+        window.scrollTo(0, 0);
+      }
       
       window.PayWithConverge.open(
         { ssl_txn_auth_token: token },
