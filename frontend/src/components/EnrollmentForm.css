@@ -981,6 +981,15 @@ button:focus-visible {
   max-width: 170px;
 }
 
+/* Force visual highlight for the requested start date input */
+.start-date-row #requestedStartDate {
+  background-color: #ffeb3b !important; /* brighter yellow */
+  font-weight: 700 !important;
+  font-size: 17px !important; /* +1 from typical 16px */
+  border-color: #f1c40f !important;
+  color: #212529 !important;
+}
+
 /* Sales rep dropdown in start date row */
 .start-date-row .form-group:not(.date-field) {
   flex: 0 0 240px; /* Fixed width, don't grow or shrink */

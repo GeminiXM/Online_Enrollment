@@ -301,6 +301,23 @@ class EmailService {
         logger.error("Error finding contract file for email:", error);
       }
 
+      // Determine amount paid today with robust fallbacks
+      const parseAmount = (val) => {
+        const n = parseFloat(val);
+        return isNaN(n) ? 0 : n;
+      };
+      const amountFromEnrollment = parseAmount(enrollmentData?.amountBilled);
+      const amountFromForm = parseAmount(formData?.totalCollected);
+      const amountPaidToday = (
+        amountFromEnrollment > 0 ? amountFromEnrollment : amountFromForm
+      ).toFixed(2);
+
+      logger.info("Email amount resolution:", {
+        amountFromEnrollment,
+        amountFromForm,
+        amountPaidToday,
+      });
+
       // Email content
       const emailContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
@@ -350,9 +367,7 @@ class EmailService {
                 <li style="margin-bottom: 8px;"><strong>Club Address:</strong> ${
                   selectedClub?.address || "Address not available"
                 }</li>
-                <li style="margin-bottom: 8px;"><strong>Amount Paid Today:</strong> $${
-                  enrollmentData.amountBilled || 0
-                }</li>
+                <li style="margin-bottom: 8px;"><strong>Amount Paid Today:</strong> $${amountPaidToday}</li>
               </ul>
             </div>
             

@@ -3748,6 +3748,7 @@ function EnrollmentForm() {
                   aria-required="true"
                   aria-invalid={!!errors.requestedStartDate}
                   aria-describedby={errors.requestedStartDate ? "requestedStartDate-error" : undefined}
+                  style={{ backgroundColor: '#fff3cd', fontWeight: 700 }}
                 />
                 <button
                   type="button"
