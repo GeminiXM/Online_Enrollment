@@ -184,10 +184,8 @@ app.post(
         };
 
         const networkShareDir =
+          process.env.CONTRACT_GLOBAL_SHARE ||
           "\\\\vwbwebprod\\Electronic Agreements\\ContractPDF";
-        try {
-          await fs.promises.mkdir(networkShareDir, { recursive: true });
-        } catch {}
         try {
           const destGlobal = path.join(networkShareDir, fileName);
           // Skip copy if destination exists with same size
@@ -210,29 +208,29 @@ app.post(
         }
         if (clubIdHeader) {
           const clubBaseDir =
-            "\\\\vwbwebsvc\\c$\\Data\\ElectronicContracts\\Contract";
+            process.env.CONTRACT_CLUB_SHARE_BASE || "\\\\vwbwebsvc\\Contract";
           const clubDir = path.join(clubBaseDir, String(clubIdHeader));
+          // Do not create folders; assume they exist
+          const destClub = path.join(clubDir, fileName);
+          // Skip if destination exists with same size
+          let doCopyClub = true;
           try {
-            await fs.promises.mkdir(clubDir, { recursive: true });
-            const destClub = path.join(clubDir, fileName);
-            // Skip if destination exists with same size
-            let doCopyClub = true;
+            const statC = fs.statSync(destClub);
+            const srcStatC = fs.statSync(savePath);
+            if (statC.size === srcStatC.size) doCopyClub = false;
+          } catch {}
+          if (doCopyClub) {
             try {
-              const statC = fs.statSync(destClub);
-              const srcStatC = fs.statSync(savePath);
-              if (statC.size === srcStatC.size) doCopyClub = false;
-            } catch {}
-            if (doCopyClub) {
               await tryCopy(savePath, destClub);
               logger.info(`PDF copied to club folder: ${destClub}`);
-            } else {
-              logger.info(
-                `PDF already present in club folder, skipping: ${destClub}`
+            } catch (e2) {
+              logger.warn(
+                `Copy to club folder failed (${clubIdHeader}): ${e2.message}`
               );
             }
-          } catch (e2) {
-            logger.warn(
-              `Copy to club folder failed (${clubIdHeader}): ${e2.message}`
+          } else {
+            logger.info(
+              `PDF already present in club folder, skipping: ${destClub}`
             );
           }
         }

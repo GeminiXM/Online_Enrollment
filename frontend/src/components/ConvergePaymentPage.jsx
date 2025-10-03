@@ -329,6 +329,11 @@ const ConvergePaymentPage = () => {
         
         if (event.data && event.data.converge === true) {
           const { approved, cancelled, errored, error, response } = event.data;
+          try {
+            const dataKeys = response?.data ? Object.keys(response.data) : [];
+            const rootKeys = response ? Object.keys(response) : [];
+            devLogger.log('Converge message key summary:', { dataKeys, rootKeys });
+          } catch (_) {}
           
           if (cancelled) {
             devLogger.log("Payment cancelled by user");
@@ -340,6 +345,10 @@ const ConvergePaymentPage = () => {
             setIsSubmitting(false);
           } else if (response) {
             devLogger.log("Payment response received:", response);
+            try {
+              const keys = Object.keys((response && (response.data || response)) || {});
+              devLogger.log('Payment response keys:', keys);
+            } catch (_) {}
             handlePaymentResponse(response);
           }
         }
@@ -362,24 +371,60 @@ const ConvergePaymentPage = () => {
       const declined = !!(result.ssl_result_message && /declin/i.test(result.ssl_result_message));
       
       if (approved) {
-        devLogger.log("Payment approved:", result);
-        // Create mock payment response for enrollment completion
-        const mockPaymentResponse = {
+        // Normalize card details
+        const rawLast4 = result.ssl_last4 || (result.ssl_card_number ? String(result.ssl_card_number).slice(-4) : null);
+        const normalizedLast4 = rawLast4 && String(rawLast4).length === 4 ? String(rawLast4) : '****';
+        const maskedCardNumber = '************' + (normalizedLast4 !== '****' ? normalizedLast4 : '****');
+        // Prefer short description (VISA/MC/AMEX). Avoid generic CREDIT/CREDITCARD labels.
+        const shortDesc = result.ssl_card_short_description || result.aal_card_short_description || '';
+        const rawType = result.ssl_card_type || result.card_type || '';
+        const cardType = shortDesc || ((rawType && !/^CREDIT(?:CARD)?$/i.test(rawType)) ? rawType : '');
+        const expRaw = result.ssl_exp_date; // MMYY
+        let expirationDate = '';
+        if (expRaw && String(expRaw).length === 4) {
+          const mm = String(expRaw).substring(0, 2);
+          const yy = String(expRaw).substring(2, 4);
+          expirationDate = `20${yy}-${mm}-01`;
+        }
+
+        // Amount from gateway if present
+        const amountFromGateway = result.ssl_amount;
+        const amount = amountFromGateway || calculateProratedAmount().toFixed(2);
+
+        devLogger.log('Converge approved - raw result subset:', {
+          ssl_transaction_id: result.ssl_transaction_id,
+          ssl_txn_id: result.ssl_txn_id,
+          ssl_approval_code: result.ssl_approval_code,
+          ssl_last4: result.ssl_last4,
+          ssl_card_number: result.ssl_card_number ? '[present]' : '[missing]',
+          ssl_card_type: result.ssl_card_type,
+          ssl_card_short_description: result.ssl_card_short_description,
+          ssl_exp_date: result.ssl_exp_date,
+          ssl_amount: result.ssl_amount,
+          derived: { normalizedLast4, maskedCardNumber, cardType, expirationDate, amount }
+        });
+
+        // Build normalized payment response used by confirmation
+        const normalizedPaymentResponse = {
           processor: 'CONVERGE',
           success: true,
-          transaction_id: result.ssl_transaction_id || 'CONVERGE_' + Date.now(),
+          transaction_id: result.ssl_transaction_id || result.ssl_txn_id || 'CONVERGE_' + Date.now(),
           authorization_code: result.ssl_approval_code,
           card_info: {
-            last_four: result.ssl_last4 || '****',
-            card_type: result.ssl_card_type || 'Credit Card'
+            last_four: normalizedLast4,
+            card_type: cardType || 'Credit Card'
           },
-          amount: calculateProratedAmount().toFixed(2),
+          last4: normalizedLast4,
+          maskedCardNumber,
+          cardType: cardType || 'Credit Card',
+          expirationDate,
+          amount,
           timestamp: new Date().toISOString(),
           vault_token: result.ssl_token
         };
-        
-        setPaymentResponse(mockPaymentResponse);
-        await finishEnrollment(mockPaymentResponse);
+
+        setPaymentResponse(normalizedPaymentResponse);
+        await finishEnrollment(normalizedPaymentResponse);
       } else if (declined) {
         devLogger.error("Payment declined:", result);
         setSubmitError(`Payment declined: ${result.ssl_result_message || 'Unknown reason'}`);
@@ -512,10 +557,15 @@ const ConvergePaymentPage = () => {
           processorName: 'CONVERGE',
           transactionId: paymentResult.transaction_id,
           authorizationCode: paymentResult.authorization_code,
-          last4: paymentResult.card_info?.last_four,
+          // Masked number for DB storage, not full PAN
+          last4: paymentResult.maskedCardNumber || (paymentResult.card_info?.last_four ? '************' + paymentResult.card_info.last_four : ''),
+          cardType: paymentResult.cardType || paymentResult.card_info?.card_type || '',
+          expirationDate: paymentResult.expirationDate || '',
           vaultToken: paymentResult.vault_token
         }
       };
+
+      devLogger.log('Enrollment submission paymentInfo:', submissionData.paymentInfo);
 
       
       devLogger.log('Submitting enrollment data to database:', submissionData);

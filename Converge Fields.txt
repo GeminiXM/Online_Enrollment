@@ -1,0 +1,36 @@
+OK, I saved the converge fields from before. Here they all are. Visa is under aal_card_short_description, don't use ssl_card_type. We should have ssl_amount for the total billed
+
+ssl_merchant_initiated_unscheduled: N
+ssl_issuer_response: 00
+ssl_last_name: D
+ssl_partner_app_id: 01
+ssl_phone: 7201112222
+ssl_card_number: 43**********2156
+ssl_oar_data: 01002325820923221217000004717050000000000006541D526622232582
+ssl_result: 0
+ssl_txn_id: 230925C29-9CA6B03F-4759-4EF1-905E-25F73F795D94
+ssl_avs_response: Y
+ssl_approval_code: 06541D
+ssl_email: mmoore@wellbridge.com
+ssl_amount: 45.20
+ssl_avs_zip: 80123
+ssl_txn_time: 09/23/2025 04:12:17 PM
+ssl_exp_date: 1227
+ssl_card_short_description: VISA
+ssl_get_token: Y
+ssl_par_value: V0010013817300052110020109286
+ssl_token_response: SUCCESS
+ssl_card_type: CREDITCARD
+ssl_token_format: N
+ssl_token_provider: V
+ssl_transaction_type: SALE
+ssl_transaction_reference_number: 923221217
+ssl_avs_address: 8220 W. WALKER DRIVE
+ssl_customer_id: John D
+ssl_account_balance: 0.00
+ssl_ps2000_data: V465266799376486DFKDD
+ssl_result_message: APPROVAL
+ssl_first_name: John
+ssl_cvv2_response: M
+ssl_token: 4452374406032156 ← REAL VAULT TOKEN!
+ssl_add_token_response: Card Updated

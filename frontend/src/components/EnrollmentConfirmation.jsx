@@ -32,29 +32,33 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     return now.toLocaleString();
   };
 
-  // Get last 4 digits of the card
+  // Get last 4 digits of the card (normalized across processors)
   const getLastFour = () => {
     if (!paymentResponse) return 'XXXX';
-    
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.card_info?.last_four || 'XXXX';
-    } else {
-      // Handle CONVERGE
-      const cardNumber = paymentResponse.ssl_card_number || '';
-      return cardNumber.slice(-4) || 'XXXX';
-    }
+    if (paymentResponse.card_info?.last_four) return paymentResponse.card_info.last_four;
+    if (paymentResponse.last4) return paymentResponse.last4;
+    if (paymentResponse.maskedCardNumber) return paymentResponse.maskedCardNumber.slice(-4);
+    const cn = paymentResponse.ssl_card_number || paymentResponse.ssl_last4 || '';
+    return cn && cn.length >= 4 ? cn.slice(-4) : 'XXXX';
   };
   
-  // Get the card type
+  // Get the card type (normalized)
   const getCardType = () => {
     if (!paymentResponse) return 'Credit Card';
-    
-    if (paymentResponse.processor === 'FLUIDPAY') {
-      return paymentResponse.card_info?.card_type || 'Credit Card';
-    } else {
-      // Handle CONVERGE
-      return paymentResponse.ssl_card_type || 'Credit Card';
-    }
+    if (paymentResponse.cardType) return paymentResponse.cardType;
+    if (paymentResponse.card_info?.card_type) return paymentResponse.card_info.card_type;
+    if (paymentResponse.ssl_card_type) return paymentResponse.ssl_card_type;
+    return 'Credit Card';
+  };
+
+  // Get billed amount with fallbacks (prefer processor amount)
+  const getAmountBilled = () => {
+    const fromPayment = paymentResponse?.amount;
+    if (fromPayment && !isNaN(parseFloat(fromPayment))) return Number(fromPayment).toFixed(2);
+    if (amountBilled && !isNaN(parseFloat(amountBilled))) return Number(amountBilled).toFixed(2);
+    const fromEnrollment = enrollmentData?.amountBilled;
+    if (fromEnrollment && !isNaN(parseFloat(fromEnrollment))) return Number(fromEnrollment).toFixed(2);
+    return undefined;
   };
   
   // // Get transaction ID
@@ -265,15 +269,15 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
             <div className="payment-confirmation">
               <h3 style={{ textDecoration: 'underline' }}>Payment Receipt</h3>
               <div className="payment-receipt">
-                {amountBilled !== undefined && (
+                {getAmountBilled() !== undefined && (
                   <div className="receipt-row">
                     <span className="receipt-label">Amount Billed:</span>
-                    <span className="receipt-value">${Number(amountBilled).toFixed(2)}</span>
+                    <span className="receipt-value">${getAmountBilled()}</span>
                   </div>
                 )}
                 <div className="receipt-row">
                   <span className="receipt-label">Card:</span>
-                  <span className="receipt-value">{getCardType()} ending in {getLastFour()}</span>
+                  <span className="receipt-value">ending in {getLastFour()}</span>
                 </div>
                 {transactionId && (
                   <div className="receipt-row">

@@ -71,6 +71,11 @@ const formatCardType = (cardType) => {
     case "AMERICAN EXPRESS":
     case "AMEX":
       return "AMEX";
+    case "CREDIT":
+    case "CREDITCARD":
+    case "CREDIT CARD":
+      // Some gateways send generic 'CREDIT' - if last4 is present, leave generic blank so UI shows 'ending in 1234'
+      return "";
     default:
       return cardType; // Return as-is if not recognized
   }
@@ -129,7 +134,7 @@ const executeSqlProcedure = async (procedureName, clubId, params = []) => {
       sqlError: error.sqlError || "Unknown",
       isamError: error.isamError || "Unknown",
       fullError: error,
-      query: `EXECUTE PROCEDURE ${actualProcedureName}(${Array(params.length)
+      query: `EXECUTE PROCEDURE ${procedureName}(${Array(params.length)
         .fill("?")
         .join(", ")})`,
       params: params,
@@ -1005,12 +1010,14 @@ export const submitEnrollment = async (req, res) => {
     const proratedDuesAddon = proratedDues + proratedAddonsTotal;
     const proratedDuesAddonTax = proratedDuesTax + proratedAddonsTax;
     // Use totalCollected from frontend if available, otherwise calculate
-    const totalProrateBilled = req.body.totalCollected
-      ? parseFloat(req.body.totalCollected)
-      : proratedDuesAddon +
-        proratedDuesAddonTax +
-        ptPackageAmount +
-        initiationFee;
+    const requestedTotalCollected = parseFloat(req.body.totalCollected);
+    const totalProrateBilled =
+      requestedTotalCollected && requestedTotalCollected > 0
+        ? requestedTotalCollected
+        : proratedDuesAddon +
+          proratedDuesAddonTax +
+          ptPackageAmount +
+          initiationFee;
 
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";
