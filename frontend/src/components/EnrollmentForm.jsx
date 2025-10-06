@@ -787,27 +787,32 @@ function EnrollmentForm() {
     fetchTaxRate();
   }, [selectedClub]);
 
-  // Fetch sales reps when club changes
-  useEffect(() => {
-    const fetchSalesReps = async () => {
-      if (!selectedClub) return;
-      
-      setLoadingSalesReps(true);
-      try {
-        const response = await api.get(`/enrollment/sales-reps?clubId=${selectedClub.id}`);
-        if (response.data.success) {
-          setSalesReps(response.data.salesReps);
-        }
-      } catch (error) {
-        console.error('Error fetching sales reps:', error);
-        setSalesReps([]);
-      } finally {
-        setLoadingSalesReps(false);
-      }
-    };
+	// Fetch sales reps, preferring clubId from URL if present (prevents default CO reps on first load)
+	useEffect(() => {
+		const fetchSalesReps = async () => {
+			// Derive clubId from URL query first, then fall back to selectedClub
+			const params = new URLSearchParams(location.search || "");
+			const urlClubId =
+				params.get("club") || params.get("clubId") || params.get("clubid");
+			const effectiveClubId = urlClubId || selectedClub?.id;
+			if (!effectiveClubId) return;
+			
+			setLoadingSalesReps(true);
+			try {
+				const response = await api.get(`/enrollment/sales-reps?clubId=${effectiveClubId}`);
+				if (response.data.success) {
+					setSalesReps(response.data.salesReps);
+				}
+			} catch (error) {
+				console.error('Error fetching sales reps:', error);
+				setSalesReps([]);
+			} finally {
+				setLoadingSalesReps(false);
+			}
+		};
 
-    fetchSalesReps();
-  }, [selectedClub]);
+		fetchSalesReps();
+	}, [selectedClub, location.search]);
 
   // State for form submission status
   const [submitError, setSubmitError] = useState("");

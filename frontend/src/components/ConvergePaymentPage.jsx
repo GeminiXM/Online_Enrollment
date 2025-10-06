@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
@@ -28,6 +28,7 @@ const ConvergePaymentPage = () => {
   const [processorName, setProcessorName] = useState('');
   const [processorInfo, setProcessorInfo] = useState(null);
   const [errors, setErrors] = useState({});
+  const payButtonRef = useRef(null);
 
   // Non-invasive Test Mode flag (off by default). Enable via Vite env or localStorage.
   const isTestMode =
@@ -391,7 +392,7 @@ const ConvergePaymentPage = () => {
         const amountFromGateway = result.ssl_amount;
         const amount = amountFromGateway || calculateProratedAmount().toFixed(2);
 
-        devLogger.log('Converge approved - raw result subset:', {
+      devLogger.log('Converge approved - raw result subset:', {
           ssl_transaction_id: result.ssl_transaction_id,
           ssl_txn_id: result.ssl_txn_id,
           ssl_approval_code: result.ssl_approval_code,
@@ -401,6 +402,7 @@ const ConvergePaymentPage = () => {
           ssl_card_short_description: result.ssl_card_short_description,
           ssl_exp_date: result.ssl_exp_date,
           ssl_amount: result.ssl_amount,
+          ssl_customer_id: result.ssl_customer_id,
           derived: { normalizedLast4, maskedCardNumber, cardType, expirationDate, amount }
         });
 
@@ -420,7 +422,8 @@ const ConvergePaymentPage = () => {
           expirationDate,
           amount,
           timestamp: new Date().toISOString(),
-          vault_token: result.ssl_token
+          vault_token: result.ssl_token,
+          customerId: result.ssl_customer_id || ''
         };
 
         setPaymentResponse(normalizedPaymentResponse);
@@ -456,13 +459,20 @@ const ConvergePaymentPage = () => {
 
     try {
       devLogger.log("Opening Converge modal with token:", token);
-      // Ensure the modal is immediately visible by scrolling to top where Converge anchors its overlay
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (_) {
+      // Ensure the modal is immediately visible (Converge overlays anchor to page top)
+      const scrollToTopNow = () => {
+        const container = document.querySelector('.payment-container');
+        if (container && container.scrollIntoView) {
+          try { container.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (_) { /* noop */ }
+        }
         window.scrollTo(0, 0);
-      }
-      
+        document.documentElement && (document.documentElement.scrollTop = 0);
+        document.body && (document.body.scrollTop = 0);
+      };
+      scrollToTopNow();
+      // Give the browser a frame to apply the scroll before opening
+      await new Promise(r => setTimeout(r, 150));
+
       window.PayWithConverge.open(
         { ssl_txn_auth_token: token },
         (result) => {
@@ -475,6 +485,10 @@ const ConvergePaymentPage = () => {
           setIsSubmitting(false);
         }
       );
+      // Reinforce scroll after modal attaches
+      setTimeout(() => {
+        try { window.scrollTo(0, 0); } catch (_) {}
+      }, 50);
     } catch (error) {
       devLogger.error('Error opening Converge modal:', error);
       setSubmitError('Failed to open payment modal');
@@ -567,7 +581,8 @@ const ConvergePaymentPage = () => {
           last4: paymentResult.maskedCardNumber || (paymentResult.card_info?.last_four ? '************' + paymentResult.card_info.last_four : ''),
           cardType: paymentResult.cardType || paymentResult.card_info?.card_type || '',
           expirationDate: paymentResult.expirationDate || '',
-          vaultToken: paymentResult.vault_token
+          vaultToken: paymentResult.vault_token,
+          customerId: paymentResult.customerId || ''
         }
       };
 
@@ -786,6 +801,7 @@ const ConvergePaymentPage = () => {
               type="button" 
               className="primary-button"
               onClick={processConvergePayment}
+              ref={payButtonRef}
               disabled={isSubmitting || isLoadingConverge || !convergeInfo}
             >
               {isSubmitting || isLoadingConverge ? "Processing..." : "Process Payment"}

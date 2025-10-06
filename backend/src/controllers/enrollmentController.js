@@ -464,13 +464,27 @@ export const submitEnrollment = async (req, res) => {
     } = req.body;
 
     // Extract payment data for database insertion
+    const last4Digits = (paymentInfo?.last4 || "").toString().slice(-4);
+    const maskedCardNumber = last4Digits
+      ? formatCardNumber(last4Digits)
+      : paymentInfo?.cardNumber || "";
+
     const paymentData = {
       token: paymentInfo?.vaultToken || "", // Use vault token, not transaction ID
       cardExpDate: paymentInfo?.expirationDate || "", // Already formatted as YYYY-MM-DD
-      cardNumber: paymentInfo?.last4 || "", // Already formatted as ************2156
+      cardNumber: maskedCardNumber, // Always store masked form ************NNNN
       cardType: formatCardType(paymentInfo?.cardType || ""),
       processorName: paymentInfo?.processorName || "",
     };
+    const cardTypeUpper = (paymentData.cardType || "").toString().toUpperCase();
+
+    // Derive card holder (limit to 20 chars per schema)
+    const rawCardHolder =
+      paymentInfo?.customerId ||
+      paymentInfo?.ssl_customer_id ||
+      `${firstName || ""} ${lastName || ""}`.trim();
+    const cardHolderValue = (rawCardHolder || "").toString().substring(0, 20);
+    const cardHolderValueUpper = cardHolderValue.toUpperCase();
 
     logger.info("Payment data extracted:", paymentData);
     logger.info("PT selection:", { hasPTAddon, ptPackage });
@@ -637,8 +651,8 @@ export const submitEnrollment = async (req, res) => {
       paymentData.cardExpDate, // parCcExpDate - from payment processor
       paymentData.cardNumber, // parCardNo - last 4 digits with asterisks
       paymentData.cardExpDate, // parExpDate - same as parCcExpDate
-      "", // parCardHolder
-      paymentData.cardType, // parCcMethod - card type (VISA, MC, etc.)
+      cardHolderValueUpper, // parCardHolder (uppercased)
+      cardTypeUpper, // parCcMethod - uppercase issuer code
       "ONLINE", // parCreatedBy
       "ONLINE", // parSalesPersnCode
       email, // parEmail
@@ -1110,9 +1124,13 @@ export const submitEnrollment = async (req, res) => {
         grossDues: grossDues.toFixed(2),
         totalTaxAmount: totalTaxAmount.toFixed(2),
         club,
-        cardType: paymentData.cardType,
+        cardType: cardTypeUpper,
         cardExpDate: paymentData.cardExpDate,
         cardNumber: paymentData.cardNumber,
+        cardHolder:
+          req.body?.paymentInfo?.customerId ||
+          req.body?.paymentInfo?.ssl_customer_id ||
+          `${req.body.firstName || ""} ${req.body.lastName || ""}`.trim(),
         proratedDues: proratedDues.toFixed(2),
         proratedDuesTax: proratedDuesTax.toFixed(2),
         proratedAddonsTotal: proratedAddonsTotal.toFixed(2),
@@ -1139,9 +1157,13 @@ export const submitEnrollment = async (req, res) => {
           grossDues.toFixed(2), // parPrice
           totalTaxAmount.toFixed(2), // parTax
           parseInt(club), // parClub - convert to integer
-          paymentData.cardType, // parCC_Issuer
+          cardTypeUpper, // parCC_Issuer (uppercase)
           paymentData.cardExpDate, // parCC_Exp
           paymentData.cardNumber, // parCC
+          // New parameter: parCardHolder from Converge ssl_customer_id
+          req.body?.paymentInfo?.customerId ||
+            req.body?.paymentInfo?.ssl_customer_id ||
+            `${req.body.firstName || ""} ${req.body.lastName || ""}`.trim(), // parCardHolder
           proratedDues.toFixed(2), // parProrateDues
           proratedDuesTax.toFixed(2), // parProrateDuesTax
           proratedAddonsTotal.toFixed(2), // parProrateAddonsTotal
@@ -1265,6 +1287,22 @@ export const submitEnrollment = async (req, res) => {
           transactionId,
         });
       } else {
+        // If no valid transaction id, do not attempt item inserts
+        const numericTransactionId = parseInt(transactionId);
+        if (!numericTransactionId || isNaN(numericTransactionId)) {
+          logger.error(
+            "Production migration returned invalid transactionId; skipping item inserts",
+            { resultCode, errorMessage, transactionId }
+          );
+          return res.status(500).json({
+            success: false,
+            message:
+              "Enrollment processing failed: could not create transaction header.",
+            error: errorMessage || "Missing transaction ID",
+            custCode: updatedCustCode,
+          });
+        }
+
         // Production migration successful, now insert item details with UPC codes
         logger.info(
           "Production migration successful, inserting item details with UPC codes"

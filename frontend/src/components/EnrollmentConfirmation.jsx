@@ -37,6 +37,12 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     if (!paymentResponse) return 'XXXX';
     if (paymentResponse.card_info?.last_four) return paymentResponse.card_info.last_four;
     if (paymentResponse.last4) return paymentResponse.last4;
+    if (paymentResponse.cardNumber) {
+      // Handle masked values like ****1111 or 438857******2156
+      const onlyDigits = String(paymentResponse.cardNumber).replace(/\D/g, '');
+      if (onlyDigits && onlyDigits.length >= 4) return onlyDigits.slice(-4);
+      return String(paymentResponse.cardNumber).slice(-4);
+    }
     if (paymentResponse.maskedCardNumber) return paymentResponse.maskedCardNumber.slice(-4);
     const cn = paymentResponse.ssl_card_number || paymentResponse.ssl_last4 || '';
     return cn && cn.length >= 4 ? cn.slice(-4) : 'XXXX';

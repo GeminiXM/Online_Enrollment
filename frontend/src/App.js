@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import "./App.css";
 import EnrollmentForm from "./components/EnrollmentForm.jsx";
 import LandingPage from "./components/LandingPage.jsx";
@@ -55,6 +55,7 @@ function ClubSelector() {
 function AppContent() {
   const { selectedClub, changeClub } = useClub();
   const location = window.location;
+  const routerLocation = useLocation();
   // Check if we're in development mode - header only shows in development
   const isDevelopment = process.env.NODE_ENV === "development";
   const [headerVisible, setHeaderVisible] = React.useState(isDevelopment);
@@ -72,6 +73,15 @@ function AppContent() {
   React.useEffect(() => {
     document.title = `${selectedClub.name} - Membership Enrollment`;
   }, [selectedClub]);
+
+  // Ensure each route change starts at the top of the page
+  React.useEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    } catch (_) {
+      window.scrollTo(0, 0);
+    }
+  }, [routerLocation.pathname]);
 
   // Toggle header visibility (only in development)
   const toggleHeader = React.useCallback(() => {

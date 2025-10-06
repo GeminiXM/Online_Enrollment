@@ -534,45 +534,14 @@ export const processFluidPayPayment = async (req, res) => {
         );
       }
 
-      // Try to get merchant information to check processor configuration
-      try {
-        const merchantResponse = await fetch(
-          `${fluidPayInfo.fluidpay_base_url}/api/merchant`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: fluidPayInfo.fluidpay_api_key,
-              "Content-Type": "application/json",
-            },
-          }
-        );
+      // Processor id must come from database merchant_id only per requirement
 
-        if (merchantResponse.ok) {
-          const merchantData = await merchantResponse.json();
-          logger.info("FluidPay merchant info retrieved", {
-            merchantId: merchantData.id,
-            hasDefaultProcessor: !!merchantData.default_processor,
-            processors: merchantData.processors || [],
-          });
-        }
-      } catch (merchantError) {
-        logger.warn("Could not retrieve merchant info", {
-          error: merchantError.message,
-        });
-      }
+      // New flow per FluidPay docs: Create Customer Vault first using the token,
+      // then charge using the customer/payment_method reference
+      let vaultToken = null; // will hold customerId
+      let paymentMethodId = null;
+      let paymentResponse = null;
 
-      // PRODUCTION: Make actual FluidPay API call to process the payment
-      // This is where you would use the token to make a sale/charge request
-      const paymentResponse = await processFluidPayTransaction(fluidPayInfo, {
-        token,
-        amount,
-        customerInfo,
-        user,
-        billing,
-      });
-
-      // Create customer in vault for future rebilling
-      let vaultToken = null;
       try {
         const vaultResponse = await createFluidPayCustomerVault(fluidPayInfo, {
           token,
@@ -580,17 +549,40 @@ export const processFluidPayPayment = async (req, res) => {
           user,
           billing,
         });
-        vaultToken = vaultResponse.vaultToken;
+
+        vaultToken = vaultResponse.vaultToken; // customerId
+        paymentMethodId = vaultResponse.paymentMethodId || null;
+
+        if (!vaultToken) {
+          throw new Error("No customer ID returned from FluidPay vault");
+        }
+
         logger.info("Customer vault created successfully", {
           clubId,
-          vaultToken: vaultToken ? `${vaultToken.substring(0, 10)}...` : null,
+          customerId: vaultToken ? `${vaultToken.substring(0, 10)}...` : null,
+          paymentMethodId,
         });
-      } catch (vaultError) {
-        logger.warn("Failed to create customer vault, but payment succeeded", {
-          error: vaultError.message,
+
+        // Attempt to process the sale using the customer + payment_method_id
+        paymentResponse = await processFluidPayTransaction(fluidPayInfo, {
+          amount,
+          customerInfo,
+          user,
+          billing,
+          customerId: vaultToken,
+          paymentMethodId: paymentMethodId,
+        });
+      } catch (vaultOrCustomerChargeError) {
+        logger.error("Vault creation or customer-based charge failed", {
+          error: vaultOrCustomerChargeError.message,
           clubId,
         });
-        // Don't fail the payment if vault creation fails
+        return res.status(500).json({
+          success: false,
+          message:
+            "Vault token could not be created. Please contact the club to create your membership. Details: " +
+            vaultOrCustomerChargeError.message,
+        });
       }
 
       logger.info("FluidPay payment processed successfully", {
@@ -609,7 +601,8 @@ export const processFluidPayPayment = async (req, res) => {
         cardType: paymentResponse.cardType,
         expirationDate: paymentResponse.expirationDate, // Include formatted expiration date
         amount: amount,
-        vaultToken: vaultToken, // Include vault token for database storage
+        vaultToken: vaultToken, // Return customerId for database storage (keeps response shape stable)
+        paymentMethodId: paymentMethodId || null,
         message: "Payment processed successfully",
       });
     } catch (procError) {
@@ -644,7 +637,8 @@ export const processFluidPayPayment = async (req, res) => {
  * @returns {Object} Payment response
  */
 const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
-  const { token, amount, customerInfo } = paymentData;
+  const { token, amount, customerInfo, customerId, paymentMethodId } =
+    paymentData;
 
   try {
     logger.info("Making FluidPay API call", {
@@ -658,11 +652,23 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
     const requestPayload = {
       type: "sale",
       amount: Math.round(parseFloat(amount) * 100), // Convert to cents
-      payment_method: {
-        token: token,
-      },
-      // Add processor ID - this is required for merchant accounts without default processor
-      processor_id: fluidPayInfo.merchant_id.trim(), // Use the merchant_id as processor_id
+      payment_method: customerId
+        ? {
+            customer: {
+              id: customerId,
+              ...(paymentMethodId
+                ? {
+                    payment_method_id: paymentMethodId,
+                    payment_method_type: "card",
+                  }
+                : {}),
+            },
+          }
+        : {
+            token: token,
+          },
+      // Add processor ID from database merchant_id only
+      processor_id: fluidPayInfo.merchant_id.trim(),
     };
 
     logger.info("FluidPay API request details", {
@@ -671,7 +677,11 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       merchantId: fluidPayInfo.merchant_id,
       amount: requestPayload.amount,
       amountOriginal: amount,
-      token: token ? `${token.substring(0, 10)}...` : "null",
+      token: token
+        ? `${token.substring(0, 10)}...`
+        : customerId
+        ? `customer:${customerId.substring(0, 10)}...`
+        : "null",
       customer: {
         firstName: customerInfo.firstName,
         lastName: customerInfo.lastName,
@@ -911,12 +921,9 @@ const createFluidPayCustomerVault = async (fluidPayInfo, vaultData) => {
       customerEmail: customerInfo?.email,
     });
 
-    // Prepare the vault request payload according to FluidPay documentation
+    // Prepare the initial customer create payload per FluidPay docs
     const vaultPayload = {
       description: `${customerInfo.firstName} ${customerInfo.lastName} - Club Member`,
-      payment_method: {
-        token: token,
-      },
       billing_address: {
         first_name: customerInfo.firstName || "",
         last_name: customerInfo.lastName || "",
@@ -931,13 +938,21 @@ const createFluidPayCustomerVault = async (fluidPayInfo, vaultData) => {
         phone: customerInfo.phone || "",
         fax: "",
       },
+      // Attempt to set the default payment during customer creation
+      // Some FluidPay environments support providing the token here
+      ...(token
+        ? {
+            default_payment: {
+              token: token,
+            },
+          }
+        : {}),
     };
 
     logger.info("FluidPay vault request details", {
       url: `${fluidPayInfo.fluidpay_base_url}/api/vault/customer`,
       method: "POST",
       merchantId: fluidPayInfo.merchant_id,
-      token: token ? `${token.substring(0, 10)}...` : "null",
       customer: {
         firstName: customerInfo.firstName,
         lastName: customerInfo.lastName,
@@ -946,7 +961,7 @@ const createFluidPayCustomerVault = async (fluidPayInfo, vaultData) => {
       vaultPayload: vaultPayload,
     });
 
-    // Make FluidPay vault API call
+    // 1) Create the customer first (no payment attached yet)
     const response = await fetch(
       `${fluidPayInfo.fluidpay_base_url}/api/vault/customer`,
       {
@@ -1001,9 +1016,213 @@ const createFluidPayCustomerVault = async (fluidPayInfo, vaultData) => {
       throw new Error("No vault token returned from FluidPay");
     }
 
+    const customerId = responseData.data?.id;
+    if (!customerId) {
+      throw new Error("No customer ID returned from FluidPay");
+    }
+
+    // 2) Determine if payment method already exists from creation (default_payment) and skip extra attach if so
+    let paymentMethodId =
+      responseData?.data?.data?.customer?.defaults?.payment_method_id ||
+      (Array.isArray(responseData?.data?.data?.customer?.payments?.cards)
+        ? responseData.data.data.customer.payments.cards[0]?.id
+        : null) ||
+      null;
+
+    const hasMethodFromCreate = !!paymentMethodId;
+
+    if (hasMethodFromCreate) {
+      logger.info(
+        "Skipping attach token step; payment method present from customer creation",
+        {
+          customerId: customerId.substring(0, 10) + "...",
+          paymentMethodId,
+        }
+      );
+    } else {
+      // No payment method yet; attach the token as a payment method to the customer
+      const attachTokenUrl = `${fluidPayInfo.fluidpay_base_url}/api/vault/customer/${customerId}/token`;
+      logger.info("Attaching token to FluidPay customer", {
+        url: attachTokenUrl,
+        customerId: customerId.substring(0, 10) + "...",
+      });
+
+      const attachResp = await fetch(attachTokenUrl, {
+        method: "POST",
+        headers: {
+          Authorization: fluidPayInfo.fluidpay_api_key,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      const attachText = await attachResp.text();
+      let attachData;
+      try {
+        attachData = JSON.parse(attachText);
+      } catch (e) {
+        logger.error("Failed to parse FluidPay attach token response as JSON", {
+          responseText: attachText,
+          responseStatus: attachResp.status,
+          parseError: e.message,
+        });
+        throw new Error(
+          `FluidPay attach token returned invalid JSON: ${attachText}`
+        );
+      }
+
+      logger.info("FluidPay attach token API response", {
+        httpStatus: attachResp.status,
+        responseData: attachData,
+      });
+
+      if (!attachResp.ok || attachData.status !== "success") {
+        throw new Error(
+          `FluidPay attach token failed: ${
+            attachResp.status
+          } - ${JSON.stringify(attachData)}`
+        );
+      }
+
+      // Extract created payment method id from attach
+      paymentMethodId =
+        attachData.data?.created_payment_method_id ||
+        attachData.data?.data?.customer?.defaults?.payment_method_id ||
+        (Array.isArray(attachData.data?.data?.customer?.payments?.cards)
+          ? attachData.data.data.customer.payments.cards[0]?.id
+          : null) ||
+        null;
+      if (!paymentMethodId) {
+        logger.warn("No payment method id returned after attaching token", {
+          customerId,
+          attachData,
+        });
+      }
+    }
+
+    // 3) Optionally set customer defaults (for legacy consumers) when we have a payment method id
+    try {
+      if (paymentMethodId) {
+        const setDefaultsUrl = `${fluidPayInfo.fluidpay_base_url}/api/vault/customer/${customerId}/defaults`;
+        logger.info("Setting FluidPay customer defaults", {
+          url: setDefaultsUrl,
+          customerId: customerId.substring(0, 10) + "...",
+          paymentMethodId,
+        });
+
+        const defaultsResp = await fetch(setDefaultsUrl, {
+          method: "PUT",
+          headers: {
+            Authorization: fluidPayInfo.fluidpay_api_key,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            payment_method_id: paymentMethodId,
+            type: "card",
+          }),
+        });
+
+        const defaultsText = await defaultsResp.text();
+        let defaultsData;
+        try {
+          defaultsData = JSON.parse(defaultsText);
+        } catch (e) {
+          logger.warn("FluidPay defaults response not JSON", {
+            responseText: defaultsText,
+            status: defaultsResp.status,
+          });
+        }
+
+        if (!defaultsResp.ok) {
+          logger.warn("Failed to set FluidPay customer defaults", {
+            httpStatus: defaultsResp.status,
+            response: defaultsData || defaultsText,
+          });
+        } else {
+          logger.info("FluidPay customer defaults set", {
+            httpStatus: defaultsResp.status,
+            response: defaultsData,
+          });
+        }
+      }
+    } catch (defaultsErr) {
+      logger.warn("Error while setting FluidPay customer defaults", {
+        error: defaultsErr.message,
+        customerId,
+      });
+    }
+
+    // 4) Verify customer record reflects expected data (payments and defaults) for legacy
+    try {
+      const getCustomerUrl = `${fluidPayInfo.fluidpay_base_url}/api/vault/customer/${customerId}`;
+      const verifyResp = await fetch(getCustomerUrl, {
+        method: "GET",
+        headers: {
+          Authorization: fluidPayInfo.fluidpay_api_key,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const verifyText = await verifyResp.text();
+      let verifyData;
+      try {
+        verifyData = JSON.parse(verifyText);
+      } catch (e) {
+        logger.warn("FluidPay verify customer response not JSON", {
+          responseText: verifyText,
+          status: verifyResp.status,
+        });
+      }
+
+      const currentDefaultsId =
+        verifyData?.data?.data?.customer?.defaults?.payment_method_id || null;
+      const cardList = verifyData?.data?.data?.customer?.payments?.cards || [];
+
+      logger.info("FluidPay customer verification", {
+        httpStatus: verifyResp.status,
+        defaultsPaymentMethodId: currentDefaultsId,
+        cardsCount: Array.isArray(cardList) ? cardList.length : 0,
+      });
+
+      // If defaults still not set but we do have a card id, set defaults again
+      if (
+        !currentDefaultsId &&
+        Array.isArray(cardList) &&
+        cardList.length > 0
+      ) {
+        const fallbackCardId = cardList[0]?.id;
+        if (fallbackCardId) {
+          const setDefaultsUrl2 = `${fluidPayInfo.fluidpay_base_url}/api/vault/customer/${customerId}/defaults`;
+          logger.info("Setting FluidPay customer defaults (fallback)", {
+            url: setDefaultsUrl2,
+            customerId: customerId.substring(0, 10) + "...",
+            fallbackCardId,
+          });
+
+          await fetch(setDefaultsUrl2, {
+            method: "PUT",
+            headers: {
+              Authorization: fluidPayInfo.fluidpay_api_key,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              payment_method_id: fallbackCardId,
+              type: "card",
+            }),
+          });
+        }
+      }
+    } catch (verifyErr) {
+      logger.warn("Error verifying FluidPay customer record", {
+        error: verifyErr.message,
+        customerId,
+      });
+    }
+
     return {
-      vaultToken: vaultToken,
-      vaultId: responseData.data?.id,
+      vaultToken: customerId, // customerId
+      vaultId: customerId,
+      paymentMethodId,
       status: responseData.status,
       response: responseData,
     };

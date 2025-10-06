@@ -583,8 +583,9 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Route to Converge payment page
-      const paymentRoute = '/converge-payment';
+      // Route based on club state: CO -> FluidPay, NM -> Converge (default to Converge)
+      const isColoradoClub = selectedClub?.state === 'CO';
+      const paymentRoute = isColoradoClub ? '/payment-fluidpay' : '/converge-payment';
       
       console.log(`Routing to ${paymentRoute}`);
       console.log('ContractPage - Passing data to payment:', {

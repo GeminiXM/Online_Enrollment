@@ -517,7 +517,8 @@ const processPaymentWithToken = async (token, tokenizerResponse) => {
     }
   } catch (error) {
     console.error('Error processing payment:', error);
-    setErrorMessage('Payment processing failed. Please check your card information and try again.');
+    const serverMessage = error?.response?.data?.message || error?.message || 'Payment processing failed.';
+    setErrorMessage(serverMessage);
     setIsSubmitting(false);
     setShowResultPopup(false);
   }
