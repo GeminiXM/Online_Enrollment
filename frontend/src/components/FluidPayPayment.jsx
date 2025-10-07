@@ -452,15 +452,20 @@ const FluidPayPayment = () => {
         apikey: apiKey,
         container: '#fluidpay-tokenizer-container',
         amount: calculateProratedAmount().toFixed(2),
+        // Provide both camelCase and snake_case to maximize prefill compatibility
         user: {
           firstName: customerInfo.firstName || '',
-          lastName: customerInfo.lastName || ''
+          lastName: customerInfo.lastName || '',
+          first_name: customerInfo.firstName || '',
+          last_name: customerInfo.lastName || ''
         },
         billing: {
           address: customerInfo.address || '',
+          address_line_1: customerInfo.address || '',
           city: customerInfo.city || '',
           state: customerInfo.state || '',
-          zip: customerInfo.zipCode || ''
+          zip: customerInfo.zipCode || '',
+          postal_code: customerInfo.zipCode || ''
         },
 
         settings: {

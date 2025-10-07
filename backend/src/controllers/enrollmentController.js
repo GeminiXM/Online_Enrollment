@@ -619,11 +619,68 @@ export const submitEnrollment = async (req, res) => {
     custCode = String(custCode).trim();
     logger.info("Using customer code:", { custCode });
 
+    // Determine bridge code: specialty (Senior/Junior/SYP) → DB bridge code; else use custCode
+    let bridgeCodeToUse = custCode;
+    try {
+      if (
+        specialtyMembership &&
+        ["S", "J", "Y"].includes(specialtyMembership)
+      ) {
+        logger.info("Fetching specialty bridge code", {
+          club,
+          specialtyMembership,
+        });
+        const bridgeResult = await executeSqlProcedure(
+          "web_proc_GetSpecialtyMembershipBridgeCode",
+          club,
+          [club, specialtyMembership]
+        );
+        if (Array.isArray(bridgeResult) && bridgeResult.length > 0) {
+          const firstRow = bridgeResult[0] || {};
+          let resolved = "";
+          if (firstRow.specialty_bridge_code !== undefined) {
+            resolved = firstRow.specialty_bridge_code;
+          } else {
+            const firstKey = Object.keys(firstRow)[0];
+            if (firstKey) resolved = firstRow[firstKey];
+          }
+          if (resolved && String(resolved).trim() !== "") {
+            bridgeCodeToUse = String(resolved).trim();
+          } else if (specialtyMembership === "J") {
+            // Junior fallback
+            bridgeCodeToUse = "181818";
+          } else if (specialtyMembership === "S") {
+            // Senior fallback
+            bridgeCodeToUse = "656565";
+          } else if (specialtyMembership === "Y") {
+            // SYP fallback
+            bridgeCodeToUse = "2929";
+          }
+        } else if (specialtyMembership === "J") {
+          bridgeCodeToUse = "181818";
+        } else if (specialtyMembership === "S") {
+          bridgeCodeToUse = "656565";
+        } else if (specialtyMembership === "Y") {
+          bridgeCodeToUse = "2929";
+        }
+      }
+    } catch (bridgeError) {
+      logger.warn(
+        "Unable to resolve specialty bridge code, defaulting to custCode",
+        {
+          error: bridgeError.message,
+          specialtyMembership,
+        }
+      );
+      bridgeCodeToUse = custCode;
+    }
+
     // 2. Insert primary membership record using web_proc_InsertWebStrcustr
     logger.info("Inserting primary membership record:", {
       busName,
       club,
       custCode,
+      bridgeCodeToUse,
       paymentData,
     });
 
@@ -638,7 +695,7 @@ export const submitEnrollment = async (req, res) => {
 
     await executeSqlProcedure("web_proc_InsertWebStrcustr", club, [
       custCode, // parCustCode - using generated ID
-      custCode, // parBridgeCode - using same ID for bridge code
+      bridgeCodeToUse, // parBridgeCode - specialty bridge code or custCode
       busName, // parBusName (already uppercase)
       "", // parCreditRep
       phone, // parPhone

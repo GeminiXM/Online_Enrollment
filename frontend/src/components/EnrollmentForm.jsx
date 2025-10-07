@@ -3016,7 +3016,7 @@ function EnrollmentForm() {
  case 'youth':
   return (
     <div className="youth-tab">
-      <h3>Add Youth Member</h3>
+      <h3>Submit Youth Members</h3>
       <p>Add a youth member (12–20 years) to your membership.</p>
 
       {/* New Mexico club specific messages */}
@@ -3255,9 +3255,9 @@ function EnrollmentForm() {
             type="button"
             className="add-member-button"
             onClick={() => addFamilyMember('youth')}
-            aria-label="Add youth family member"
+            aria-label="Submit youth family members"
           >
-            Add Youth Member
+            Submit Youth Members
           </button>
         </div>
       </div>
