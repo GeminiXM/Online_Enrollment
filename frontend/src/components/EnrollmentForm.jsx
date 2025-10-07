@@ -2802,7 +2802,7 @@ function EnrollmentForm() {
                         className="add-member-button"
                         onClick={handleAddChildMember}
                       >
-                        Add {childForms.length} {childForms.length === 1 ? 'Child' : 'Children'}
+                        Submit Children
                       </button>
                     </div>
                   </div>
@@ -3004,7 +3004,7 @@ function EnrollmentForm() {
                         marginTop: '20px'
                       }}
                     >
-                      Add Child Member
+                      Submit Children
                     </button>
                   </div>
                 )}
