@@ -12,6 +12,7 @@ execute procedure web_proc_InsertWebAsamembr(parCustCode,
              parMobilePhone,
              parEmail,
              parRole,
-             parCreatedDate
+             parCreatedDate,
+             parCard_Num
          );
 )

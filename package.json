@@ -1,6 +1,6 @@
 {
   "name": "online-enrollment",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Online enrollment system with React frontend and Node.js backend",
   "main": "index.js",
   "scripts": {

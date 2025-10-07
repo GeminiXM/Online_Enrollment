@@ -741,6 +741,7 @@ export const submitEnrollment = async (req, res) => {
       email, // parEmail
       "P", // parRole (P for primary)
       new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
+      1, // parCard_Num - primary is always 1
     ]);
 
     logger.info("Primary member record inserted successfully");
@@ -777,6 +778,8 @@ export const submitEnrollment = async (req, res) => {
 
       // Track the next member code to use
       let nextMbrCode = 1;
+      // Track the next card number: 2 for secondary (if any), then dependents continue. If no secondary, dependents start at 2
+      let nextCardNum = 2;
 
       // Process adult members first (role = 'S')
       const adultMembers = familyMembers.filter(
@@ -815,9 +818,11 @@ export const submitEnrollment = async (req, res) => {
           new Date().toLocaleDateString("en-CA", {
             timeZone: "America/Denver",
           }), // parCreatedDate - current date in YYYY-MM-DD format
+          nextCardNum, // parCard_Num - secondary gets next card number
         ]);
 
         nextMbrCode++;
+        nextCardNum++;
         logger.info("Adult family member inserted successfully");
       }
 
@@ -860,9 +865,11 @@ export const submitEnrollment = async (req, res) => {
           new Date().toLocaleDateString("en-CA", {
             timeZone: "America/Denver",
           }), // parCreatedDate - current date in YYYY-MM-DD format
+          nextCardNum, // parCard_Num - dependents continue the sequence
         ]);
 
         nextMbrCode++;
+        nextCardNum++;
         logger.info("Dependent family member inserted successfully");
       }
     } else {
@@ -890,6 +897,7 @@ export const submitEnrollment = async (req, res) => {
         guardian.email || "", // parEmail
         "G", // parRole (G for guardian)
         new Date().toLocaleDateString("en-CA", { timeZone: "America/Denver" }), // parCreatedDate - current date in YYYY-MM-DD format
+        0, // parCard_Num - guardian does not receive a membership card number
       ]);
 
       logger.info("Guardian inserted successfully");

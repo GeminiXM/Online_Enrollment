@@ -504,7 +504,9 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     const paymentMethodEndY = pdf.lastAutoTable.finalY;
     const formatCreditCardNumber = (ccNumber) => {
       if (!ccNumber) return '';
-      return ccNumber.replace(/\d(?=\d{4})/g, '*');
+      const digits = String(ccNumber).replace(/\D/g, '');
+      const last4 = digits.slice(-4);
+      return last4 ? `************${last4}` : '';
     };
     autoTable(pdf, {
       startY: paymentMethodEndY + 5,
@@ -513,7 +515,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
         [
           formatCreditCardNumber(formData.creditCardNumber || ''),
           formatDate(formData.expirationDate || ''),
-          `${formData.firstName || ''} ${formData.lastName || ''}`
+          formData.nameOnAccount || `${formData.firstName || ''} ${formData.lastName || ''}`
         ]
       ],
       theme: 'grid',

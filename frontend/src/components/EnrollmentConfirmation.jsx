@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import devLogger from "../utils/devLogger";
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import CanvasContractPDF from './CanvasContractPDF';
 import CanvasContractDenverPDF from './CanvasContractDenverPDF';
@@ -11,7 +11,7 @@ import './EnrollmentConfirmation.css';
 
 function EnrollmentConfirmation() {
   const location = useLocation();
-  const { enrollmentData, memberName, successMessage, paymentResponse, formData, signatureData, initialedSections, email, amountBilled, membershipNumber, transactionId } = location.state || {};
+  const { enrollmentData, memberName, paymentResponse, formData, signatureData, initialedSections, email, amountBilled, membershipNumber, transactionId } = location.state || {};
   const { selectedClub } = useClub();
   
 // Debug logging
@@ -22,7 +22,7 @@ devLogger.log('EnrollmentConfirmation - amountBilled:', amountBilled);
 devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled);
 
   // Format the payment timestamp
-  const formatTimestamp = () => {
+  const formatTimestamp = useCallback(() => {
     // Use the payment timestamp if available, otherwise use current time
     if (paymentResponse?.timestamp) {
       return new Date(paymentResponse.timestamp).toLocaleString();
@@ -30,7 +30,7 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     // Fallback to current time if no payment timestamp
     const now = new Date();
     return now.toLocaleString();
-  };
+  }, [paymentResponse?.timestamp]);
 
   // Get last 4 digits of the card (normalized across processors)
   const getLastFour = () => {
@@ -49,13 +49,13 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
   };
   
   // Get the card type (normalized)
-  const getCardType = () => {
-    if (!paymentResponse) return 'Credit Card';
-    if (paymentResponse.cardType) return paymentResponse.cardType;
-    if (paymentResponse.card_info?.card_type) return paymentResponse.card_info.card_type;
-    if (paymentResponse.ssl_card_type) return paymentResponse.ssl_card_type;
-    return 'Credit Card';
-  };
+  // const getCardType = () => {
+  //   if (!paymentResponse) return 'Credit Card';
+  //   if (paymentResponse.cardType) return paymentResponse.cardType;
+  //   if (paymentResponse.card_info?.card_type) return paymentResponse.card_info.card_type;
+  //   if (paymentResponse.ssl_card_type) return paymentResponse.ssl_card_type;
+  //   return 'Credit Card';
+  // };
 
   // Get billed amount with fallbacks (prefer processor amount)
   const getAmountBilled = () => {
@@ -65,6 +65,32 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     const fromEnrollment = enrollmentData?.amountBilled;
     if (fromEnrollment && !isNaN(parseFloat(fromEnrollment))) return Number(fromEnrollment).toFixed(2);
     return undefined;
+  };
+
+  // Derive Payment Authorization fields for contract PDFs (download buttons)
+  const getPaymentBrandUpper = () => {
+    const brand = (paymentResponse?.cardType || paymentResponse?.ssl_card_short_description || paymentResponse?.ssl_card_type || paymentResponse?.card?.card_type || '').toString();
+    return brand ? brand.toUpperCase() : '';
+  };
+  const getMaskedCardForPdf = () => {
+    const rawNumber = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+    const last4 = rawNumber.replace(/\D/g, '').slice(-4);
+    return last4 ? `************${last4}` : '';
+  };
+  const getExpirationForPdf = () => {
+    return (paymentResponse?.expirationDate || paymentResponse?.ssl_exp_date || paymentResponse?.card?.expiration_date || formData?.expirationDate || '').toString();
+  };
+  const getNameOnAccountForPdf = () => {
+    const name = (
+      paymentResponse?.card?.cardholder_name ||
+      paymentResponse?.cardholder ||
+      (paymentResponse?.ssl_first_name && paymentResponse?.ssl_last_name
+        ? `${paymentResponse.ssl_first_name} ${paymentResponse.ssl_last_name}`
+        : '') ||
+      paymentResponse?.ssl_cardholder ||
+      `${formData?.firstName || ''} ${formData?.lastName || ''}`
+    );
+    return (name || '').trim();
   };
   
   // // Get transaction ID
@@ -112,9 +138,31 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
             devLogger.log('Generating contract PDF for payment processor:', paymentResponse?.processor);
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
+            // Derive payment display details for PDF
+            const brand = (paymentResponse?.cardType || paymentResponse?.ssl_card_short_description || paymentResponse?.ssl_card_type || paymentResponse?.card?.card_type || '').toString();
+            const rawNumber = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+            const last4 = rawNumber.replace(/\D/g, '').slice(-4);
+            const maskedNumber = last4 ? `************${last4}` : (rawNumber || '');
+            const exp = (paymentResponse?.expirationDate || paymentResponse?.ssl_exp_date || paymentResponse?.card?.expiration_date || formData?.expirationDate || '').toString();
+
+            // Derive name on account from processor response
+            const nameOnAccount = (
+              paymentResponse?.card?.cardholder_name ||
+              paymentResponse?.cardholder ||
+              (paymentResponse?.ssl_first_name && paymentResponse?.ssl_last_name
+                ? `${paymentResponse.ssl_first_name} ${paymentResponse.ssl_last_name}`
+                : '') ||
+              paymentResponse?.ssl_cardholder ||
+              `${formData.firstName || ''} ${formData.lastName || ''}`
+            ).trim();
+
             const pdfFormData = {
               ...formData,
-              membershipId: membershipNumber // Add membership ID to formData
+              membershipId: membershipNumber,
+              paymentMethod: brand ? `Credit Card - ${brand.toUpperCase()}` : 'Credit Card',
+              creditCardNumber: maskedNumber,
+              expirationDate: exp,
+              nameOnAccount,
             };
             
             devLogger.log('PDF generation - formData with membershipId:', {
@@ -183,9 +231,29 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
           try {
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
+            const brand2 = (paymentResponse?.cardType || paymentResponse?.ssl_card_short_description || paymentResponse?.ssl_card_type || paymentResponse?.card?.card_type || '').toString();
+            const rawNumber2 = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+            const last42 = rawNumber2.replace(/\D/g, '').slice(-4);
+            const maskedNumber2 = last42 ? `************${last42}` : (rawNumber2 || '');
+            const exp2 = (paymentResponse?.expirationDate || paymentResponse?.ssl_exp_date || paymentResponse?.card?.expiration_date || formData?.expirationDate || '').toString();
+
+            const nameOnAccount2 = (
+              paymentResponse?.card?.cardholder_name ||
+              paymentResponse?.cardholder ||
+              (paymentResponse?.ssl_first_name && paymentResponse?.ssl_last_name
+                ? `${paymentResponse.ssl_first_name} ${paymentResponse.ssl_last_name}`
+                : '') ||
+              paymentResponse?.ssl_cardholder ||
+              `${formData.firstName || ''} ${formData.lastName || ''}`
+            ).trim();
+
             const pdfFormData = {
               ...formData,
-              membershipId: membershipNumber
+              membershipId: membershipNumber,
+              paymentMethod: brand2 ? `Credit Card - ${brand2.toUpperCase()}` : 'Credit Card',
+              creditCardNumber: maskedNumber2,
+              expirationDate: exp2,
+              nameOnAccount: nameOnAccount2,
             };
             
             const pdfBuffer = await generatePDFBuffer(
@@ -238,7 +306,7 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     };
 
     saveContractAndSendEmail();
-  }, [formData, signatureData, initialedSections, selectedClub, membershipNumber, transactionId, paymentResponse]);
+  }, [formData, signatureData, initialedSections, selectedClub, membershipNumber, transactionId, paymentResponse, amountBilled, formatTimestamp]);
 
   return (
     <div className="enrollment-confirmation">
@@ -328,7 +396,11 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
                 <CanvasContractPDF 
                   formData={{
                     ...formData,
-                    membershipId: membershipNumber // Add membership ID to formData
+                    membershipId: membershipNumber,
+                    paymentMethod: getPaymentBrandUpper() ? `Credit Card - ${getPaymentBrandUpper()}` : 'Credit Card',
+                    creditCardNumber: getMaskedCardForPdf(),
+                    expirationDate: getExpirationForPdf(),
+                    nameOnAccount: getNameOnAccountForPdf()
                   }}
                   signatureData={signatureData}
                   signatureDate={formatTimestamp()}
@@ -340,7 +412,11 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
                 <CanvasContractDenverPDF 
                   formData={{
                     ...formData,
-                    membershipId: membershipNumber // Add membership ID to formData
+                    membershipId: membershipNumber,
+                    paymentMethod: getPaymentBrandUpper() ? `Credit Card - ${getPaymentBrandUpper()}` : 'Credit Card',
+                    creditCardNumber: getMaskedCardForPdf(),
+                    expirationDate: getExpirationForPdf(),
+                    nameOnAccount: getNameOnAccountForPdf()
                   }}
                   signatureData={signatureData}
                   signatureDate={formatTimestamp()}
