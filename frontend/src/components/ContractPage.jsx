@@ -13,6 +13,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
+import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
@@ -74,6 +76,19 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
 });
 
 const ContractPage = () => {
+  // Always start at top when this page mounts inside iframe
+  useScrollTopOnMount();
+  const titleRef = React.useRef(null);
+  useNotifyParentScroll('membership-agreement');
+
+  // After mount, scroll specifically to Membership Agreement title
+  useEffect(() => {
+    if (titleRef.current) {
+      try {
+        titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (_) {}
+    }
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -823,7 +838,7 @@ const ContractPage = () => {
     <div className="contract-container">
 
         
-      <h1>Membership Agreement</h1>
+      <h1 ref={titleRef} id="membership-agreement">Membership Agreement</h1>
       
       <div className="member-info-summary">
         <h2>Membership Information</h2>

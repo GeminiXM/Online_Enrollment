@@ -80,6 +80,7 @@ body {
   top: 2rem;
   max-width: 28%; /* Adjusted to match the increased form width */
   min-width: 250px;
+  margin-top: 2.75rem; /* match spacing under instructions */
   align-self: flex-start;
 }
 
@@ -499,6 +500,7 @@ button:focus-visible {
 
 /* Adjust spacing between sections */
 .start-date-row {
+  margin-top: 2.75rem; /* add space after instructions */
   margin-bottom: 0.75rem; /* Increased from 0.5rem */
   display: flex;
   gap: 20px;
@@ -571,6 +573,8 @@ button:focus-visible {
   
   .form-instructions {
     font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.25rem;
   }
   
   .enrollment-form h2, .shopping-cart h2 {

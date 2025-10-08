@@ -77,11 +77,12 @@ function AppContent() {
   // Ensure each route change starts at the top of the page
   React.useEffect(() => {
     try {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      // 'instant' not widely supported; fallback to immediate
+      window.scrollTo(0, 0);
     } catch (_) {
       window.scrollTo(0, 0);
     }
-  }, [routerLocation.pathname]);
+  }, [routerLocation.pathname, routerLocation.search]);
 
   // Toggle header visibility (only in development)
   const toggleHeader = React.useCallback(() => {

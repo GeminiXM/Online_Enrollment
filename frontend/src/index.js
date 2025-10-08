@@ -10,6 +10,12 @@ import "./utils/errorLogger.js";
 import "./utils/consoleLogger.js";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
+// Disable browser scroll restoration so SPA controls scroll position
+try {
+  if ("scrollRestoration" in window.history) {
+    window.history.scrollRestoration = "manual";
+  }
+} catch (_) {}
 root.render(
   <React.StrictMode>
     <BrowserRouter basename="/online-enrollment">

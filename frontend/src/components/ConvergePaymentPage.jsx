@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
+import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
@@ -6,6 +8,17 @@ import api from '../services/api.js';
 import './ConvergePaymentPage.css';
 
 const ConvergePaymentPage = () => {
+  useScrollTopOnMount();
+  const paymentSummaryRef = React.useRef(null);
+  useNotifyParentScroll('payment-summary');
+
+  useEffect(() => {
+    if (paymentSummaryRef.current) {
+      try {
+        paymentSummaryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (_) {}
+    }
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -681,7 +694,7 @@ const ConvergePaymentPage = () => {
     
     <div className="payment-layout">
       <div className="payment-summary">
-        <h2>Payment Summary</h2>
+        <h2 ref={paymentSummaryRef} id="payment-summary">Payment Summary</h2>
         
         <div className="membership-summary">
           <h3>Membership Details</h3>

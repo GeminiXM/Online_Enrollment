@@ -2,7 +2,8 @@
 // This component displays a form to collect user information for a gym membership enrollment.
 // It includes form validation, secure data handling, and follows accessibility best practices.
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
 import devLogger from "../utils/devLogger";
@@ -191,6 +192,8 @@ const determineMembershipTypeByAge = (dateOfBirth) => {
 // });
 
 function EnrollmentForm() {
+  // Always start at top when this page mounts inside iframe
+  useScrollTopOnMount();
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -232,6 +235,11 @@ function EnrollmentForm() {
   const [lastSaved, setLastSaved] = useState(null);
   const [showRestorePrompt, setShowRestorePrompt] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+
+  // Add state for junior enrollment block modal
+  const [showJuniorBlockModal, setShowJuniorBlockModal] = useState(false);
+  // Anchor to scroll to the primary DOB field when blocking juniors
+  const primaryDobRef = useRef(null);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -1063,7 +1071,15 @@ function EnrollmentForm() {
   // Handle input changes for the main form
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+    // Immediately block Junior ages (12-17) on primary DOB entry
+    if (name === 'dateOfBirth') {
+      const age = calculateAge(value);
+      if (age !== null && age >= 12 && age <= 17) {
+        setShowJuniorBlockModal(true);
+        return; // do not set DOB or proceed
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -1397,6 +1413,8 @@ function EnrollmentForm() {
   // Handle form submission - COMPLETELY REDESIGNED to work in all cases
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const blocked = handleDobChangeBlockJunior(formData.dateOfBirth);
+    if (blocked) return;
     console.log("Form submission started - USING DIRECT NAVIGATION");
 
     // Clear any previous error
@@ -2532,7 +2550,7 @@ function EnrollmentForm() {
                 className="add-member-button"
                 onClick={() => addFamilyMember('adult')}
               >
-                Add Adult Member
+                Submit Adult Member
               </button>
             </div>
           </div>
@@ -3644,8 +3662,54 @@ function EnrollmentForm() {
     }
   }, [formData.requestedStartDate, selectedServiceAddons, selectedChildAddons, selectedClub, taxRate]);
 
+  // Helper to fully reset enrollment
+  const resetEnrollment = useCallback(async () => {
+    try {
+      await clearSavedData();
+    } catch (e) {}
+    // Close the junior modal first to ensure clicks are not blocked
+    setShowJuniorBlockModal(false);
+    // Force full reload to ensure no restore prompt appears
+    window.location.replace('/online-enrollment/enrollment');
+  }, []);
+
+  // Intercept DOB changes to block Juniors (12-17)
+  const handleDobChangeBlockJunior = useCallback((value) => {
+    const age = calculateAge(value);
+    if (age !== null && age >= 12 && age <= 17) {
+      setShowJuniorBlockModal(true);
+      return true; // blocked
+    }
+    return false;
+  }, []);
+
+  // When the junior modal opens, scroll the primary DOB into view
+  useEffect(() => {
+    if (showJuniorBlockModal) {
+      try {
+        // Scroll the application viewport to the very top so the club header and DOB are visible
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      } catch (_) {
+        window.scrollTo(0, 0);
+      }
+    }
+  }, [showJuniorBlockModal]);
+
   return (
-    <div className="enrollment-container">
+    <div className="enrollment-form-container">
+      {/* Junior block modal */}
+      {showJuniorBlockModal && (
+        <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.5)',zIndex:9999,display:'flex',alignItems:'flex-start',justifyContent:'center',paddingTop:'60px'}}>
+          <div className="modal" style={{background:'#fff',borderRadius:'8px',padding:'20px',maxWidth:'520px',width:'90%',boxShadow:'0 8px 24px rgba(0,0,0,0.2)',textAlign:'center'}}>
+            <h3>Online Enrollment Not Available</h3>
+            <p>Online Enrollment is for 18 and older adults. For a Junior membership please contact the club directly. Thank you!</p>
+            <div className="modal-actions">
+              <button className="primary-button" style={{padding:'10px 20px',background:'#007bff',color:'#fff',border:'none',borderRadius:'4px',cursor:'pointer',fontSize:'16px'}} onClick={resetEnrollment}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Restore Data Prompt */}
       {showRestorePrompt && (
         <div className="restore-prompt-overlay">
@@ -3733,6 +3797,7 @@ function EnrollmentForm() {
 
       <div className="enrollment-layout">
         {/* Main enrollment form */}
+        
         <form className="enrollment-form" onSubmit={handleSubmit} noValidate>
           {/* Primary member form fields */}
           <div className="form-row start-date-row">
@@ -3938,6 +4003,7 @@ function EnrollmentForm() {
                   type="date"
                   id="dateOfBirth"
                   name="dateOfBirth"
+                  ref={primaryDobRef}
                   value={formData.dateOfBirth}
                   onChange={handleChange}
                   placeholder="MM/DD/YYYY"

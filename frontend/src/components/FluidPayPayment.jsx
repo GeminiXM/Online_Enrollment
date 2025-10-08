@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
+import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
@@ -76,6 +78,17 @@ const CardLogos = {
 };
 
 const FluidPayPayment = () => {
+  useScrollTopOnMount();
+  const paymentSummaryRef = React.useRef(null);
+  useNotifyParentScroll('payment-summary');
+
+  useEffect(() => {
+    if (paymentSummaryRef.current) {
+      try {
+        paymentSummaryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (_) {}
+    }
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -782,7 +795,7 @@ const launchPayment = async () => {
       
       <div className="payment-layout">
         <div className="payment-summary">
-          <h2>Payment Summary</h2>
+          <h2 ref={paymentSummaryRef} id="payment-summary">Payment Summary</h2>
           
           {/* Processor info hidden from customer view */}
           

@@ -1392,12 +1392,8 @@ export const submitEnrollment = async (req, res) => {
           logger.info("Membership dues item inserted successfully");
         }
 
-        // Insert enrollment fee item with location-specific UPC code
-        const isColoradoClub =
-          club === "252" || club === "253" || club === "254"; // Denver/Colorado clubs
-        const enrollmentFeeUpcCode = isColoradoClub
-          ? "202500000713"
-          : "202500000522"; // Denver vs New Mexico
+        // Insert enrollment fee item with unified UPC code for all locations
+        const enrollmentFeeUpcCode = "202500000713";
         const enrollmentFee = 19.0; // $19 enrollment fee
         const enrollmentFeeTax = parseFloat(req.body.initiationFeeTax || 0);
 
@@ -1406,8 +1402,6 @@ export const submitEnrollment = async (req, res) => {
           enrollmentFeeUpcCode,
           "Club:",
           club,
-          "Is Colorado club:",
-          isColoradoClub,
           "Tax amount:",
           enrollmentFeeTax
         );
