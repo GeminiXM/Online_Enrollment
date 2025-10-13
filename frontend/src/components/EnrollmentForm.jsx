@@ -1448,6 +1448,8 @@ const handleChange = (e) => {
       errorKeys.forEach(key => delete newErrors[key]);
       return newErrors;
     });
+
+    scrollCartIntoView();
   };
   
   // Remove a family member
@@ -2011,6 +2013,8 @@ const handleChange = (e) => {
       familyMembers: [...prev.familyMembers, ...newFamilyMembers]
     }));
     
+    scrollCartIntoView();
+    
     // Switch back to members tab
     setActiveTab("members");
   };
@@ -2065,6 +2069,8 @@ const handleChange = (e) => {
       familyMembers: [...prev.familyMembers, newYouthMember]
     }));
 
+    scrollCartIntoView();
+
     // Reset youth member form
     setYouthMember({
       firstName: "",
@@ -2105,6 +2111,7 @@ const handleChange = (e) => {
         return [...prev, addon];
       }
     });
+    scrollCartIntoView();
   };
 
   // Render the tabs based on membership type
@@ -2359,6 +2366,7 @@ const handleChange = (e) => {
               selectMembershipType(standardType);
               // Also move back to members tab so user sees updated state
               setActiveTab('members');
+              scrollCartIntoView();
             } catch (_) {}
           }} 
         />
@@ -3789,6 +3797,13 @@ const handleChange = (e) => {
       }
     }
   }, [showJuniorBlockModal]);
+
+  const scrollCartIntoView = () => {
+    try {
+      const cart = document.querySelector('.shopping-cart');
+      if (cart) cart.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (_) {}
+  };
 
   return (
     <div className="enrollment-form-container">
