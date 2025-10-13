@@ -57,7 +57,7 @@ class ErrorBoundary extends React.Component {
         context: 'React Component Error'
       };
 
-      await api.post('/api/enrollment/report-error', errorPayload);
+      await api.post('/enrollment/report-error', errorPayload);
       console.log('Error reported to backend successfully');
     } catch (reportError) {
       console.error('Failed to report error to backend:', reportError);

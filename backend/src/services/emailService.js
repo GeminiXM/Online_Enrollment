@@ -432,7 +432,11 @@ class EmailService {
                   <tr><td style="width: 30px; padding: 0; vertical-align: top;">&nbsp;</td>
                       <td style="padding: 0; font-family: Arial, sans-serif;">
                         • On your smartphone, open the App Store (iPhone) or Google Play Store (Android).<br><br>
-                        • Search for "${(selectedClub?.state === 'NM') ? 'New Mexico Sports & Wellness' : 'Colorado Athletic Club'}".<br><br>
+                        • Search for "${
+                          selectedClub?.state === "NM"
+                            ? "New Mexico Sports & Wellness"
+                            : "Colorado Athletic Club"
+                        }".<br><br>
                         • Tap Download (iPhone) or Install (Android).
                       </td>
                   </tr>

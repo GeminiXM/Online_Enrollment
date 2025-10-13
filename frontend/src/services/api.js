@@ -1,9 +1,20 @@
 import axios from "axios";
 import config from "../config.js";
 
+// Normalize baseURL to avoid double /api in production proxies
+const normalizedBaseURL = (() => {
+  try {
+    // Ensure no trailing slash to prevent axios from collapsing incorrectly
+    const raw = (config.apiUrl || "").replace(/\/$/, "");
+    return raw;
+  } catch (_) {
+    return config.apiUrl;
+  }
+})();
+
 // Create an axios instance with default config
 const api = axios.create({
-  baseURL: config.apiUrl,
+  baseURL: normalizedBaseURL,
   headers: {
     "Content-Type": "application/json",
   },

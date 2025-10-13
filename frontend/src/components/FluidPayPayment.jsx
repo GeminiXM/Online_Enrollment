@@ -4,6 +4,7 @@ import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
+import { APP_VERSION } from '../version';
 // CanvasContractDenverPDF not used on this page
 // import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './FluidPayPayment.css';

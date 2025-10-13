@@ -88,7 +88,7 @@ class ErrorLogger {
 
       // Only send to backend in production
       if (process.env.NODE_ENV === "production") {
-        await api.post("/api/enrollment/report-error", errorPayload);
+        await api.post("/enrollment/report-error", errorPayload);
         console.log("Error reported to backend");
       } else {
         console.log("Dev mode - error not sent to backend");

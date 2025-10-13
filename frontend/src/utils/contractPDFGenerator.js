@@ -623,12 +623,35 @@ export const generateContractPDFBuffer = async (
       margin: { left: 20, right: 20 },
     });
     const paymentMethodEndY = pdf.lastAutoTable.finalY;
+    // Derive masked CC number robustly from multiple possible fields
+    const deriveMaskedLast4 = () => {
+      const candidates = [
+        formData.creditCardNumber,
+        formData.cardNumber,
+        formData?.paymentResponse?.cardNumber,
+        formData?.paymentResponse?.ssl_card_number,
+        formData?.paymentResponse?.card?.masked_card,
+      ]
+        .filter(Boolean)
+        .map((v) => String(v));
+      for (const v of candidates) {
+        const digits = v.replace(/\D/g, "");
+        const last4 = digits.slice(-4);
+        if (last4 && last4.length === 4) {
+          return `************${last4}`;
+        }
+      }
+      return "";
+    };
+
     autoTable(pdf, {
       startY: paymentMethodEndY + 5,
       head: [["Credit Card Number", "Expiration", "Name on Account"]],
       body: [
         [
-          formatCreditCardNumber(formData.creditCardNumber || ""),
+          formatCreditCardNumber(
+            deriveMaskedLast4() || formData.creditCardNumber || ""
+          ),
           formatDate(formData.expirationDate || ""),
           formData.nameOnAccount ||
             `${formData.firstName || ""} ${formData.lastName || ""}`,

@@ -13,8 +13,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
-import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
+// Removed legacy iframe scroll helpers; page is standalone now
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
@@ -77,25 +76,7 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
 });
 
 const ContractPage = () => {
-  // Always start at top when this page mounts inside iframe
-  useScrollTopOnMount();
   const titleRef = React.useRef(null);
-  useNotifyParentScroll('membership-agreement');
-
-  // After mount, scroll specifically to Membership Agreement title
-  useEffect(() => {
-    if (titleRef.current) {
-      try {
-        // Hard jump first, then smooth correction to ensure we really land at the top
-        window.scrollTo(0, 0);
-        requestAnimationFrame(() => window.scrollTo(0, 0));
-        setTimeout(() => window.scrollTo(0, 0), 120);
-        setTimeout(() => {
-          try { titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
-        }, 240);
-      } catch (_) {}
-    }
-  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -611,13 +592,7 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
-      // Force top so next page doesn't inherit scroll position
-      try {
-        console.log('[ScrollDebug] Contract: Continue to Payment pressed - forcing top before navigation. y=', window.pageYOffset);
-        window.scrollTo(0, 0);
-        requestAnimationFrame(() => window.scrollTo(0, 0));
-        setTimeout(() => window.scrollTo(0, 0), 80);
-      } catch (_) {}
+      // No forced scroll; pages are standalone now
       // Route based on club state: CO -> FluidPay, NM -> Converge (default to Converge)
       const isColoradoClub = selectedClub?.state === 'CO';
       const paymentRoute = isColoradoClub ? '/payment-fluidpay' : '/converge-payment';
