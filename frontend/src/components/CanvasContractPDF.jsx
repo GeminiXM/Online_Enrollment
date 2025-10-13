@@ -9,6 +9,7 @@ import LaBelleAuroreBase64 from '@/assets/fonts/base64/LaBelleAurore';
 import OvertheRainbowBase64 from '@/assets/fonts/base64/OvertheRainbow';
 import RougeScriptBase64 from '@/assets/fonts/base64/RougeScript';
 import WhisperBase64 from '@/assets/fonts/base64/Whisper';
+import NMSWLogo50 from '@/assets/images/nmsw_logo resize50.jpg';
 
 const SIGNATURE_FONTS = [
   { name: "Great Vibes", fontKey: "GreatVibes", fontData: GreatVibesBase64 },
@@ -41,6 +42,33 @@ const loadFontsIntoJsPDF = (pdf) => {
     console.error('Error loading fonts into jsPDF:', error);
     return false;
   }
+};
+
+// Load an image (bundled) into a Data URL for jsPDF drawImage, preserving intrinsic size
+const loadImageAsDataUrl = (src) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          const dataUrl = canvas.toDataURL('image/png');
+          resolve({ dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+        } catch (e) {
+          reject(e);
+        }
+      };
+      img.onerror = (e) => reject(e);
+      img.src = src;
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 // Function to calculate cancellation date (14 days from start date)
@@ -194,15 +222,44 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(10);
 
-    // Add title
+    // Add title: for New Mexico, draw NMSW logo image instead of text
+    const isNewMexico = isNewMexicoClub(selectedClub);
+    let membershipTextY = 30;
+    if (isNewMexico) {
+      try {
+        const imgInfo = await loadImageAsDataUrl(NMSWLogo50);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pxToMm = 0.264583; // CSS px to mm
+        const logoWidthMm = imgInfo.width * pxToMm;
+        const logoHeightMm = imgInfo.height * pxToMm;
+        const logoY = 12;
+        const centerX = (pageWidth - logoWidthMm) / 2;
+        const leftAdjustMm = 6; // visual left nudge for alignment
+        const logoX = Math.max(0, centerX - leftAdjustMm);
+        pdf.addImage(imgInfo.dataUrl, 'PNG', logoX, logoY, logoWidthMm, logoHeightMm);
+        membershipTextY = logoY + logoHeightMm + 6;
+      } catch (e) {
+        // Fallback to text if image fails
+        pdf.setFontSize(18);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(getClubName(selectedClub), 105, 20, { align: 'center' });
+        membershipTextY = 30;
+      }
+    } else {
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(getClubName(selectedClub), 105, 20, { align: 'center' });
+    }
     pdf.setFontSize(18);
     pdf.setFont('helvetica', 'bold');
-    pdf.text(getClubName(selectedClub), 105, 20, { align: 'center' });
-    pdf.text('Membership Agreement', 105, 30, { align: 'center' });
+    pdf.text('Membership Agreement', 105, membershipTextY, { align: 'center' });
+
+    // Compute top Y for the Member Information area to add space under the header
+    const contentTopY = Math.max(45, membershipTextY + 14);
 
     // Member Information Section
     const xStart = 20;
-    let y = 45;
+    let y = contentTopY;
     pdf.setFontSize(10);
     const prefix = 'Home Club: ';
     pdf.text(prefix, xStart, y);
@@ -229,7 +286,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
 
     // Primary Member details table
     autoTable(pdf, {
-      startY: 50,
+      startY: y + 5,
       head: [['Membership ID', 'Last Name', 'First Name', 'DOB']],
       body: [
         [
@@ -472,6 +529,10 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     });
 
     currentY = pdf.lastAutoTable.finalY + 10;
+
+    // Move Payment Authorization to a new page (page 2)
+    pdf.addPage();
+    currentY = 20;
 
     // Payment Authorization Section
     pdf.setFontSize(12);
