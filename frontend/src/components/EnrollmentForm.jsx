@@ -998,12 +998,15 @@ function EnrollmentForm() {
         price: addon.invtr_price ? parseFloat(addon.invtr_price) : 0,
         upcCode: addon.invtr_upccode || ''
       })),
-      // Add prorated addon values for backend calculation
+      // Add prorated dues/addon combined values for backend calculation
+      // Keep individual fields for UI/reference but rely on combined amounts for billing
       proratedAddOns: formData.proratedAddOns || 0,
       proratedAddOnsTax: formData.proratedAddOnsTax || 0,
-      // Add prorated dues values for backend calculation
       proratedDues: formData.proratedDues || 0,
       proratedDuesTax: formData.proratedDuesTax || 0,
+      proratedDuesAddon: (parseFloat(formData.proratedDues || 0) + parseFloat(formData.proratedAddOns || 0)).toFixed(2),
+      proratedDuesAddonTax: (parseFloat(formData.proratedDuesTax || 0) + parseFloat(formData.proratedAddOnsTax || 0)).toFixed(2),
+      combineAddonsIntoProrated: true,
       // Add enrollment fee
       initiationFee: '19.00',
       // Add PT selection

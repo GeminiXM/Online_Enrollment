@@ -1375,7 +1375,19 @@ export const submitEnrollment = async (req, res) => {
 
         // Insert membership dues item
         if (membershipUpcCode) {
-          const membershipDuesTax = parseFloat(req.body.proratedDuesTax || 0);
+          const combineAddons = req.body.combineAddonsIntoProrated === true;
+          const membershipPrice = combineAddons
+            ? parseFloat(
+                req.body.proratedDuesAddon ||
+                  req.body.proratedDues ||
+                  prorateAmount
+              )
+            : prorateAmount;
+          const membershipDuesTax = combineAddons
+            ? parseFloat(
+                req.body.proratedDuesAddonTax || req.body.proratedDuesTax || 0
+              )
+            : parseFloat(req.body.proratedDuesTax || 0);
           logger.info(
             "Inserting membership dues item with UPC code:",
             membershipUpcCode,
@@ -1385,8 +1397,8 @@ export const submitEnrollment = async (req, res) => {
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             "701592007513", // parUPC - Special UPC for prorated membership dues
-            prorateAmount.toFixed(2), // parPrice - prorated amount
-            membershipDuesTax.toFixed(2), // parTax - prorated dues tax only (from frontend)
+            membershipPrice.toFixed(2), // parPrice - prorated amount (with addons when combined)
+            membershipDuesTax.toFixed(2), // parTax - dues tax only or combined tax from frontend
             1, // parQty
           ]);
           logger.info("Membership dues item inserted successfully");
@@ -1415,8 +1427,13 @@ export const submitEnrollment = async (req, res) => {
         ]);
         logger.info("Enrollment fee item inserted successfully");
 
-        // Insert addon items
-        if (req.body.serviceAddons && Array.isArray(req.body.serviceAddons)) {
+        // Insert addon items unless frontend requested to combine into prorated dues
+        const combineAddons = req.body.combineAddonsIntoProrated === true;
+        if (
+          !combineAddons &&
+          req.body.serviceAddons &&
+          Array.isArray(req.body.serviceAddons)
+        ) {
           for (const addon of req.body.serviceAddons) {
             if (addon.upcCode) {
               // Calculate prorated amount and tax for this addon
