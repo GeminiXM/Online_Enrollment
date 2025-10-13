@@ -20,6 +20,7 @@ import FluidPayModalTest from "./components/FluidPayModalTest.jsx";
 import { ClubProvider, useClub } from "./context/ClubContext";
 import { MembershipProvider } from "./context/MembershipContext";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
+import SiteFooter from "./components/SiteFooter.jsx";
 
 // Import pages
 // Example: import Home from './pages/Home.js';
@@ -202,9 +203,7 @@ function AppContent() {
           {/* Add more routes as needed */}
         </Routes>
       </main>
-      <footer>
-        <p>&copy; {new Date().getFullYear()} Wellbridge Enrollment System</p>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

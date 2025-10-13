@@ -80,6 +80,7 @@ const validateAgeForMembershipType = (dateOfBirth, membershipType) => {
 const validateAdultAge = (dateOfBirth) => {
   const age = calculateAge(dateOfBirth);
   if (age === null) return "Date of birth is required";
+  if (age > 110) return "Please enter a valid date of birth (must be 110 years old or younger).";
   if (age < 18) return `You are ${age} years old. Adult members must be 18 or older.`;
   return null;
 };
@@ -88,6 +89,7 @@ const validateChildAge = (dateOfBirth) => {
   const age = calculateAge(dateOfBirth);
   if (age === null) return "Date of birth is required";
   if (age < 0) return "Invalid date of birth";
+  if (age > 110) return "Please enter a valid date of birth (must be 110 years old or younger).";
   if (age > 11) return `You are ${age} years old. Child members must be 11 or younger.`;
   return null;
 };
@@ -107,7 +109,8 @@ const validateYouthAge = (dateOfBirth) => {
     age--;
   }
   
-  // Youth must be between 12 and 20 years old
+  // Must be reasonable age (<= 110) and youth band 12..20
+  if (age > 110) return false;
   return age >= 12 && age <= 20;
 };
 
@@ -1083,31 +1086,73 @@ function EnrollmentForm() {
     return submissionData;
   };
 
-  // Handle input changes for the main form
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    // Immediately block Junior ages (12-17) on primary DOB entry
-    if (name === 'dateOfBirth') {
-      const age = calculateAge(value);
-      if (age !== null && age >= 12 && age <= 17) {
-        setShowJuniorBlockModal(true);
-        return; // do not set DOB or proceed
-      }
-    }
 
+
+
+  // Handle input changes for the main form
+const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  // Update form data with potential gender uppercase
+  if (name === "gender") {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value === "" ? value : value.toUpperCase()
+    }));
+  } else {
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
+  }
 
-    // If this is a date of birth change, determine membership type
-    if (name === 'dateOfBirth') {
-      const newMembershipType = determineMembershipTypeByAge(value);
+  // Handle date of birth validation only when full date is entered (MM/DD/YYYY or YYYY-MM-DD)
+  if (name === 'dateOfBirth') {
+    const isUS = /^\d{2}\/\d{2}\/\d{4}$/.test(value);
+    const isISO = /^\d{4}-\d{2}-\d{2}$/.test(value);
+    if (isUS || isISO) {
+      let year, month, day;
+      if (isUS) {
+        [month, day, year] = value.split('/').map(Number);
+      } else {
+        [year, month, day] = value.split('-').map(Number);
+      }
+
+      const current = new Date();
+      const currentYear = current.getFullYear();
+      const limitYear = currentYear - 110;
+      const birthDate = new Date(year, month - 1, day);
+      // Compute age accurately
+      let age = currentYear - year;
+      const mDiff = current.getMonth() - (month - 1);
+      if (mDiff < 0 || (mDiff === 0 && current.getDate() < day)) age--;
+
+      if (Number.isNaN(birthDate.getTime()) || year < limitYear || year > currentYear) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          dateOfBirth: 'Please enter a valid date of birth (must be 110 years old or younger).'
+        }));
+        return;
+      }
+
+      if (age < 12) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          dateOfBirth: `You are ${age} years old. Children under 12 cannot enroll directly. Please have an adult 18+ enroll and add you as a child member.`
+        }));
+        return;
+      } else if (age >= 12 && age <= 17) {
+        setShowJuniorBlockModal(true);
+      } else {
+        setErrors(prevErrors => ({ ...prevErrors, dateOfBirth: null }));
+      }
+
+      // Use ISO string for downstream age/membership logic to avoid parsing ambiguity
+      const isoDob = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const newMembershipType = determineMembershipTypeByAge(isoDob);
       if (newMembershipType) {
         selectMembershipType(newMembershipType);
-        
-        // Validate the age for the new membership type
-        const ageError = validateAgeForMembershipType(value, newMembershipType);
+        const ageError = validateAgeForMembershipType(isoDob, newMembershipType);
         if (ageError) {
           setErrors(prevErrors => ({
             ...prevErrors,
@@ -1119,53 +1164,50 @@ function EnrollmentForm() {
             dateOfBirth: null
           }));
         }
-      } else {
-        // If no membership type is determined (e.g., under 12), show error
-        const age = calculateAge(value);
-        if (age !== null && age < 12) {
-          setErrors(prevErrors => ({
-            ...prevErrors,
-            dateOfBirth: `You are ${age} years old. Children under 12 cannot enroll directly. Please have an adult 18+ enroll and add you as a child member.`
-          }));
-        } else {
-          setErrors(prevErrors => ({
-            ...prevErrors,
-            dateOfBirth: null
-          }));
-        }
       }
+    } else {
+      setErrors(prevErrors => ({ ...prevErrors, dateOfBirth: null })); // Clear error on partial input
     }
-    
-    // If this is a start date change, validate it's not in the past
-    if (name === 'requestedStartDate') {
-      if (value) {
-        // Use UTC for consistent date comparison to avoid timezone issues
-        const selectedDate = new Date(value + 'T00:00:00.000Z'); // Force UTC
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0); // Reset to start of UTC day
-        
-        if (selectedDate < today) {
-          setErrors(prevErrors => ({
-            ...prevErrors,
-            requestedStartDate: "Start date cannot be in the past. Please select today or a future date."
-          }));
-        } else {
-          setErrors(prevErrors => ({
-            ...prevErrors,
-            requestedStartDate: null
-          }));
-        }
-      }
-    }
+  }
 
-    // Clear errors when field is changed
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
+  // If this is a start date change, validate it's within allowed window (today..+7 days)
+  if (name === 'requestedStartDate') {
+    if (value) {
+      // Use UTC for consistent date comparison to avoid timezone issues
+      const selectedDate = new Date(value + 'T00:00:00.000Z'); // Force UTC
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0); // Reset to start of UTC day
+      const max = new Date();
+      max.setUTCHours(0, 0, 0, 0);
+      max.setUTCDate(max.getUTCDate() + 7);
+      
+      if (selectedDate < today) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          requestedStartDate: "Start date cannot be in the past. Please select today or a future date."
+        }));
+      } else if (selectedDate > max) {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          requestedStartDate: "Start date must be within the next 7 days."
+        }));
+      } else {
+        setErrors(prevErrors => ({
+          ...prevErrors,
+          requestedStartDate: null
+        }));
+      }
     }
-  };
+  }
+
+  // Clear errors when field is changed
+  if (errors[name]) {
+    setErrors(prev => ({
+      ...prev,
+      [name]: null
+    }));
+  }
+};
   
   // Handle input changes for temporary member data based on the active tab
   const handleTempMemberChange = (e) => {
@@ -1221,8 +1263,9 @@ function EnrollmentForm() {
         const month = parseInt(dateParts[1]);
         const day = parseInt(dateParts[2]);
         
-        // Only validate if we have a valid date (real year, valid month and day)
-        const isValidDate = year > 1920 && year <= new Date().getFullYear() &&
+        // Only validate if we have a valid date (reasonable year, valid month and day)
+        const currentYear = new Date().getFullYear();
+        const isValidDate = year >= currentYear - 110 && year <= currentYear &&
                            month >= 1 && month <= 12 &&
                            day >= 1 && day <= 31;
         
@@ -1493,9 +1536,14 @@ function EnrollmentForm() {
         const selectedDate = new Date(formData.requestedStartDate + 'T00:00:00.000Z'); // Force UTC
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0); // Reset to start of UTC day
-        
+        const max = new Date();
+        max.setUTCHours(0, 0, 0, 0);
+        max.setUTCDate(max.getUTCDate() + 7);
+
         if (selectedDate < today) {
           newErrors.requestedStartDate = "Start date cannot be in the past. Please select today or a future date.";
+        } else if (selectedDate > max) {
+          newErrors.requestedStartDate = "Start date must be within the next 7 days.";
         }
       }
       
@@ -1869,12 +1917,23 @@ function EnrollmentForm() {
 
   // Function to handle changes to a specific child form
   const handleChildFormChange = (index, field, value) => {
+    // Enforce 110-year cap immediately when typing DOB (flag only)
+    if (field === 'dateOfBirth' && value) {
+      const parts = String(value).split('-');
+      if (parts.length === 3 && parts[0].length === 4) {
+        const year = parseInt(parts[0], 10);
+        const currentYear = new Date().getFullYear();
+        if (year < currentYear - 110 || year > currentYear) {
+          setErrors(prev => ({ ...prev, [`child${index}DateOfBirth`]: 'Please enter a valid date of birth (≤ 110 years).' }));
+          // don't block update, let user correct
+        } else {
+          setErrors(prev => ({ ...prev, [`child${index}DateOfBirth`]: null }));
+        }
+      }
+    }
     setChildForms(prev => {
       const updated = [...prev];
-      updated[index] = {
-        ...updated[index],
-        [field]: value
-      };
+      updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
@@ -2447,6 +2506,7 @@ function EnrollmentForm() {
                   name="dateOfBirth"
                   value={adultMember.dateOfBirth}
                   onChange={handleTempMemberChange}
+                  max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
                   aria-required="true"
                   aria-invalid={!!errors.tempDateOfBirth}
                   aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
@@ -3194,6 +3254,7 @@ function EnrollmentForm() {
             name="dateOfBirth"
             value={youthMember.dateOfBirth}
             onChange={handleTempMemberChange}
+            max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
             aria-required="true"
             aria-invalid={!!errors.tempDateOfBirth}
             aria-describedby={errors.tempDateOfBirth ? 'dateOfBirth-error' : undefined}
@@ -4033,18 +4094,17 @@ function EnrollmentForm() {
                 <label htmlFor="dateOfBirth">
                   Date of Birth <span className="required">*</span>
                 </label>
-                <input
-                  type="date"
-                  id="dateOfBirth"
-                  name="dateOfBirth"
-                  ref={primaryDobRef}
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  placeholder="MM/DD/YYYY"
-                  aria-required="true"
-                  aria-invalid={!!errors.dateOfBirth}
-                  aria-describedby={errors.dateOfBirth ? "dateOfBirth-error" : undefined}
-                />
+<input
+  type="date"
+  id="dateOfBirth"
+  name="dateOfBirth"
+  ref={primaryDobRef}
+  value={formData.dateOfBirth}
+  onChange={handleChange}
+  min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${da}`; })()}
+  max={(() => { const d = new Date(); const y = d.getFullYear(); const m = String(d.getMonth() + 1).padStart(2, '0'); const da = String(d.getDate()).padStart(2, '0'); return `${y}-${m}-${da}`; })()}
+  aria-required="true"
+/>
                 {errors.dateOfBirth && (
                   <div id="dateOfBirth-error" className="error-message">
                     {errors.dateOfBirth}

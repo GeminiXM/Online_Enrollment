@@ -557,6 +557,9 @@ button:focus-visible {
     padding: 1rem;
     margin: 0.5rem;
   }
+
+/* Allow tooltips/modals inside framed pages to escape the border area */
+.form-page-frame { overflow: visible; }
   
   /* Keep name fields on the same line even on mobile */
   .name-row {

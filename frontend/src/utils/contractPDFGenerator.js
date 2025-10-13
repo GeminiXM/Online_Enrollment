@@ -626,14 +626,22 @@ export const generateContractPDFBuffer = async (
     // Derive masked CC number robustly from multiple possible fields
     const deriveMaskedLast4 = () => {
       const candidates = [
+        // Already-masked or raw CC on formData
         formData.creditCardNumber,
         formData.cardNumber,
+        // Generic paymentResponse sources
         formData?.paymentResponse?.cardNumber,
+        formData?.paymentResponse?.last4,
+        formData?.paymentResponse?.card_info?.last_four,
+        // Converge (NM) specific fields
+        formData?.paymentResponse?.ssl_last4,
         formData?.paymentResponse?.ssl_card_number,
+        // Tokenized/structured objects from gateways
         formData?.paymentResponse?.card?.masked_card,
       ]
         .filter(Boolean)
         .map((v) => String(v));
+
       for (const v of candidates) {
         const digits = v.replace(/\D/g, "");
         const last4 = digits.slice(-4);
