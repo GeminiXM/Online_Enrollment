@@ -11,6 +11,9 @@
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
+  position: relative; /* allow absolute children like tooltips */
+  overflow: visible;  /* prevent clipping of overlay tooltips */
+  z-index: 0;         /* ensure higher z-index children can draw above */
 }
 
 /* Main page title styling */

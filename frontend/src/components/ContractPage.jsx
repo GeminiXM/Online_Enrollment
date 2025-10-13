@@ -1391,7 +1391,7 @@ const ContractPage = () => {
                         {showStartDateInfo && (
                           <div style={{
                             position: 'absolute',
-                            top: 28,
+                            top: 32,
                             left: '50%',
                             transform: 'translateX(-50%)',
                             background: '#fff',
@@ -1400,11 +1400,13 @@ const ContractPage = () => {
                             borderRadius: 6,
                             boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                             padding: '10px 14px',
-                            zIndex: 10,
-                            minWidth: 260,
+                            zIndex: 10001,
+                            minWidth: 300,
+                            maxWidth: '90vw',
                             fontSize: 13,
                             fontWeight: 400,
                             whiteSpace: 'normal',
+                            pointerEvents: 'auto',
                           }}>
                             All memberships require an initial 3 months of full membership dues
                           </div>
