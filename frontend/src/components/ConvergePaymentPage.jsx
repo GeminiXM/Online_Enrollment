@@ -6,6 +6,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import './ConvergePaymentPage.css';
+import { APP_VERSION } from '../version';
 
 const ConvergePaymentPage = () => {
   useScrollTopOnMount();
@@ -699,7 +700,8 @@ const ConvergePaymentPage = () => {
   }
   
   return (
-    <div className="payment-container">
+    <div className="payment-container form-page-frame">
+      <div className="app-version-badge">v{APP_VERSION}</div>
       <h1>Complete Your Membership</h1>
     
     <div className="payment-layout">

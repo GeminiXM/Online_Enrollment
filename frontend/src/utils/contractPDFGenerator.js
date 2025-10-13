@@ -9,6 +9,9 @@ import LaBelleAuroreBase64 from "@/assets/fonts/base64/LaBelleAurore";
 import OvertheRainbowBase64 from "@/assets/fonts/base64/OvertheRainbow";
 import RougeScriptBase64 from "@/assets/fonts/base64/RougeScript";
 import WhisperBase64 from "@/assets/fonts/base64/Whisper";
+// Club logos
+import CACLogo40 from "@/assets/images/CAC_Logo resize 40.jpg";
+import NMSWLogo50 from "@/assets/images/nmsw_logo resize50.jpg";
 
 // Define the mapping between font names and their internal keys
 const SIGNATURE_FONTS = [
@@ -236,15 +239,72 @@ export const generateContractPDFBuffer = async (
     pdf.setFont("helvetica", "normal");
     pdf.setFontSize(10);
 
-    // Add title based on club type
+    // Add title with logo support (CO/NM) and spacing
+    const isNM = selectedClub?.state === "NM";
+    let membershipTextY = 30;
+    const loadImageAsDataUrl = (src) =>
+      new Promise((resolve, reject) => {
+        try {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => {
+            try {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.naturalWidth;
+              canvas.height = img.naturalHeight;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve({
+                dataUrl: canvas.toDataURL("image/png"),
+                width: img.naturalWidth,
+                height: img.naturalHeight,
+              });
+            } catch (e) {
+              reject(e);
+            }
+          };
+          img.onerror = (e) => reject(e);
+          img.src = src;
+        } catch (err) {
+          reject(err);
+        }
+      });
+
+    try {
+      const logoSrc = isNM ? NMSWLogo50 : CACLogo40;
+      const imgInfo = await loadImageAsDataUrl(logoSrc);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pxToMm = 0.264583;
+      const logoWidthMm = imgInfo.width * pxToMm;
+      const logoHeightMm = imgInfo.height * pxToMm;
+      const logoY = 12;
+      const centerX = (pageWidth - logoWidthMm) / 2;
+      const leftAdjustMm = 6; // nudge for alignment
+      const logoX = Math.max(0, centerX - leftAdjustMm);
+      pdf.addImage(
+        imgInfo.dataUrl,
+        "PNG",
+        logoX,
+        logoY,
+        logoWidthMm,
+        logoHeightMm
+      );
+      membershipTextY = logoY + logoHeightMm + 6;
+    } catch (e) {
+      // Fallback: text header
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(getClubName(selectedClub), 105, 20, { align: "center" });
+      membershipTextY = 30;
+    }
     pdf.setFontSize(18);
     pdf.setFont("helvetica", "bold");
-    pdf.text(getClubName(selectedClub), 105, 20, { align: "center" });
-    pdf.text("Membership Agreement", 105, 30, { align: "center" });
+    pdf.text("Membership Agreement", 105, membershipTextY, { align: "center" });
 
     // Member Information Section
     const xStart = 20;
-    const y = 45;
+    const contentTopY = Math.max(45, membershipTextY + 14);
+    const y = contentTopY;
 
     // 1) Draw the prefix in your normal size
     pdf.setFontSize(10);
@@ -271,7 +331,7 @@ export const generateContractPDFBuffer = async (
 
     // Primary Member details table - matches ContractPage layout
     autoTable(pdf, {
-      startY: 50,
+      startY: y + 5,
       head: [["Membership ID", "Last Name", "First Name", "DOB"]],
       body: [
         [
@@ -521,6 +581,63 @@ export const generateContractPDFBuffer = async (
       headStyles: {
         fillColor: [60, 60, 60],
         textColor: [255, 255, 255],
+        fontStyle: "bold",
+      },
+      margin: { left: 20, right: 20 },
+    });
+
+    // Move Payment Authorization to a new page (page 2)
+    pdf.addPage();
+    let payAuthY = 20;
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Payment Authorization", 20, payAuthY);
+    const beginDate = formData.requestedStartDate
+      ? formatFirstOfNextMonthMMDDYYYY(formData.requestedStartDate)
+      : "";
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    const authText = `I hereby request and authorize ${getClubName(
+      selectedClub
+    )} to charge my account via Electronic Funds Transfer on a monthly basis beginning ${beginDate}.`;
+    const additionalAuthText = `The debit will consist of monthly dues plus any other club charges (if applicable) made by myself or other persons included in my membership in accordance with the resignation policy detailed in the Terms and Conditions within this Agreement. The authorization is extended by me to ${getClubName(
+      selectedClub
+    )} and/or its authorized agents or firms engaged in the business of processing check and charge card debits.`;
+    const splitAuthText = pdf.splitTextToSize(authText, 170);
+    const splitAdditionalAuthText = pdf.splitTextToSize(
+      additionalAuthText,
+      170
+    );
+    pdf.text(splitAuthText, 20, payAuthY + 5);
+    pdf.text(splitAdditionalAuthText, 20, payAuthY + 15);
+    autoTable(pdf, {
+      startY: payAuthY + 30,
+      head: [["Payment Method"]],
+      body: [[formData.paymentMethod || "Credit Card"]],
+      theme: "grid",
+      headStyles: {
+        fillColor: [220, 220, 220],
+        textColor: [0, 0, 0],
+        fontStyle: "bold",
+      },
+      margin: { left: 20, right: 20 },
+    });
+    const paymentMethodEndY = pdf.lastAutoTable.finalY;
+    autoTable(pdf, {
+      startY: paymentMethodEndY + 5,
+      head: [["Credit Card Number", "Expiration", "Name on Account"]],
+      body: [
+        [
+          formatCreditCardNumber(formData.creditCardNumber || ""),
+          formatDate(formData.expirationDate || ""),
+          formData.nameOnAccount ||
+            `${formData.firstName || ""} ${formData.lastName || ""}`,
+        ],
+      ],
+      theme: "grid",
+      headStyles: {
+        fillColor: [220, 220, 220],
+        textColor: [0, 0, 0],
         fontStyle: "bold",
       },
       margin: { left: 20, right: 20 },

@@ -39,7 +39,8 @@ body {
 
 /* Container for the entire enrollment form - Provides the main wrapper for the form content */
 .enrollment-container,
-.enrollment-form-container {
+.enrollment-form-container,
+.form-page-frame {
   max-width: 1200px; /* Limits the width on larger screens */
   margin: 1.5rem auto 2.5rem; /* Centers the container with compact top spacing */
   padding: 1.5rem 2.5rem 2.5rem; /* Provides internal spacing with less padding on top */
@@ -53,7 +54,8 @@ body {
 
 /* Add a subtle accented top border to the form */
 .enrollment-container::before,
-.enrollment-form-container::before {
+.enrollment-form-container::before,
+.form-page-frame::before {
   content: "";
   position: absolute;
   top: 0;
@@ -441,7 +443,8 @@ select[aria-invalid="true"] {
 /* Responsive adjustments for tablets */
 @media (max-width: 768px) {
   .enrollment-container,
-  .enrollment-form-container {
+  .enrollment-form-container,
+  .form-page-frame {
     padding: 1.5rem; /* Reduced padding on smaller screens */
     margin: 1rem; /* Reduced margin on smaller screens */
   }
@@ -549,7 +552,8 @@ button:focus-visible {
 /* Additional mobile optimizations */
 @media (max-width: 480px) {
   .enrollment-container,
-  .enrollment-form-container {
+  .enrollment-form-container,
+  .form-page-frame {
     padding: 1rem;
     margin: 0.5rem;
   }

@@ -18,6 +18,7 @@ import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
+import { APP_VERSION } from '../version';
 import SignatureSelector from './SignatureSelector';
 import CanvasContractPDF from './CanvasContractPDF';
 import CanvasContractDenverPDF from './CanvasContractDenverPDF';
@@ -128,6 +129,12 @@ const ContractPage = () => {
     
     // Fallback for unexpected format
     return dateString;
+  };
+
+  // Format any numeric-like input as currency with two decimals
+  const formatCurrency = (value) => {
+    const num = Number(String(value ?? '0').toString().replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(num) ? num.toFixed(2) : '0.00';
   };
   // Track which initial boxes have been clicked
   const [initialedBoxes, setInitialedBoxes] = useState({
@@ -848,7 +855,8 @@ const ContractPage = () => {
   console.log("ContractPage: currentAmounts:", currentAmounts);
 
   return (
-    <div className="contract-container">
+    <div className="contract-container form-page-frame">
+      <div className="app-version-badge">v{APP_VERSION}</div>
 
         
       <h1 ref={titleRef} id="membership-agreement">Membership Agreement</h1>
@@ -1247,10 +1255,10 @@ const ContractPage = () => {
             <div className="info-content">
               {formData.childPrograms}
               {formData.childProgramsMonthly && (
-                <div>Monthly: ${formData.childProgramsMonthly}</div>
+                <div>Monthly: ${formatCurrency(formData.childProgramsMonthly)}</div>
               )}
               {formData.childProgramsDueNow && (
-                <div>Due now: ${formData.childProgramsDueNow}</div>
+                <div>Due now: ${formatCurrency(formData.childProgramsDueNow)}</div>
               )}
             </div>
           </div>
@@ -1264,8 +1272,8 @@ const ContractPage = () => {
               {formData.additionalServiceDetails.map((service, index) => (
                 <div key={index} className="service-item">
                   <div>{service.name}</div>
-                  {service.dueNow && <div>Due now: ${service.dueNow}</div>}
-                  {service.monthly && <div>Monthly: ${service.monthly}</div>}
+                  {service.dueNow && <div>Due now: ${formatCurrency(service.dueNow)}</div>}
+                  {service.monthly && <div>Monthly: ${formatCurrency(service.monthly)}</div>}
                 </div>
               ))}
             </div>
@@ -1290,19 +1298,19 @@ const ContractPage = () => {
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Enrollment Fee</div>
-              <div className="info-value">${formData.initiationFee || '19.00'}</div>
+              <div className="info-value">${formatCurrency(formData.initiationFee ?? '19.00')}</div>
             </div>
           </div>
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Pro-rated Dues</div>
-              <div className="info-value">${formData.proratedDues || '0.00'}</div>
+              <div className="info-value">${formatCurrency(formData.proratedDues ?? '0.00')}</div>
             </div>
           </div>
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Pro-rated Add-Ons</div>
-              <div className="info-value">${formData.proratedAddOns || '0.00'}</div>
+              <div className="info-value">${formatCurrency(formData.proratedAddOns ?? '0.00')}</div>
             </div>
           </div>
 
@@ -1311,7 +1319,7 @@ const ContractPage = () => {
             <div className="info-row">
               <div className="info-column financial-item">
                 <div className="info-label">New Intro Personal Training Package (including applicable taxes)</div>
-                <div className="info-value">${formData.ptPackageAmount || formData.ptPackage.invtr_price || formData.ptPackage.price || '0.00'}</div>
+                <div className="info-value">${formatCurrency((formData.ptPackageAmount != null ? formData.ptPackageAmount : (formData.ptPackage && (formData.ptPackage.invtr_price ?? formData.ptPackage.price))) ?? '0.00')}</div>
               </div>
             </div>
             
@@ -1319,7 +1327,7 @@ const ContractPage = () => {
           <div className="info-row">
             <div className="info-column financial-item">
               <div className="info-label">Taxes</div>
-              <div className="info-value">${formData.taxAmount || '0.00'}</div>
+              <div className="info-value">${formatCurrency(formData.taxAmount ?? '0.00')}</div>
             </div>
           </div>
           <div className="info-row">
@@ -1341,9 +1349,9 @@ const ContractPage = () => {
         <div className="info-section payment-summary-section">
           <div className="info-header">Monthly Cost Going Forward</div>
           <div className="info-row">
-            {/* <div className="info-column">
+              {/* <div className="info-column">
               <div className="info-label">{formData.displayMembershipType || 'Individual'} Dues {formData.displayAgreementType || 'Month-to-month'}</div>
-              <div className="info-value">${formData.monthlyDues || '0.00'}</div>
+              <div className="info-value">${formatCurrency(formData.monthlyDues ?? '0.00')}</div>
             </div> */}
           </div>
           <div className="info-row">
@@ -1354,7 +1362,7 @@ const ContractPage = () => {
                 <span style={{ fontStyle: 'italic' }}>(applicable taxes not included)</span>
               </div>
               <div className="info-value" style={{ fontWeight: "bold" }}>
-                ${formData.totalMonthlyRate || formData.monthlyDues || '0.00'}
+                ${formatCurrency((formData.totalMonthlyRate != null ? formData.totalMonthlyRate : formData.monthlyDues) ?? '0.00')}
               </div>
             </div>
           </div>

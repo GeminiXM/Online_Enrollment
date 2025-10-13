@@ -721,7 +721,8 @@ const launchPayment = async () => {
   }
   
   return (
-    <div className="payment-container">
+    <div className="payment-container form-page-frame">
+      <div className="app-version-badge">v{APP_VERSION}</div>
       <style>
         {`
           .due-today {
