@@ -11,6 +11,16 @@ const ConvergePaymentPage = () => {
   useScrollTopOnMount();
   const paymentSummaryRef = React.useRef(null);
   useNotifyParentScroll('payment-summary');
+  // Ensure top-on-mount with retries (avoid inheriting prior page scroll)
+  React.useEffect(() => {
+    try {
+      console.log('[ScrollDebug] ConvergePaymentPage mount - forcing top. y=', window.pageYOffset);
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => window.scrollTo(0, 0));
+      setTimeout(() => window.scrollTo(0, 0), 120);
+      setTimeout(() => window.scrollTo(0, 0), 350);
+    } catch (_) {}
+  }, []);
 
   useEffect(() => {
     if (paymentSummaryRef.current) {

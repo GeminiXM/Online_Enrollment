@@ -1,3 +1,14 @@
+/* Version badge */
+.app-version-badge {
+  position: fixed;
+  right: 8px;
+  bottom: 8px;
+  font-size: 10px;
+  color: #7e8a9a; /* subtle grey-blue */
+  z-index: 9999;
+  user-select: none;
+  pointer-events: none;
+}
 /* frontend/src/components/EnrollmentForm.css */
 /* Styles for the gym membership enrollment form */
 
@@ -348,7 +359,7 @@ select[aria-invalid="true"] {
 
 /* Submit button - Styles the main form submission button */
 .submit-button {
-  background-color: var(--primary-color); /* Changed from var(--primary-color) to a more blue color */
+  background-color: #0055b7; /* Match shopping cart header/total color */
   color: white; /* White text for contrast */
   border: none; /* No border */
   padding: 0.75rem 2rem; /* Generous padding for clickable area */
@@ -360,9 +371,11 @@ select[aria-invalid="true"] {
 }
 
 /* Submit button hover state */
-.submit-button:hover {
-  background-color: var(--primary-dark); /* Darker teal on hover */
-}
+.submit-button:hover { background-color: #00479a; }
+
+/* Increase specificity to override any theme styles */
+.form-actions .submit-button { background-color: #0055b7 !important; }
+.form-actions .submit-button:hover { background-color: #00479a !important; }
 
 /* Disabled submit button - For when form is submitting or invalid */
 .submit-button:disabled {

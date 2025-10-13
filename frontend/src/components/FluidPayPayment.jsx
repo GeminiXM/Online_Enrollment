@@ -81,13 +81,15 @@ const FluidPayPayment = () => {
   useScrollTopOnMount();
   const paymentSummaryRef = React.useRef(null);
   useNotifyParentScroll('payment-summary');
-
+  // Do NOT auto-scroll to the summary; ensure page starts at absolute top
   useEffect(() => {
-    if (paymentSummaryRef.current) {
-      try {
-        paymentSummaryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } catch (_) {}
-    }
+    try {
+      console.log('[ScrollDebug] FluidPayPayment mount - forcing top. y=', window.pageYOffset);
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => window.scrollTo(0, 0));
+      setTimeout(() => window.scrollTo(0, 0), 150);
+      setTimeout(() => window.scrollTo(0, 0), 400);
+    } catch (_) {}
   }, []);
   const navigate = useNavigate();
   const location = useLocation();

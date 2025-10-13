@@ -10,9 +10,20 @@ export default function useNotifyParentScroll(anchor = "") {
         anchor,
         path: window.location?.pathname || "",
       };
-      window.parent &&
+      const post = () =>
+        window.parent &&
         window.parent !== window &&
         window.parent.postMessage(message, "*");
+
+      try {
+        console.log("[NotifyParent] postMessage ENROLLMENT_SCROLL_TO", message);
+      } catch (_) {}
+      // Fire multiple times to overcome parent load timing and lazy iframe paints
+      post();
+      requestAnimationFrame(post);
+      setTimeout(post, 150);
+      setTimeout(post, 400);
+      setTimeout(post, 800);
     } catch (_) {
       // no-op
     }

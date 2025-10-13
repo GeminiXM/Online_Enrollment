@@ -9,13 +9,13 @@ function RestrictedMembershipMessage({ membershipType, onChangeMembershipType })
           Your selected membership type <strong>({membershipType.title})</strong> does not allow adding additional members.
         </p>
         <p>
-          If you would like to add family members to your membership, please change to a Family or Premium membership type.
+          If you would like to add family members to your membership, please change to a Standard membership type.
         </p>
         <button 
           onClick={onChangeMembershipType} 
           className="change-membership-button"
         >
-          Change Membership Type
+          Switch to Standard Membership
         </button>
       </div>
     </div>

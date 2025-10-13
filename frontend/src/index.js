@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.js";
 import reportWebVitals from "./reportWebVitals.js";
 import "./index.css";
+import { APP_VERSION } from "./version";
 // Initialize global error logger
 import "./utils/errorLogger.js";
 // Initialize console logger (captures console.log, console.error, etc. in production)
@@ -23,6 +24,9 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+try {
+  console.log(`[Build] Online Enrollment version ${APP_VERSION}`);
+} catch (_) {}
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

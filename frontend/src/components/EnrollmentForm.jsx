@@ -4,12 +4,14 @@
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
+import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
 import devLogger from "../utils/devLogger";
 import "./EnrollmentForm.css";
 import { useClub } from "../context/ClubContext";
 import { useMembership } from "../context/MembershipContext";
+import { APP_VERSION } from "../version";
 import RestrictedMembershipMessage from "./RestrictedMembershipMessage";
 import AddonButtons from "./AddonButtons";
 import ServiceAddonButtons from './ServiceAddonButtons';
@@ -194,6 +196,19 @@ const determineMembershipTypeByAge = (dateOfBirth) => {
 function EnrollmentForm() {
   // Always start at top when this page mounts inside iframe
   useScrollTopOnMount();
+  // Ask parent to bring iframe into view, repeat-fired in hook
+  useNotifyParentScroll('enrollment-form');
+  // Strong scroll-to-top utility to defeat anchoring before navigations/modals
+  const forceScrollTop = React.useCallback(() => {
+    try {
+      console.log('[ScrollDebug] forceScrollTop() start, y=', window.pageYOffset);
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => window.scrollTo(0, 0));
+      setTimeout(() => window.scrollTo(0, 0), 80);
+      setTimeout(() => window.scrollTo(0, 0), 240);
+      setTimeout(() => console.log('[ScrollDebug] forceScrollTop() retries done, y=', window.pageYOffset), 260);
+    } catch (_) {}
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();
@@ -1582,12 +1597,18 @@ function EnrollmentForm() {
       
       // Only show PT modal if PT is not already in the cart
       if (!hasPTAddon) {
-        console.log("PT not in cart, showing PT modal");
+        console.log('[ScrollDebug] Continue to Agreement: PT modal path - forcing top, then opening modal. y=', window.pageYOffset);
+        // Scroll to very top so modal header is visible
+        forceScrollTop();
         setShowPTModal(true);
+        // Nudge again after open
+        setTimeout(() => { console.log('[ScrollDebug] After PT modal open retry #1'); forceScrollTop(); }, 0);
+        setTimeout(() => { console.log('[ScrollDebug] After PT modal open retry #2'); forceScrollTop(); }, 160);
       } else {
-        console.log("PT already in cart, proceeding directly to contract");
+        console.log('[ScrollDebug] Continue to Agreement: PT already selected - forcing top then navigating to /contract. y=', window.pageYOffset);
         // Clear saved data before navigation (Safari fix)
         await clearSavedData();
+        forceScrollTop();
         // Navigate directly to contract since PT is already selected
         navigate('/contract', { 
           state: { 
@@ -1606,7 +1627,7 @@ function EnrollmentForm() {
   };
 
   const handlePTAccept = async () => {
-    console.log('PT Accept clicked!');
+    console.log('[ScrollDebug] PT Accept clicked: forcing top then navigating to /contract. y=', window.pageYOffset);
     setShowPTModal(false);
     
     let ptPackageData;
@@ -1649,6 +1670,7 @@ function EnrollmentForm() {
     if (formSubmissionData) {
       // Clear saved data before navigation (Safari fix)
       await clearSavedData();
+      forceScrollTop();
       navigate('/contract', { 
         state: { 
           formData: {
@@ -1668,6 +1690,8 @@ function EnrollmentForm() {
     if (formSubmissionData) {
       // Clear saved data before navigation (Safari fix)
       await clearSavedData();
+      console.log('[ScrollDebug] PT Decline clicked: forcing top then navigating to /contract. y=', window.pageYOffset);
+      forceScrollTop();
       navigate('/contract', { 
         state: { 
           formData: {
@@ -2267,7 +2291,14 @@ function EnrollmentForm() {
       return (
         <RestrictedMembershipMessage 
           membershipType={membershipType} 
-          onChangeMembershipType={() => {}} 
+          onChangeMembershipType={() => {
+            try {
+              const standardType = { id: 'standard', title: 'Standard', description: 'For members between 30-64 years old' };
+              selectMembershipType(standardType);
+              // Also move back to members tab so user sees updated state
+              setActiveTab('members');
+            } catch (_) {}
+          }} 
         />
       );
     }
@@ -3794,6 +3825,9 @@ function EnrollmentForm() {
           {submitError}
         </div>
       )}
+
+      {/* Version badge - bottom right, subtle */}
+      <div className="app-version-badge">v{APP_VERSION}</div>
 
       <div className="enrollment-layout">
         {/* Main enrollment form */}

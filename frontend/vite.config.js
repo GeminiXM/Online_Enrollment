@@ -7,6 +7,11 @@ import spaFallbackPlugin from "./src/vite-spa-fallback-plugin.js";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), svgr(), spaFallbackPlugin()],
+  define: {
+    "import.meta.env.PACKAGE_VERSION": JSON.stringify(
+      process.env.npm_package_version
+    ),
+  },
   server: {
     port: 5000,
     host: "0.0.0.0",

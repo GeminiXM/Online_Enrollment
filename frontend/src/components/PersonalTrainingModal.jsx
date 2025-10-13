@@ -7,6 +7,37 @@ import ptImage from '../assets/images/PT.png';
 const PersonalTrainingModal = ({ isOpen, onClose, onAccept, selectedClub }) => {
   const [ptPackage, setPtPackage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Force the iframe window to the very top when modal opens so users see the header/content
+  useEffect(() => {
+    if (isOpen) {
+      const scrollTop = () => {
+        try { window.scrollTo(0, 0); } catch (_) {}
+      };
+      // Disable smooth behavior briefly and blur focus to defeat anchoring
+      const htmlEl = document.documentElement;
+      const bodyEl = document.body;
+      const prevHtmlScrollBehavior = htmlEl && htmlEl.style ? htmlEl.style.scrollBehavior : undefined;
+      const prevBodyScrollBehavior = bodyEl && bodyEl.style ? bodyEl.style.scrollBehavior : undefined;
+      try {
+        if (htmlEl && htmlEl.style) htmlEl.style.scrollBehavior = 'auto';
+        if (bodyEl && bodyEl.style) bodyEl.style.scrollBehavior = 'auto';
+        try { document.activeElement && document.activeElement.blur && document.activeElement.blur(); } catch(_) {}
+      } catch(_) {}
+      scrollTop();
+      requestAnimationFrame(scrollTop);
+      const t1 = setTimeout(scrollTop, 120);
+      const t2 = setTimeout(scrollTop, 350);
+      const t3 = setTimeout(scrollTop, 700);
+      return () => {
+        clearTimeout(t1); clearTimeout(t2); clearTimeout(t3);
+        try {
+          if (htmlEl && htmlEl.style) htmlEl.style.scrollBehavior = prevHtmlScrollBehavior || '';
+          if (bodyEl && bodyEl.style) bodyEl.style.scrollBehavior = prevBodyScrollBehavior || '';
+        } catch(_) {}
+      };
+    }
+  }, [isOpen]);
 
   // Fetch PT package when modal opens
   useEffect(() => {

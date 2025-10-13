@@ -85,7 +85,13 @@ const ContractPage = () => {
   useEffect(() => {
     if (titleRef.current) {
       try {
-        titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Hard jump first, then smooth correction to ensure we really land at the top
+        window.scrollTo(0, 0);
+        requestAnimationFrame(() => window.scrollTo(0, 0));
+        setTimeout(() => window.scrollTo(0, 0), 120);
+        setTimeout(() => {
+          try { titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(_) {}
+        }, 240);
       } catch (_) {}
     }
   }, []);
@@ -598,6 +604,13 @@ const ContractPage = () => {
     e.preventDefault();
     
     if (validateForm()) {
+      // Force top so next page doesn't inherit scroll position
+      try {
+        console.log('[ScrollDebug] Contract: Continue to Payment pressed - forcing top before navigation. y=', window.pageYOffset);
+        window.scrollTo(0, 0);
+        requestAnimationFrame(() => window.scrollTo(0, 0));
+        setTimeout(() => window.scrollTo(0, 0), 80);
+      } catch (_) {}
       // Route based on club state: CO -> FluidPay, NM -> Converge (default to Converge)
       const isColoradoClub = selectedClub?.state === 'CO';
       const paymentRoute = isColoradoClub ? '/payment-fluidpay' : '/converge-payment';
