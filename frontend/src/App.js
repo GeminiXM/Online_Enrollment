@@ -110,6 +110,7 @@ function AppContent() {
 
   return (
     <div className="App">
+      <div className="top-header-bar" />
       {/* Header Toggle Button - only in development */}
       {isDevelopment && (
         <button

@@ -285,3 +285,10 @@ a:hover {
 .App:not(.header-visible) main {
   padding-top: 0;
 } 
+
+/* Small top header bar */
+.top-header-bar {
+  background-color: #0082B5;
+  height: 28px;
+  width: 100%;
+} 

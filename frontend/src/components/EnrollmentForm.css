@@ -49,7 +49,7 @@ body {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18); /* Slightly stronger shadow for separation */
   border: 2px solid rgba(0, 79, 110, 0.35); /* Darker, more defined border */
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   z-index: 0; /* ensure children (like tooltips) can stack above */
 }
 
@@ -456,13 +456,19 @@ select[aria-invalid="true"] {
   }
   
   .enrollment-layout {
-    flex-direction: column; /* Stack form and cart vertically */
+    display: block; /* Let cart be fixed without flex quirks */
   }
   
   .shopping-cart {
-    position: static; /* Remove sticky positioning */
-    order: -1; /* Show cart at the top on mobile */
-    margin-bottom: 2rem; /* Space below cart */
+    position: fixed; /* Keep cart always on screen during page scroll */
+    right: 12px;
+    bottom: 12px;
+    left: 12px; /* full width minus padding */
+    top: auto;
+    max-height: 40vh; /* show a compact cart on mobile */
+    overflow: auto;
+    z-index: 100; /* above form content */
+    margin: 0; /* fixed elements ignore margins */
   }
   
   .form-row {
