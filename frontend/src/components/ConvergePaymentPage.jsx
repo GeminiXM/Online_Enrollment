@@ -7,6 +7,8 @@ import { useClub } from '../context/ClubContext';
 import api from '../services/api.js';
 import './ConvergePaymentPage.css';
 import { APP_VERSION } from '../version';
+import CACLogo40 from '@/assets/images/CAC_Logo resize 40.jpg';
+import NMSWLogo50 from '@/assets/images/nmsw_logo resize50.jpg';
 
 const ConvergePaymentPage = () => {
   useScrollTopOnMount();
@@ -702,6 +704,14 @@ const ConvergePaymentPage = () => {
   return (
     <div className="payment-container form-page-frame">
       <div className="app-version-badge">v{APP_VERSION}</div>
+      {/* Club Logo above header */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+        {selectedClub?.state === 'NM' ? (
+          <img src={NMSWLogo50} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        ) : (
+          <img src={CACLogo40} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        )}
+      </div>
       <h1>Complete Your Membership</h1>
     
     <div className="payment-layout">

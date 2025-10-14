@@ -61,12 +61,15 @@ function AppContent() {
   const isDevelopment = process.env.NODE_ENV === "development";
   const [headerVisible, setHeaderVisible] = React.useState(isDevelopment);
 
-  // Handle club selection from URL parameters
+  // Handle club selection from URL parameters (accept clubId or clubid) and override any stored selection
   React.useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const clubId = params.get("clubId");
-    if (clubId) {
-      changeClub(clubId);
+    const clubIdParam = params.get("clubId") || params.get("clubid");
+    if (clubIdParam) {
+      changeClub(clubIdParam);
+      try {
+        localStorage.setItem("selectedClubId", String(clubIdParam));
+      } catch (_) {}
     }
   }, [location.search, changeClub]);
 

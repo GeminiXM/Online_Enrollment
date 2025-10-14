@@ -71,14 +71,30 @@ const loadImageAsDataUrl = (src) => {
   });
 };
 
-// Function to calculate cancellation date (14 days from start date)
+// Function to calculate cancellation date (14 days from start date), robust to ISO or US format and avoids TZ shifts
 const calculateCancellationDate = (startDate) => {
   if (!startDate) return '';
   try {
-    const date = new Date(startDate);
-    if (isNaN(date.getTime())) return '';
-    date.setDate(date.getDate() + 14);
-    return date.toLocaleDateString('en-US', {
+    const isISO = /^\d{4}-\d{2}-\d{2}$/.test(startDate);
+    const isUS = /^\d{2}\/\d{2}\/\d{4}$/.test(startDate);
+    let baseDate;
+
+    if (isISO) {
+      const [y, m, d] = startDate.split('-').map((v) => parseInt(v, 10));
+      baseDate = new Date(y, m - 1, d);
+    } else if (isUS) {
+      const [mm, dd, yyyy] = startDate.split('/').map((v) => parseInt(v, 10));
+      baseDate = new Date(yyyy, mm - 1, dd);
+    } else {
+      // Fallback parse
+      baseDate = new Date(startDate);
+    }
+
+    if (isNaN(baseDate.getTime())) return '';
+    const cancellationDate = new Date(baseDate);
+    // Inclusive of start date: add 13 calendar days
+    cancellationDate.setDate(baseDate.getDate() + 13);
+    return cancellationDate.toLocaleDateString('en-US', {
       month: '2-digit',
       day: '2-digit',
       year: 'numeric'
@@ -595,7 +611,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     const cancellationHeader = `${getClubName(selectedClub)} (${getClubAbbreviation(selectedClub)}) MONEY BACK GUARANTEE:`;
     pdf.text(cancellationHeader, 20, 45);
     pdf.setFont('helvetica', 'normal');
-    const cancellationText = `${getClubAbbreviation(selectedClub)} EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO ${getClubAbbreviation(selectedClub)} UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM MT) OF ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
+    const cancellationText = `${getClubAbbreviation(selectedClub)} EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO ${getClubAbbreviation(selectedClub)} UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS OF START DATE (NOT LATER THAN 5PM MT) ON ${formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.`;
     const splitCancellationText = pdf.splitTextToSize(cancellationText, 170);
     pdf.text(splitCancellationText, 20, 50);
     let currentYPos = 50 + (splitCancellationText.length * 4) + 5;
@@ -824,7 +840,7 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
     pdf.text('A. RESIGNATION POLICY', 30, currentYPos);
     currentYPos += 5;
     pdf.setFont('helvetica', 'normal');
-    const resignationText = `A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.`;
+    const resignationText = `A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancellation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date ember must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.`;
     const splitResignation = pdf.splitTextToSize(resignationText, 150);
     currentYPos = drawPagedText(pdf, splitResignation, 30, currentYPos);
     if (initialedSections?.resignation && signatureData?.initials?.text) {

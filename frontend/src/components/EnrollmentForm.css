@@ -193,7 +193,7 @@ body {
 .additional-services h3 {
   color: var(--primary-color);
   margin: 0 0 0.4rem 0;
-  font-size: 0.9rem;
+  font-size: 1.2rem; /* +1 step for better readability */
 }
 
 .family-members-summary ul,
@@ -208,7 +208,7 @@ body {
   padding: 0.2rem 0;
   border-bottom: 1px solid #e0e0e0;
   color: #555;
-  font-size: 0.8rem;
+  font-size: 1.0rem; /* +1 step from 0.8rem */
 }
 
 .family-members-summary li:last-child,

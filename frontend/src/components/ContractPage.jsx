@@ -22,6 +22,8 @@ import SignatureSelector from './SignatureSelector';
 import CanvasContractPDF from './CanvasContractPDF';
 import CanvasContractDenverPDF from './CanvasContractDenverPDF';
 import './ContractPage.css';
+import CACLogo40 from '@/assets/images/CAC_Logo resize 40.jpg';
+import NMSWLogo50 from '@/assets/images/nmsw_logo resize50.jpg';
 
 // Component for clickable initial boxes
 const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref) => {
@@ -154,35 +156,36 @@ const ContractPage = () => {
     return signatureData.initials?.text || '';
   };
   
-  // Calculate date 14 days from requested start date
+  // Calculate date 14 days from requested start date (supports MM/DD/YYYY and YYYY-MM-DD)
   const calculateCancellationDate = (startDateString) => {
     if (!startDateString) return '';
     
-    // Parse the date string - avoid timezone shifts by handling parts manually
-    const parts = startDateString.split(/[-T]/);
-    if (parts.length >= 3) {
-      const year = parseInt(parts[0], 10);
-      // JavaScript months are 0-based, so subtract 1 from the month
-      const month = parseInt(parts[1], 10) - 1;
-      const day = parseInt(parts[2], 10);
-      
-      // Create date with specific year, month, day in local timezone
-      const date = new Date(year, month, day);
-      
-      // Add 14 days to the start date
-      const cancellationDate = new Date(date);
-      cancellationDate.setDate(date.getDate() + 14);
-      
-      // Format to mm/dd/yyyy
-      return cancellationDate.toLocaleDateString('en-US', {
-        month: '2-digit',
-        day: '2-digit',
-        year: 'numeric'
-      });
+    const usMatch = /^\d{2}\/\d{2}\/\d{4}$/.test(startDateString);
+    const isoMatch = /^\d{4}-\d{2}-\d{2}$/.test(startDateString);
+    let date;
+    
+    if (isoMatch) {
+      const [y, m, d] = startDateString.split('-').map((v) => parseInt(v, 10));
+      date = new Date(y, m - 1, d);
+    } else if (usMatch) {
+      const [mm, dd, yyyy] = startDateString.split('/').map((v) => parseInt(v, 10));
+      date = new Date(yyyy, mm - 1, dd);
+    } else {
+      // Last resort: let Date try to parse
+      date = new Date(startDateString);
     }
     
-    // Fallback for unexpected format
-    return startDateString;
+    if (Number.isNaN(date.getTime())) return '';
+    
+    const cancellationDate = new Date(date);
+    // Inclusive of start date: add 13 calendar days
+    cancellationDate.setDate(date.getDate() + 13);
+    
+    return cancellationDate.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
   };
 
   // Calculate prorated factor (percentage of month remaining) - copied from EnrollmentForm
@@ -364,15 +367,16 @@ const ContractPage = () => {
         const ptPackagePriceWithTax = parseFloat(data.ptPackage.invtr_price || data.ptPackage.price || 0);
         if (isNewMexicoClub) {
           // For New Mexico, separate tax from the price
-          ptPackageAmount = Math.round(ptPackagePriceWithTax / (1 + taxRate)); // Round to nearest dollar
-          ptPackageTax = ptPackagePriceWithTax - ptPackageAmount;
+          const base = Math.round(ptPackagePriceWithTax / (1 + taxRate)); // Round to nearest dollar
+          ptPackageAmount = Number(base).toFixed(2);
+          ptPackageTax = ptPackagePriceWithTax - base;
         } else {
           // For non-NM clubs, use the price as-is
-          ptPackageAmount = ptPackagePriceWithTax;
+          ptPackageAmount = Number(ptPackagePriceWithTax).toFixed(2);
           ptPackageTax = 0;
         }
       } else {
-        ptPackageAmount = 0;
+        ptPackageAmount = '0.00';
         ptPackageTax = 0;
       }
       
@@ -832,8 +836,14 @@ const ContractPage = () => {
   return (
     <div className="contract-container form-page-frame">
       <div className="app-version-badge">v{APP_VERSION}</div>
-
-        
+      {/* Club Logo above header */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+        {selectedClub?.state === 'NM' ? (
+          <img src={NMSWLogo50} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        ) : (
+          <img src={CACLogo40} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        )}
+      </div>
       <h1 ref={titleRef} id="membership-agreement">Membership Agreement</h1>
       
       <div className="member-info-summary">
@@ -1745,7 +1755,7 @@ const DenverContract = ({
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
           <p className="cancellation-text">COLORADO ATHLETIC CLUB (CAC) MONEY BACK GUARANTEE:</p>
-          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS ( MT) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p>CAC EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO CAC UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO COLORADO ATHLETIC CLUB THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS OF START DATE (NOT LATER THAN 5PM MT) ON {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
           <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of Colorado Athletic Club. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>
@@ -1799,7 +1809,7 @@ const DenverContract = ({
           
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
-          <p><strong>A. RESIGNATION POLICY: </strong>A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
+          <p><strong>A. RESIGNATION POLICY: </strong>A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date Member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox
@@ -1957,7 +1967,7 @@ const NewMexicoContract = ({
         <div className="section-header">CANCELLATION RIGHT</div>
         <div className="section-content">
           <p className="cancellation-text">NEW MEXICO SPORTS AND WELLNESS (NMSW) MONEY BACK GUARANTEE:</p>
-          <p>NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS (NOT LATER THAN 5PM) OF {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
+          <p>NMSW EXTENDS A FOURTEEN (14) DAY TRIAL PERIOD WITH A FULL REFUND. THIS REFUND DOES NOT APPLY TO AMOUNTS OWED BY MEMBER TO NMSW UNDER ANY OTHER MEMBERSHIP APPLICATION OR AGREEMENT. THE 14 DAYS INCLUDE THE DATE ON THIS AGREEMENT. YOU MAY RESCIND THIS AGREEMENT BY SENDING WRITTEN NOTICE TO NEW MEXICO SPORTS AND WELLNESS THAT YOU ARE EXERCISING YOUR RIGHT TO RESCIND BY FACSIMILE TRANSMITTAL, MAIL, EMAIL, HAND DELIVERY OR COMPLETING A MEMBERSHIP CANCELATION FORM AT THE CLUB. A NOTICE IS DEEMED DELIVERED ON THE DATE POSTMARKED IF MAILED, ON THE DATE DELIVERED IF BY HAND DELIVERY, FACSIMILE OR EMAIL. IF YOU PROPERLY EXERCISE YOUR RIGHT TO RESCIND WITHIN 14 DAYS OF START DATE (NOT LATER THAN 5PM MT) ON {formData?.requestedStartDate ? calculateCancellationDate(formData.requestedStartDate) : ''}, YOU WILL BE ENTITLED TO A REFUND OF ALL PAYMENTS MADE PURSUANT TO THIS MEMBERSHIP APPLICATION.</p>
           <p className="acknowledgment">EACH OF THE UNDERSIGNED MEMBERS ACKNOWLEDGES RECEIPT OF THE FOREGOING NOTICE AND COPIES HEREOF:</p>
           <p>I have read and understand this agreement along with the terms and conditions contained on this document and will abide by the rules and regulations of New Mexico Sports & Wellness. In addition, I understand that the primary member represents all members and accepts all responsibility on the account and that all memberships are non-transferable and non-assignable to another individual. By signing this document or sending this by facsimile, I do intend it to be my legally binding and valid signature on this agreement as if it were an original signature.</p>
         </div>
@@ -2012,7 +2022,7 @@ const NewMexicoContract = ({
           
           <p><strong>4. TERMINATION/RESIGNATION RIGHTS</strong> - In addition to the Cancellation Right set forth on this agreement, Member has the following rights to terminate:</p>
           
-          <p><strong>A. RESIGNATION POLICY:</strong> A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
+          <p><strong>A. RESIGNATION POLICY:</strong> A month-to-month membership may be cancelled by providing at least one (1) month's written notice. Cancellation shall be effective on the 1st of the month that is at least one (1) month after the date the notice is delivered. Notice can be provided by first class mail (Certified with Return Receipt Recommended), personal delivery of cancelation form at the club (Obtaining a copy from Club Personnel Recommended), and contact with the club to obtain the current, digital form of cancellation. Concurrently with the delivery of written notice, Member must pay the club any amounts due on the account as of the cancellation date and on or before the cancellation date Member must return all membership cards (if applicable). Those who have signed on an Extended Plan agreement are subject to the terms of their agreement and are responsible for the balance of remaining dues. All memberships are non-refundable, non-transferable, non-assignable and non-proprietary.</p>
           <p className="initial-line">
             <strong>INITIAL</strong>
             <InitialBox

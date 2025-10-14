@@ -7,6 +7,8 @@ import { APP_VERSION } from '../version';
 //import PaymentProcessorDemo from './PaymentProcessorDemo';
 import { generateContractPDFBuffer } from '../utils/contractPDFGenerator.js';
 import './PaymentPage.css';
+import CACLogo40 from '@/assets/images/CAC_Logo resize 40.jpg';
+import NMSWLogo50 from '@/assets/images/nmsw_logo resize50.jpg';
 
 // Import Google Fonts for signatures (same as SignatureSelector)
 import '../components/SignatureSelector.css';
@@ -892,8 +894,16 @@ const processConvergePayment = async () => {
         `}
       </style>
       <div className="payment-container form-page-frame">
-        <div className="app-version-badge">v{APP_VERSION}</div>
-        <h1>Complete Your Membership</h1>
+      <div className="app-version-badge">v{APP_VERSION}</div>
+      {/* Club Logo above header */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+        {selectedClub?.state === 'NM' ? (
+          <img src={NMSWLogo50} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        ) : (
+          <img src={CACLogo40} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+        )}
+      </div>
+      <h1>Complete Your Membership</h1>
       
       <div className="payment-layout">
         <div className="payment-summary">

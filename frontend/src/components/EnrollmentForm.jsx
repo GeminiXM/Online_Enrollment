@@ -80,7 +80,7 @@ const validateAgeForMembershipType = (dateOfBirth, membershipType) => {
 const validateAdultAge = (dateOfBirth) => {
   const age = calculateAge(dateOfBirth);
   if (age === null) return "Date of birth is required";
-  if (age > 110) return "Please enter a valid date of birth (must be 110 years old or younger).";
+  if (age > 110) return "Please enter a date of birth younger than 110 years old";
   if (age < 18) return `You are ${age} years old. Adult members must be 18 or older.`;
   return null;
 };
@@ -89,7 +89,7 @@ const validateChildAge = (dateOfBirth) => {
   const age = calculateAge(dateOfBirth);
   if (age === null) return "Date of birth is required";
   if (age < 0) return "Invalid date of birth";
-  if (age > 110) return "Please enter a valid date of birth (must be 110 years old or younger).";
+  if (age > 110) return "Please enter a date of birth younger than 110 years old";
   if (age > 11) return `You are ${age} years old. Child members must be 11 or younger.`;
   return null;
 };
@@ -554,6 +554,16 @@ function EnrollmentForm() {
   // State for sales reps
   const [salesReps, setSalesReps] = useState([]);
   const [loadingSalesReps, setLoadingSalesReps] = useState(false);
+
+  // Restore sales rep selection independently so it persists when drafts are cleared before navigation
+  useEffect(() => {
+    try {
+      const savedRep = localStorage.getItem('enrollment_sales_rep');
+      if (savedRep && !formData.salesRep) {
+        setFormData(prev => ({ ...prev, salesRep: savedRep }));
+      }
+    } catch (_) {}
+  }, []);
   
   // Determine membership type (I/D/F) based on member composition
   const determineMembershipType = useCallback(() => {
@@ -1109,6 +1119,11 @@ const handleChange = (e) => {
     }));
   }
 
+  // Persist sales rep selection immediately so it survives draft clears and back navigation
+  if (name === 'salesRep') {
+    try { localStorage.setItem('enrollment_sales_rep', value || ''); } catch (_) {}
+  }
+
   // Handle date of birth validation only when full date is entered (MM/DD/YYYY or YYYY-MM-DD)
   if (name === 'dateOfBirth') {
     const isUS = /^\d{2}\/\d{2}\/\d{4}$/.test(value);
@@ -1133,7 +1148,7 @@ const handleChange = (e) => {
       if (Number.isNaN(birthDate.getTime()) || year < limitYear || year > currentYear) {
         setErrors(prevErrors => ({
           ...prevErrors,
-          dateOfBirth: 'Please enter a valid date of birth (must be 110 years old or younger).'
+          dateOfBirth: 'Please enter a date of birth younger than 110 years old'
         }));
         return;
       }
@@ -1929,7 +1944,7 @@ const handleChange = (e) => {
         const year = parseInt(parts[0], 10);
         const currentYear = new Date().getFullYear();
         if (year < currentYear - 110 || year > currentYear) {
-          setErrors(prev => ({ ...prev, [`child${index}DateOfBirth`]: 'Please enter a valid date of birth (≤ 110 years).' }));
+          setErrors(prev => ({ ...prev, [`child${index}DateOfBirth`]: 'Please enter a date of birth younger than 110 years old' }));
           // don't block update, let user correct
         } else {
           setErrors(prev => ({ ...prev, [`child${index}DateOfBirth`]: null }));
