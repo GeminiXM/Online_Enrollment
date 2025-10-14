@@ -57,6 +57,18 @@ export const asyncHandler = (fn) => {
  * 404 Not Found handler
  */
 export const notFoundHandler = (req, res, next) => {
+  // Ignore common probe paths to reduce noise (bots scanning for env files, etc.)
+  const ignored404s = [
+    "/.env",
+    "/.env.example",
+    "/api/.env",
+    "/api/.env.example",
+  ];
+
+  if (ignored404s.includes(req.originalUrl)) {
+    return res.status(404).end();
+  }
+
   const error = new Error(`Not Found - ${req.originalUrl}`);
   error.statusCode = 404;
   next(error);
