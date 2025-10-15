@@ -4722,9 +4722,9 @@ const handleChange = (e) => {
                     return (
                       <li key={index}>
                         <div>{addon.invtr_desc}</div>
-                        <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
-                          <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
-                          <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
+                        <div className="cart-price-line">
+                          <span className="cart-price-due-now">Due now: ${proratedPrice.toFixed(2)}</span>
+                          <span className="cart-price-monthly">Monthly: ${fullPrice.toFixed(2)}</span>
                         </div>
                       </li>
                     );
@@ -4748,9 +4748,9 @@ const handleChange = (e) => {
                       return (
                         <li key={index}>
                           <div>{addon.invtr_desc}</div>
-                          <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
-                            <span style={{color: "#28a745"}}>Due now: ${proratedPrice.toFixed(2)}</span>
-                            <span style={{color: "#666", marginLeft: "0.4rem"}}>Monthly: ${fullPrice.toFixed(2)}</span>
+                          <div className="cart-price-line">
+                            <span className="cart-price-due-now">Due now: ${proratedPrice.toFixed(2)}</span>
+                            <span className="cart-price-monthly">Monthly: ${fullPrice.toFixed(2)}</span>
                           </div>
                         </li>
                       );

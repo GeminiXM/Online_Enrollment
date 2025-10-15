@@ -193,7 +193,7 @@ body {
 .additional-services h3 {
   color: var(--primary-color);
   margin: 0 0 0.4rem 0;
-  font-size: 1.2rem; /* +1 step for better readability */
+  font-size: 1.1rem; /* +1 step for better readability */
 }
 
 .family-members-summary ul,
@@ -209,6 +209,22 @@ body {
   border-bottom: 1px solid #e0e0e0;
   color: #555;
   font-size: 1.0rem; /* +1 step from 0.8rem */
+}
+
+/* Unified cart price line styles */
+.cart-price-line {
+  font-size: 0.9rem; /* increased by 0.1rem */
+  margin-top: 0.15rem;
+}
+
+.cart-price-due-now {
+  color: #28a745; /* green */
+  font-weight: 600;
+}
+
+.cart-price-monthly {
+  color: #666;
+  margin-left: 0.4rem;
 }
 
 .family-members-summary li:last-child,
