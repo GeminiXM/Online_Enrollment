@@ -571,18 +571,47 @@ export const generatePDFBuffer = async (formData, signatureData, signatureDate, 
       margin: { left: 20, right: 20 }
     });
     const paymentMethodEndY = pdf.lastAutoTable.finalY;
-    const formatCreditCardNumber = (ccNumber) => {
-      if (!ccNumber) return '';
-      const digits = String(ccNumber).replace(/\D/g, '');
-      const last4 = digits.slice(-4);
-      return last4 ? `************${last4}` : '';
+    // Derive masked CC number robustly from multiple possible fields
+    const deriveMaskedLast4 = () => {
+      const candidates = [
+        // Already-masked or raw CC on formData
+        formData.creditCardNumber,
+        formData.cardNumber,
+        // Generic paymentResponse sources
+        formData.paymentResponse?.creditCardNumber,
+        formData.paymentResponse?.cardNumber,
+        formData.paymentResponse?.maskedCardNumber,
+        // Converge-specific fields
+        formData.paymentResponse?.ssl_card_number,
+        formData.paymentResponse?.cardNumber,
+        formData.paymentResponse?.maskedCardNumber,
+        // FluidPay-specific fields
+        formData.paymentResponse?.card?.number,
+        formData.paymentResponse?.card?.maskedNumber,
+      ];
+      
+      for (const candidate of candidates) {
+        if (candidate) {
+          // If already masked, return as-is
+          if (String(candidate).includes('*')) {
+            return candidate;
+          }
+          // If raw number, mask it
+          const digits = String(candidate).replace(/\D/g, '');
+          if (digits.length >= 4) {
+            const last4 = digits.slice(-4);
+            return `************${last4}`;
+          }
+        }
+      }
+      return '';
     };
     autoTable(pdf, {
       startY: paymentMethodEndY + 5,
       head: [['Credit Card Number', 'Expiration', 'Name on Account']],
       body: [
         [
-          formatCreditCardNumber(formData.creditCardNumber || ''),
+          deriveMaskedLast4(),
           formatDate(formData.expirationDate || ''),
           formData.nameOnAccount || `${formData.firstName || ''} ${formData.lastName || ''}`
         ]

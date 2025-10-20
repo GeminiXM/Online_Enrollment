@@ -151,6 +151,11 @@ const applySignatureFont = (pdf, signatureData) => {
 // Function to format credit card number
 const formatCreditCardNumber = (ccNumber) => {
   if (!ccNumber) return "";
+  // If already masked (contains asterisks), return as-is
+  if (ccNumber.includes("*")) {
+    return ccNumber;
+  }
+  // Otherwise, mask it
   const cleaned = ccNumber.replace(/\s/g, "");
   const last4 = cleaned.slice(-4);
   return `************${last4}`;
@@ -657,9 +662,8 @@ export const generateContractPDFBuffer = async (
       head: [["Credit Card Number", "Expiration", "Name on Account"]],
       body: [
         [
-          formatCreditCardNumber(
-            deriveMaskedLast4() || formData.creditCardNumber || ""
-          ),
+          deriveMaskedLast4() ||
+            formatCreditCardNumber(formData.creditCardNumber || ""),
           formatDate(formData.expirationDate || ""),
           formData.nameOnAccount ||
             `${formData.firstName || ""} ${formData.lastName || ""}`,

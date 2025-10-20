@@ -1017,6 +1017,17 @@ function EnrollmentForm() {
       proratedDuesAddon: (parseFloat(formData.proratedDues || 0) + parseFloat(formData.proratedAddOns || 0)).toFixed(2),
       proratedDuesAddonTax: (parseFloat(formData.proratedDuesTax || 0) + parseFloat(formData.proratedAddOnsTax || 0)).toFixed(2),
       combineAddonsIntoProrated: true,
+      
+      // FRONTEND CALCULATION DEBUG LOGGING
+      frontendCalculationDebug: {
+        proratedDues: formData.proratedDues,
+        proratedDuesTax: formData.proratedDuesTax,
+        proratedAddOns: formData.proratedAddOns,
+        proratedAddOnsTax: formData.proratedAddOnsTax,
+        proratedDuesAddon: (parseFloat(formData.proratedDues || 0) + parseFloat(formData.proratedAddOns || 0)).toFixed(2),
+        proratedDuesAddonTax: (parseFloat(formData.proratedDuesTax || 0) + parseFloat(formData.proratedAddOnsTax || 0)).toFixed(2),
+        totalCollected: formData.totalCollected
+      },
       // Add enrollment fee
       initiationFee: '19.00',
       // Add PT selection

@@ -1075,6 +1075,29 @@ export const submitEnrollment = async (req, res) => {
       : 0.0;
     const prorateAmount = membershipDetails.proratedPrice || 0.0;
 
+    // COMPREHENSIVE LOGGING FOR AMOUNT DISCREPANCY DEBUGGING
+    logger.info("=== AMOUNT CALCULATION DEBUG START ===");
+    logger.info("Raw request body amounts:", {
+      proratedDues: req.body.proratedDues,
+      proratedDuesTax: req.body.proratedDuesTax,
+      proratedAddOns: req.body.proratedAddOns,
+      proratedAddOnsTax: req.body.proratedAddOnsTax,
+      proratedDuesAddon: req.body.proratedDuesAddon,
+      proratedDuesAddonTax: req.body.proratedDuesAddonTax,
+      totalCollected: req.body.totalCollected,
+      combineAddonsIntoProrated: req.body.combineAddonsIntoProrated,
+    });
+    logger.info("Calculated amounts:", {
+      duesTaxAmount,
+      taxRate,
+      addonsTotal,
+      addonsTaxAmount,
+      initiationFee,
+      initiationFeeTax,
+      prorateAmount,
+    });
+    logger.info("Membership details:", membershipDetails);
+
     // Calculate totalProrateBilled here so it's available for the response
     const ptPackageAmount =
       hasPTAddon && ptPackage
@@ -1101,6 +1124,37 @@ export const submitEnrollment = async (req, res) => {
           proratedDuesAddonTax +
           ptPackageAmount +
           initiationFee;
+
+    // LOG THE CRITICAL CALCULATION STEPS
+    logger.info("=== CRITICAL CALCULATION STEPS ===");
+    logger.info("Individual components:", {
+      proratedDues,
+      proratedDuesTax,
+      proratedAddonsTotal,
+      proratedAddonsTax,
+      proratedDuesAddon,
+      proratedDuesAddonTax,
+      ptPackageAmount,
+      initiationFee,
+      requestedTotalCollected,
+    });
+    // Recompute prorate portion using combined tax to avoid discrepancies
+    const recomputedTotalProrateBilled =
+      (proratedDues || 0) +
+      (proratedAddonsTotal || 0) +
+      (typeof combinedProrateTax === "number" ? combinedProrateTax : 0) +
+      (ptPackageAmount || 0);
+
+    const finalTotalBilled =
+      recomputedTotalProrateBilled + initiationFee + initiationFeeTax;
+
+    logger.info("FINAL CALCULATED TOTAL:", {
+      totalProrateBilled: recomputedTotalProrateBilled,
+      finalTotalBilled,
+      calculation: `${
+        (proratedDues || 0) + (proratedAddonsTotal || 0)
+      } + ${combinedProrateTax} + ${ptPackageAmount} + (${initiationFee} + ${initiationFeeTax}) = ${finalTotalBilled}`,
+    });
 
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";
@@ -1398,7 +1452,10 @@ export const submitEnrollment = async (req, res) => {
           const membershipPrice = combineAddons
             ? parseFloat(req.body.proratedDuesAddon || 0)
             : prorateAmount;
-          const membershipDuesTax = parseFloat(req.body.proratedDuesTax || 0);
+          // Compute dues+addons tax directly from combined base to avoid rounding drift
+          const correctMembershipDuesTax = taxRate
+            ? Number((membershipPrice * taxRate).toFixed(2))
+            : 0.0;
           logger.info(
             "Inserting membership dues item with UPC code:",
             membershipUpcCode,
@@ -1406,27 +1463,44 @@ export const submitEnrollment = async (req, res) => {
             combineAddons,
             "Membership price:",
             membershipPrice,
-            "Membership dues tax:",
-            membershipDuesTax,
+            "Computed combined prorate tax:",
+            correctMembershipDuesTax,
             "Request body proratedDuesAddon:",
             req.body.proratedDuesAddon,
             "Request body proratedDuesAddonTax:",
-            req.body.proratedDuesAddonTax
+            req.body.proratedDuesAddonTax,
+            "Request body proratedDues:",
+            req.body.proratedDues,
+            "Request body proratedAddOns:",
+            req.body.proratedAddOns,
+            "ProrateAmount:",
+            prorateAmount
           );
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             "701592007513", // parUPC - Special UPC for prorated membership dues
             membershipPrice.toFixed(2), // parPrice - prorated amount (with addons when combined)
-            membershipDuesTax.toFixed(2), // parTax - dues tax only or combined tax from frontend
+            correctMembershipDuesTax.toFixed(2), // parTax - dues tax only or combined tax from frontend
             1, // parQty
           ]);
+          logger.info("=== DATABASE INSERTION COMPLETED ===");
+          logger.info("ACTUAL VALUES INSERTED INTO DATABASE:", {
+            transactionId,
+            upcCode: "701592007513",
+            membershipPrice: membershipPrice.toFixed(2),
+            membershipDuesTax: correctMembershipDuesTax.toFixed(2),
+            quantity: 1,
+          });
           logger.info("Membership dues item inserted successfully");
         }
 
         // Insert enrollment fee item with unified UPC code for all locations
         const enrollmentFeeUpcCode = "202500000713";
         const enrollmentFee = 19.0; // $19 enrollment fee
-        const enrollmentFeeTax = parseFloat(req.body.initiationFeeTax || 0);
+        // Calculate enrollment fee tax for NM clubs
+        const enrollmentFeeTax = taxRate
+          ? Number((enrollmentFee * taxRate).toFixed(2))
+          : 0.0;
 
         logger.info(
           "Inserting enrollment fee item with UPC code:",
