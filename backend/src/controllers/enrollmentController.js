@@ -1138,23 +1138,7 @@ export const submitEnrollment = async (req, res) => {
       initiationFee,
       requestedTotalCollected,
     });
-    // Recompute prorate portion using combined tax to avoid discrepancies
-    const recomputedTotalProrateBilled =
-      (proratedDues || 0) +
-      (proratedAddonsTotal || 0) +
-      (typeof combinedProrateTax === "number" ? combinedProrateTax : 0) +
-      (ptPackageAmount || 0);
-
-    const finalTotalBilled =
-      recomputedTotalProrateBilled + initiationFee + initiationFeeTax;
-
-    logger.info("FINAL CALCULATED TOTAL:", {
-      totalProrateBilled: recomputedTotalProrateBilled,
-      finalTotalBilled,
-      calculation: `${
-        (proratedDues || 0) + (proratedAddonsTotal || 0)
-      } + ${combinedProrateTax} + ${ptPackageAmount} + (${initiationFee} + ${initiationFeeTax}) = ${finalTotalBilled}`,
-    });
+    // NOTE: Combined tax computed below; final totals logging moved after that
 
     // Get UPC codes
     const membershipUpcCode = req.body.membershipDetails?.upcCode || "";
@@ -1180,6 +1164,24 @@ export const submitEnrollment = async (req, res) => {
       ? Number((combinedProrateBaseForTax * taxRate).toFixed(2))
       : 0.0;
     const totalTaxAmount = initiationFeeTax + combinedProrateTax;
+
+    // Recompute prorate portion using combined tax to avoid discrepancies
+    const recomputedTotalProrateBilled =
+      (proratedDues || 0) +
+      (proratedAddonsTotal || 0) +
+      combinedProrateTax +
+      (ptPackageAmount || 0);
+
+    const finalTotalBilled =
+      recomputedTotalProrateBilled + initiationFee + initiationFeeTax;
+
+    logger.info("FINAL CALCULATED TOTAL:", {
+      totalProrateBilled: recomputedTotalProrateBilled,
+      finalTotalBilled,
+      calculation: `${
+        (proratedDues || 0) + (proratedAddonsTotal || 0)
+      } + ${combinedProrateTax} + ${ptPackageAmount} + (${initiationFee} + ${initiationFeeTax}) = ${finalTotalBilled}`,
+    });
 
     // Extract the returned values from the procedure
     let updatedCustCode = custCode;
@@ -1274,10 +1276,12 @@ export const submitEnrollment = async (req, res) => {
         proratedAddonsTotal: proratedAddonsTotal.toFixed(2),
         proratedAddonsTax: proratedAddonsTaxForProd.toFixed(2),
         proratedDuesAddon: proratedDuesAddon.toFixed(2),
-        proratedDuesAddonTax: proratedDuesAddonTax.toFixed(2),
+        // Ensure the combined addon+dues tax reflects the combined base, not the raw frontend value
+        proratedDuesAddonTax: combinedProrateTaxForProd.toFixed(2),
         initiationFee: initiationFee.toFixed(2),
         initiationFeeTax: initiationFeeTax.toFixed(2),
-        totalProrateBilled: totalProrateBilled.toFixed(2),
+        // Send the full amount paid today (includes enrollment fee + tax)
+        totalProrateBilled: finalTotalBilled.toFixed(2),
         netDues: netDues.toFixed(2),
         addonsTaxAmount: addonsTaxAmount.toFixed(2),
         addonsTotal: addonsTotal.toFixed(2),
@@ -1307,10 +1311,10 @@ export const submitEnrollment = async (req, res) => {
           proratedAddonsTotal.toFixed(2), // parProrateAddonsTotal
           proratedAddonsTaxForProd.toFixed(2), // parProrateAddonsTax (0.00 when combined)
           proratedDuesAddon.toFixed(2), // parProrateDuesAddon
-          proratedDuesAddonTax.toFixed(2), // parProrateDuesAddonTax
+          combinedProrateTaxForProd.toFixed(2), // parProrateDuesAddonTax (use combined calc)
           initiationFee.toFixed(2), // parIfee
           initiationFeeTax.toFixed(2), // parIfeeTax
-          totalProrateBilled.toFixed(2), // parTotalProrateBilled
+          finalTotalBilled.toFixed(2), // parTotalProrateBilled (full amount paid today)
           netDues.toFixed(2), // parOrigDues
           addonsTaxAmount.toFixed(2), // parAddonsTax
           addonsTotal.toFixed(2), // parAddonsTotal
