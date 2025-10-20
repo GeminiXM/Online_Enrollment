@@ -1064,11 +1064,15 @@ export const submitEnrollment = async (req, res) => {
         : 0.0;
     const addonsTaxAmount = Number((addonsTotal * taxRate).toFixed(2));
 
-    const initiationFeeTax = 0.0; // Calculate based on initiation fee and tax rate
+    let initiationFeeTax = 0.0; // Will compute after initiation fee is known
     const prorateTaxAmount = membershipDetails.proratedTaxAmount || 0.0;
 
     // Calculate totals from the enrollment form data
     const initiationFee = 19.0; // Enrollment fee set to $19
+    // Compute initiation fee tax for NM clubs
+    initiationFeeTax = taxRate
+      ? Number((initiationFee * taxRate).toFixed(2))
+      : 0.0;
     const prorateAmount = membershipDetails.proratedPrice || 0.0;
 
     // Calculate totalProrateBilled here so it's available for the response
@@ -1113,9 +1117,15 @@ export const submitEnrollment = async (req, res) => {
       addonCount: addonUpcCodes.length,
     });
 
-    // Calculate total tax amount
-    const totalTaxAmount =
-      duesTaxAmount + addonsTaxAmount + initiationFeeTax + prorateTaxAmount;
+    // Calculate total tax amount for today's charges (NM):
+    // - Prorate tax is computed on combined prorated dues + prorated add-ons
+    // - Initiation fee tax is computed separately
+    const combinedProrateBaseForTax =
+      (proratedDues || 0) + (proratedAddonsTotal || 0);
+    const combinedProrateTax = taxRate
+      ? Number((combinedProrateBaseForTax * taxRate).toFixed(2))
+      : 0.0;
+    const totalTaxAmount = initiationFeeTax + combinedProrateTax;
 
     // Extract the returned values from the procedure
     let updatedCustCode = custCode;
@@ -1182,6 +1192,15 @@ export const submitEnrollment = async (req, res) => {
         : 0.0;
       const grossMonthlyTotal = grossDues;
 
+      // For production posting in NM, combine prorated dues and add-ons into one prorate tax
+      const combinedProrateBase =
+        (proratedDues || 0) + (proratedAddonsTotal || 0);
+      const combinedProrateTaxForProd = taxRate
+        ? Number((combinedProrateBase * taxRate).toFixed(2))
+        : 0.0;
+      const proratedDuesTaxForProd = combinedProrateTaxForProd;
+      const proratedAddonsTaxForProd = 0.0;
+
       logger.info("About to call web_proc_InsertProduction with parameters:", {
         custCode,
         formattedStartDate,
@@ -1197,9 +1216,9 @@ export const submitEnrollment = async (req, res) => {
           req.body?.paymentInfo?.ssl_customer_id ||
           `${req.body.firstName || ""} ${req.body.lastName || ""}`.trim(),
         proratedDues: proratedDues.toFixed(2),
-        proratedDuesTax: proratedDuesTax.toFixed(2),
+        proratedDuesTax: proratedDuesTaxForProd.toFixed(2),
         proratedAddonsTotal: proratedAddonsTotal.toFixed(2),
-        proratedAddonsTax: proratedAddonsTax.toFixed(2),
+        proratedAddonsTax: proratedAddonsTaxForProd.toFixed(2),
         proratedDuesAddon: proratedDuesAddon.toFixed(2),
         proratedDuesAddonTax: proratedDuesAddonTax.toFixed(2),
         initiationFee: initiationFee.toFixed(2),
@@ -1230,9 +1249,9 @@ export const submitEnrollment = async (req, res) => {
             req.body?.paymentInfo?.ssl_customer_id ||
             `${req.body.firstName || ""} ${req.body.lastName || ""}`.trim(), // parCardHolder
           proratedDues.toFixed(2), // parProrateDues
-          proratedDuesTax.toFixed(2), // parProrateDuesTax
+          proratedDuesTaxForProd.toFixed(2), // parProrateDuesTax (combined dues+add-ons tax)
           proratedAddonsTotal.toFixed(2), // parProrateAddonsTotal
-          proratedAddonsTax.toFixed(2), // parProrateAddonsTax
+          proratedAddonsTaxForProd.toFixed(2), // parProrateAddonsTax (0.00 when combined)
           proratedDuesAddon.toFixed(2), // parProrateDuesAddon
           proratedDuesAddonTax.toFixed(2), // parProrateDuesAddonTax
           initiationFee.toFixed(2), // parIfee
@@ -1377,22 +1396,22 @@ export const submitEnrollment = async (req, res) => {
         if (membershipUpcCode) {
           const combineAddons = req.body.combineAddonsIntoProrated === true;
           const membershipPrice = combineAddons
-            ? parseFloat(
-                req.body.proratedDuesAddon ||
-                  req.body.proratedDues ||
-                  prorateAmount
-              )
+            ? parseFloat(req.body.proratedDuesAddon || 0)
             : prorateAmount;
-          const membershipDuesTax = combineAddons
-            ? parseFloat(
-                req.body.proratedDuesAddonTax || req.body.proratedDuesTax || 0
-              )
-            : parseFloat(req.body.proratedDuesTax || 0);
+          const membershipDuesTax = parseFloat(req.body.proratedDuesTax || 0);
           logger.info(
             "Inserting membership dues item with UPC code:",
             membershipUpcCode,
-            "Tax amount from frontend:",
-            membershipDuesTax
+            "Combine addons:",
+            combineAddons,
+            "Membership price:",
+            membershipPrice,
+            "Membership dues tax:",
+            membershipDuesTax,
+            "Request body proratedDuesAddon:",
+            req.body.proratedDuesAddon,
+            "Request body proratedDuesAddonTax:",
+            req.body.proratedDuesAddonTax
           );
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans

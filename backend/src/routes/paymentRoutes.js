@@ -696,17 +696,16 @@ router.post("/get-session-token", async (req, res) => {
         : 0,
     });
 
-    // Request session token from Converge using demo credentials
+    // Request session token from Converge using DB credentials
     const params = new URLSearchParams({
       ssl_transaction_type: "ccsale",
-      ssl_merchant_id: "0020159", // Standard demo merchant ID
-      ssl_user_id: "webpage", // Standard demo user ID
-      ssl_pin: "123456", // Standard demo PIN
-      ssl_vendor_id: "0020159", // Standard demo vendor ID
-      ssl_amount: "1.00", // Default amount for session token
+      ssl_merchant_id: convergeInfo.merchant_id?.trim(),
+      ssl_user_id: convergeInfo.converge_user_id?.trim(),
+      ssl_pin: convergeInfo.converge_pin?.trim(),
+      ssl_vendor_id: convergeInfo.merchant_id?.trim(),
+      ssl_amount: String(amount ?? "1.00"),
       ssl_add_token: "Y",
       ssl_get_token: "Y",
-      ssl_test_mode: "true", // Enable test mode for demo environment
     });
 
     logger.info("Session token request parameters:", {
@@ -721,7 +720,7 @@ router.post("/get-session-token", async (req, res) => {
     });
 
     const response = await axios.post(
-      "https://api.demo.convergepay.com/hosted-payments/transaction_token",
+      "https://api.convergepay.com/hosted-payments/transaction_token",
       params.toString(),
       {
         headers: {
@@ -1124,12 +1123,12 @@ router.post("/converge-hpp/session-token", async (req, res) => {
 
     const firstRow = convergeResult[0];
     const convergeInfo = {
-      merchant_id: "758595", // From working converge-hpp project
-      converge_user_id: "BOSS", // From working converge-hpp project
-      converge_pin:
-        "BWMFYBFT9HM9PP401B6NBFIPPWLNFBANYV6RKPV4MOYPGMXBLDT4WKC0T73DNQG8", // From working converge-hpp project
+      merchant_id: firstRow.merchant_id?.trim() || "",
+      converge_user_id: firstRow.converge_user_id?.trim() || "",
+      converge_pin: firstRow.converge_pin?.trim() || "",
       converge_url_process:
-        "https://api.convergepay.com/VirtualMerchant/process.do", // Hardcoded for testing
+        firstRow.converge_url_process?.trim() ||
+        "https://api.convergepay.com/VirtualMerchant/process.do",
     };
 
     if (

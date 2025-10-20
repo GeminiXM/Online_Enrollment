@@ -71,8 +71,8 @@ class ErrorBoundary extends React.Component {
       errorInfo: null,
       errorId: null
     });
-    // Navigate to home
-    window.location.href = '/';
+    // Navigate to wellbridge.com
+    window.location.href = 'https://wellbridge.com';
   };
 
   render() {

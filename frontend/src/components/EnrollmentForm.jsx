@@ -2532,7 +2532,8 @@ const handleChange = (e) => {
                   name="dateOfBirth"
                   value={adultMember.dateOfBirth}
                   onChange={handleTempMemberChange}
-                  max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
+                  min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
+                  max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 12); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
                   aria-required="true"
                   aria-invalid={!!errors.tempDateOfBirth}
                   aria-describedby={errors.tempDateOfBirth ? "tempDateOfBirth-error" : undefined}
@@ -3280,7 +3281,8 @@ const handleChange = (e) => {
             name="dateOfBirth"
             value={youthMember.dateOfBirth}
             onChange={handleTempMemberChange}
-            max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 110); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
+            min={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 20); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
+            max={(() => { const d = new Date(); d.setFullYear(d.getFullYear() - 12); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const da=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${da}`; })()}
             aria-required="true"
             aria-invalid={!!errors.tempDateOfBirth}
             aria-describedby={errors.tempDateOfBirth ? 'dateOfBirth-error' : undefined}
@@ -3819,6 +3821,35 @@ const handleChange = (e) => {
       if (cart) cart.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (_) {}
   };
+
+  // Reorder elements for mobile layout
+  const reorderElementsForMobile = () => {
+    if (window.innerWidth <= 900) {
+      const layout = document.querySelector('.enrollment-layout');
+      const form = document.querySelector('.enrollment-form');
+      const cart = document.querySelector('.shopping-cart');
+      const formActions = document.querySelector('.form-actions');
+      
+      if (layout && form && cart && formActions) {
+        // Remove cart from its current position
+        cart.remove();
+        // Insert cart right before the form actions (inside the form)
+        form.insertBefore(cart, formActions);
+      }
+    }
+  };
+
+  // Call reorder function on mount and resize
+  useEffect(() => {
+    reorderElementsForMobile();
+    
+    const handleResize = () => {
+      reorderElementsForMobile();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="enrollment-form-container">
@@ -4765,7 +4796,7 @@ const handleChange = (e) => {
                 <ul>
                   <li>
                     <div>{ptPackage.description || "4 Sessions with a Trainer/Instructor"}</div>
-                    <div style={{fontSize: "0.8rem", marginTop: "0.1rem"}}>
+                    <div style={{fontSize: "0.9rem", marginTop: "0.1rem"}}>
                       <span style={{color: "#28a745"}}>One-time cost: ${ptPackage.price || 149}</span>
                     </div>
                   </li>

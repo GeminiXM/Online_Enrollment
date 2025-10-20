@@ -458,6 +458,35 @@ select[aria-invalid="true"] {
   border-radius: 2px;
 }
 
+/* Desktop styles - cart on right, scrolls with page */
+@media (min-width: 769px) {
+  .enrollment-layout {
+    display: flex;
+    flex-direction: row; /* Side by side on desktop */
+    gap: 2rem;
+  }
+  
+  .enrollment-form {
+    flex: 1;
+    order: 1;
+  }
+  
+  .shopping-cart {
+    position: sticky; /* Sticky positioning for desktop */
+    top: 2rem;
+    order: 2;
+    max-width: 28%;
+    min-width: 250px;
+    align-self: flex-start;
+    margin: 0;
+  }
+  
+  .form-actions,
+  .privacy-notice {
+    order: 1; /* These stay with the form on desktop */
+  }
+}
+
 /* Responsive adjustments for tablets */
 @media (max-width: 768px) {
   .enrollment-container,
@@ -472,19 +501,43 @@ select[aria-invalid="true"] {
   }
   
   .enrollment-layout {
-    display: block; /* Let cart be fixed without flex quirks */
+    display: flex !important;
+    flex-direction: column !important; /* Stack form, then cart, then actions on mobile */
+    flex-wrap: nowrap !important;
+  }
+  
+  .enrollment-form {
+    order: 1 !important; /* Form comes first */
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
   }
   
   .shopping-cart {
-    position: fixed; /* Keep cart always on screen during page scroll */
-    right: 12px;
-    bottom: 12px;
-    left: 12px; /* full width minus padding */
-    top: auto;
-    max-height: 40vh; /* show a compact cart on mobile */
-    overflow: auto;
-    z-index: 100; /* above form content */
-    margin: 0; /* fixed elements ignore margins */
+    position: static !important; /* Remove fixed positioning */
+    order: 2 !important; /* Cart comes second on mobile */
+    margin: 1rem 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure form actions come after the shopping cart on mobile */
+  .form-actions {
+    order: 3 !important; /* Actions come third on mobile */
+    position: static !important;
+    z-index: auto !important;
+    background: transparent !important;
+    padding: 1rem 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Ensure privacy notice comes after form actions on mobile */
+  .privacy-notice {
+    order: 4 !important; /* Privacy notice comes fourth on mobile */
+    margin-top: 1rem !important;
   }
   
   .form-row {
@@ -573,7 +626,41 @@ button:focus-visible {
   margin-bottom: 0.5rem; /* Increased from 0.25rem */
 }
 
-/* Additional mobile optimizations */
+/* Force mobile layout for all mobile devices */
+@media (max-width: 900px) {
+  .enrollment-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .enrollment-form {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .shopping-cart {
+    position: static !important;
+    margin: 1rem 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  .form-actions {
+    position: static !important;
+    z-index: auto !important;
+    background: transparent !important;
+    padding: 1rem 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  .privacy-notice {
+    margin-top: 1rem !important;
+  }
+}
+
+/* Additional mobile optimizations for very small screens */
 @media (max-width: 480px) {
   .enrollment-container,
   .enrollment-form-container,
