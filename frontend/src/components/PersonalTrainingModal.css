@@ -102,6 +102,31 @@
   margin-top: 5px;
 }
 
+/* Mobile: stack content and put image on bottom */
+@media (max-width: 900px) {
+  .pt-modal {
+    height: auto;
+    max-height: 95vh;
+    overflow-y: auto;            /* allow scrolling when content is taller than viewport */
+    -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  }
+  .pt-modal-content {
+    flex-direction: column-reverse; /* text first, image below */
+    align-items: stretch;
+  }
+  .pt-modal-text, .pt-modal-image {
+    width: 100%;
+    height: auto;
+  }
+  .pt-modal-image img {
+    width: 100%;
+    height: auto;           /* keep proportional height */
+    max-height: none;       /* allow full-width scaling */
+    object-fit: contain;
+    display: block;
+  }
+}
+
 .pt-modal-buttons {
   display: flex;
   gap: 12px;
