@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
 import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -11,19 +10,10 @@ import CACLogo40 from '@/assets/images/CAC_Logo resize 40.jpg';
 import NMSWLogo50 from '@/assets/images/nmsw_logo resize50.jpg';
 
 const ConvergePaymentPage = () => {
-  useScrollTopOnMount();
   const paymentSummaryRef = React.useRef(null);
   useNotifyParentScroll('payment-summary');
   // Ensure top-on-mount with retries (avoid inheriting prior page scroll)
-  React.useEffect(() => {
-    try {
-      console.log('[ScrollDebug] ConvergePaymentPage mount - forcing top. y=', window.pageYOffset);
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => window.scrollTo(0, 0));
-      setTimeout(() => window.scrollTo(0, 0), 120);
-      setTimeout(() => window.scrollTo(0, 0), 350);
-    } catch (_) {}
-  }, []);
+  // removed forced scroll-to-top; not embedded anymore
 
   useEffect(() => {
     if (paymentSummaryRef.current) {

@@ -81,19 +81,11 @@ const CardLogos = {
 };
 
 const FluidPayPayment = () => {
-  useScrollTopOnMount();
+  // removed forced scroll-to-top; not embedded anymore
   const paymentSummaryRef = React.useRef(null);
   useNotifyParentScroll('payment-summary');
   // Do NOT auto-scroll to the summary; ensure page starts at absolute top
-  useEffect(() => {
-    try {
-      console.log('[ScrollDebug] FluidPayPayment mount - forcing top. y=', window.pageYOffset);
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => window.scrollTo(0, 0));
-      setTimeout(() => window.scrollTo(0, 0), 150);
-      setTimeout(() => window.scrollTo(0, 0), 400);
-    } catch (_) {}
-  }, []);
+  // removed forced scroll-to-top
   const navigate = useNavigate();
   const location = useLocation();
   const { selectedClub } = useClub();

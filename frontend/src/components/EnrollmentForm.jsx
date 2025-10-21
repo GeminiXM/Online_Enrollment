@@ -3,7 +3,6 @@
 // It includes form validation, secure data handling, and follows accessibility best practices.
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import useScrollTopOnMount from "../hooks/useScrollTopOnMount";
 import useNotifyParentScroll from "../hooks/useNotifyParentScroll";
 import { useNavigate, useLocation } from "react-router-dom";
 import api from "../services/api.js";
@@ -198,17 +197,13 @@ const determineMembershipTypeByAge = (dateOfBirth) => {
 
 function EnrollmentForm() {
   // Always start at top when this page mounts inside iframe
-  useScrollTopOnMount();
   // Ask parent to bring iframe into view, repeat-fired in hook
   useNotifyParentScroll('enrollment-form');
   // Strong scroll-to-top utility to defeat anchoring before navigations/modals
   const forceScrollTop = React.useCallback(() => {
     try {
       console.log('[ScrollDebug] forceScrollTop() start, y=', window.pageYOffset);
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => window.scrollTo(0, 0));
-      setTimeout(() => window.scrollTo(0, 0), 80);
-      setTimeout(() => window.scrollTo(0, 0), 240);
+      // removed forced scroll-to-top; page is no longer embedded
       setTimeout(() => console.log('[ScrollDebug] forceScrollTop() retries done, y=', window.pageYOffset), 260);
     } catch (_) {}
   }, []);
@@ -3161,6 +3156,10 @@ const handleChange = (e) => {
         );
       
  case 'youth':
+  // Determine mobile once per render (sufficient for gating restore prompt)
+  const isMobileViewportRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth <= 900 : false);
+  const isMobileViewport = isMobileViewportRef.current;
+
   return (
     <div className="youth-tab">
       <h3>Submit Youth Members</h3>
@@ -3867,7 +3866,7 @@ const handleChange = (e) => {
         }
         cartMovedRef.current = true;
       } else if (cartMovedRef.current && originalCartParentRef.current) {
-        // Restore cart to its original parent/sibling when leaving mobile
+        // Restore cart to be a sibling of form/actions on desktop
         const parent = originalCartParentRef.current;
         try {
           if (
@@ -3905,9 +3904,124 @@ const handleChange = (e) => {
     const handleResize = () => reorderElementsForMobile();
     window.addEventListener('resize', handleResize);
 
+    // Diagnostics: log computed style and ancestry that can disable sticky
+    try {
+      const cart = document.querySelector('.shopping-cart');
+      if (cart) {
+        const cs = getComputedStyle(cart);
+        const layout = document.querySelector('.enrollment-layout');
+        const container = document.querySelector('.enrollment-form-container');
+        console.log('[CartDebug] cart position:', cs.position, 'top:', cs.top, 'max-height:', cs.maxHeight, 'overflow:', cs.overflow);
+        if (layout) {
+          const lcs = getComputedStyle(layout);
+          console.log('[CartDebug] layout overflow:', lcs.overflow, 'transform:', lcs.transform);
+        }
+        if (container) {
+          const ccs = getComputedStyle(container);
+          console.log('[CartDebug] container overflow:', ccs.overflow, 'transform:', ccs.transform);
+        }
+      }
+    } catch (_) {}
+
     return () => {
       window.removeEventListener('resize', handleResize);
       observer.disconnect();
+    };
+  }, []);
+
+  // Desktop: pin cart using position: fixed aligned to the right edge of layout
+  useEffect(() => {
+    const cart = document.querySelector('.shopping-cart');
+    const layout = document.querySelector('.enrollment-layout');
+    const privacy = document.querySelector('.privacy-notice');
+    if (!cart || !layout) return;
+
+    const originalStyle = {
+      position: cart.style.position,
+      top: cart.style.top,
+      left: cart.style.left,
+      width: cart.style.width,
+      zIndex: cart.style.zIndex,
+    };
+    let fixedWidthPx = null;
+    let initialBottomDoc = null;
+
+    const applyFixed = (recalcWidth = false) => {
+      const isDesktop = window.innerWidth > 900;
+      if (!isDesktop) {
+        cart.style.position = originalStyle.position || '';
+        cart.style.top = originalStyle.top || '';
+        cart.style.left = originalStyle.left || '';
+        cart.style.width = originalStyle.width || '';
+        cart.style.zIndex = originalStyle.zIndex || '';
+        fixedWidthPx = null;
+        return;
+      }
+      const lrect = layout.getBoundingClientRect();
+
+      if (fixedWidthPx == null || recalcWidth) {
+        // Approximate former column width: 28% of layout, at least 250px
+        fixedWidthPx = Math.max(250, Math.round(layout.clientWidth * 0.28));
+      }
+      const left = Math.round(lrect.right - fixedWidthPx);
+
+      // Determine initial cart bottom in document coords
+      if (initialBottomDoc == null) {
+        const r0 = cart.getBoundingClientRect();
+        initialBottomDoc = window.scrollY + r0.bottom;
+      }
+
+      // Base desired top relative to viewport
+      let desiredTopPx = 416;
+      let desiredTopDoc = window.scrollY + desiredTopPx;
+      let desiredBottomDoc = desiredTopDoc + cart.offsetHeight;
+
+      // Apply bottom brake: 33px below initial bottom
+      const bottomLimitDoc = initialBottomDoc + 33;
+      if (desiredBottomDoc > bottomLimitDoc) {
+        desiredTopDoc = bottomLimitDoc - cart.offsetHeight;
+      }
+
+      // Also clamp to privacy/footer so we never overlap them
+      let brakeTopDoc = Infinity;
+      const footer = document.querySelector('.site-footer');
+      if (privacy) {
+        const prect = privacy.getBoundingClientRect();
+        brakeTopDoc = Math.min(brakeTopDoc, window.scrollY + prect.top);
+      }
+      if (footer) {
+        const frect = footer.getBoundingClientRect();
+        brakeTopDoc = Math.min(brakeTopDoc, window.scrollY + frect.top);
+      }
+      if (isFinite(brakeTopDoc)) {
+        desiredBottomDoc = desiredTopDoc + cart.offsetHeight;
+        if (desiredBottomDoc > brakeTopDoc) {
+          desiredTopDoc = brakeTopDoc - cart.offsetHeight;
+        }
+      }
+
+      // Apply
+      const topPx = Math.max(40, Math.round(desiredTopDoc - window.scrollY));
+      cart.style.position = 'fixed';
+      cart.style.top = `${topPx}px`;
+      cart.style.left = `${left}px`;
+      cart.style.width = `${fixedWidthPx}px`;
+      cart.style.zIndex = '10';
+    };
+
+    applyFixed();
+    const onResize = () => applyFixed(true);
+    const onScroll = () => applyFixed(false);
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll);
+      cart.style.position = originalStyle.position || '';
+      cart.style.top = originalStyle.top || '';
+      cart.style.left = originalStyle.left || '';
+      cart.style.width = originalStyle.width || '';
+      cart.style.zIndex = originalStyle.zIndex || '';
     };
   }, []);
 
@@ -3926,8 +4040,8 @@ const handleChange = (e) => {
         </div>
       )}
 
-      {/* Restore Data Prompt */}
-      {showRestorePrompt && (
+      {/* Restore Data Prompt - show on mobile only to avoid desktop scroll interference */}
+      {showRestorePrompt && (typeof window !== 'undefined' ? window.innerWidth <= 900 : false) && (
         <div className="restore-prompt-overlay">
           <div className="restore-prompt-modal">
             <h3>📋 Restore Previous Session</h3>
@@ -4744,8 +4858,8 @@ const handleChange = (e) => {
           </div>
         </form>
 
-        {/* Shopping cart section */}
-        <div className="shopping-cart">
+          {/* Shopping cart section */}
+          <div className="shopping-cart">
           <h2>Your Membership</h2>
           <div className="cart-details">
             <div className="cart-item">

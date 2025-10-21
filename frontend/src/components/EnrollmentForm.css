@@ -93,11 +93,11 @@ body {
   border-radius: 8px;
   padding: 0.5rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 2rem;
-  max-width: 28%; /* Adjusted to match the increased form width */
+  position: static;
+  top: auto;
+  max-width: 28%;
   min-width: 250px;
-  margin-top: 2.75rem; /* match spacing under instructions */
+  margin-top: 2.75rem;
   align-self: flex-start;
 }
 
@@ -113,6 +113,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  /* Ensure cart can scroll on desktop */
+  max-height: none;
 }
 
 .cart-item {
@@ -464,6 +466,7 @@ select[aria-invalid="true"] {
     display: flex;
     flex-direction: row; /* Side by side on desktop */
     gap: 2rem;
+    position: relative; /* allow cart to clamp above privacy with absolute positioning */
   }
   
   .enrollment-form {
@@ -472,13 +475,23 @@ select[aria-invalid="true"] {
   }
   
   .shopping-cart {
-    position: sticky; /* Sticky positioning for desktop */
-    top: 2rem;
+    position: sticky; /* Stay visible while page scrolls on desktop */
+    top: 416px;
     order: 2;
     max-width: 28%;
     min-width: 250px;
     align-self: flex-start;
     margin: 0;
+    /* Keep cart visible and scrollable within the viewport on desktop */
+    /* Let inner content scroll to avoid sticky/overflow conflicts in some browsers */
+  }
+  .shopping-cart { height: auto; }
+  .shopping-cart .cart-details { max-height: none; overflow: visible; padding-right: 0; }
+
+  /* Force cart to flow with page on desktop in case of any higher-specificity rules */
+  .enrollment-layout .shopping-cart {
+    position: sticky;
+    top: 416px;
   }
   
   .form-actions,
@@ -1675,6 +1688,13 @@ button:focus-visible {
   justify-content: center;
   z-index: 1000;
   padding-top: 140px; /* place near the start date area */
+}
+
+/* Desktop: avoid locking viewport when restore prompt appears */
+@media (min-width: 769px) {
+  .restore-prompt-overlay {
+    position: absolute;
+  }
 }
 
 .restore-prompt-modal {
