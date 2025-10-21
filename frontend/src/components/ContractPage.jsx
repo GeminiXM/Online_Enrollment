@@ -856,12 +856,8 @@ const ContractPage = () => {
           padding: '0 20px'
         }}>
           {/* Top Section - Personal Information */}
-          <div style={{ 
-            display: 'flex',
-            gap: '20px',
-            marginBottom: '15px'
-          }}>
-            <div style={{ flex: '1' }}>
+          <div className="info-row" style={{ marginBottom: '15px' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -883,7 +879,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '1' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -905,7 +901,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '1' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -927,7 +923,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '1' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -958,12 +954,8 @@ const ContractPage = () => {
           }}></div>
 
           {/* Middle Section - Contact Information */}
-          <div style={{ 
-            display: 'flex',
-            gap: '20px',
-            marginBottom: '15px'
-          }}>
-            <div style={{ flex: '1' }}>
+          <div className="info-row" style={{ marginBottom: '15px' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -985,7 +977,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '1' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -1015,11 +1007,8 @@ const ContractPage = () => {
           }}></div>
 
           {/* Bottom Section - Address Information */}
-          <div style={{ 
-            display: 'flex',
-            gap: '20px'
-          }}>
-            <div style={{ flex: '2' }}>
+          <div className="info-row">
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -1041,7 +1030,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '0 0 80px' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -1063,7 +1052,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '1' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -1085,7 +1074,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '0 0 80px' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',
@@ -1107,7 +1096,7 @@ const ContractPage = () => {
               </div>
             </div>
             
-            <div style={{ flex: '0 0 100px' }}>
+            <div className="info-column">
               <div style={{ 
                 backgroundColor: '#f5f5f5',
                 padding: '8px 12px',

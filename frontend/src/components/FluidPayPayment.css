@@ -486,11 +486,11 @@
   }
   
   .payment-summary {
-    order: 2;
+    order: 1;
   }
   
   .payment-form-container {
-    order: 1;
+    order: 2;
   }
   
   .form-actions {

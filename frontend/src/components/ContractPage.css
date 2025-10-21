@@ -16,6 +16,17 @@
   z-index: 0;         /* ensure higher z-index children can draw above */
 }
 
+/* Prevent horizontal overflow on mobile; allow internal scroll areas to handle overflow */
+.contract-container,
+.contract-container * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+html, body, .contract-container {
+  overflow-x: hidden;
+}
+
 /* Main page title styling */
 .contract-container h1 {
   color: #2c3e50;
@@ -299,6 +310,7 @@
 .scrollable-text {
   height: 300px;  /* Fixed height with scrolling for lengthy contract text */
   overflow-y: auto;  /* Vertical scrollbar when content exceeds height */
+  overflow-x: hidden; /* Avoid horizontal scroll on mobile */
   border: 1px solid #ced4da;
   padding: 15px;
   background-color: #fff;
@@ -647,7 +659,8 @@
   border-radius: 3px;
   padding: 10px 15px;
   min-height: 30px;
-  width: 300px;
+  width: 100%;
+  max-width: 300px;
   text-align: center;
   background-color: #f8f9fa;
   margin-bottom: 10px;
@@ -670,13 +683,56 @@
 
 /* Date box next to signature */
 .contract-date-box {
-
   padding: 5px 10px;
-  width: 150px;
+  width: 100%;
+  max-width: 150px;
   text-align: center;
   background-color: #f8f9fa;
   margin-bottom: 10px;
   font-size: 0.9rem;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 900px) {
+  /* Stronger selector to affect the top member information section */
+  .member-info-summary .info-row { 
+    display: grid !important; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 12px; 
+  }
+  .member-info-summary .info-column { 
+    min-width: 0 !important; 
+  }
+  /* Wrap top info pills into two columns to avoid horizontal overflow */
+  .info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .info-column { min-width: 0; }
+
+  /* Stack financial panels */
+  .financial-details-section,
+  .payment-summary-section { width: 100%; display: block; }
+
+  /* Stack membership columns */
+  .membership-type-column,
+  .addon-options-column,
+  .specialty-membership-column,
+  .agreement-type-column { flex: 1 1 100%; }
+
+  .contract-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .pdf-download-container { order: 1; flex: 1 1 100%; }
+  .secondary-button { order: 2; width: 100%; }
+  .primary-button { order: 3; width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .info-row { grid-template-columns: 1fr; }
 }
 
 /* Canvas PDF button - blue styling */

@@ -3833,33 +3833,82 @@ const handleChange = (e) => {
     } catch (_) {}
   };
 
-  // Reorder elements for mobile layout
+  // Track cart relocation so we can restore it when leaving mobile
+  const cartMovedRef = React.useRef(false);
+  const originalCartParentRef = React.useRef(null);
+  const originalCartNextSiblingRef = React.useRef(null);
+
+  // Reorder elements for mobile layout (safe DOM ops, idempotent)
   const reorderElementsForMobile = () => {
-    if (window.innerWidth <= 900) {
+    try {
       const layout = document.querySelector('.enrollment-layout');
       const form = document.querySelector('.enrollment-form');
       const cart = document.querySelector('.shopping-cart');
       const formActions = document.querySelector('.form-actions');
-      
-      if (layout && form && cart && formActions) {
-        // Remove cart from its current position
-        cart.remove();
-        // Insert cart right before the form actions (inside the form)
-        form.insertBefore(cart, formActions);
+      if (!layout || !form || !cart) return;
+
+      const isMobile = window.innerWidth <= 900;
+
+      if (isMobile) {
+        // Capture original position only once
+        if (!cartMovedRef.current) {
+          originalCartParentRef.current = cart.parentNode;
+          originalCartNextSiblingRef.current = cart.nextSibling;
+        }
+
+        // Move cart inside form, above actions; avoid NotFoundError by validating parent relationship
+        if (formActions && formActions.parentNode === form) {
+          if (cart !== formActions.previousSibling) {
+            form.insertBefore(cart, formActions);
+          }
+        } else {
+          // If actions are missing, append cart at the end of the form
+          form.appendChild(cart);
+        }
+        cartMovedRef.current = true;
+      } else if (cartMovedRef.current && originalCartParentRef.current) {
+        // Restore cart to its original parent/sibling when leaving mobile
+        const parent = originalCartParentRef.current;
+        try {
+          if (
+            originalCartNextSiblingRef.current &&
+            originalCartNextSiblingRef.current.parentNode === parent
+          ) {
+            parent.insertBefore(cart, originalCartNextSiblingRef.current);
+          } else {
+            parent.appendChild(cart);
+          }
+        } catch (_) {
+          parent.appendChild(cart);
+        }
+        cartMovedRef.current = false;
       }
+    } catch (e) {
+      console.error('Mobile reorder failed:', e);
     }
   };
 
   // Call reorder function on mount and resize
   useEffect(() => {
+    // Initial placement
     reorderElementsForMobile();
-    
-    const handleResize = () => {
+
+    // Re-run after key state changes that can re-render the form or cart
+    const observer = new MutationObserver(() => {
       reorderElementsForMobile();
-    };
-    
+    });
+    try {
+      const layout = document.querySelector('.enrollment-layout');
+      if (layout) observer.observe(layout, { childList: true, subtree: true });
+    } catch (_) {}
+
+    const handleResize = () => reorderElementsForMobile();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
+    };
   }, []);
 
   return (

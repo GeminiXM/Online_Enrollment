@@ -327,7 +327,7 @@
   color: #495057 !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .payment-layout {
     flex-direction: column;
   }
@@ -335,6 +335,10 @@
   .payment-summary, .payment-form-container {
     width: 100%;
   }
+
+  /* Ensure summary appears above the payment form on mobile */
+  .payment-summary { order: 1; }
+  .payment-form-container { order: 2; }
   
   .form-actions {
     flex-direction: column;
