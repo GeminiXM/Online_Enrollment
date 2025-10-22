@@ -1,10 +1,21 @@
+/* Remove browser default margins and prevent horizontal overflow */
+html, body { 
+  margin: 0; 
+  padding: 0; 
+}
+
 body {
-  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scroll revealing page bg */
+}
+
+/* Make sizing predictable so padding/borders don't push width over 100% */
+*, *::before, *::after { 
+  box-sizing: border-box; 
 }
 
 code {
@@ -14,6 +25,49 @@ code {
 
 .App {
   text-align: center;
+}
+
+/* Mobile-specific adjustment to move content to arrow position */
+@media (max-width: 768px) {
+  .App {
+    margin-left: 0; /* Remove negative margin to avoid overflow */
+    margin-right: 0; 
+    padding-left: 0; 
+  }
+  
+  /* Use full width to eliminate empty space */
+  .enrollment-container,
+  .enrollment-form-container,
+  .form-page-frame {
+    margin: 0.5rem !important;
+    padding-left: 6px !important;  /* Narrow content without widening layout */
+    padding-right: 6px !important; /* Keep inside viewport on right */
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Force all content to fit within viewport */
+  * {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Specifically target text content that might be too wide */
+  p, span, div, td, th, input, select, textarea {
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  
+  /* Force tables and flex containers to be responsive */
+  table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+  
+  .flex, .flex-container, [class*="flex"] {
+    flex-wrap: wrap !important;
+  }
 }
 
 .App-header {
