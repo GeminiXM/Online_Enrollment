@@ -1,0 +1,323 @@
+ ErrorLogger: Global error handlers initialized for production
+ ConsoleLogger: Console capture initialized for production
+ [Build] Online Enrollment version 1.1.9
+ [NotifyParent] postMessage ENROLLMENT_SCROLL_TO Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(24)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Attempting to restore from localStorage...
+ No encrypted data found in localStorage
+ [CartDebug] cart position: sticky top: 416px max-height: none overflow: visible
+ [CartDebug] layout overflow: visible transform: none
+ [CartDebug] container overflow: visible transform: none
+ Fetching price for: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(24)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+/api/enrollment/draft/session_1761087928228_q524w6m5m:1  Failed to load resource: the server responded with a status of 404 ()
+ Error restoring draft from backend: Ye
+console.error @ index-BDRYNMcN.js:345
+ Tax rate fetched: 0.07625
+Error with Permissions-Policy header: Unrecognized feature: 'browsing-topics'.
+ Price fetched: 124
+ Membership price data for cart: Object
+ Fetching price for: Object
+ Price fetched: 124
+ Membership price data for cart: Object
+maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true:1  Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+ Tab data being saved: Object
+ Auto-saving form data...
+ Form data to save: Object
+ Additional data to save: Object
+ Form data auto-saved successfully
+ Saving draft to backend: Object
+ Backend response: Object
+ Draft saved to backend successfully
+ Fetching price for: Object
+ Tax calculation: isNewMexicoClub=true, effectiveTaxRate=0.07625, fullTax=9.46
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(24)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Tax calculation: isNewMexicoClub=true, effectiveTaxRate=0.07625, proratedTax=1.45, fullTax=9.46
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Tax calculation: isNewMexicoClub=true, effectiveTaxRate=0.07625, proratedTax=3.28, fullTax=9.46
+ Price fetched: 124
+ Membership price data for cart: Object
+ Tab data being saved: Object
+ Auto-saving form data...
+ Form data to save: Object
+ Additional data to save: Object
+ Form data auto-saved successfully
+ Saving draft to backend: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Backend response: Object
+ Draft saved to backend successfully
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+ Child forms: Array(0)
+ Adult member: Object
+ Child member: Object
+ Youth member: Object
+ Checking if form has meaningful data: true
+ Main form data: true
+ Tab data: true
+ Form data values: Array(28)
+index-BDRYNMcN.js:345 Child forms: Array(0)
+index-BDRYNMcN.js:345 Adult member: Object
+index-BDRYNMcN.js:345 Child member: Object
+index-BDRYNMcN.js:345 Youth member: Object
+index-BDRYNMcN.js:345 Checking if form has meaningful data: true
+index-BDRYNMcN.js:345 Main form data: true
+index-BDRYNMcN.js:345 Tab data: true
+index-BDRYNMcN.js:345 Form data values: Array(28)
+index-BDRYNMcN.js:345 Child forms: Array(0)
+index-BDRYNMcN.js:345 Adult member: Object
+index-BDRYNMcN.js:345 Child member: Object
+index-BDRYNMcN.js:345 Youth member: Object
+index-BDRYNMcN.js:345 Fetching price for: Object
+index-BDRYNMcN.js:345 Checking if form has meaningful data: true
+index-BDRYNMcN.js:345 Main form data: true
+index-BDRYNMcN.js:345 Tab data: true
+index-BDRYNMcN.js:345 Form data values: Array(28)
+index-BDRYNMcN.js:345 Child forms: Array(0)
+index-BDRYNMcN.js:345 Adult member: Object
+index-BDRYNMcN.js:345 Child member: Object
+index-BDRYNMcN.js:345 Youth member: Object
+index-BDRYNMcN.js:345 Price fetched: 124
+index-BDRYNMcN.js:345 Membership price data for cart: Object
+index-BDRYNMcN.js:345 Checking if form has meaningful data: true
+index-BDRYNMcN.js:345 Main form data: true
+index-BDRYNMcN.js:345 Tab data: true
+index-BDRYNMcN.js:345 Form data values: Array(28)
+index-BDRYNMcN.js:345 Child forms: Array(0)
+index-BDRYNMcN.js:345 Adult member: Object
+index-BDRYNMcN.js:345 Child member: Object
+index-BDRYNMcN.js:345 Youth member: Object
+index-BDRYNMcN.js:345 Form submission started - USING DIRECT NAVIGATION
+index-BDRYNMcN.js:345 Preparing to submit form with data Object
+index-BDRYNMcN.js:345 [ScrollDebug] Continue to Agreement: PT modal path - forcing top, then opening modal. y= 800
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() start, y= 800
+index-BDRYNMcN.js:345 [ScrollDebug] After PT modal open retry #1
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() start, y= 0
+index-BDRYNMcN.js:345 [ScrollDebug] After PT modal open retry #2
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() start, y= 0
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() retries done, y= 0
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() retries done, y= 0
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() retries done, y= 0
+index-BDRYNMcN.js:345 Tab data being saved: Object
+index-BDRYNMcN.js:345 Auto-saving form data...
+index-BDRYNMcN.js:345 Form data to save: Object
+index-BDRYNMcN.js:345 Additional data to save: Object
+index-BDRYNMcN.js:345 Form data auto-saved successfully
+index-BDRYNMcN.js:345 Saving draft to backend: Object
+index-BDRYNMcN.js:345 Backend response: Object
+index-BDRYNMcN.js:345 Draft saved to backend successfully
+index-BDRYNMcN.js:345 All saved data cleared
+index-BDRYNMcN.js:345 [ScrollDebug] PT Decline clicked: forcing top then navigating to /contract. y= 0
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() start, y= 0
+index-BDRYNMcN.js:345 ContractPage: formData is null, showing loading...
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 [ScrollDebug] forceScrollTop() retries done, y= 0
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 ContractPage: Rendering with formData: Object
+index-BDRYNMcN.js:345 ContractPage: currentAmounts: Object
+index-BDRYNMcN.js:345 Routing to /converge-payment
+index-BDRYNMcN.js:345 ContractPage - Passing data to payment: Object
+index-BDRYNMcN.js:345 ContractPage - signatureData value: Object
+index-BDRYNMcN.js:345 ContractPage - initialedBoxes value: Object
+index-BDRYNMcN.js:345 ContractPage - signatureData.signature: Object
+index-BDRYNMcN.js:345 ContractPage - signatureData.initials: Object
+index-BDRYNMcN.js:345 ContractPage - isSigned: true
+index-BDRYNMcN.js:345 [NotifyParent] postMessage ENROLLMENT_SCROLL_TO Object
+index-BDRYNMcN.js:345 Starting PDF generation with data: Object
+index-BDRYNMcN.js:345 Registered font: Great Vibes
+index-BDRYNMcN.js:345 Registered font: Rouge Script
+index-BDRYNMcN.js:345 Registered font: Whisper
+index-BDRYNMcN.js:345 Registered font: Over the Rainbow
+index-BDRYNMcN.js:345 Registered font: La Belle Aurore
+index-BDRYNMcN.js:345 Registered font: Bilbo Swash Caps
+index-BDRYNMcN.js:345 Of the table content, 2 units width could not fit page
+console.warn @ index-BDRYNMcN.js:345
+index-BDRYNMcN.js:345 PDF Generation - deriveMaskedLast4 called with formData: Object
+index-BDRYNMcN.js:345 Using formData.creditCardNumber: ************2156
+index-BDRYNMcN.js:345 PDF Generation - Credit card data for table: Object
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Contract PDF generation successful, buffer size: undefined
+index-BDRYNMcN.js:345 Starting Email PDF generation with data: Object
+index-BDRYNMcN.js:345 Registered font: Great Vibes
+index-BDRYNMcN.js:345 Registered font: Rouge Script
+index-BDRYNMcN.js:345 Registered font: Whisper
+index-BDRYNMcN.js:345 Registered font: Over the Rainbow
+index-BDRYNMcN.js:345 Registered font: La Belle Aurore
+index-BDRYNMcN.js:345 Registered font: Bilbo Swash Caps
+index-BDRYNMcN.js:345 Of the table content, 2 units width could not fit page
+console.warn @ index-BDRYNMcN.js:345
+index-BDRYNMcN.js:345 PDF Generation - deriveMaskedLast4 called with formData: Object
+index-BDRYNMcN.js:345 Using formData.creditCardNumber: ************2156
+index-BDRYNMcN.js:345 PDF Generation - Credit card data for table: Object
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Email PDF generation successful, buffer size: undefined
+index-BDRYNMcN.js:345 Registered font: Great Vibes
+index-BDRYNMcN.js:345 Registered font: Rouge Script
+index-BDRYNMcN.js:345 Registered font: Whisper
+index-BDRYNMcN.js:345 Registered font: Over the Rainbow
+index-BDRYNMcN.js:345 Registered font: La Belle Aurore
+index-BDRYNMcN.js:345 Registered font: Bilbo Swash Caps
+index-BDRYNMcN.js:345 Of the table content, 2 units width could not fit page
+console.warn @ index-BDRYNMcN.js:345
+my @ index-BDRYNMcN.js:267
+KY @ index-BDRYNMcN.js:267
+ze @ index-BDRYNMcN.js:267
+FI @ index-BDRYNMcN.js:267
+await in FI
+o @ index-BDRYNMcN.js:267
+DN @ index-BDRYNMcN.js:37
+dN @ index-BDRYNMcN.js:37
+NN @ index-BDRYNMcN.js:37
+Jl @ index-BDRYNMcN.js:37
+NF @ index-BDRYNMcN.js:37
+(anonymous) @ index-BDRYNMcN.js:37
+nC @ index-BDRYNMcN.js:40
+vM @ index-BDRYNMcN.js:37
+GE @ index-BDRYNMcN.js:37
+JI @ index-BDRYNMcN.js:37
+zN @ index-BDRYNMcN.js:37
+index-BDRYNMcN.js:345 PDF Generation - deriveMaskedLast4 called with formData: {creditCardNumber: '', cardNumber: undefined, paymentResponse: undefined, allKeys: Array(52)}
+index-BDRYNMcN.js:345 PDF Generation - Credit card data for table: {maskedCard: '', expiration: '12/01/2027', nameOnAccount: 'John D', formDataExpiration: '2027-12-01', formDataNameOnAccount: 'John D', …}
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes
+index-BDRYNMcN.js:345 Applying font: Great Vibes

@@ -872,13 +872,31 @@ const processFluidPayTransaction = async (fluidPayInfo, paymentData) => {
       cardExpDate: responseData.data?.response_body?.card?.exp_date,
     });
 
+    // Extract last 4 digits from masked card or card number
+    const maskedCard = responseData.data?.response_body?.card?.masked_card;
+    const cardNumber = responseData.data?.response_body?.card?.card_number;
+    let last4 = "";
+
+    if (maskedCard) {
+      // Extract last 4 from masked card (e.g., "****1234" or "************1234")
+      const digits = maskedCard.replace(/\D/g, "");
+      last4 = digits.slice(-4);
+    } else if (cardNumber) {
+      // Extract last 4 from full card number
+      last4 = cardNumber.slice(-4);
+    }
+
+    // Format as ************1234
+    const formattedCardNumber = last4
+      ? `************${last4}`
+      : "************1111";
+
     return {
       transactionId: responseData.data?.id || `TXN_${Date.now()}`,
       authorizationCode:
         responseData.data?.response_body?.card?.auth_code ||
         `AUTH${Math.random().toString().substr(2, 6)}`,
-      cardNumber:
-        responseData.data?.response_body?.card?.masked_card || "****1111",
+      cardNumber: formattedCardNumber,
       cardType: responseData.data?.response_body?.card?.card_type || "VISA",
       expirationDate: formattedExpDate,
       status: responseData.data?.status,

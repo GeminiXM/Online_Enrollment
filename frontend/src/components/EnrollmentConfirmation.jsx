@@ -73,7 +73,7 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
     return brand ? brand.toUpperCase() : '';
   };
   const getMaskedCardForPdf = () => {
-    const rawNumber = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+    const rawNumber = (paymentResponse?.maskedCardNumber || paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
     const last4 = rawNumber.replace(/\D/g, '').slice(-4);
     return last4 ? `************${last4}` : '';
   };
@@ -140,18 +140,17 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
             
             // Derive payment display details for PDF
             const brand = (paymentResponse?.cardType || paymentResponse?.ssl_card_short_description || paymentResponse?.ssl_card_type || paymentResponse?.card?.card_type || '').toString();
-            const rawNumber = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+            const rawNumber = (paymentResponse?.maskedCardNumber || paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
             const last4 = rawNumber.replace(/\D/g, '').slice(-4);
             const maskedNumber = last4 ? `************${last4}` : (rawNumber || '');
             const exp = (paymentResponse?.expirationDate || paymentResponse?.ssl_exp_date || paymentResponse?.card?.expiration_date || formData?.expirationDate || '').toString();
 
             // Derive name on account from processor response
+            // Note: Payment processors don't return cardholder name, so use form data
             const nameOnAccount = (
+              paymentResponse?.cardholder_name ||
               paymentResponse?.card?.cardholder_name ||
               paymentResponse?.cardholder ||
-              (paymentResponse?.ssl_first_name && paymentResponse?.ssl_last_name
-                ? `${paymentResponse.ssl_first_name} ${paymentResponse.ssl_last_name}`
-                : '') ||
               paymentResponse?.ssl_cardholder ||
               `${formData.firstName || ''} ${formData.lastName || ''}`
             ).trim();
@@ -168,7 +167,14 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
             devLogger.log('PDF generation - formData with membershipId:', {
               membershipId: pdfFormData.membershipId,
               membershipNumber,
-              hasMembershipId: !!pdfFormData.membershipId
+              hasMembershipId: !!pdfFormData.membershipId,
+              creditCardNumber: pdfFormData.creditCardNumber,
+              expirationDate: pdfFormData.expirationDate,
+              nameOnAccount: pdfFormData.nameOnAccount,
+              paymentMethod: pdfFormData.paymentMethod,
+              paymentResponseKeys: Object.keys(paymentResponse || {}),
+              paymentResponseExpiration: paymentResponse?.expirationDate,
+              paymentResponseSslExp: paymentResponse?.ssl_exp_date
             });
             
             const pdfBuffer = await generatePDFBuffer(
@@ -232,17 +238,15 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
             const generatePDFBuffer = selectedClub?.state === 'NM' ? generatePDFBufferNM : generatePDFBufferDenver;
             
             const brand2 = (paymentResponse?.cardType || paymentResponse?.ssl_card_short_description || paymentResponse?.ssl_card_type || paymentResponse?.card?.card_type || '').toString();
-            const rawNumber2 = (paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
+            const rawNumber2 = (paymentResponse?.maskedCardNumber || paymentResponse?.cardNumber || paymentResponse?.ssl_card_number || paymentResponse?.card?.masked_card || '').toString();
             const last42 = rawNumber2.replace(/\D/g, '').slice(-4);
             const maskedNumber2 = last42 ? `************${last42}` : (rawNumber2 || '');
             const exp2 = (paymentResponse?.expirationDate || paymentResponse?.ssl_exp_date || paymentResponse?.card?.expiration_date || formData?.expirationDate || '').toString();
 
             const nameOnAccount2 = (
+              paymentResponse?.cardholder_name ||
               paymentResponse?.card?.cardholder_name ||
               paymentResponse?.cardholder ||
-              (paymentResponse?.ssl_first_name && paymentResponse?.ssl_last_name
-                ? `${paymentResponse.ssl_first_name} ${paymentResponse.ssl_last_name}`
-                : '') ||
               paymentResponse?.ssl_cardholder ||
               `${formData.firstName || ''} ${formData.lastName || ''}`
             ).trim();
@@ -255,6 +259,16 @@ devLogger.log('EnrollmentConfirmation - amountBilled type:', typeof amountBilled
               expirationDate: exp2,
               nameOnAccount: nameOnAccount2,
             };
+            
+            devLogger.log('Email PDF generation - formData with credit card data:', {
+              creditCardNumber: pdfFormData.creditCardNumber,
+              expirationDate: pdfFormData.expirationDate,
+              nameOnAccount: pdfFormData.nameOnAccount,
+              paymentMethod: pdfFormData.paymentMethod,
+              paymentResponseKeys: Object.keys(paymentResponse || {}),
+              paymentResponseExpiration: paymentResponse?.expirationDate,
+              paymentResponseSslExp: paymentResponse?.ssl_exp_date
+            });
             
             const pdfBuffer = await generatePDFBuffer(
               pdfFormData,

@@ -630,9 +630,13 @@ export const generateContractPDFBuffer = async (
     const paymentMethodEndY = pdf.lastAutoTable.finalY;
     // Derive masked CC number robustly from multiple possible fields
     const deriveMaskedLast4 = () => {
+      // First check if creditCardNumber is already set (from EnrollmentConfirmation)
+      if (formData.creditCardNumber) {
+        return formData.creditCardNumber;
+      }
+
       const candidates = [
         // Already-masked or raw CC on formData
-        formData.creditCardNumber,
         formData.cardNumber,
         // Generic paymentResponse sources
         formData?.paymentResponse?.cardNumber,

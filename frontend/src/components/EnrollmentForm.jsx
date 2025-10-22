@@ -253,6 +253,7 @@ function EnrollmentForm() {
   const [showJuniorBlockModal, setShowJuniorBlockModal] = useState(false);
   // Anchor to scroll to the primary DOB field when blocking juniors
   const primaryDobRef = useRef(null);
+  const isMobileViewportRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth <= 900 : false);
 
   // Check if data is passed in location state
   useEffect(() => {
@@ -3155,9 +3156,8 @@ const handleChange = (e) => {
           </div>
         );
       
- case 'youth':
-  // Determine mobile once per render (sufficient for gating restore prompt)
-  const isMobileViewportRef = React.useRef(typeof window !== 'undefined' ? window.innerWidth <= 900 : false);
+      case 'youth':
+  // Use the mobile viewport ref that was defined at component level
   const isMobileViewport = isMobileViewportRef.current;
 
   return (
@@ -3417,16 +3417,7 @@ const handleChange = (e) => {
     }
   };
 
-  // If form was submitted successfully, show success message
-  if (submitSuccess) {
-    return (
-      <div className="enrollment-success">
-        <h2>Enrollment Submitted Successfully!</h2>
-        <p>Thank you for enrolling with our fitness facility.</p>
-        <p>We will contact you shortly with further information.</p>
-      </div>
-    );
-  }
+  // Move early return check to after all hooks
 
 
 
@@ -3847,6 +3838,10 @@ const handleChange = (e) => {
       if (!layout || !form || !cart) return;
 
       const isMobile = window.innerWidth <= 900;
+      
+      // Prevent unnecessary reordering if already in correct state
+      if (isMobile && cartMovedRef.current) return;
+      if (!isMobile && !cartMovedRef.current) return;
 
       if (isMobile) {
         // Capture original position only once
@@ -3892,15 +3887,7 @@ const handleChange = (e) => {
     // Initial placement
     reorderElementsForMobile();
 
-    // Re-run after key state changes that can re-render the form or cart
-    const observer = new MutationObserver(() => {
-      reorderElementsForMobile();
-    });
-    try {
-      const layout = document.querySelector('.enrollment-layout');
-      if (layout) observer.observe(layout, { childList: true, subtree: true });
-    } catch (_) {}
-
+    // Only reorder on resize, not on every DOM change to prevent infinite loops
     const handleResize = () => reorderElementsForMobile();
     window.addEventListener('resize', handleResize);
 
@@ -3925,7 +3912,6 @@ const handleChange = (e) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      observer.disconnect();
     };
   }, []);
 
@@ -4024,6 +4010,17 @@ const handleChange = (e) => {
       cart.style.zIndex = originalStyle.zIndex || '';
     };
   }, []);
+
+  // If form was submitted successfully, show success message
+  if (submitSuccess) {
+    return (
+      <div className="enrollment-success">
+        <h2>Enrollment Submitted Successfully!</h2>
+        <p>Thank you for enrolling with our fitness facility.</p>
+        <p>We will contact you shortly with further information.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="enrollment-form-container">

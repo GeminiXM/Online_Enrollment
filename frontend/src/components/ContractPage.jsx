@@ -32,16 +32,16 @@ const InitialBox = React.forwardRef(({ onClick, value, font, isInitialed }, ref)
     display: 'inline-block',
     border: '2px solid #007bff', // More prominent blue border
     borderRadius: '4px', // Slightly more rounded corners
-    padding: '3px 8px', // More padding for larger size
+    padding: '8px 14px', // Slightly more padding for larger size
     margin: '0 8px', // More margin for better spacing
-    minWidth: '28px', // Larger minimum width
-    height: '22px', // Larger height
+    minWidth: '45px', // Slightly larger minimum width
+    height: '36px', // Slightly larger height
     backgroundColor: isInitialed ? '#007bff' : '#ffffff', // Blue background if initialed, white if not
     color: isInitialed ? '#ffffff' : '#007bff', // White text if initialed, blue if not
     cursor: 'pointer',
     textAlign: 'center',
     fontFamily: font?.font || 'inherit',
-    fontSize: '0.9rem', // Larger font size
+    fontSize: '1.1rem', // Increased font size
     fontWeight: 'bold', // Bold font for better visibility
     lineHeight: 'normal',
     verticalAlign: 'middle',

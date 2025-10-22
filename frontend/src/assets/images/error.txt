@@ -1,0 +1,126 @@
+index-C4DmfsiH.js:345 ErrorLogger: Global error handlers initialized for production
+index-C4DmfsiH.js:345 ConsoleLogger: Console capture initialized for production
+index-C4DmfsiH.js:345 [Build] Online Enrollment version 1.1.9
+index-C4DmfsiH.js:345 [NotifyParent] postMessage ENROLLMENT_SCROLL_TO Object
+index-C4DmfsiH.js:345 Checking if form has meaningful data: true
+index-C4DmfsiH.js:345 Main form data: true
+index-C4DmfsiH.js:345 Tab data: true
+index-C4DmfsiH.js:345 Form data values: Array(24)
+index-C4DmfsiH.js:345 Child forms: Array(0)
+index-C4DmfsiH.js:345 Adult member: Object
+index-C4DmfsiH.js:345 Child member: Object
+index-C4DmfsiH.js:345 Youth member: Object
+index-C4DmfsiH.js:345 Attempting to restore from localStorage...
+index-C4DmfsiH.js:345 Found encrypted data, attempting to decrypt...
+index-C4DmfsiH.js:345 Data decrypted successfully: Object
+index-C4DmfsiH.js:345 Current session ID: session_1761064527159_7z1xl3d3k
+index-C4DmfsiH.js:345 Data session ID: session_1761064527159_7z1xl3d3k
+index-C4DmfsiH.js:345 Data age: 9007 ms (max: 86400000 ms)
+index-C4DmfsiH.js:345 Form data restored successfully from localStorage
+index-C4DmfsiH.js:345 [CartDebug] cart position: sticky top: 416px max-height: none overflow: visible
+index-C4DmfsiH.js:345 [CartDebug] layout overflow: visible transform: none
+index-C4DmfsiH.js:345 [CartDebug] container overflow: visible transform: none
+index-C4DmfsiH.js:345 Fetching price for: Object
+index-C4DmfsiH.js:345 Checking if form has meaningful data: true
+index-C4DmfsiH.js:345 Main form data: true
+index-C4DmfsiH.js:345 Tab data: true
+index-C4DmfsiH.js:345 Form data values: Array(24)
+index-C4DmfsiH.js:345 Child forms: Array(0)
+index-C4DmfsiH.js:345 Adult member: Object
+index-C4DmfsiH.js:345 Child member: Object
+index-C4DmfsiH.js:345 Youth member: Object
+index-C4DmfsiH.js:345 Tax rate fetched: 0.07625
+index-C4DmfsiH.js:345 Price fetched: 124
+index-C4DmfsiH.js:345 Membership price data for cart: Object
+index-C4DmfsiH.js:345 Fetching price for: Object
+index-C4DmfsiH.js:345 Price fetched: 124
+index-C4DmfsiH.js:345 Membership price data for cart: Object
+Error with Permissions-Policy header: Unrecognized feature: 'browsing-topics'.
+maps.googleapis.com/maps/api/mapsjs/gen_204?csp_test=true:1  Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+index-C4DmfsiH.js:345 Tab data being saved: {childForms: 0, adultMember: {…}, childMember: {…}, youthMember: {…}, activeTab: 'members'}
+index-C4DmfsiH.js:345 Auto-saving form data...
+index-C4DmfsiH.js:345 Form data to save: {requestedStartDate: '', salesRep: '', firstName: '', middleInitial: '', lastName: '', …}
+index-C4DmfsiH.js:345 Additional data to save: {selectedChildAddons: Array(0), selectedServiceAddons: Array(0), membershipType: 'standard', club: '201', childForms: Array(0), …}
+index-C4DmfsiH.js:345 Form data auto-saved successfully
+index-C4DmfsiH.js:345 Saving draft to backend: {sessionId: 'session_1761064527159_7z1xl3d3k', dataSize: 1591}
+index-C4DmfsiH.js:345 Backend response: {data: {…}, status: 200, statusText: '', headers: qt, config: {…}, …}
+index-C4DmfsiH.js:345 Draft saved to backend successfully
+index-C4DmfsiH.js:345 Checking if form has meaningful data: true
+index-C4DmfsiH.js:345 Main form data: true
+index-C4DmfsiH.js:345 Tab data: true
+index-C4DmfsiH.js:345 Form data values: (24) ['', '', '', '', '', '', 'default', '', '', '', '', '', '', '', Array(0), {…}, '', '', '', '', '', '', '', false]
+index-C4DmfsiH.js:345 Child forms: []
+index-C4DmfsiH.js:345 Adult member: {firstName: '', middleInitial: '', lastName: '', dateOfBirth: '', gender: 'default', …}
+index-C4DmfsiH.js:345 Child member: {firstName: '', middleInitial: '', lastName: '', dateOfBirth: '', gender: 'default', …}
+index-C4DmfsiH.js:345 Youth member: {firstName: '', middleInitial: '', lastName: '', dateOfBirth: '', gender: 'default', …}
+index-C4DmfsiH.js:345 Tab data being saved: {childForms: 0, adultMember: {…}, childMember: {…}, youthMember: {…}, activeTab: 'new_adult'}
+index-C4DmfsiH.js:345 Auto-saving form data...
+index-C4DmfsiH.js:345 Form data to save: {requestedStartDate: '', salesRep: '', firstName: '', middleInitial: '', lastName: '', …}
+index-C4DmfsiH.js:345 Additional data to save: {selectedChildAddons: Array(0), selectedServiceAddons: Array(0), membershipType: 'standard', club: '201', childForms: Array(0), …}
+index-C4DmfsiH.js:345 Form data auto-saved successfully
+index-C4DmfsiH.js:345 Saving draft to backend: {sessionId: 'session_1761064527159_7z1xl3d3k', dataSize: 1613}
+index-C4DmfsiH.js:345 Backend response: {data: {…}, status: 200, statusText: '', headers: qt, config: {…}, …}
+index-C4DmfsiH.js:345 Draft saved to backend successfully
+index-C4DmfsiH.js:345 Checking if form has meaningful data: true
+index-C4DmfsiH.js:345 Main form data: true
+index-C4DmfsiH.js:345 Tab data: true
+index-C4DmfsiH.js:345 Form data values: (24) ['', '', '', '', '', '', 'default', '', '', '', '', '', '', '', Array(0), {…}, '', '', '', '', '', '', '', false]
+index-C4DmfsiH.js:345 Child forms: []
+index-C4DmfsiH.js:345 Adult member: {firstName: '', middleInitial: '', lastName: '', dateOfBirth: '', gender: 'default', …}
+index-C4DmfsiH.js:345 Child member: {firstName: '', lastName: '', dateOfBirth: '', gender: '', mobile: '', …}
+index-C4DmfsiH.js:345 Youth member: {firstName: '', middleInitial: '', lastName: '', dateOfBirth: '', gender: 'default', …}
+index-C4DmfsiH.js:345 Tab data being saved: {childForms: 0, adultMember: {…}, childMember: {…}, youthMember: {…}, activeTab: 'child'}
+index-C4DmfsiH.js:345 Auto-saving form data...
+index-C4DmfsiH.js:345 Form data to save: {requestedStartDate: '', salesRep: '', firstName: '', middleInitial: '', lastName: '', …}
+index-C4DmfsiH.js:345 Additional data to save: {selectedChildAddons: Array(0), selectedServiceAddons: Array(0), membershipType: 'standard', club: '201', childForms: Array(0), …}
+index-C4DmfsiH.js:345 Form data auto-saved successfully
+index-C4DmfsiH.js:345 Saving draft to backend: {sessionId: 'session_1761064527159_7z1xl3d3k', dataSize: 1404}
+index-C4DmfsiH.js:345 Backend response: {data: {…}, status: 200, statusText: '', headers: qt, config: {…}, …}
+index-C4DmfsiH.js:345 Draft saved to backend successfully
+index-C4DmfsiH.js:345 Error: Minified React error #310; visit https://reactjs.org/docs/error-decoder.html?invariant=310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at Ri (index-C4DmfsiH.js:38:17708)
+    at Object.PF [as useRef] (index-C4DmfsiH.js:38:20513)
+    at fe.useRef (index-C4DmfsiH.js:9:6344)
+    at Vg (index-C4DmfsiH.js:72:67059)
+    at rm (index-C4DmfsiH.js:72:98644)
+    at AC (index-C4DmfsiH.js:38:17111)
+    at kw (index-C4DmfsiH.js:40:3139)
+    at ND (index-C4DmfsiH.js:40:44833)
+    at DD (index-C4DmfsiH.js:40:39790)
+    at Au (index-C4DmfsiH.js:40:39718)
+console.error @ index-C4DmfsiH.js:345
+Jw @ index-C4DmfsiH.js:40
+g.componentDidCatch.B.callback @ index-C4DmfsiH.js:40
+Kl @ index-C4DmfsiH.js:38
+rh @ index-C4DmfsiH.js:40
+lD @ index-C4DmfsiH.js:40
+qU @ index-C4DmfsiH.js:40
+Bu @ index-C4DmfsiH.js:40
+vQ @ index-C4DmfsiH.js:40
+ah @ index-C4DmfsiH.js:40
+jQ @ index-C4DmfsiH.js:38
+(anonymous) @ index-C4DmfsiH.js:40
+index-C4DmfsiH.js:345 Error caught by boundary: Error: Minified React error #310; visit https://reactjs.org/docs/error-decoder.html?invariant=310 for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at Ri (index-C4DmfsiH.js:38:17708)
+    at Object.PF [as useRef] (index-C4DmfsiH.js:38:20513)
+    at fe.useRef (index-C4DmfsiH.js:9:6344)
+    at Vg (index-C4DmfsiH.js:72:67059)
+    at rm (index-C4DmfsiH.js:72:98644)
+    at AC (index-C4DmfsiH.js:38:17111)
+    at kw (index-C4DmfsiH.js:40:3139)
+    at ND (index-C4DmfsiH.js:40:44833)
+    at DD (index-C4DmfsiH.js:40:39790)
+    at Au (index-C4DmfsiH.js:40:39718) {componentStack: '\n    at rm (https://enrollment.wellbridge.com/onli…nline-enrollment/assets/index-C4DmfsiH.js:67:738)'}
+console.error @ index-C4DmfsiH.js:345
+componentDidCatch @ index-C4DmfsiH.js:345
+g.componentDidCatch.B.callback @ index-C4DmfsiH.js:40
+Kl @ index-C4DmfsiH.js:38
+rh @ index-C4DmfsiH.js:40
+lD @ index-C4DmfsiH.js:40
+qU @ index-C4DmfsiH.js:40
+Bu @ index-C4DmfsiH.js:40
+vQ @ index-C4DmfsiH.js:40
+ah @ index-C4DmfsiH.js:40
+jQ @ index-C4DmfsiH.js:38
+(anonymous) @ index-C4DmfsiH.js:40
+index-C4DmfsiH.js:345 Error reported to backend successfully
