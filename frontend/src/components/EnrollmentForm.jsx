@@ -3781,7 +3781,7 @@ const handleChange = (e) => {
         proratedDuesTax: proratedTaxAmount || 0
       }));
     }
-  }, [formData.requestedStartDate, selectedServiceAddons, selectedChildAddons, selectedClub, taxRate]);
+  }, [formData.requestedStartDate, selectedServiceAddons, selectedChildAddons, selectedClub, taxRate, proratedPrice, proratedTaxAmount]);
 
   // Helper to fully reset enrollment
   const resetEnrollment = useCallback(async () => {

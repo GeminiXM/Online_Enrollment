@@ -1453,38 +1453,37 @@ export const submitEnrollment = async (req, res) => {
         // Insert membership dues item
         if (membershipUpcCode) {
           const combineAddons = req.body.combineAddonsIntoProrated === true;
-          const membershipPrice = combineAddons
-            ? parseFloat(req.body.proratedDuesAddon || 0)
-            : prorateAmount;
-          // Compute dues+addons tax directly from combined base to avoid rounding drift
-          const correctMembershipDuesTax = taxRate
-            ? Number((membershipPrice * taxRate).toFixed(2))
-            : 0.0;
+          // Always use just the prorated dues amount for the dues line
+          const membershipPrice = parseFloat(req.body.proratedDues || 0);
+          // Use the prorated dues tax amount
+          const correctMembershipDuesTax = parseFloat(
+            req.body.proratedDuesTax || 0
+          );
           logger.info(
             "Inserting membership dues item with UPC code:",
             membershipUpcCode,
             "Combine addons:",
             combineAddons,
-            "Membership price:",
+            "Membership price (prorated dues only):",
             membershipPrice,
-            "Computed combined prorate tax:",
+            "Prorated dues tax:",
             correctMembershipDuesTax,
-            "Request body proratedDuesAddon:",
-            req.body.proratedDuesAddon,
-            "Request body proratedDuesAddonTax:",
-            req.body.proratedDuesAddonTax,
             "Request body proratedDues:",
             req.body.proratedDues,
+            "Request body proratedDuesTax:",
+            req.body.proratedDuesTax,
             "Request body proratedAddOns:",
             req.body.proratedAddOns,
+            "Request body proratedAddOnsTax:",
+            req.body.proratedAddOnsTax,
             "ProrateAmount:",
             prorateAmount
           );
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             "701592007513", // parUPC - Special UPC for prorated membership dues
-            membershipPrice.toFixed(2), // parPrice - prorated amount (with addons when combined)
-            correctMembershipDuesTax.toFixed(2), // parTax - dues tax only or combined tax from frontend
+            membershipPrice.toFixed(2), // parPrice - prorated dues amount only
+            correctMembershipDuesTax.toFixed(2), // parTax - prorated dues tax only
             1, // parQty
           ]);
           logger.info("=== DATABASE INSERTION COMPLETED ===");

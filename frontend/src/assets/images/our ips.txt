@@ -1,0 +1,18 @@
+12.130.163.128
+12.130.163.129
+12.130.163.130
+12.130.163.131
+12.130.163.132
+12.130.163.133
+12.130.163.134
+12.130.163.135
+
+12.130.163.130
+192.168.15.170
+
+
+pm2-service-install -n "PM2 Online Enrollment" -u ".\svc_node" -p "n/@t30r/af>4GonE"
+
+
+
+https://enrollment.wellbridge.com/online-enrollment/enrollment?clubId=203
