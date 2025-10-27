@@ -3915,8 +3915,12 @@ const handleChange = (e) => {
     };
   }, []);
 
-  // Desktop: pin cart using position: fixed aligned to the right edge of layout
+  // Desktop: formerly used position: fixed; now rely on CSS sticky to avoid footer overlap
   useEffect(() => {
+    const enableFixedBehavior = true;
+    if (!enableFixedBehavior) {
+      return; // CSS handles sticky behavior
+    }
     const cart = document.querySelector('.shopping-cart');
     const layout = document.querySelector('.enrollment-layout');
     const privacy = document.querySelector('.privacy-notice');
@@ -3930,7 +3934,7 @@ const handleChange = (e) => {
       zIndex: cart.style.zIndex,
     };
     let fixedWidthPx = null;
-    let initialBottomDoc = null;
+    let initialCartTop = null;
 
     const applyFixed = (recalcWidth = false) => {
       const isDesktop = window.innerWidth > 900;
@@ -3941,6 +3945,7 @@ const handleChange = (e) => {
         cart.style.width = originalStyle.width || '';
         cart.style.zIndex = originalStyle.zIndex || '';
         fixedWidthPx = null;
+        initialCartTop = null;
         return;
       }
       const lrect = layout.getBoundingClientRect();
@@ -3951,45 +3956,43 @@ const handleChange = (e) => {
       }
       const left = Math.round(lrect.right - fixedWidthPx);
 
-      // Determine initial cart bottom in document coords
-      if (initialBottomDoc == null) {
-        const r0 = cart.getBoundingClientRect();
-        initialBottomDoc = window.scrollY + r0.bottom;
+      // Store initial cart top position (only once)
+      if (initialCartTop == null) {
+        // Temporarily set to static to get natural position
+        const tempPosition = cart.style.position;
+        cart.style.position = 'static';
+        initialCartTop = cart.getBoundingClientRect().top;
+        cart.style.position = tempPosition;
       }
 
-      // Base desired top relative to viewport
-      let desiredTopPx = 416;
-      let desiredTopDoc = window.scrollY + desiredTopPx;
-      let desiredBottomDoc = desiredTopDoc + cart.offsetHeight;
-
-      // Apply bottom brake: 33px below initial bottom
-      const bottomLimitDoc = initialBottomDoc + 33;
-      if (desiredBottomDoc > bottomLimitDoc) {
-        desiredTopDoc = bottomLimitDoc - cart.offsetHeight;
+      // Calculate where cart would naturally be at current scroll position
+      const naturalCartTop = initialCartTop - window.scrollY + window.scrollY;
+      const naturalCartTopViewport = initialCartTop - window.scrollY;
+      
+      // Simple sticky behavior
+      const stickyTopPx = 375;
+      let targetTopPx;
+      
+      // If natural position is below 375px, stick at 375px
+      if (naturalCartTopViewport > stickyTopPx) {
+        targetTopPx = stickyTopPx;
+      } else {
+        // Natural position is at or above 375px, use natural position
+        targetTopPx = naturalCartTopViewport;
       }
-
-      // Also clamp to privacy/footer so we never overlap them
-      let brakeTopDoc = Infinity;
-      const footer = document.querySelector('.site-footer');
-      if (privacy) {
-        const prect = privacy.getBoundingClientRect();
-        brakeTopDoc = Math.min(brakeTopDoc, window.scrollY + prect.top);
-      }
+      
+      // Clamp to avoid footer overlap
+      const footer = document.querySelector('footer') || document.querySelector('.site-footer');
       if (footer) {
-        const frect = footer.getBoundingClientRect();
-        brakeTopDoc = Math.min(brakeTopDoc, window.scrollY + frect.top);
+        const footerRect = footer.getBoundingClientRect();
+        const maxTopToAvoidFooter = footerRect.top - cart.offsetHeight - 8;
+        targetTopPx = Math.min(targetTopPx, maxTopToAvoidFooter);
       }
-      if (isFinite(brakeTopDoc)) {
-        desiredBottomDoc = desiredTopDoc + cart.offsetHeight;
-        if (desiredBottomDoc > brakeTopDoc) {
-          desiredTopDoc = brakeTopDoc - cart.offsetHeight;
-        }
-      }
-
-      // Apply
-      const topPx = Math.max(40, Math.round(desiredTopDoc - window.scrollY));
+      
+      // Ensure minimum top
+      targetTopPx = Math.max(40, targetTopPx);
       cart.style.position = 'fixed';
-      cart.style.top = `${topPx}px`;
+      cart.style.top = `${targetTopPx}px`;
       cart.style.left = `${left}px`;
       cart.style.width = `${fixedWidthPx}px`;
       cart.style.zIndex = '10';

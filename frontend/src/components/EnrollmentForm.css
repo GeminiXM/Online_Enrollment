@@ -475,23 +475,24 @@ select[aria-invalid="true"] {
   }
   
   .shopping-cart {
-    position: sticky; /* Stay visible while page scrolls on desktop */
-    top: 416px;
+    position: static; /* Let JavaScript handle positioning */
     order: 2;
     max-width: 28%;
     min-width: 250px;
     align-self: flex-start;
     margin: 0;
-    /* Keep cart visible and scrollable within the viewport on desktop */
-    /* Let inner content scroll to avoid sticky/overflow conflicts in some browsers */
+    /* JavaScript handles all positioning */
   }
-  .shopping-cart { height: auto; }
+  /* Keep cart flowing without internal scrollbar; JS clamps top so bottom stays visible */
+  .shopping-cart { 
+    height: auto;
+    overflow: visible;
+  }
   .shopping-cart .cart-details { max-height: none; overflow: visible; padding-right: 0; }
 
   /* Force cart to flow with page on desktop in case of any higher-specificity rules */
   .enrollment-layout .shopping-cart {
-    position: sticky;
-    top: 416px;
+    position: static; /* Let JavaScript handle positioning */
   }
   
   .form-actions,
@@ -1574,14 +1575,7 @@ button:focus-visible {
   box-shadow: 0 0 0 2px rgba(0, 99, 124, 0.3);
 }
 
-/* Responsive adjustments for shopping cart */
-@media (max-width: 1200px) {
-  .shopping-cart {
-    max-width: 100%;
-    position: static;
-    margin-top: 2rem;
-  }
-}
+/* Responsive adjustments for shopping cart - removed conflicting rule */
 
 @media (max-width: 768px) {
   .shopping-cart {
