@@ -63,6 +63,13 @@ export const notFoundHandler = (req, res, next) => {
     "/.env.example",
     "/api/.env",
     "/api/.env.example",
+    // Common API probe endpoints
+    "/api/v1/pods",
+    "/api/sonicos/auth",
+    "/api/sonicos/tfa",
+    "/api/v1/version",
+    "/api/v1/system/platform",
+    "/api/server/version",
   ];
 
   if (ignored404s.includes(req.originalUrl)) {

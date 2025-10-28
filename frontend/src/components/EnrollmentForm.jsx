@@ -4003,33 +4003,86 @@ const handleChange = (e) => {
       const naturalCartTop = initialCartTop - window.scrollY + window.scrollY;
       const naturalCartTopViewport = initialCartTop - window.scrollY;
       
-      // Simple sticky behavior
-      const stickyTopPx = 375;
+      // Simple sticky behavior - start lower
+      const stickyTopPx = 250; // Starting position
+      const maxTopPx = 50; // Maximum position when cart is too tall
       let targetTopPx;
       
-      // If natural position is below 375px, stick at 375px
-      if (naturalCartTopViewport > stickyTopPx) {
-        targetTopPx = stickyTopPx;
-      } else {
-        // Natural position is at or above 375px, use natural position
-        targetTopPx = naturalCartTopViewport;
-      }
+      // Always use sticky position for consistent behavior
+      targetTopPx = stickyTopPx;
+      
+      // Debug logging
+      console.log('[CartDebug] Sticky positioning:', {
+        stickyTopPx,
+        targetTopPx,
+        naturalCartTopViewport,
+        windowScrollY: window.scrollY
+      });
       
       // Clamp to avoid footer overlap
       const footer = document.querySelector('footer') || document.querySelector('.site-footer');
       if (footer) {
         const footerRect = footer.getBoundingClientRect();
-        const maxTopToAvoidFooter = footerRect.top - cart.offsetHeight - 8;
+        // Get accurate cart height by temporarily setting to static
+        const tempPosition = cart.style.position;
+        cart.style.position = 'static';
+        const cartHeight = cart.offsetHeight;
+        cart.style.position = tempPosition;
+        
+        const maxTopToAvoidFooter = footerRect.top - cartHeight - 8;
         targetTopPx = Math.min(targetTopPx, maxTopToAvoidFooter);
       }
       
-      // Ensure minimum top
-      targetTopPx = Math.max(40, targetTopPx);
+      // Apply the positioning first, then check if bottom is visible
       cart.style.position = 'fixed';
       cart.style.top = `${targetTopPx}px`;
       cart.style.left = `${left}px`;
       cart.style.width = `${fixedWidthPx}px`;
       cart.style.zIndex = '10';
+      
+      // Debug logging after positioning
+      console.log('[CartDebug] Applied positioning:', {
+        position: cart.style.position,
+        top: cart.style.top,
+        left: cart.style.left,
+        width: cart.style.width,
+        zIndex: cart.style.zIndex
+      });
+      
+      // Now check if the bottom is visible and adjust if needed
+      const cartRect = cart.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const cartBottom = cartRect.bottom;
+      const cartTop = cartRect.top;
+      const maxAllowedBottom = viewportHeight - 10; // 10px buffer from bottom
+      
+      // Temporarily disable viewport bottom adjustment to test positioning
+      console.log('[CartDebug] Viewport check:', {
+        cartBottom: cartBottom,
+        maxAllowedBottom: maxAllowedBottom,
+        wouldAdjust: cartBottom > maxAllowedBottom + 200,
+        cartTop: cartTop,
+        maxTopPx: maxTopPx
+      });
+      
+      // Only adjust if bottom is significantly cut off AND we have room to move up
+      if (cartBottom > maxAllowedBottom + 50 && cartTop > maxTopPx) { // Re-enabled with 50px buffer
+        // Calculate how much we need to move up
+        const excessBottom = cartBottom - maxAllowedBottom;
+        const newTop = Math.max(maxTopPx, cartTop - excessBottom);
+        
+        cart.style.top = `${newTop}px`;
+        console.log('[CartDebug] Adjusted for viewport bottom:', {
+          originalTop: targetTopPx,
+          cartTop: cartTop,
+          newTop: newTop,
+          cartHeight: cartRect.height,
+          viewportHeight: viewportHeight,
+          cartBottom: cartBottom,
+          excessBottom: excessBottom,
+          maxTopPx: maxTopPx
+        });
+      }
     };
 
     applyFixed();
