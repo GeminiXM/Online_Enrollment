@@ -388,13 +388,17 @@ const ContractPage = () => {
         isNewMexicoClub: isNewMexicoClub
       });
       
-      // Calculate tax on enrollment fee and prorated amounts
+      // Calculate taxes per item using consistent rounding method
       const enrollmentFee = 19.0;
-      const taxableAmount = enrollmentFee + parseFloat(proratedDues) + parseFloat(proratedAddOns);
-      const duesAndFeesTax = isNewMexicoClub ? Number((taxableAmount * taxRate).toFixed(2)) : 0;
+      const proratedTaxableAmount = parseFloat(proratedDues) + parseFloat(proratedAddOns);
+      const proratedTax = isNewMexicoClub ? Number((proratedTaxableAmount * taxRate).toFixed(2)) : 0;
+      const enrollmentFeeTax = isNewMexicoClub ? Number((enrollmentFee * taxRate).toFixed(2)) : 0;
       
-      // Calculate total tax amount including PT package tax
-      const totalTaxAmount = duesAndFeesTax + ptPackageTax;
+      // Calculate PT package tax using same method as other items
+      const ptPackageTaxCalculated = isNewMexicoClub ? Number((parseFloat(ptPackageAmount) * taxRate).toFixed(2)) : 0;
+      
+      // Sum all individual taxes
+      const totalTaxAmount = proratedTax + enrollmentFeeTax + ptPackageTaxCalculated;
       
       // Calculate tax amount (will be 0 for non-NM clubs)
       const taxAmount = isNewMexicoClub ? totalTaxAmount.toFixed(2) : '0.00';

@@ -1453,8 +1453,10 @@ export const submitEnrollment = async (req, res) => {
         // Insert membership dues item
         if (membershipUpcCode) {
           const combineAddons = req.body.combineAddonsIntoProrated === true;
-          // Always use just the prorated dues amount for the dues line
+          // Include prorated addons in the PRORATE line item amount
           const membershipPrice = parseFloat(req.body.proratedDues || 0);
+          const proratedAddons = parseFloat(req.body.proratedAddOns || 0);
+          const combinedProrateAmount = membershipPrice + proratedAddons;
           // Use the prorated dues tax amount
           const correctMembershipDuesTax = parseFloat(
             req.body.proratedDuesTax || 0
@@ -1482,7 +1484,7 @@ export const submitEnrollment = async (req, res) => {
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             "701592007513", // parUPC - Special UPC for prorated membership dues
-            membershipPrice.toFixed(2), // parPrice - prorated dues amount only
+            combinedProrateAmount.toFixed(2), // parPrice - includes dues + addons
             correctMembershipDuesTax.toFixed(2), // parTax - prorated dues tax only
             1, // parQty
           ]);
@@ -1491,6 +1493,8 @@ export const submitEnrollment = async (req, res) => {
             transactionId,
             upcCode: "701592007513",
             membershipPrice: membershipPrice.toFixed(2),
+            proratedAddons: proratedAddons.toFixed(2),
+            combinedProrateAmount: combinedProrateAmount.toFixed(2),
             membershipDuesTax: correctMembershipDuesTax.toFixed(2),
             quantity: 1,
           });
@@ -1561,23 +1565,29 @@ export const submitEnrollment = async (req, res) => {
 
         // Insert PT package item if selected
         if (hasPTAddon && ptPackage && transactionId) {
+          // Use calculated values from frontend for NM clubs
+          const ptPackageBasePrice = parseFloat(req.body.ptPackageAmount || 0);
+          const ptPackageTaxAmount = parseFloat(req.body.ptPackageTax || 0);
+
           logger.info(
             "Inserting PT package item with UPC code:",
-            ptPackage.invtr_upccode
+            ptPackage.invtr_upccode,
+            "Base price:",
+            ptPackageBasePrice,
+            "Tax:",
+            ptPackageTaxAmount
           );
           await executeSqlProcedure("web_proc_InsertAsptitemd", club, [
             transactionId, // parTrans
             ptPackage.invtr_upccode || "", // parUPC
-            parseFloat(ptPackage.invtr_price || ptPackage.price || 0).toFixed(
-              2
-            ), // parPrice - full PT package price
-            0.0, // parTax - PT packages typically don't have tax
+            ptPackageBasePrice.toFixed(2), // parPrice - base price without tax
+            ptPackageTaxAmount.toFixed(2), // parTax - tax amount for NM clubs
             1, // parQty
           ]);
           logger.info(
-            `PT package item inserted successfully with price: ${parseFloat(
-              ptPackage.invtr_price || ptPackage.price || 0
-            ).toFixed(2)}`
+            `PT package item inserted successfully with base price: ${ptPackageBasePrice.toFixed(
+              2
+            )}, tax: ${ptPackageTaxAmount.toFixed(2)}`
           );
         }
       }

@@ -783,11 +783,10 @@ function EnrollmentForm() {
       const isNewMexicoClub = selectedClub?.state === 'NM';
       const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
       
-      // Calculate tax amount for total taxable amount (enrollment fee + prorated price)
-      const enrollmentFee = 19.0; // $19 enrollment fee
-      const totalTaxableAmount = enrollmentFee + prorated;
-      const proratedTax = Number((totalTaxableAmount * effectiveTaxRate).toFixed(2));
+      // Calculate tax on prorated amount only (not including enrollment fee)
+      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
       setProratedTaxAmount(proratedTax);
+      // Note: Enrollment fee tax is calculated separately in backend
       
       // Calculate tax for full membership price
       const fullTax = Number((membershipPrice * effectiveTaxRate).toFixed(2));
@@ -944,6 +943,39 @@ function EnrollmentForm() {
     return /^\d{5}(-\d{4})?$/.test(zipCode);
   };
 
+  // Helper functions for PT package calculations
+  const calculatePTPackageAmount = (ptPackage) => {
+    if (!ptPackage) return 0;
+    const isNewMexicoClub = selectedClub?.state === 'NM';
+    const taxRate = isNewMexicoClub ? 0.07625 : 0;
+    const ptPackagePriceWithTax = parseFloat(ptPackage.invtr_price || ptPackage.price || 0);
+    
+    if (isNewMexicoClub) {
+      // For New Mexico, separate tax from the price using precise rounding
+      const base = Math.round(ptPackagePriceWithTax / (1 + taxRate));
+      return base;
+    } else {
+      // For non-NM clubs, use the price as-is
+      return ptPackagePriceWithTax;
+    }
+  };
+
+  const calculatePTPackageTax = (ptPackage) => {
+    if (!ptPackage) return '0.00';
+    const isNewMexicoClub = selectedClub?.state === 'NM';
+    const taxRate = isNewMexicoClub ? 0.07625 : 0;
+    const ptPackagePriceWithTax = parseFloat(ptPackage.invtr_price || ptPackage.price || 0);
+    
+    if (isNewMexicoClub) {
+      // For New Mexico, calculate tax amount using precise rounding
+      const base = Math.round(ptPackagePriceWithTax / (1 + taxRate));
+      const taxAmount = ptPackagePriceWithTax - base;
+      return Math.round(taxAmount * 100) / 100;
+    } else {
+      return 0;
+    }
+  };
+
   // Transform form data for submission
   const transformFormDataForSubmission = () => {
     // Format the data to match backend expectations
@@ -1029,7 +1061,10 @@ function EnrollmentForm() {
       // Add PT selection
       hasPTAddon: hasPTAddon || false,
       // Add PT package data if available
-      ptPackage: ptPackage || null
+      ptPackage: ptPackage || null,
+      // Add calculated PT package values for backend
+      ptPackageAmount: hasPTAddon && ptPackage ? calculatePTPackageAmount(ptPackage) : '0.00',
+      ptPackageTax: hasPTAddon && ptPackage ? calculatePTPackageTax(ptPackage) : '0.00'
     };
    
       // ADD THIS SECTION to create a prioritized phone field
@@ -3716,11 +3751,10 @@ const handleChange = (e) => {
       const isNewMexicoClub = selectedClub?.state === 'NM';
       const effectiveTaxRate = isNewMexicoClub ? taxRate : 0;
 
-      // Calculate tax amount for total taxable amount (enrollment fee + prorated price)
-      const enrollmentFee = 19.0; // $19 enrollment fee
-      const totalTaxableAmount = enrollmentFee + prorated;
-      const proratedTax = Number((totalTaxableAmount * effectiveTaxRate).toFixed(2));
+      // Calculate tax on prorated amount only (not including enrollment fee)
+      const proratedTax = Number((prorated * effectiveTaxRate).toFixed(2));
       setProratedTaxAmount(proratedTax);
+      // Note: Enrollment fee tax is calculated separately in backend
 
       // Calculate monthly total (going forward)
       let monthlyTotal = membershipPrice !== undefined ? membershipPrice : 0;
