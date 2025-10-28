@@ -59,7 +59,7 @@ function AppContent() {
   const routerLocation = useLocation();
   // Check if we're in development mode - header only shows in development
   const isDevelopment = process.env.NODE_ENV === "development";
-  const [headerVisible, setHeaderVisible] = React.useState(isDevelopment);
+  const [headerVisible, setHeaderVisible] = React.useState(false); // Keep header hidden for production-like testing
 
   // Handle club selection from URL parameters (accept clubId or clubid) and override any stored selection
   React.useEffect(() => {

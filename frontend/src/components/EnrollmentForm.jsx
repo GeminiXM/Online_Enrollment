@@ -4008,8 +4008,35 @@ const handleChange = (e) => {
       const maxTopPx = 50; // Maximum position when cart is too tall
       let targetTopPx;
       
-      // Always use sticky position for consistent behavior
-      targetTopPx = stickyTopPx;
+      // Calculate 50% scroll threshold
+      const documentHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight;
+      const scrollThreshold = documentHeight * 0.5; // 50% of page height
+      const currentScrollY = window.scrollY;
+      
+      // Smooth transition between natural and sticky positioning
+      if (currentScrollY >= scrollThreshold) {
+        // Fully sticky - use fixed position
+        targetTopPx = stickyTopPx;
+        console.log('[CartDebug] Using sticky position - scrolled past 10% threshold');
+      } else {
+        // Smooth transition: blend natural position with sticky position
+        const scrollProgress = currentScrollY / scrollThreshold; // 0 to 1
+        const naturalPosition = naturalCartTopViewport;
+        const stickyPosition = stickyTopPx;
+        
+        // Smooth interpolation between natural and sticky
+        targetTopPx = naturalPosition + (stickyPosition - naturalPosition) * scrollProgress;
+        
+        console.log('[CartDebug] Smooth transition', {
+          currentScrollY,
+          scrollThreshold,
+          scrollProgress: (scrollProgress * 100).toFixed(1) + '%',
+          naturalPosition: naturalPosition.toFixed(1),
+          stickyPosition: stickyPosition.toFixed(1),
+          targetTopPx: targetTopPx.toFixed(1)
+        });
+      }
       
       // Debug logging
       console.log('[CartDebug] Sticky positioning:', {
@@ -4051,10 +4078,9 @@ const handleChange = (e) => {
       
       // Now check if the bottom is visible and adjust if needed
       const cartRect = cart.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
       const cartBottom = cartRect.bottom;
       const cartTop = cartRect.top;
-      const maxAllowedBottom = viewportHeight - 10; // 10px buffer from bottom
+      const maxAllowedBottom = viewportHeight - 100; // 10px buffer from bottom
       
       // Temporarily disable viewport bottom adjustment to test positioning
       console.log('[CartDebug] Viewport check:', {
@@ -4066,7 +4092,7 @@ const handleChange = (e) => {
       });
       
       // Only adjust if bottom is significantly cut off AND we have room to move up
-      if (cartBottom > maxAllowedBottom + 50 && cartTop > maxTopPx) { // Re-enabled with 50px buffer
+      if (false && cartBottom > maxAllowedBottom + 50 && cartTop > maxTopPx) { // Disabled - cart positioning is perfect
         // Calculate how much we need to move up
         const excessBottom = cartBottom - maxAllowedBottom;
         const newTop = Math.max(maxTopPx, cartTop - excessBottom);
