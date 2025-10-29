@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import emailService from "../services/emailService.js";
+import calculateTotals from "../../../shared/pricing/calculateTotals.js";
 
 // Get the current file's directory
 const __filename = fileURLToPath(import.meta.url);
@@ -1064,15 +1065,10 @@ export const submitEnrollment = async (req, res) => {
         : 0.0;
     const addonsTaxAmount = Number((addonsTotal * taxRate).toFixed(2));
 
-    let initiationFeeTax = 0.0; // Will compute after initiation fee is known
     const prorateTaxAmount = membershipDetails.proratedTaxAmount || 0.0;
 
     // Calculate totals from the enrollment form data
     const initiationFee = 19.0; // Enrollment fee set to $19
-    // Compute initiation fee tax for NM clubs
-    initiationFeeTax = taxRate
-      ? Number((initiationFee * taxRate).toFixed(2))
-      : 0.0;
     const prorateAmount = membershipDetails.proratedPrice || 0.0;
 
     // COMPREHENSIVE LOGGING FOR AMOUNT DISCREPANCY DEBUGGING
@@ -1093,16 +1089,33 @@ export const submitEnrollment = async (req, res) => {
       addonsTotal,
       addonsTaxAmount,
       initiationFee,
-      initiationFeeTax,
+      initiationFeeTax: "will be calculated from shared function",
       prorateAmount,
     });
     logger.info("Membership details:", membershipDetails);
 
-    // Calculate totalProrateBilled here so it's available for the response
-    const ptPackageAmount =
+    // Calculate PT package base/tax amounts correctly
+    // Prefer frontend-provided split when available; otherwise derive from gross using taxRate
+    const ptPackageGross =
       hasPTAddon && ptPackage
         ? parseFloat(ptPackage.invtr_price || ptPackage.price || 0)
         : 0;
+    const ptBaseDerived = taxRate
+      ? Number((ptPackageGross / (1 + taxRate)).toFixed(2))
+      : ptPackageGross;
+    const ptTaxDerived = taxRate
+      ? Number((ptPackageGross - ptBaseDerived).toFixed(2))
+      : 0;
+    const ptPackageAmount = hasPTAddon
+      ? req.body.ptPackageAmount
+        ? parseFloat(req.body.ptPackageAmount)
+        : ptBaseDerived
+      : 0;
+    const ptPackageTaxOverride = hasPTAddon
+      ? req.body.ptPackageTax
+        ? parseFloat(req.body.ptPackageTax)
+        : ptTaxDerived
+      : 0;
     const proratedDues =
       parseFloat(req.body.proratedDues) ||
       membershipDetails.proratedPrice ||
@@ -1155,32 +1168,35 @@ export const submitEnrollment = async (req, res) => {
       addonCount: addonUpcCodes.length,
     });
 
-    // Calculate total tax amount for today's charges (NM):
-    // - Prorate tax is computed on combined prorated dues + prorated add-ons
-    // - Initiation fee tax is computed separately
-    const combinedProrateBaseForTax =
-      (proratedDues || 0) + (proratedAddonsTotal || 0);
-    const combinedProrateTax = taxRate
-      ? Number((combinedProrateBaseForTax * taxRate).toFixed(2))
-      : 0.0;
-    const totalTaxAmount = initiationFeeTax + combinedProrateTax;
+    // Use shared calculation function for consistency with frontend (supports base or gross)
+    const calculation = calculateTotals({
+      proratedDues: proratedDues || 0,
+      proratedAddonsTotal: proratedAddonsTotal || 0,
+      taxRate: taxRate || 0,
+      initiationFee: initiationFee || 19,
+      ptPackageAmount: ptPackageAmount || 0,
+      ptPackageGross: ptPackageAmount ? 0 : ptPackageGross || 0,
+      ptTaxIncludedGross: !!(ptPackageGross && ptPackageGross > 0),
+    });
 
-    // Recompute prorate portion using combined tax to avoid discrepancies
+    // Extract values from shared calculation
+    const combinedProrateTax = calculation.components.combinedProrateTax;
+    const initiationFeeTax = calculation.components.enrollmentFeeTax;
+    const ptPackageTax = calculation.components.ptPackageTax;
+    const totalTaxAmount = calculation.totals.taxTotal;
     const recomputedTotalProrateBilled =
-      (proratedDues || 0) +
-      (proratedAddonsTotal || 0) +
-      combinedProrateTax +
-      (ptPackageAmount || 0);
+      calculation.totals.totalProrateBilledProrateOnly;
+    const finalTotalBilled = calculation.insertProduction.finalTotalBilled;
 
-    const finalTotalBilled =
-      recomputedTotalProrateBilled + initiationFee + initiationFeeTax;
-
-    logger.info("FINAL CALCULATED TOTAL:", {
+    logger.info("FINAL CALCULATED TOTAL (using shared calculation):", {
       totalProrateBilled: recomputedTotalProrateBilled,
       finalTotalBilled,
       calculation: `${
         (proratedDues || 0) + (proratedAddonsTotal || 0)
-      } + ${combinedProrateTax} + ${ptPackageAmount} + (${initiationFee} + ${initiationFeeTax}) = ${finalTotalBilled}`,
+      } + ${combinedProrateTax} + ${
+        ptPackageAmount || ptPackageGross
+      } + (${initiationFee} + ${initiationFeeTax}) = ${finalTotalBilled}`,
+      sharedCalculation: calculation.totals,
     });
 
     // Extract the returned values from the procedure
@@ -1279,7 +1295,7 @@ export const submitEnrollment = async (req, res) => {
         // Ensure the combined addon+dues tax reflects the combined base, not the raw frontend value
         proratedDuesAddonTax: combinedProrateTaxForProd.toFixed(2),
         initiationFee: initiationFee.toFixed(2),
-        initiationFeeTax: initiationFeeTax.toFixed(2),
+        initiationFeeTax: calculation.components.enrollmentFeeTax.toFixed(2),
         // Send the full amount paid today (includes enrollment fee + tax)
         totalProrateBilled: finalTotalBilled.toFixed(2),
         netDues: netDues.toFixed(2),
@@ -1313,7 +1329,7 @@ export const submitEnrollment = async (req, res) => {
           proratedDuesAddon.toFixed(2), // parProrateDuesAddon
           combinedProrateTaxForProd.toFixed(2), // parProrateDuesAddonTax (use combined calc)
           initiationFee.toFixed(2), // parIfee
-          initiationFeeTax.toFixed(2), // parIfeeTax
+          calculation.components.enrollmentFeeTax.toFixed(2), // parIfeeTax
           finalTotalBilled.toFixed(2), // parTotalProrateBilled (full amount paid today)
           netDues.toFixed(2), // parOrigDues
           addonsTaxAmount.toFixed(2), // parAddonsTax
@@ -1565,9 +1581,9 @@ export const submitEnrollment = async (req, res) => {
 
         // Insert PT package item if selected
         if (hasPTAddon && ptPackage && transactionId) {
-          // Use calculated values from frontend for NM clubs
-          const ptPackageBasePrice = parseFloat(req.body.ptPackageAmount || 0);
-          const ptPackageTaxAmount = parseFloat(req.body.ptPackageTax || 0);
+          // Use resolved base and tax from shared calculation
+          const ptPackageBasePrice = calculation.components.ptPackageAmount;
+          const ptPackageTaxAmount = calculation.components.ptPackageTax;
 
           logger.info(
             "Inserting PT package item with UPC code:",
@@ -1716,7 +1732,9 @@ export const submitEnrollment = async (req, res) => {
 
     // Calculate total amount billed (including PT package if selected)
     const totalAmountBilled =
-      totalProrateBilled + initiationFee + initiationFeeTax;
+      totalProrateBilled +
+      initiationFee +
+      calculation.components.enrollmentFeeTax;
 
     res.status(200).json({
       success: true,

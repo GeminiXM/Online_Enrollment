@@ -18,6 +18,7 @@ import devLogger from "../utils/devLogger";
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useClub } from '../context/ClubContext';
 import { APP_VERSION } from '../version';
+import calculateTotals from '../../../shared/pricing/calculateTotals.js';
 import SignatureSelector from './SignatureSelector';
 import CanvasContractPDF from './CanvasContractPDF';
 import CanvasContractDenverPDF from './CanvasContractDenverPDF';
@@ -388,28 +389,22 @@ const ContractPage = () => {
         isNewMexicoClub: isNewMexicoClub
       });
       
-      // Calculate taxes per item using consistent rounding method
-      const enrollmentFee = 19.0;
-      const proratedTaxableAmount = parseFloat(proratedDues) + parseFloat(proratedAddOns);
-      const proratedTax = isNewMexicoClub ? Number((proratedTaxableAmount * taxRate).toFixed(2)) : 0;
-      const enrollmentFeeTax = isNewMexicoClub ? Number((enrollmentFee * taxRate).toFixed(2)) : 0;
+      // Use shared calculation for consistency with backend and frontend
+      const ptGross = data.hasPTAddon ? parseFloat((data.ptPackage && (data.ptPackage.invtr_price || data.ptPackage.price)) || 0) : 0;
+      const calculation = calculateTotals({
+        proratedDues: parseFloat(proratedDues),
+        proratedAddonsTotal: parseFloat(proratedAddOns),
+        taxRate: isNewMexicoClub ? taxRate : 0,
+        initiationFee: 19.0,
+        ptPackageGross: ptGross,
+        ptTaxIncludedGross: !!(ptGross && isNewMexicoClub),
+      });
       
-      // Calculate PT package tax using same method as other items
-      const ptPackageTaxCalculated = isNewMexicoClub ? Number((parseFloat(ptPackageAmount) * taxRate).toFixed(2)) : 0;
+      console.log('ContractPage calculation:', { calculation, proratedDues, proratedAddOns, taxRate, isNewMexicoClub, ptGross });
       
-      // Sum all individual taxes
-      const totalTaxAmount = proratedTax + enrollmentFeeTax + ptPackageTaxCalculated;
-      
-      // Calculate tax amount (will be 0 for non-NM clubs)
-      const taxAmount = isNewMexicoClub ? totalTaxAmount.toFixed(2) : '0.00';
-      
-      const totalCollected = (
-        parseFloat(initiationFee) + 
-        parseFloat(proratedDues) + 
-        parseFloat(proratedAddOns) + 
-        parseFloat(ptPackageAmount) + 
-        parseFloat(taxAmount)
-      ).toFixed(2);
+      // Extract values from shared calculation
+      const taxAmount = calculation?.totals?.taxTotal?.toFixed(2) || '0.00';
+      const totalCollected = calculation?.totals?.totalToday?.toFixed(2) || '19.00';
       
       const totalMonthlyRate = (
         parseFloat(monthlyDues) + 
@@ -1293,34 +1288,67 @@ const ContractPage = () => {
           </div>
 
 
-          {formData.hasPTAddon && formData.ptPackage && (
-            <div className="info-row">
-              <div className="info-column financial-item">
-                <div className="info-label">New Intro Personal Training Package (including applicable taxes)</div>
-                <div className="info-value">${formatCurrency((formData.ptPackageAmount != null ? formData.ptPackageAmount : (formData.ptPackage && (formData.ptPackage.invtr_price ?? formData.ptPackage.price))) ?? '0.00')}</div>
+          {formData.hasPTAddon && formData.ptPackage && (() => {
+            const baseFromForm = parseFloat(formData.ptPackageAmount || 0) || 0;
+            return (
+              <div className="info-row">
+                <div className="info-column financial-item">
+                  <div className="info-label">New Intro Personal Training Package</div>
+                  <div className="info-value">${formatCurrency(baseFromForm.toFixed(2))}</div>
+                </div>
               </div>
-            </div>
-            
-          )}
-          <div className="info-row">
-            <div className="info-column financial-item">
-              <div className="info-label">Taxes</div>
-              <div className="info-value">${formatCurrency(formData.taxAmount ?? '0.00')}</div>
-            </div>
-          </div>
-          <div className="info-row">
-            <div className="info-column financial-item total-collected">
-              <div className="info-label">Total Collected (Tax included)</div>
-              <div className="info-value">${formData.totalCollected || (
-                parseFloat(formData.initiationFee || 19) + 
-                parseFloat(formData.proratedDues || 0) + 
-                parseFloat(formData.proratedAddOns || 0) + 
-                parseFloat(formData.packagesFee || 0) + 
-                parseFloat(formData.ptPackageAmount || 0) + 
-                parseFloat(formData.taxAmount || 0)
-              ).toFixed(2) || '0.00'}</div>
-            </div>
-          </div>
+            );
+          })()}
+          {(() => {
+            const ptGross = parseFloat((formData.ptPackage && (formData.ptPackage.invtr_price ?? formData.ptPackage.price)) ?? 0) || 0;
+            const ptBase = parseFloat(formData.ptPackageAmount || 0) || 0;
+            const ptIncludedTax = Number((ptGross - ptBase).toFixed(2));
+            const rate = selectedClub?.state === 'NM' ? (formData.taxRate ?? formData.membershipDetails?.taxRate ?? 0) : 0;
+            const calc = calculateTotals({
+              proratedDues: parseFloat(formData.proratedDues || 0),
+              proratedAddonsTotal: parseFloat(formData.proratedAddOns || 0),
+              taxRate: rate,
+              initiationFee: 19,
+              ptPackageGross: ptGross,
+              ptTaxIncludedGross: !!(ptGross && rate > 0),
+            });
+            const duesEnrollTax = Number(((calc?.components?.combinedProrateTax || 0) + (calc?.components?.enrollmentFeeTax || 0)).toFixed(2));
+            const taxesDisplay = Number((ptIncludedTax + duesEnrollTax).toFixed(2));
+            return (
+              <div className="info-row">
+                <div className="info-column financial-item">
+                  <div className="info-label">Taxes</div>
+                  <div className="info-value">${formatCurrency(taxesDisplay.toFixed(2))}</div>
+                </div>
+              </div>
+            );
+          })()}
+          {(() => {
+            const ptGross = parseFloat((formData.ptPackage && (formData.ptPackage.invtr_price ?? formData.ptPackage.price)) ?? 0) || 0;
+            const ptBase = parseFloat(formData.ptPackageAmount || 0) || 0;
+            const ptIncludedTax = Number((ptGross - ptBase).toFixed(2));
+            const rate = selectedClub?.state === 'NM' ? (formData.taxRate ?? formData.membershipDetails?.taxRate ?? 0) : 0;
+            const calc = calculateTotals({
+              proratedDues: parseFloat(formData.proratedDues || 0),
+              proratedAddonsTotal: parseFloat(formData.proratedAddOns || 0),
+              taxRate: rate,
+              initiationFee: 19,
+              ptPackageGross: ptGross,
+              ptTaxIncludedGross: !!(ptGross && rate > 0),
+            });
+            const duesEnrollTax = Number(((calc?.components?.combinedProrateTax || 0) + (calc?.components?.enrollmentFeeTax || 0)).toFixed(2));
+            const taxesDisplay = Number((ptIncludedTax + duesEnrollTax).toFixed(2));
+            const subtotalBase = Number(((parseFloat(formData.initiationFee || 19) + parseFloat(formData.proratedDues || 0) + parseFloat(formData.proratedAddOns || 0) + ptBase)).toFixed(2));
+            const totalDisplay = Number((subtotalBase + taxesDisplay).toFixed(2));
+            return (
+              <div className="info-row">
+                <div className="info-column financial-item total-collected">
+                  <div className="info-label">Total Collected (Tax included)</div>
+                  <div className="info-value">${formatCurrency(totalDisplay.toFixed(2))}</div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         
         {/* Payment Summary Section */}
@@ -1691,16 +1719,35 @@ const ContractPage = () => {
         
         {/* PDF Download Buttons */} 
         <div className="pdf-download-container">
-          {selectedClub?.state === 'NM' ? (
-            <CanvasContractPDF
-              formData={formData}
-              signatureData={signatureData}
-              signatureDate={signatureDate}
-              initialedSections={initialedBoxes}
-              selectedClub={selectedClub}
-              membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
-            />
-          ) : (
+          {selectedClub?.state === 'NM' ? (() => {
+            const ptGross = parseFloat((formData.ptPackage && (formData.ptPackage.invtr_price ?? formData.ptPackage.price)) ?? 0) || 0;
+            const ptBase = parseFloat(formData.ptPackageAmount || 0) || 0;
+            const ptIncludedTax = Number((ptGross - ptBase).toFixed(2));
+            const rate = formData.taxRate ?? formData.membershipDetails?.taxRate ?? 0;
+            const calc = calculateTotals({
+              proratedDues: parseFloat(formData.proratedDues || 0),
+              proratedAddonsTotal: parseFloat(formData.proratedAddOns || 0),
+              taxRate: rate,
+              initiationFee: 19,
+              ptPackageGross: ptGross,
+              ptTaxIncludedGross: !!(ptGross && rate > 0),
+            });
+            const duesEnrollTax = Number(((calc?.components?.combinedProrateTax || 0) + (calc?.components?.enrollmentFeeTax || 0)).toFixed(2));
+            const taxesDisplay = Number((ptIncludedTax + duesEnrollTax).toFixed(2));
+            const subtotalBase = Number(((parseFloat(formData.initiationFee || 19) + parseFloat(formData.proratedDues || 0) + parseFloat(formData.proratedAddOns || 0) + ptBase)).toFixed(2));
+            const totalDisplay = Number((subtotalBase + taxesDisplay).toFixed(2));
+            const pdfFormData = { ...formData, taxAmount: taxesDisplay.toFixed(2), totalCollected: totalDisplay.toFixed(2) };
+            return (
+              <CanvasContractPDF
+                formData={pdfFormData}
+                signatureData={signatureData}
+                signatureDate={signatureDate}
+                initialedSections={initialedBoxes}
+                selectedClub={selectedClub}
+                membershipPrice={formData.monthlyDues || formData.membershipDetails?.price}
+              />
+            );
+          })() : (
             <CanvasContractDenverPDF
               formData={formData}
               signatureData={signatureData}

@@ -24,6 +24,7 @@ import {
   hasSavedData, 
   getSessionInfo 
 } from "../services/dataPersistence.js";
+import calculateTotals from '../../../shared/pricing/calculateTotals.js';
 
 // Add this near the top of the file with other constants
 const SPECIALTY_MEMBERSHIP_MAP = {
@@ -202,9 +203,7 @@ function EnrollmentForm() {
   // Strong scroll-to-top utility to defeat anchoring before navigations/modals
   const forceScrollTop = React.useCallback(() => {
     try {
-      console.log('[ScrollDebug] forceScrollTop() start, y=', window.pageYOffset);
       // removed forced scroll-to-top; page is no longer embedded
-      setTimeout(() => console.log('[ScrollDebug] forceScrollTop() retries done, y=', window.pageYOffset), 260);
     } catch (_) {}
   }, []);
   const navigate = useNavigate();
@@ -1707,15 +1706,13 @@ const handleChange = (e) => {
       
       // Only show PT modal if PT is not already in the cart
       if (!hasPTAddon) {
-        console.log('[ScrollDebug] Continue to Agreement: PT modal path - forcing top, then opening modal. y=', window.pageYOffset);
         // Scroll to very top so modal header is visible
         forceScrollTop();
         setShowPTModal(true);
         // Nudge again after open
-        setTimeout(() => { console.log('[ScrollDebug] After PT modal open retry #1'); forceScrollTop(); }, 0);
-        setTimeout(() => { console.log('[ScrollDebug] After PT modal open retry #2'); forceScrollTop(); }, 160);
+        setTimeout(() => { forceScrollTop(); }, 0);
+        setTimeout(() => { forceScrollTop(); }, 160);
       } else {
-        console.log('[ScrollDebug] Continue to Agreement: PT already selected - forcing top then navigating to /contract. y=', window.pageYOffset);
         // Clear saved data before navigation (Safari fix)
         await clearSavedData();
         forceScrollTop();
@@ -1725,7 +1722,8 @@ const handleChange = (e) => {
             formData: {
               ...submissionData,
               hasPTAddon: true,
-              ptPackage: ptPackage
+              ptPackage: ptPackage,
+              taxRate: taxRate
             }
           } 
         });
@@ -1737,7 +1735,6 @@ const handleChange = (e) => {
   };
 
   const handlePTAccept = async () => {
-    console.log('[ScrollDebug] PT Accept clicked: forcing top then navigating to /contract. y=', window.pageYOffset);
     setShowPTModal(false);
     
     let ptPackageData;
@@ -1786,7 +1783,8 @@ const handleChange = (e) => {
           formData: {
             ...formSubmissionData,
             hasPTAddon: true,
-            ptPackage: ptPackageData
+            ptPackage: ptPackageData,
+            taxRate: taxRate
           }
         } 
       });
@@ -1800,13 +1798,13 @@ const handleChange = (e) => {
     if (formSubmissionData) {
       // Clear saved data before navigation (Safari fix)
       await clearSavedData();
-      console.log('[ScrollDebug] PT Decline clicked: forcing top then navigating to /contract. y=', window.pageYOffset);
       forceScrollTop();
       navigate('/contract', { 
         state: { 
           formData: {
             ...formSubmissionData,
-            hasPTAddon: false
+            hasPTAddon: false,
+            taxRate: taxRate
           }
         } 
       });
@@ -2078,6 +2076,7 @@ const handleChange = (e) => {
 
   // Update handleAddYouthMember to remove work phone
   const handleAddYouthMember = () => {
+    console.log('[Youth Debug] handleAddYouthMember called');
     const newErrors = {};
     
     // Validate required fields
@@ -2104,10 +2103,12 @@ const handleChange = (e) => {
     }
 
     if (Object.keys(newErrors).length > 0) {
+      console.log('[Youth Debug] Validation errors found:', newErrors);
       setErrors(prev => ({ ...prev, ...newErrors }));
       return;
     }
 
+    console.log('[Youth Debug] Validation passed, adding youth member and switching to members tab');
     // Create new youth member
     const newYouthMember = {
       memberType: "youth",
@@ -2140,6 +2141,7 @@ const handleChange = (e) => {
     });
 
     // Switch back to members tab
+    console.log('[Youth Debug] Switching to members tab');
     setActiveTab("members");
   };
 
@@ -3437,7 +3439,7 @@ const handleChange = (e) => {
           <button
             type="button"
             className="add-member-button"
-            onClick={() => addFamilyMember('youth')}
+            onClick={handleAddYouthMember}
             aria-label="Submit youth family members"
           >
             Submit Youth Members
@@ -3932,15 +3934,6 @@ const handleChange = (e) => {
         const cs = getComputedStyle(cart);
         const layout = document.querySelector('.enrollment-layout');
         const container = document.querySelector('.enrollment-form-container');
-        console.log('[CartDebug] cart position:', cs.position, 'top:', cs.top, 'max-height:', cs.maxHeight, 'overflow:', cs.overflow);
-        if (layout) {
-          const lcs = getComputedStyle(layout);
-          console.log('[CartDebug] layout overflow:', lcs.overflow, 'transform:', lcs.transform);
-        }
-        if (container) {
-          const ccs = getComputedStyle(container);
-          console.log('[CartDebug] container overflow:', ccs.overflow, 'transform:', ccs.transform);
-        }
       }
     } catch (_) {}
 
@@ -4018,7 +4011,6 @@ const handleChange = (e) => {
       if (currentScrollY >= scrollThreshold) {
         // Fully sticky - use fixed position
         targetTopPx = stickyTopPx;
-        console.log('[CartDebug] Using sticky position - scrolled past 10% threshold');
       } else {
         // Smooth transition: blend natural position with sticky position
         const scrollProgress = currentScrollY / scrollThreshold; // 0 to 1
@@ -4028,23 +4020,8 @@ const handleChange = (e) => {
         // Smooth interpolation between natural and sticky
         targetTopPx = naturalPosition + (stickyPosition - naturalPosition) * scrollProgress;
         
-        console.log('[CartDebug] Smooth transition', {
-          currentScrollY,
-          scrollThreshold,
-          scrollProgress: (scrollProgress * 100).toFixed(1) + '%',
-          naturalPosition: naturalPosition.toFixed(1),
-          stickyPosition: stickyPosition.toFixed(1),
-          targetTopPx: targetTopPx.toFixed(1)
-        });
       }
       
-      // Debug logging
-      console.log('[CartDebug] Sticky positioning:', {
-        stickyTopPx,
-        targetTopPx,
-        naturalCartTopViewport,
-        windowScrollY: window.scrollY
-      });
       
       // Clamp to avoid footer overlap
       const footer = document.querySelector('footer') || document.querySelector('.site-footer');
@@ -4067,14 +4044,6 @@ const handleChange = (e) => {
       cart.style.width = `${fixedWidthPx}px`;
       cart.style.zIndex = '10';
       
-      // Debug logging after positioning
-      console.log('[CartDebug] Applied positioning:', {
-        position: cart.style.position,
-        top: cart.style.top,
-        left: cart.style.left,
-        width: cart.style.width,
-        zIndex: cart.style.zIndex
-      });
       
       // Now check if the bottom is visible and adjust if needed
       const cartRect = cart.getBoundingClientRect();
@@ -4082,14 +4051,6 @@ const handleChange = (e) => {
       const cartTop = cartRect.top;
       const maxAllowedBottom = viewportHeight - 100; // 10px buffer from bottom
       
-      // Temporarily disable viewport bottom adjustment to test positioning
-      console.log('[CartDebug] Viewport check:', {
-        cartBottom: cartBottom,
-        maxAllowedBottom: maxAllowedBottom,
-        wouldAdjust: cartBottom > maxAllowedBottom + 200,
-        cartTop: cartTop,
-        maxTopPx: maxTopPx
-      });
       
       // Only adjust if bottom is significantly cut off AND we have room to move up
       if (false && cartBottom > maxAllowedBottom + 50 && cartTop > maxTopPx) { // Disabled - cart positioning is perfect
@@ -4098,16 +4059,6 @@ const handleChange = (e) => {
         const newTop = Math.max(maxTopPx, cartTop - excessBottom);
         
         cart.style.top = `${newTop}px`;
-        console.log('[CartDebug] Adjusted for viewport bottom:', {
-          originalTop: targetTopPx,
-          cartTop: cartTop,
-          newTop: newTop,
-          cartHeight: cartRect.height,
-          viewportHeight: viewportHeight,
-          cartBottom: cartBottom,
-          excessBottom: excessBottom,
-          maxTopPx: maxTopPx
-        });
       }
     };
 
@@ -5111,29 +5062,122 @@ const handleChange = (e) => {
                   </div>
                   <div className="price-row">
                     <span>Prorated Dues & Add-ons</span>
-                    <span>${formData.requestedStartDate ? (calculateTotalProratedCost() - 19.0 - (hasPTAddon && ptPackage ? parseFloat(ptPackage.price || 149) : 0)).toFixed(2) : '0.00'}</span>
+                    <span>${(() => {
+                      // Use shared calculation for consistency
+                      const proratedDues = proratedPrice !== undefined ? proratedPrice : 0;
+                      const proratedAddonsTotal = selectedServiceAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0) + selectedChildAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0);
+                      const ptGross = hasPTAddon && ptPackage ? parseFloat(ptPackage.price || 0) : 0;
+                      const effectiveTaxRate = selectedClub?.state === 'NM' ? taxRate : 0;
+                      
+                      const calculation = calculateTotals({
+                        proratedDues,
+                        proratedAddonsTotal,
+                        taxRate: effectiveTaxRate,
+                        initiationFee: 19,
+                        ptPackageGross: ptGross,
+                        ptTaxIncludedGross: !!(ptGross && effectiveTaxRate > 0),
+                      });
+                      
+                      return calculation?.components?.combinedBase?.toFixed(2) || '0.00';
+                    })()}</span>
                   </div>
-                  {hasPTAddon && ptPackage && (
-                    <div className="price-row">
-                      <span>New Intro Personal Training Package</span>
-                      <span>${ptPackage.price || 149}</span>
-                    </div>
-                  )}
+                  {hasPTAddon && ptPackage && (() => {
+                    const ptBase = 149.00;
+                    return (
+                      <div className="price-row">
+                        <span>New Intro Personal Training Package</span>
+                        <span>${ptBase.toFixed(2)}</span>
+                      </div>
+                    );
+                  })()}
                   <div className="price-row">
                     <span>Subtotal</span>
-                    <span>${formData.requestedStartDate ? calculateTotalProratedCost().toFixed(2) : '19.00'}</span>
+                    <span>${(() => {
+                      const proratedDues = proratedPrice !== undefined ? proratedPrice : 0;
+                      const proratedAddonsTotal = selectedServiceAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0) + selectedChildAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0);
+                      const ptBase = hasPTAddon && ptPackage ? 149.00 : 0;
+                      const subtotalBase = Number((19 + proratedDues + proratedAddonsTotal + ptBase).toFixed(2));
+                      return subtotalBase.toFixed(2);
+                    })()}</span>
                   </div>
                   <div className="price-row">
                     {selectedClub?.state === 'NM' ? (
-                      <span>Tax ({(taxRate * 100).toFixed(3)}%)</span>
+                      <span>Taxes</span>
                     ) : (
                       <span>Tax</span>
                     )}
-                    <span>${proratedTaxAmount.toFixed(2)}</span>
+                    <span>${(() => {
+                      const proratedDues = proratedPrice !== undefined ? proratedPrice : 0;
+                      const proratedAddonsTotal = selectedServiceAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0) + selectedChildAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0);
+                      const effectiveTaxRate = selectedClub?.state === 'NM' ? taxRate : 0;
+                      const ptBase = hasPTAddon && ptPackage ? 149.00 : 0;
+                      const ptGross = hasPTAddon && ptPackage
+                        ? (parseFloat(ptPackage.invtr_price ?? ptPackage.price) || (effectiveTaxRate > 0 ? Number((ptBase * (1 + effectiveTaxRate)).toFixed(2)) : 0))
+                        : 0;
+                      const ptIncludedTax = Number((ptGross - ptBase).toFixed(2));
+                      const calc = calculateTotals({
+                        proratedDues,
+                        proratedAddonsTotal,
+                        taxRate: effectiveTaxRate,
+                        initiationFee: 19,
+                        ptPackageGross: ptGross,
+                        ptTaxIncludedGross: !!(ptGross && effectiveTaxRate > 0),
+                      });
+                      const duesEnrollTax = Number(((calc?.components?.combinedProrateTax || 0) + (calc?.components?.enrollmentFeeTax || 0)).toFixed(2));
+                      const taxesDisplay = Number((ptIncludedTax + duesEnrollTax).toFixed(2));
+                      console.log('Cart tax calculation:', { calc, proratedDues, proratedAddonsTotal, effectiveTaxRate, ptGross, ptBase, ptIncludedTax, duesEnrollTax, taxesDisplay });
+                      return taxesDisplay.toFixed(2);
+                    })()}</span>
                   </div>
                   <div className="price-row total">
                     <span><strong>Total with Tax</strong></span>
-                    <span><strong>${(calculateTotalProratedCost() + proratedTaxAmount).toFixed(2)}</strong></span>
+                    <span><strong>${(() => {
+                      const proratedDues = proratedPrice !== undefined ? proratedPrice : 0;
+                      const proratedAddonsTotal = selectedServiceAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0) + selectedChildAddons.reduce((sum, addon) => {
+                        const proratedFactor = calculateProratedFactor(formData.requestedStartDate);
+                        return sum + (parseFloat(addon.invtr_price || 0) * proratedFactor);
+                      }, 0);
+                      const effectiveTaxRate = selectedClub?.state === 'NM' ? taxRate : 0;
+                      const ptBase = hasPTAddon && ptPackage ? 149.00 : 0;
+                      const ptGross = hasPTAddon && ptPackage
+                        ? (parseFloat(ptPackage.invtr_price ?? ptPackage.price) || (effectiveTaxRate > 0 ? Number((ptBase * (1 + effectiveTaxRate)).toFixed(2)) : 0))
+                        : 0;
+                      const ptIncludedTax = Number((ptGross - ptBase).toFixed(2));
+                      const calc = calculateTotals({
+                        proratedDues,
+                        proratedAddonsTotal,
+                        taxRate: effectiveTaxRate,
+                        initiationFee: 19,
+                        ptPackageGross: ptGross,
+                        ptTaxIncludedGross: !!(ptGross && effectiveTaxRate > 0),
+                      });
+                      const duesEnrollTax = Number(((calc?.components?.combinedProrateTax || 0) + (calc?.components?.enrollmentFeeTax || 0)).toFixed(2));
+                      const taxesDisplay = Number((ptIncludedTax + duesEnrollTax).toFixed(2));
+                      const subtotalBase = Number((19 + proratedDues + proratedAddonsTotal + ptBase).toFixed(2));
+                      const totalDisplay = Number((subtotalBase + taxesDisplay).toFixed(2));
+                      return totalDisplay.toFixed(2);
+                    })()}</strong></span>
                   </div>
                 </div>
                 <p className="price-detail">

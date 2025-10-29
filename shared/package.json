@@ -1,0 +1,10 @@
+{
+  "name": "online-enrollment-shared",
+  "version": "1.2.1",
+  "type": "module",
+  "description": "Shared utilities for Online Enrollment System",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
