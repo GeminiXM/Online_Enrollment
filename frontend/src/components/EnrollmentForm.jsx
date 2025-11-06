@@ -868,6 +868,8 @@ function EnrollmentForm() {
     guardianRelationship: ""
   });
 
+  
+
   const [childMember, setChildMember] = useState({
     firstName: "",
     middleInitial: "",
@@ -905,6 +907,48 @@ function EnrollmentForm() {
     guardianPhone: "",
     guardianRelationship: ""
   });
+
+  // Keep the latest draft snapshot for immediate saves on unmount/navigation
+  const latestSnapshotRef = React.useRef(null);
+  useEffect(() => {
+    latestSnapshotRef.current = {
+      formData,
+      additionalData: {
+        selectedChildAddons,
+        selectedServiceAddons,
+        membershipType: membershipType?.id,
+        club: selectedClub?.id,
+        childForms,
+        adultMember,
+        childMember,
+        youthMember,
+        activeTab
+      }
+    };
+  }, [formData, selectedChildAddons, selectedServiceAddons, membershipType?.id, selectedClub?.id, childForms, adultMember, childMember, youthMember, activeTab]);
+
+  const saveImmediate = React.useCallback(() => {
+    try {
+      const snap = latestSnapshotRef.current;
+      if (snap && snap.formData && Object.keys(snap.formData).length > 0) {
+        autoSaveFormData(snap.formData, snap.additionalData || {});
+      }
+    } catch (_) {}
+  }, []);
+
+  // Ensure we persist the latest state on page refresh, tab hide, or route change
+  useEffect(() => {
+    const handleBeforeUnload = () => saveImmediate();
+    const handleVisibility = () => { if (document.hidden) saveImmediate(); };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Also save on unmount
+      saveImmediate();
+    };
+  }, [saveImmediate]);
 
   // An array of states in the US for the dropdown
   const states = [
@@ -1713,8 +1757,18 @@ const handleChange = (e) => {
         setTimeout(() => { forceScrollTop(); }, 0);
         setTimeout(() => { forceScrollTop(); }, 160);
       } else {
-        // Clear saved data before navigation (Safari fix)
-        await clearSavedData();
+        // Snapshot latest UI form state before navigation
+        autoSaveFormData(formData, {
+          selectedChildAddons,
+          selectedServiceAddons,
+          membershipType: membershipType?.id,
+          club: selectedClub?.id,
+          childForms,
+          adultMember,
+          childMember,
+          youthMember,
+          activeTab
+        });
         forceScrollTop();
         // Navigate directly to contract since PT is already selected
         navigate('/contract', { 
@@ -1775,8 +1829,25 @@ const handleChange = (e) => {
     
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
-      // Clear saved data before navigation (Safari fix)
-      await clearSavedData();
+      // Snapshot latest UI form state before navigation
+      autoSaveFormData({
+        ...formData,
+        hasPTAddon: true,
+        ptPackage: ptPackageData,
+        taxRate: taxRate
+      }, {
+        selectedChildAddons,
+        selectedServiceAddons,
+        membershipType: membershipType?.id,
+        club: selectedClub?.id,
+        childForms,
+        adultMember,
+        childMember,
+        youthMember,
+        activeTab,
+        hasPTAddon: true,
+        ptPackage: ptPackageData
+      });
       forceScrollTop();
       navigate('/contract', { 
         state: { 
@@ -1796,8 +1867,24 @@ const handleChange = (e) => {
     setHasPTAddon(false); // Ensure PT is marked as declined
     // Navigate to contract page with the stored submission data
     if (formSubmissionData) {
-      // Clear saved data before navigation (Safari fix)
-      await clearSavedData();
+      // Snapshot latest UI form state before navigation
+      autoSaveFormData({
+        ...formData,
+        hasPTAddon: false,
+        taxRate: taxRate
+      }, {
+        selectedChildAddons,
+        selectedServiceAddons,
+        membershipType: membershipType?.id,
+        club: selectedClub?.id,
+        childForms,
+        adultMember,
+        childMember,
+        youthMember,
+        activeTab,
+        hasPTAddon: false,
+        ptPackage: null
+      });
       forceScrollTop();
       navigate('/contract', { 
         state: { 
@@ -3551,25 +3638,26 @@ const handleChange = (e) => {
   // Auto-save form data when it changes
   useEffect(() => {
     if (autoSaveEnabled && formData && Object.keys(formData).length > 0) {
-      // Only auto-save if we have meaningful data (not just empty form)
-      const hasMainFormData = Object.values(formData).some(value => 
-        value && (typeof value === 'string' ? value.trim() !== '' : true)
-      );
-      
-      // Check for meaningful data in tab forms
-      const hasTabData = childForms.some(form => 
-        Object.values(form).some(value => 
-          value && (typeof value === 'string' ? value.trim() !== '' : true)
-        )
-      ) || 
-      Object.values(adultMember).some(value => 
-        value && (typeof value === 'string' ? value.trim() !== '' : true)
-      ) ||
-      Object.values(childMember).some(value => 
-        value && (typeof value === 'string' ? value.trim() !== '' : true)
-      ) ||
-      Object.values(youthMember).some(value => 
-        value && (typeof value === 'string' ? value.trim() !== '' : true)
+      // Only auto-save if we have meaningful data (avoid saving initial defaults like "default")
+      const importantFields = [
+        'firstName','lastName','dateOfBirth','email','address1','city','state','zipCode','mobilePhone','requestedStartDate'
+      ];
+      const hasMainFormData = importantFields.some(k => {
+        const v = formData[k];
+        if (typeof v === 'string') return v.trim() !== '' && v.trim().toLowerCase() !== 'default';
+        if (typeof v === 'number') return !Number.isNaN(v) && v !== 0;
+        if (typeof v === 'boolean') return v === true;
+        if (Array.isArray(v)) return v.length > 0;
+        if (v && typeof v === 'object') return Object.keys(v).length > 0;
+        return false;
+      });
+
+      // Check for meaningful data in tab forms (exclude empty/defaults)
+      const hasTabData = (
+        childForms.some(form => Object.values(form).some(val => typeof val === 'string' ? val.trim() !== '' : !!val)) ||
+        Object.values(adultMember).some(val => typeof val === 'string' ? val.trim() !== '' : !!val) ||
+        Object.values(childMember).some(val => typeof val === 'string' ? val.trim() !== '' : !!val) ||
+        Object.values(youthMember).some(val => typeof val === 'string' ? val.trim() !== '' : !!val)
       );
       
       const hasData = hasMainFormData || hasTabData;
@@ -3595,7 +3683,9 @@ const handleChange = (e) => {
           adultMember,
           childMember,
           youthMember,
-          activeTab
+          activeTab,
+          hasPTAddon,
+          ptPackage
         };
         
         console.log("Tab data being saved:", {
@@ -3628,6 +3718,63 @@ const handleChange = (e) => {
   // Restore data on component mount
   useEffect(() => {
     const restoreData = async () => {
+      // Prevent autosave from overwriting any existing draft while we decide how to restore
+      setIsRestoring(true);
+
+      // If we are returning from the Contract page via hard reload, auto-restore without prompting
+      const returning = sessionStorage.getItem('isReturningFromContract') === 'true';
+      if (returning) {
+        try {
+          let restored = restoreFormData();
+          if (!restored) {
+            restored = await restoreDraftFromBackend();
+          }
+          if (restored && restored.formData) {
+            // Apply restored main form data
+            setFormData(restored.formData);
+            // Apply additional tab data when available
+            if (restored.additionalData) {
+              const {
+                selectedChildAddons,
+                selectedServiceAddons,
+                membershipType,
+                club,
+                childForms,
+                adultMember,
+                childMember,
+                youthMember,
+                activeTab
+              } = restored.additionalData;
+              if (Array.isArray(selectedChildAddons)) setSelectedChildAddons(selectedChildAddons);
+              if (Array.isArray(selectedServiceAddons)) setSelectedServiceAddons(selectedServiceAddons);
+              if (membershipType) {
+                // Re-select membership type by id if available
+                const types = [
+                  { id: 'standard', title: 'Individual', description: 'Standard membership for one adult' },
+                  { id: 'couple', title: 'Couple', description: 'Membership for two adults' },
+                  { id: 'family', title: 'Family', description: 'Membership for family' },
+                  { id: 'junior', title: 'Junior', description: 'For children under 18 years old' }
+                ];
+                const t = types.find(t => t.id === membershipType);
+                if (t) selectMembershipType(t);
+              }
+              if (club && selectedClub?.id !== club) {
+                // keep current selectedClub; changing clubs here could be disruptive
+              }
+              if (childForms) setChildForms(childForms);
+              if (adultMember) setAdultMember(adultMember);
+              if (childMember) setChildMember(childMember);
+              if (youthMember) setYouthMember(youthMember);
+              if (activeTab) setActiveTab(activeTab);
+            }
+          }
+        } finally {
+          sessionStorage.removeItem('isReturningFromContract');
+          setTimeout(() => setIsRestoring(false), 500);
+        }
+        return; // Skip prompt path when auto-restoring
+      }
+
       // First try to restore from localStorage
       let restoredData = restoreFormData();
       
@@ -3637,8 +3784,12 @@ const handleChange = (e) => {
       }
       
       if (restoredData && !location.state?.formData) {
+        // Show prompt on normal refresh; keep autosave paused until user decides
         setShowRestorePrompt(true);
+        return;
       }
+      // No data to restore, allow autosave
+      setIsRestoring(false);
     };
     
     restoreData();
@@ -3659,55 +3810,107 @@ const handleChange = (e) => {
       console.log("Backend restore result:", restoredData);
     }
     
-          if (restoredData && restoredData.formData) {
-        console.log("Restoring form data:", restoredData.formData);
-        setFormData(restoredData.formData);
-        
-        if (restoredData.additionalData) {
-          const { 
-            selectedChildAddons, 
-            selectedServiceAddons, 
-            membershipType, 
-            club,
-            childForms,
-            adultMember,
-            childMember,
-            youthMember,
-            activeTab
-          } = restoredData.additionalData;
-          console.log("Restoring additional data:", restoredData.additionalData);
-          
-          if (selectedChildAddons) setSelectedChildAddons(selectedChildAddons);
-          if (selectedServiceAddons) setSelectedServiceAddons(selectedServiceAddons);
-          if (membershipType) {
-            // Find and set membership type
-            const membershipTypes = [
-              { id: 'standard', title: 'Standard Adult', description: 'For adults between 30-64 years old' },
-              { id: 'senior', title: 'Senior', description: 'For adults 65 and older' },
-              { id: 'young-professional', title: 'Student/Young Professional', description: 'For adults between 18-29 years old' },
-              { id: 'junior', title: 'Junior', description: 'For children under 18 years old' }
-            ];
-            const type = membershipTypes.find(t => t.id === membershipType);
-            if (type) selectMembershipType(type);
-          }
-          
-          // Restore tab data
-          console.log("Restoring tab data:", {
-            childForms: childForms?.length || 0,
-            adultMember,
-            childMember,
-            youthMember,
-            activeTab
-          });
-          
-          if (childForms) setChildForms(childForms);
-          if (adultMember) setAdultMember(adultMember);
-          if (childMember) setChildMember(childMember);
-          if (youthMember) setYouthMember(youthMember);
-          if (activeTab) setActiveTab(activeTab);
+        if (restoredData && restoredData.formData) {
+      console.log("Restoring form data:", restoredData.formData);
+
+      const isMeaningful = (v) => {
+        if (v === null || v === undefined) return false;
+        if (typeof v === 'string') return v.trim() !== '' && v.trim().toLowerCase() !== 'default';
+        if (typeof v === 'number') return !Number.isNaN(v) && v !== 0;
+        if (typeof v === 'boolean') return v === true;
+        if (Array.isArray(v)) return v.length > 0;
+        if (typeof v === 'object') return Object.keys(v).length > 0;
+        return false;
+      };
+
+      // Merge: prefer current in-memory values when meaningful; otherwise use restored
+      const mergedFormData = { ...formData };
+      const restoredForm = restoredData.formData || {};
+      const allKeys = new Set([...Object.keys(restoredForm), ...Object.keys(formData)]);
+      for (const key of allKeys) {
+        const cur = formData[key];
+        const rest = restoredForm[key];
+        mergedFormData[key] = isMeaningful(cur) ? cur : (rest !== undefined ? rest : cur);
+      }
+      // Normalize required shapes to avoid runtime errors
+      const normalizedForm = {
+        ...mergedFormData,
+        familyMembers: Array.isArray(mergedFormData.familyMembers) ? mergedFormData.familyMembers : [],
+        services: {
+          personalTraining: false,
+          groupClasses: false,
+          childcare: false,
+          locker: false,
+          ...(mergedFormData.services || {})
         }
-        setShowRestorePrompt(false);
-      } else {
+      };
+      setFormData(normalizedForm);
+      // Also restore PT selection from either restored form or additional data
+      try {
+        const restoredHasPT = Boolean(restoredForm.hasPTAddon || (restoredData.additionalData && restoredData.additionalData.hasPTAddon));
+        const restoredPt = (restoredForm.ptPackage || (restoredData.additionalData && restoredData.additionalData.ptPackage)) || null;
+        setHasPTAddon(!!restoredHasPT);
+        if (restoredPt) {
+          const normalizedPt = Array.isArray(restoredPt) ? restoredPt[0] : restoredPt;
+          setPtPackage(normalizedPt);
+        }
+      } catch (_) {}
+
+      let mergedAdditionalOut = null;
+      if (restoredData.additionalData) {
+        const { 
+          selectedChildAddons, 
+          selectedServiceAddons, 
+          membershipType, 
+          club,
+          childForms,
+          adultMember,
+          childMember,
+          youthMember,
+          activeTab,
+          hasPTAddon: addlHasPTAddon,
+          ptPackage: addlPtPackage
+        } = restoredData.additionalData;
+        console.log("Restoring additional data (merged):", restoredData.additionalData);
+
+        if (!Array.isArray(selectedChildAddons) ? false : selectedChildAddons.length > 0) setSelectedChildAddons(selectedChildAddons);
+        if (!Array.isArray(selectedServiceAddons) ? false : selectedServiceAddons.length > 0) setSelectedServiceAddons(selectedServiceAddons);
+        if (membershipType) {
+          const membershipTypes = [
+            { id: 'standard', title: 'Standard Adult', description: 'For adults between 30-64 years old' },
+            { id: 'senior', title: 'Senior', description: 'For adults 65 and older' },
+            { id: 'young-professional', title: 'Student/Young Professional', description: 'For adults between 18-29 years old' },
+            { id: 'junior', title: 'Junior', description: 'For children under 18 years old' }
+          ];
+          const type = membershipTypes.find(t => t.id === membershipType);
+          if (type) selectMembershipType(type);
+        }
+
+        // Restore tab data if present and meaningful
+        if (Array.isArray(childForms) && childForms.length > 0) setChildForms(childForms);
+        if (adultMember && isMeaningful(adultMember)) setAdultMember(adultMember);
+        if (childMember && isMeaningful(childMember)) setChildMember(childMember);
+        if (youthMember && isMeaningful(youthMember)) setYouthMember(youthMember);
+        if (activeTab) setActiveTab(activeTab);
+
+        mergedAdditionalOut = {
+          selectedChildAddons,
+          selectedServiceAddons,
+          membershipType,
+          club,
+          childForms,
+          adultMember,
+          childMember,
+          youthMember,
+          activeTab,
+          hasPTAddon: addlHasPTAddon,
+          ptPackage: addlPtPackage
+        };
+      }
+      // Re-save the merged draft so subsequent refresh restores this exact state
+      try { autoSaveFormData(normalizedForm, mergedAdditionalOut || {}); } catch (_) {}
+      setShowRestorePrompt(false);
+    } else {
         console.log("No data to restore");
         setShowRestorePrompt(false);
       }
@@ -3721,6 +3924,7 @@ const handleChange = (e) => {
   const handleDiscardData = async () => {
     await clearSavedData();
     setShowRestorePrompt(false);
+    setIsRestoring(false);
   };
 
   // Update prorated price and tax when start date, full price, tax rate, or addons change
@@ -4104,8 +4308,8 @@ const handleChange = (e) => {
         </div>
       )}
 
-      {/* Restore Data Prompt - show on mobile only to avoid desktop scroll interference */}
-      {showRestorePrompt && (typeof window !== 'undefined' ? window.innerWidth <= 900 : false) && (
+      {/* Restore Data Prompt */}
+      {showRestorePrompt && (
         <div className="restore-prompt-overlay">
           <div className="restore-prompt-modal">
             <h3>📋 Restore Previous Session</h3>

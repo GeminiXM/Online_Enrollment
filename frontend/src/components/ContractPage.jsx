@@ -1673,45 +1673,9 @@ const ContractPage = () => {
           type="button" 
           className="secondary-button"
           onClick={() => {
-            // Store a flag in sessionStorage to indicate we're returning from the contract page
+            // Force full reload to ensure cart positioning resets correctly
             sessionStorage.setItem('isReturningFromContract', 'true');
-            
-            // Create a complete copy of all data to pass back to enrollment form
-            const completeFormData = {
-              ...formData,
-              // Add a specific flag to indicate we're returning from the contract page
-              isReturningFromContract: true,
-              // Original family members with all details - preserve original structure
-              familyMembers: formData.familyMembers && formData.familyMembers.map(member => ({
-                id: member.id || Date.now() + Math.random(),
-                firstName: member.firstName,
-                lastName: member.lastName,
-                middleInitial: member.middleInitial || '',
-                dateOfBirth: member.dateOfBirth,
-                gender: member.gender,
-                email: member.email || '',
-                cellPhone: member.cellPhone || '',
-                homePhone: member.homePhone || '',
-                workPhone: member.workPhone || '',
-                memberType: member.memberType,
-                role: member.role,
-                // Keep any other properties that might be there
-                ...member
-              })),
-              // Make sure service addons are properly formatted
-              serviceAddons: formData.serviceAddons?.map(addon => ({
-                invtr_id: addon.id || '',
-                invtr_desc: addon.description || addon.name || '',
-                invtr_price: typeof addon.price === 'number' ? addon.price : 
-                             (addon.monthly ? parseFloat(addon.monthly) : 0),
-                invtr_upccode: addon.upcCode || '',
-                // Preserve all original properties
-                ...addon
-              })) || [],
-              // Preserve any additional service details
-              additionalServiceDetails: formData.additionalServiceDetails || []
-            };
-            navigate('/enrollment', { state: { formData: completeFormData } });
+            window.location.href = '/online-enrollment/enrollment';
           }}
         >
           Back

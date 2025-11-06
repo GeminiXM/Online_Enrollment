@@ -48,10 +48,52 @@ const getSessionId = () => {
 export const autoSaveFormData = (formData, additionalData = {}) => {
   try {
     const sessionId = getSessionId();
+    // Merge with existing draft to avoid wiping fields with empty/default values
+    const isMeaningful = (v) => {
+      if (v === null || v === undefined) return false;
+      if (typeof v === "string")
+        return v.trim() !== "" && v.trim().toLowerCase() !== "default";
+      if (typeof v === "number") return !Number.isNaN(v) && v !== 0;
+      if (typeof v === "boolean") return v === true;
+      if (Array.isArray(v)) return v.length > 0;
+      if (typeof v === "object") return Object.keys(v).length > 0;
+      return false;
+    };
+
+    let existing = null;
+    try {
+      const raw = localStorage.getItem("enrollment_draft");
+      if (raw) existing = decryptData(raw);
+    } catch (_) {}
+
+    let mergedForm = { ...(existing?.formData || {}) };
+    Object.keys(formData || {}).forEach((k) => {
+      const nextVal = formData[k];
+      const prevVal = mergedForm[k];
+      mergedForm[k] = isMeaningful(nextVal) ? nextVal : prevVal;
+    });
+
+    let mergedAdditional = { ...(existing?.additionalData || {}) };
+    Object.keys(additionalData || {}).forEach((k) => {
+      const nextVal = additionalData[k];
+      const prevVal = mergedAdditional[k];
+      mergedAdditional[k] = isMeaningful(nextVal) ? nextVal : prevVal;
+    });
+
+    // Normalize shapes to avoid undefined arrays/objects on restore
+    if (!Array.isArray(mergedForm.familyMembers)) mergedForm.familyMembers = [];
+    mergedForm.services = {
+      personalTraining: false,
+      groupClasses: false,
+      childcare: false,
+      locker: false,
+      ...(mergedForm.services || {}),
+    };
+
     const dataToSave = {
       sessionId,
-      formData,
-      additionalData,
+      formData: mergedForm,
+      additionalData: mergedAdditional,
       timestamp: Date.now(),
       version: "1.0",
     };
