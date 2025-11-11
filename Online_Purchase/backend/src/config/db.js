@@ -67,7 +67,7 @@ const getDatabaseConfig = (clubId) => {
       state: "NM",
     };
   }
-  if ((club >= 252 && club <= 257) || club === 292 || club === 203) {
+  if ((club >= 252 && club <= 257) || club === 292) {
     validateEnvVariables("INFORMIX_DNV");
     return {
       server: process.env.INFORMIX_DNV_SERVER,
