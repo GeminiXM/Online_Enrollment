@@ -1,0 +1,14 @@
+{
+  "name": "online_purchase_root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run --prefix backend dev\" \"npm run --prefix frontend dev\"",
+    "dev:backend": "npm run --prefix backend dev",
+    "dev:frontend": "npm run --prefix frontend dev"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
