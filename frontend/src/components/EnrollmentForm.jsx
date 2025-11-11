@@ -1207,6 +1207,20 @@ const handleChange = (e) => {
   // Persist sales rep selection immediately so it survives draft clears and back navigation
   if (name === 'salesRep') {
     try { localStorage.setItem('enrollment_sales_rep', value || ''); } catch (_) {}
+    // When selecting a sales rep, also capture their email if available from the salesReps list
+    try {
+      const selected = (salesReps || []).find(r => String(r.empCode) === String(value));
+      const repEmail = selected && selected.email ? selected.email : '';
+      setFormData(prev => ({
+        ...prev,
+        salesRepEmail: repEmail
+      }));
+      if (repEmail) {
+        try { localStorage.setItem('enrollment_sales_rep_email', repEmail); } catch (_) {}
+      } else {
+        try { localStorage.removeItem('enrollment_sales_rep_email'); } catch (_) {}
+      }
+    } catch (_) {}
   }
 
   // Handle date of birth validation only when full date is entered (MM/DD/YYYY or YYYY-MM-DD)

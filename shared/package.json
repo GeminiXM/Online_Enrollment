@@ -1,6 +1,6 @@
 {
   "name": "online-enrollment-shared",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "description": "Shared utilities for Online Enrollment System",
   "main": "index.js",

@@ -20,16 +20,24 @@ class EmailService {
    * Initialize the email transporter
    */
   initializeTransporter() {
-    // Configure for Wellbridge SMTP server
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "wellbridge.prxy.com",
-      port: parseInt(process.env.SMTP_PORT) || 25,
-      secure: false, // false for port 25
-      auth: {
-        user: process.env.SMTP_USER || "onlineenrollment@wellbridge.com",
-        pass: process.env.SMTP_PASS || "W3llbridge&0nl1n3",
-      },
-    });
+    // Configure SMTP from environment; never hardcode secrets
+    const host = process.env.SMTP_HOST || "wellbridge.prxy.com";
+    const port = parseInt(process.env.SMTP_PORT) || 25;
+    const secure = false; // false for port 25
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+
+    const transportConfig = { host, port, secure };
+
+    if (smtpUser && smtpPass) {
+      transportConfig.auth = { user: smtpUser, pass: smtpPass };
+    } else {
+      logger.warn(
+        "SMTP auth not fully configured (SMTP_USER/SMTP_PASS missing). Proceeding without auth."
+      );
+    }
+
+    this.transporter = nodemailer.createTransport(transportConfig);
   }
 
   /**
@@ -592,6 +600,273 @@ class EmailService {
       return false;
     } finally {
       // No cleanup needed - contract file is permanent and properly named
+    }
+  }
+
+  /**
+   * Derive PT manager email from a GM email by replacing 'gm' in the local part with 'ptm'
+   * @param {string} gmEmail
+   * @returns {string|null}
+   */
+  derivePtManagerEmailFromGm(gmEmail) {
+    if (!gmEmail || typeof gmEmail !== "string" || !gmEmail.includes("@")) {
+      return null;
+    }
+    const [local, domain] = gmEmail.split("@");
+    if (!local || !domain) return null;
+    const ptLocal = local.replace(/gm$/, "ptm");
+    return `${ptLocal}@${domain}`;
+  }
+
+  /**
+   * Get regional PT manager email based on state
+   * @param {string} state
+   * @returns {string|null}
+   */
+  getRegionalPtManagerEmail(state) {
+    const s = (state || "").toUpperCase();
+    if (s === "CO") return "cacregptm@wellbridge.com";
+    if (s === "NM") return "nmswregptm@wellbridge.com";
+    return null;
+  }
+
+  /**
+   * Send internal notification to the club GM about a new online member
+   * No attachments, concise summary.
+   * @returns {Promise<boolean>}
+   */
+  async sendInternalNewMemberNotification(
+    enrollmentData,
+    formData,
+    selectedClub
+  ) {
+    try {
+      const gmEmail = selectedClub?.email;
+      if (!gmEmail) {
+        logger.warn("GM email missing; skipping GM notification", {
+          club: selectedClub?.name,
+          clubId: selectedClub?.id,
+        });
+        return false;
+      }
+
+      const phoneNumbers = [
+        formData?.mobilePhone || formData?.cellPhone,
+        formData?.homePhone,
+        formData?.workPhone,
+      ].filter(Boolean);
+      const phoneDisplay = phoneNumbers.length ? phoneNumbers.join(" / ") : "";
+      const salesRepEmail =
+        formData?.salesRepEmail ||
+        formData?.salesRep?.email ||
+        formData?.salesRepEmailAddress ||
+        null;
+      const ptPurchased = !!formData?.hasPTAddon || !!formData?.ptPackage;
+      const ptDesc =
+        formData?.ptPackage?.description ||
+        (ptPurchased ? "New Intro Personal Training Package" : "");
+      const ptPriceRaw =
+        formData?.ptPackageAmount ||
+        formData?.ptPackage?.invtr_price ||
+        formData?.ptPackage?.price;
+      const ptPrice =
+        ptPurchased && ptPriceRaw !== undefined && ptPriceRaw !== null
+          ? Number(ptPriceRaw).toFixed
+            ? Number(ptPriceRaw).toFixed(2)
+            : ptPriceRaw
+          : null;
+
+      const subject = `New Online Enrollment - ${
+        selectedClub?.name || formData?.club || "Club"
+      } - ${formData?.firstName || ""} ${formData?.lastName || ""} (#${
+        enrollmentData?.custCode || ""
+      })`;
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
+          <h2 style="margin:0 0 10px 0; color:#2c3e50;">Congratulations — A New Member Joined Online</h2>
+          <p style="margin:0 0 16px 0;">Club: <strong>${
+            selectedClub?.name || formData?.club || "Club"
+          }</strong></p>
+          <div style="background:#f7f9fb; padding:16px; border-radius:6px;">
+            <p style="margin:0 0 6px 0;"><strong>Member:</strong> ${
+              formData?.firstName || ""
+            } ${formData?.lastName || ""}</p>
+            <p style="margin:0 0 6px 0;"><strong>Membership #:</strong> ${
+              enrollmentData?.custCode || ""
+            }</p>
+            <p style="margin:0 0 6px 0;"><strong>Membership Type:</strong> ${this.getMembershipTypeDisplay(
+              formData?.membershipType,
+              selectedClub
+            )}</p>
+            <p style="margin:0 0 6px 0;"><strong>Start Date:</strong> ${this.formatDateForEmail(
+              formData?.requestedStartDate
+            )}</p>
+            <p style="margin:0 0 6px 0;"><strong>Email:</strong> ${
+              formData?.email || ""
+            }</p>
+            ${
+              phoneDisplay
+                ? `<p style="margin:0 0 6px 0;"><strong>Phone:</strong> ${phoneDisplay}</p>`
+                : ""
+            }
+            ${
+              ptPurchased
+                ? `<p style="margin:0 0 6px 0;"><strong>PT Package:</strong> ${ptDesc}</p>${
+                    ptPrice
+                      ? `<p style="margin:0 0 6px 0;"><strong>PT Price:</strong> $${ptPrice}</p>`
+                      : ""
+                  }`
+                : ""
+            }
+          </div>
+          <p style="margin:12px 0 0 0;">
+            This new member has received an email confirming their membership, with an attached membership agreement, and instructions for getting started with the club App. However, it is critical that you call and email to welcome them to the club and set them up with their first workout/visit to the club. This action is required within the first 24 hours of you receiving this link. Of course, if the new member did receive an age-based membership, they will be required to show a form of ID that includes their birthdate in order for that membership to be accepted.
+          </p>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: process.env.SMTP_FROM || "noreply@yourclub.com",
+        to: gmEmail,
+        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com",
+        subject,
+        html,
+      };
+      if (salesRepEmail) {
+        mailOptions.cc = salesRepEmail;
+      }
+
+      const info = await this.transporter.sendMail(mailOptions);
+      logger.info("GM new member notification sent", {
+        to: gmEmail,
+        messageId: info.messageId,
+        membershipNumber: enrollmentData?.custCode,
+      });
+      return true;
+    } catch (error) {
+      logger.error("Failed to send GM new member notification", {
+        error: error.message,
+      });
+      return false;
+    }
+  }
+
+  /**
+   * Send internal PT purchase notification to club PT manager and regional PT manager
+   * No attachments, concise summary.
+   * @returns {Promise<boolean>}
+   */
+  async sendInternalPTPurchaseNotification(
+    enrollmentData,
+    formData,
+    selectedClub
+  ) {
+    try {
+      const gmEmail = selectedClub?.email;
+      const ptEmail = this.derivePtManagerEmailFromGm(gmEmail);
+      const regionalEmail = this.getRegionalPtManagerEmail(selectedClub?.state);
+
+      const recipients = [ptEmail, regionalEmail].filter(Boolean);
+      if (recipients.length === 0) {
+        logger.warn("No PT recipients resolved; skipping PT notification", {
+          club: selectedClub?.name,
+          gmEmail,
+          ptEmail,
+          regionalEmail,
+        });
+        return false;
+      }
+
+      const phoneNumbers = [
+        formData?.mobilePhone || formData?.cellPhone,
+        formData?.homePhone,
+        formData?.workPhone,
+      ].filter(Boolean);
+      const phoneDisplay = phoneNumbers.length ? phoneNumbers.join(" / ") : "";
+      const salesRepEmail =
+        formData?.salesRepEmail ||
+        formData?.salesRep?.email ||
+        formData?.salesRepEmailAddress ||
+        null;
+
+      const ptDesc =
+        formData?.ptPackage?.description ||
+        "New Intro Personal Training Package";
+      const ptPrice =
+        formData?.ptPackageAmount ||
+        formData?.ptPackage?.invtr_price ||
+        formData?.ptPackage?.price ||
+        "149.00";
+
+      const subject = `New Online PT Purchase - ${
+        selectedClub?.name || formData?.club || "Club"
+      } - ${formData?.firstName || ""} ${formData?.lastName || ""} (#${
+        enrollmentData?.custCode || ""
+      })`;
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
+          <h2 style="margin:0 0 10px 0; color:#2c3e50;">A New Member Purchased PT Online</h2>
+          <p style="margin:0 0 16px 0;">Club: <strong>${
+            selectedClub?.name || formData?.club || "Club"
+          }</strong></p>
+          <div style="background:#f7f9fb; padding:16px; border-radius:6px;">
+            <p style="margin:0 0 6px 0;"><strong>Member:</strong> ${
+              formData?.firstName || ""
+            } ${formData?.lastName || ""}</p>
+            <p style="margin:0 0 6px 0;"><strong>Membership #:</strong> ${
+              enrollmentData?.custCode || ""
+            }</p>
+            <p style="margin:0 0 6px 0;"><strong>Membership Type:</strong> ${this.getMembershipTypeDisplay(
+              formData?.membershipType,
+              selectedClub
+            )}</p>
+            <p style="margin:0 0 6px 0;"><strong>Start Date:</strong> ${this.formatDateForEmail(
+              formData?.requestedStartDate
+            )}</p>
+            <p style="margin:0 0 6px 0;"><strong>Email:</strong> ${
+              formData?.email || ""
+            }</p>
+            ${
+              phoneDisplay
+                ? `<p style="margin:0 0 6px 0;"><strong>Phone:</strong> ${phoneDisplay}</p>`
+                : ""
+            }
+            <p style="margin:0 0 6px 0;"><strong>PT Package:</strong> ${ptDesc}</p>
+            <p style="margin:0 0 6px 0;"><strong>PT Price:</strong> $${
+              Number(ptPrice).toFixed ? Number(ptPrice).toFixed(2) : ptPrice
+            }</p>
+          </div>
+          <p style="margin:12px 0 0 0;">
+            This new membership along with a PT3Pack has been purchased via our online joining portal. Due to this, a membership sales rep is not likely involved so you are the solo contact back to this member to get them started on their purchase Personal Training. Please call within 24 hours and, only when necessary, email. Repeat this process until you have made connection to their first session.
+          </p>
+        </div>
+      `;
+
+      const mailOptions = {
+        from: process.env.SMTP_FROM || "noreply@yourclub.com",
+        to: recipients.join(", "),
+        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com",
+        subject,
+        html,
+      };
+      if (salesRepEmail) {
+        mailOptions.cc = salesRepEmail;
+      }
+
+      const info = await this.transporter.sendMail(mailOptions);
+      logger.info("PT purchase notification sent", {
+        to: recipients,
+        messageId: info.messageId,
+        membershipNumber: enrollmentData?.custCode,
+      });
+      return true;
+    } catch (error) {
+      logger.error("Failed to send PT purchase notification", {
+        error: error.message,
+      });
+      return false;
     }
   }
 }

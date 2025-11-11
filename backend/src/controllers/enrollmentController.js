@@ -1055,7 +1055,14 @@ export const submitEnrollment = async (req, res) => {
     const duesTaxAmount = membershipDetails.proratedTaxAmount || 0.0;
 
     // Calculate addon tax based on addon total and tax rate
-    const taxRate = membershipDetails.taxRate || 0.0;
+    // Enforce state rule by CLUB, not member address: only NM clubs apply tax
+    const incomingClubId = (req.body.club || club || "")
+      .toString()
+      .padStart(3, "0");
+    const nmClubIds = new Set(["201", "202", "203", "204", "205"]);
+    const taxRate = nmClubIds.has(incomingClubId)
+      ? membershipDetails.taxRate || 0.0
+      : 0.0;
     const addonsTotal =
       req.body.serviceAddons && Array.isArray(req.body.serviceAddons)
         ? req.body.serviceAddons.reduce(

@@ -510,7 +510,7 @@ router.post("/send-welcome-email", async (req, res) => {
       amountBilled: amountBilled || 0, // Use the actual amount billed from frontend
     };
 
-    // Use the actual form data from frontend instead of creating mock data
+    // Use the actual form data from frontend; fall back to minimal shape
     const formData = actualFormData || {
       firstName,
       lastName,
@@ -520,6 +520,45 @@ router.post("/send-welcome-email", async (req, res) => {
       requestedStartDate: new Date().toLocaleDateString(),
       monthlyDues: 0,
     };
+
+    // Best-effort lookup of sales rep email if a sales rep (emp code) was selected but no email was provided
+    try {
+      const hasSalesRepEmpCode =
+        formData?.salesRep && String(formData.salesRep).trim().length > 0;
+      const hasSalesRepEmail =
+        formData?.salesRepEmail ||
+        formData?.salesRep?.email ||
+        formData?.salesRepEmailAddress;
+      const clubIdForLookup = (selectedClub?.id || "")
+        .toString()
+        .padStart(3, "0");
+      if (!hasSalesRepEmail && hasSalesRepEmpCode && clubIdForLookup) {
+        const reps = await pool.query(
+          clubIdForLookup,
+          "EXECUTE PROCEDURE web_proc_GetSalesReps(?)",
+          [clubIdForLookup]
+        );
+        if (Array.isArray(reps) && reps.length > 0) {
+          const match = reps.find((row) => {
+            const code = (row.emp_code || row.EMP_CODE || "").toString().trim();
+            return code === String(formData.salesRep).trim();
+          });
+          if (match) {
+            const repEmail =
+              match.sales_rep_email || match.email || match.emp_email || null;
+            if (repEmail) {
+              formData.salesRepEmail = repEmail;
+            }
+          }
+        }
+      }
+    } catch (repLookupErr) {
+      logger.warn("Sales rep email lookup failed (non-blocking)", {
+        error: repLookupErr.message,
+        salesRep: formData?.salesRep,
+        clubId: selectedClub?.id,
+      });
+    }
 
     // Convert contractPDF array back to buffer if provided
     let contractPDFBuffer = null;
@@ -537,6 +576,37 @@ router.post("/send-welcome-email", async (req, res) => {
     );
 
     if (emailSent) {
+      // Fire-and-forget internal notifications; do not fail overall on these
+      try {
+        await emailService.sendInternalNewMemberNotification(
+          enrollmentData,
+          formData,
+          selectedClub
+        );
+      } catch (internalErr) {
+        logger.error("Failed to send GM internal new member notification", {
+          error: internalErr?.message,
+          membershipNumber,
+        });
+      }
+
+      // If PT was purchased, notify PT manager and regional PT manager
+      try {
+        const ptPurchased = !!formData?.hasPTAddon || !!formData?.ptPackage;
+        if (ptPurchased) {
+          await emailService.sendInternalPTPurchaseNotification(
+            enrollmentData,
+            formData,
+            selectedClub
+          );
+        }
+      } catch (ptErr) {
+        logger.error("Failed to send PT internal notification", {
+          error: ptErr?.message,
+          membershipNumber,
+        });
+      }
+
       logger.info("Welcome email sent successfully from confirmation page:", {
         membershipNumber,
         email,
@@ -963,6 +1033,7 @@ router.get("/sales-reps", async (req, res) => {
     const salesReps = result.map((row) => ({
       salesRep: row.sales_reps,
       empCode: row.emp_code,
+      email: row.email || row.sales_rep_email || row.emp_email || null,
     }));
 
     logger.info("Sales reps retrieved successfully:", {
