@@ -256,6 +256,39 @@ body {
 	color: rgba(255, 255, 255, 0.95);
 }
 
+.tokenizer-container {
+	min-height: 200px;
+	padding: 18px;
+	border-radius: 14px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px dashed rgba(255, 255, 255, 0.35);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+.tokenizer-loading {
+	text-align: center;
+	color: rgba(255, 255, 255, 0.8);
+	display: grid;
+	gap: 8px;
+	align-items: center;
+}
+.loading-spinner {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	border: 3px solid rgba(255, 255, 255, 0.4);
+	border-top-color: #fff;
+	animation: spin 0.8s linear infinite;
+	margin: 0 auto;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 .op-footer {
 	margin-top: 60px;
 	background: #0082b5;

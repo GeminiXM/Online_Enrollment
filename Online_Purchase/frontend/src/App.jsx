@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import "./styles.css";
@@ -22,11 +22,12 @@ export default function App() {
 	// Payment state
 	const isColorado = club?.state === "CO";
 	const isNewMexico = club?.state === "NM";
-	const [useCardOnFile, setUseCardOnFile] = useState(false);
-	const [fluidpayToken, setFluidpayToken] = useState("");
-	const [cardNumber, setCardNumber] = useState("");
-	const [expMMYY, setExpMMYY] = useState("");
-	const [cvv, setCvv] = useState("");
+	const [paymentError, setPaymentError] = useState("");
+	const [paymentSubmitting, setPaymentSubmitting] = useState(false);
+	const [fluidPayInfo, setFluidPayInfo] = useState(null);
+	const [fluidPayReady, setFluidPayReady] = useState(false);
+	const fluidPayTokenizerRef = useRef(null);
+	const [convergeReady, setConvergeReady] = useState(false);
 
 	// Club names (sourced from Online_Enrollment ClubContext data)
 	const CLUB_ID_TO_NAME = useMemo(
@@ -71,15 +72,22 @@ export default function App() {
 		setIsLoading(true);
 		setError("");
 		setSuccess("");
+		setPaymentError("");
+		setPaymentSubmitting(false);
+		setFluidPayInfo(null);
+		setFluidPayReady(false);
+		fluidPayTokenizerRef.current = null;
 		setMember(null);
 		setClub(null);
 		setPtPackage(null);
 		try {
-			const params = new URLSearchParams();
-			params.set("membershipNumber", membershipNumber.trim());
-			if (clubIdOverride.trim()) params.set("clubId", clubIdOverride.trim());
-			const { ok, data } = await fetchJson(`/api/online-buy/member?${params.toString()}`);
+	const params = new URLSearchParams();
+	params.set("membershipNumber", membershipNumber.trim());
+	if (clubIdOverride.trim()) params.set("clubId", clubIdOverride.trim());
+	console.log("Lookup request", Object.fromEntries(params.entries()));
+	const { ok, data } = await fetchJson(`/api/online-buy/member?${params.toString()}`);
 			if (!ok || !data?.success) throw new Error(data?.message || "Lookup failed");
+			console.log("Lookup response", data);
 			setMember(data.member);
 			setClub(data.club);
 			if (data?.club?.id) {
@@ -98,43 +106,346 @@ export default function App() {
 		}
 	};
 
-	const handlePurchase = async () => {
-		if (!member || !ptPackage || !club) return;
-		setIsLoading(true);
-		setError("");
-		setSuccess("");
-		try {
-			const payment = (() => {
-				// Use card on file flow
-				if (useCardOnFile) {
-					return {
-						processor: isColorado ? "FLUIDPAY" : "CONVERGE",
-						token: member?.token || "",
-					};
-				}
-				// New payment entry
-				return isColorado
-					? { processor: "FLUIDPAY", token: fluidpayToken }
-					: { processor: "CONVERGE", cardNumber, expDateMMYY: expMMYY, cvv };
-			})();
+	const handleFluidPayToken = useCallback(
+		async (token) => {
+			if (!member || !ptPackage || !club) {
+				setPaymentError("Membership details missing. Please lookup again.");
+				setPaymentSubmitting(false);
+				return;
+			}
+			try {
+				const { ok, data } = await fetchJson("/api/online-buy/purchase", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({
+						clubId: club.id,
+						member,
+						ptPackage,
+						payment: { processor: "FLUIDPAY", token },
+					}),
+				});
+				if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
+				setSuccess(`Payment successful via ${data.processor}. Transaction #${data.transactionId}`);
+				setPaymentError("");
+			} catch (err) {
+				setPaymentError(err.message);
+			} finally {
+				setPaymentSubmitting(false);
+			}
+		},
+		[club?.id, member, ptPackage]
+	);
 
-			const { ok, data } = await fetchJson("/api/online-buy/purchase", {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
+	const handleConvergeSuccess = useCallback(
+		async (response) => {
+			if (!member || !ptPackage || !club) {
+				setPaymentError("Membership details missing. Please lookup again.");
+				setPaymentSubmitting(false);
+				return;
+			}
+			try {
+				const transactionId =
+					response?.ssl_txn_id ||
+					response?.ssl_transaction_id ||
+					response?.transaction_id ||
+					"";
+				if (!transactionId) {
+					throw new Error("Missing transaction id from Converge response");
+				}
+				const payload = {
 					clubId: club.id,
 					member,
 					ptPackage,
-					payment,
-				}),
-			});
-			if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
-			setSuccess(`Payment successful via ${data.processor}. Transaction #${data.transactionId}`);
-		} catch (e) {
-			setError(e.message);
-		} finally {
-			setIsLoading(false);
+					payment: {
+						processor: "CONVERGE_HPP",
+						alreadyProcessed: true,
+						transactionId,
+						approvalCode: response?.ssl_approval_code || "",
+						message: response?.ssl_result_message || "",
+					},
+				};
+				const { ok, data } = await fetchJson("/api/online-buy/purchase", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(payload),
+				});
+				if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
+				setSuccess(`Payment successful via ${data.processor}. Transaction #${data.transactionId}`);
+				setPaymentError("");
+			} catch (err) {
+				setPaymentError(err.message);
+			} finally {
+				setPaymentSubmitting(false);
+			}
+		},
+		[club?.id, member, ptPackage]
+	);
+
+	useEffect(() => {
+		if (!isColorado || !club?.id) {
+			return;
 		}
+
+		let cancelled = false;
+		(async () => {
+			const { ok, data } = await fetchJson(
+				`/api/online-buy/fluidpay-info?clubId=${club.id}`
+			);
+			if (cancelled) return;
+			if (ok && data?.success && data.fluidPayInfo) {
+				setFluidPayInfo(data.fluidPayInfo);
+			} else if (ok === false) {
+				setPaymentError(data?.message || "Unable to load FluidPay configuration.");
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+			setFluidPayInfo(null);
+			setFluidPayReady(false);
+			fluidPayTokenizerRef.current = null;
+		};
+	}, [club?.id, isColorado]);
+
+	useEffect(() => {
+		if (!isColorado || !fluidPayInfo?.publicKey) {
+			return;
+		}
+
+		const initTokenizer = () => {
+			if (!window.Tokenizer) return;
+			try {
+				if (fluidPayTokenizerRef.current?.destroy) {
+					fluidPayTokenizerRef.current.destroy();
+				}
+			} catch (_) {}
+
+			try {
+				const tokenizer = new window.Tokenizer({
+					apikey: fluidPayInfo.publicKey,
+					container: "#fluidpay-tokenizer",
+					settings: {
+						payment: { types: ["card"] },
+						user: { showInline: true, showName: true, prefill: true },
+						billing: { show: true, prefill: true },
+						// Use CSS-style selectors per FluidPay Tokenizer docs
+						styles: {
+							body: {
+								color: "#ffffff",
+								"font-family":
+									"Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
+								"font-size": "15px"
+							},
+							input: {
+								color: "#ffffff",
+								"border-radius": "10px",
+								"background-color": "rgba(255,255,255,0.15)",
+								border: "1px solid rgba(255,255,255,0.35)"
+							},
+							label: {
+								color: "rgba(255,255,255,0.85)"
+							},
+							"input::placeholder": {
+								color: "rgba(255,255,255,0.6)"
+							},
+							".payment .cvv input": {
+								border: "solid 1px #ffffff",
+								"padding-left": "6px"
+							},
+							".payment .expiration input": {
+								color: "#ffffff"
+							},
+							".error": {
+								color: "#ff98a1"
+							},
+							".success": {
+								color: "#7ce5bc"
+							}
+						}
+					},
+					submission: (resp) => {
+						if (resp.status === "success" && resp.token) {
+							handleFluidPayToken(resp.token);
+						} else if (resp.status === "error") {
+							setPaymentError(resp.msg || "Payment form error.");
+							setPaymentSubmitting(false);
+						} else if (resp.status === "validation") {
+							setPaymentError("Please check your payment information and try again.");
+							setPaymentSubmitting(false);
+						}
+					},
+				});
+				fluidPayTokenizerRef.current = tokenizer;
+				setFluidPayReady(true);
+			} catch (err) {
+				setPaymentError("Unable to initialize FluidPay form. Please refresh and try again.");
+				setFluidPayReady(false);
+				fluidPayTokenizerRef.current = null;
+				setPaymentSubmitting(false);
+			}
+		};
+
+		let scriptElement = null;
+		if (!window.Tokenizer) {
+			scriptElement = document.createElement("script");
+			scriptElement.id = "fluidpay-tokenizer-script";
+			scriptElement.src = "https://app.fluidpay.com/tokenizer/tokenizer.js";
+			scriptElement.async = true;
+			scriptElement.onload = initTokenizer;
+			scriptElement.onerror = () => {
+				setPaymentError("Unable to load FluidPay payment form. Please refresh and try again.");
+			};
+			document.body.appendChild(scriptElement);
+		} else {
+			initTokenizer();
+		}
+
+		return () => {
+			if (scriptElement && scriptElement.parentNode) {
+				scriptElement.parentNode.removeChild(scriptElement);
+			}
+			if (fluidPayTokenizerRef.current?.destroy) {
+				try {
+					fluidPayTokenizerRef.current.destroy();
+				} catch (_) {}
+			}
+			fluidPayTokenizerRef.current = null;
+			setFluidPayReady(false);
+		};
+	}, [isColorado, fluidPayInfo, handleFluidPayToken]);
+
+	useEffect(() => {
+		if (!isNewMexico) {
+			setConvergeReady(false);
+			return;
+		}
+
+		let scriptRef = document.getElementById("converge-pay-script");
+		if (!scriptRef) {
+			scriptRef = document.createElement("script");
+			scriptRef.id = "converge-pay-script";
+			scriptRef.src = "https://api.convergepay.com/hosted-payments/PayWithConverge.js";
+			scriptRef.async = true;
+			scriptRef.onload = () => setConvergeReady(true);
+			scriptRef.onerror = () =>
+				setPaymentError("Unable to load Converge payment window. Please refresh and try again.");
+			document.body.appendChild(scriptRef);
+		} else {
+			setConvergeReady(true);
+		}
+
+		return () => {
+			setConvergeReady(false);
+		};
+	}, [isNewMexico]);
+
+	useEffect(() => {
+		if (!isNewMexico) return;
+
+		const handler = (event) => {
+			if (!event.origin || !event.origin.includes("convergepay.com")) return;
+			const data = event.data;
+			if (!data || data.converge !== true) return;
+
+			if (data.cancelled) {
+				setPaymentError("Payment cancelled.");
+				setPaymentSubmitting(false);
+				return;
+			}
+
+			if (data.errored) {
+				setPaymentError(data.error || "Payment error.");
+				setPaymentSubmitting(false);
+				return;
+			}
+
+			const response = data.response?.data || data.response;
+			if (!response) {
+				setPaymentError("Payment response missing.");
+				setPaymentSubmitting(false);
+				return;
+			}
+
+			const approved =
+				response.ssl_result === "0" ||
+				(response.ssl_result_message &&
+					response.ssl_result_message.toLowerCase().includes("approved")) ||
+				!!response.ssl_approval_code;
+
+			if (approved) {
+				handleConvergeSuccess(response);
+			} else {
+				setPaymentError(response.ssl_result_message || "Payment declined.");
+				setPaymentSubmitting(false);
+			}
+		};
+
+		window.addEventListener("message", handler);
+		return () => window.removeEventListener("message", handler);
+	}, [isNewMexico, handleConvergeSuccess]);
+
+	const handlePurchase = async () => {
+		if (!member || !ptPackage || !club) return;
+		setPaymentError("");
+		setSuccess("");
+
+		if (isColorado) {
+			if (!fluidPayTokenizerRef.current) {
+				setPaymentError("Secure payment form is still loading. Please wait a moment and try again.");
+				return;
+			}
+			setPaymentSubmitting(true);
+			try {
+				fluidPayTokenizerRef.current.submit();
+			} catch (err) {
+				setPaymentSubmitting(false);
+				setPaymentError("Unable to launch FluidPay form. Please refresh and try again.");
+			}
+			return;
+		}
+
+		if (isNewMexico) {
+			if (!window.PayWithConverge) {
+				setPaymentError("Converge payment window is still loading. Please wait.");
+				return;
+			}
+			setPaymentSubmitting(true);
+			try {
+				const body = {
+					amount: Number(ptPackage.price || 0).toFixed(2),
+					orderId: `PT-${member.membershipNumber || Date.now()}`,
+					clubId: club.id,
+					customerId: member.membershipNumber || undefined,
+					memberData: {
+						firstName: member.firstName || "",
+						lastName: member.lastName || "",
+						email: member.email || "",
+						phone: member.phone || "",
+						address: member.address || "",
+						city: member.city || "",
+						state: member.state || "",
+						zipCode: member.zipCode || "",
+					},
+				};
+				const { ok, data } = await fetchJson("/api/online-buy/converge-hpp/session-token", {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(body),
+				});
+				if (!ok || !data?.ssl_txn_auth_token) {
+					throw new Error(data?.message || "Failed to start Converge payment session");
+				}
+				window.PayWithConverge.open({
+					ssl_txn_auth_token: data.ssl_txn_auth_token,
+				});
+			} catch (err) {
+				setPaymentError(err.message);
+				setPaymentSubmitting(false);
+			}
+			return;
+		}
+
+		setPaymentError("Unsupported club configuration for payment processing.");
 	};
 
 	return (
@@ -202,8 +513,7 @@ export default function App() {
 									<div className="kv__row">
 										<div className="kv__key">Address</div>
 										<div className="kv__value">
-											{[member.address1, member.address2].filter(Boolean).join(" ")}{" "}
-											{member.city}, {member.state} {member.zipCode}
+									{member.city}, {member.state} {member.zipCode}
 										</div>
 									</div>
 									<div className="kv__row">
@@ -216,25 +526,6 @@ export default function App() {
 									</div>
 								</div>
 							</div>
-
-							<div className="card">
-								<div className="section-title">Existing Membership Payment Method</div>
-								<div className="kv">
-									<div className="kv__row">
-										<div className="kv__key">Type</div>
-										<div className="kv__value">{member.ccType || ""}</div>
-									</div>
-									<div className="kv__row">
-										<div className="kv__key">Credit Card Number</div>
-										<div className="kv__value">{member.cardNo || ""}</div>
-									</div>
-									<div className="kv__row">
-										<div className="kv__key">Credit Card Expiration</div>
-										<div className="kv__value">{member.ccExpDate || ""}</div>
-									</div>
-								</div>
-							</div>
-
 							<div className="card">
 								<div className="section-title">Package</div>
 								<div className="kv">
@@ -254,81 +545,46 @@ export default function App() {
 							<div className="card">
 								<div className="section-title">Pay Now</div>
 
-								<label className="checkbox">
-									<input
-										type="checkbox"
-										checked={useCardOnFile}
-										onChange={(e) => setUseCardOnFile(e.target.checked)}
-										disabled={isInactive}
-									/>
-									<span>Use Card on File</span>
-								</label>
-								<div className="muted">Will be billed immediately</div>
-
-								{!useCardOnFile && (
-									<>
-										{isColorado && (
-											<div className="stack">
-												<div className="muted">
-													Colorado detected: FluidPay Hosted Fields.{" "}
-													<span className="italic">(placeholder token input)</span>
+								{isColorado && (
+									<div className="stack">
+										<div className="muted">
+											Colorado detected: enter your card details securely below.
+										</div>
+										<div id="fluidpay-tokenizer" className="tokenizer-container">
+											{!fluidPayReady && (
+												<div className="tokenizer-loading">
+													<div className="loading-spinner" />
+													<p>Loading secure payment form...</p>
 												</div>
-												<input
-													className="input"
-													placeholder="FluidPay token"
-													value={fluidpayToken}
-													onChange={(e) => setFluidpayToken(e.target.value)}
-													disabled={isInactive}
-												/>
-											</div>
-										)}
-										{isNewMexico && (
-											<div className="stack">
-												<div className="muted">New Mexico detected: Converge card fields.</div>
-												<input
-													className="input"
-													placeholder="Card Number"
-													value={cardNumber}
-													onChange={(e) => setCardNumber(e.target.value)}
-													disabled={isInactive}
-												/>
-												<div className="form-row">
-													<input
-														className="input"
-														placeholder="Exp (MMYY)"
-														value={expMMYY}
-														onChange={(e) => setExpMMYY(e.target.value)}
-														disabled={isInactive}
-													/>
-													<input
-														className="input"
-														placeholder="CVV"
-														value={cvv}
-														onChange={(e) => setCvv(e.target.value)}
-														disabled={isInactive}
-													/>
-												</div>
-											</div>
-										)}
-									</>
+											)}
+										</div>
+									</div>
 								)}
+								{isNewMexico && (
+									<div className="stack">
+										<div className="muted">
+											New Mexico detected: click below to open the secure Converge payment window.
+										</div>
+									</div>
+								)}
+
+								{paymentError && <div className="alert alert--error">{paymentError}</div>}
 
 								<button
 									className="btn btn--primary"
 									onClick={handlePurchase}
 									disabled={
-										isLoading ||
 										isInactive ||
-										(
-											!useCardOnFile &&
-											(
-												(isColorado && !fluidpayToken.trim()) ||
-												(isNewMexico && (!cardNumber.trim() || !expMMYY.trim()))
-											)
-										)
+										paymentSubmitting ||
+										(isColorado && (!fluidPayReady || !fluidPayTokenizerRef.current)) ||
+										(isNewMexico && !convergeReady)
 									}
 								>
-									{isLoading ? "Processing..." : "Pay Now"}
+									{paymentSubmitting
+										? "Processing..."
+										: isNewMexico
+											? "Open Secure Payment"
+											: "Pay Now"}
 								</button>
 								{success && <div className="alert alert--success">{success}</div>}
 							</div>

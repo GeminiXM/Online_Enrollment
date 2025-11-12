@@ -1,5 +1,7 @@
 "use strict";
 
+import axios from "axios";
+import qs from "qs";
 import logger from "../utils/logger.js";
 import { pool } from "../config/db.js";
 import {
@@ -167,7 +169,6 @@ export async function purchasePT(req, res) {
     };
 
     if (isColorado) {
-      // FluidPay hosted fields -> token expected
       if (!payment?.token) {
         return res
           .status(400)
@@ -181,30 +182,35 @@ export async function purchasePT(req, res) {
       );
       saleResult.processorName = "FLUIDPAY";
     } else if (isNewMexico) {
-      // Converge – token or direct card (prefer token)
-      saleResult = await processConvergeSale(
-        clubId,
-        amount,
-        payment,
-        customerData
-      );
-      saleResult.processorName = "CONVERGE";
+      if (payment?.alreadyProcessed && payment?.transactionId) {
+        saleResult = {
+          success: true,
+          transactionId: payment.transactionId,
+          approvalCode: payment.approvalCode || "",
+          message: payment.message || "",
+          processorName: "CONVERGE",
+        };
+      } else {
+        saleResult = await processConvergeSale(
+          clubId,
+          amount,
+          payment,
+          customerData
+        );
+        saleResult.processorName = "CONVERGE";
+      }
     } else {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Unsupported club/state configuration",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Unsupported club/state configuration",
+      });
     }
 
     if (!saleResult?.success) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: saleResult?.message || "Payment failed",
-        });
+      return res.status(400).json({
+        success: false,
+        message: saleResult?.message || "Payment failed",
+      });
     }
 
     // Email receipt (member + PT Manager); no PDFs
@@ -242,5 +248,224 @@ export async function purchasePT(req, res) {
     return res
       .status(500)
       .json({ success: false, message: "Server error during purchase" });
+  }
+}
+
+export async function getFluidPayInfo(req, res) {
+  try {
+    const clubId = (req.query.clubId || "").toString().trim() || "001";
+
+    logger.info("getFluidPayInfo: querying database", { clubId });
+    const rows = await pool.query(
+      clubId,
+      "EXECUTE PROCEDURE procFluidPayItemSelect1(?)",
+      [clubId]
+    );
+
+    logger.info("getFluidPayInfo: procedure executed", {
+      clubId,
+      rows: Array.isArray(rows) ? rows.length : 0,
+      firstRow:
+        Array.isArray(rows) && rows.length
+          ? {
+              ...rows[0],
+              fluidpay_api_key: rows[0].fluidpay_api_key
+                ? `${rows[0].fluidpay_api_key.slice(0, 8)}...`
+                : null,
+              fluidpay_public_key: rows[0].fluidpay_public_key
+                ? `${rows[0].fluidpay_public_key.slice(0, 8)}...`
+                : null,
+            }
+          : null,
+    });
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "FluidPay processor information not found for this club",
+      });
+    }
+
+    const info = rows[0] || {};
+    const envPublicKey =
+      process.env.FLUIDPAY_PUBLIC_KEY ||
+      process.env.FLUIDPAY_PUBLIC_API_KEY ||
+      "";
+    const rawPrivateKey = (info.fluidpay_api_key || "").toString().trim();
+    const rawPublicKey = (info.fluidpay_public_key || "").toString().trim();
+
+    let publicKey = "";
+    if (envPublicKey && envPublicKey.startsWith("pub_")) {
+      publicKey = envPublicKey.trim();
+    } else if (rawPublicKey && rawPublicKey.startsWith("pub_")) {
+      publicKey = rawPublicKey;
+    } else if (rawPrivateKey && rawPrivateKey.startsWith("pub_")) {
+      publicKey = rawPrivateKey;
+    } else if (rawPrivateKey && rawPrivateKey.startsWith("api_")) {
+      publicKey = rawPrivateKey.replace(/^api_/, "pub_");
+    }
+
+    logger.info("getFluidPayInfo: key normalization", {
+      clubId,
+      rawPrivateKeyPreview: rawPrivateKey
+        ? `${rawPrivateKey.slice(0, 8)}...`
+        : null,
+      rawPublicKeyPreview: rawPublicKey
+        ? `${rawPublicKey.slice(0, 8)}...`
+        : null,
+      envPublicKeyPreview: envPublicKey
+        ? `${envPublicKey.slice(0, 8)}...`
+        : null,
+      derivedPublicKeyPreview: publicKey ? `${publicKey.slice(0, 8)}...` : null,
+    });
+
+    if (!publicKey || !publicKey.startsWith("pub_")) {
+      return res.status(500).json({
+        success: false,
+        message: "FluidPay public API key is not configured correctly",
+      });
+    }
+
+    return res.json({
+      success: true,
+      fluidPayInfo: {
+        baseUrl: (info.fluidpay_base_url || "https://api.fluidpay.com").trim(),
+        publicKey,
+        merchantId: (info.merchant_id || "").toString().trim(),
+      },
+    });
+  } catch (error) {
+    logger.warn("getFluidPayInfo error, using fallback configuration", {
+      error: error.message,
+      stack: error.stack,
+      query: req.query,
+    });
+
+    const fallbackPublicKey =
+      process.env.FLUIDPAY_PUBLIC_KEY ||
+      process.env.FLUIDPAY_PUBLIC_API_KEY ||
+      "pub_31FUYRENhNiAvspejegbLoPD2he";
+
+    return res.json({
+      success: true,
+      fluidPayInfo: {
+        baseUrl: process.env.FLUIDPAY_BASE_URL || "https://api.fluidpay.com",
+        publicKey: fallbackPublicKey,
+        merchantId: "",
+        fallback: true,
+      },
+    });
+  }
+}
+
+export async function createConvergeSessionToken(req, res) {
+  try {
+    const {
+      amount,
+      orderId,
+      clubId,
+      customerId,
+      memberData,
+      addToken = true,
+    } = req.body || {};
+
+    if (!amount || !orderId || !clubId) {
+      return res.status(400).json({
+        success: false,
+        message: "amount, orderId, and clubId are required",
+      });
+    }
+
+    const convergeRows = await pool.query(
+      clubId,
+      "EXECUTE PROCEDURE procConvergeItemSelect1(?)",
+      [clubId]
+    );
+
+    if (!convergeRows || convergeRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Converge configuration not found for this club",
+      });
+    }
+
+    const info = convergeRows[0] || {};
+    const merchantId = (info.merchant_id || "").toString().trim();
+    const userId = (info.converge_user_id || "").toString().trim();
+    const pin = (info.converge_pin || "").toString().trim();
+
+    if (!merchantId || !userId || !pin) {
+      return res.status(400).json({
+        success: false,
+        message: "Incomplete Converge processor configuration",
+      });
+    }
+
+    const form = {
+      ssl_merchant_id: merchantId,
+      ssl_user_id: userId,
+      ssl_pin: pin,
+      ssl_transaction_type: "ccsale",
+      ssl_amount: amount,
+      ssl_currency_code: "USD",
+      ssl_invoice_number: orderId,
+      ssl_get_token: addToken ? "Y" : "N",
+      ssl_add_token: addToken ? "Y" : "N",
+      ssl_customer_id: customerId || undefined,
+      ssl_first_name: memberData?.firstName || "",
+      ssl_last_name: memberData?.lastName || "",
+      ssl_avs_address: memberData?.address || "",
+      ssl_avs_zip: memberData?.zipCode || "",
+      ssl_avs_city: memberData?.city || "",
+      ssl_avs_state: memberData?.state || "",
+      ssl_avs_country: "US",
+      ssl_email: memberData?.email || "",
+      ssl_phone: memberData?.phone || "",
+    };
+
+    const url = "https://api.convergepay.com/hosted-payments/transaction_token";
+    const response = await axios.post(url, qs.stringify(form), {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      timeout: 15000,
+      responseType: "text",
+      transformResponse: [(d) => d],
+    });
+
+    const raw = response.data;
+    let token = null;
+    if (typeof raw === "string") {
+      const match = raw.match(/ssl_txn_auth_token\s*=\s*([^\n\r]+)/i);
+      token = match ? match[1].trim() : raw.trim();
+    } else if (raw && raw.ssl_txn_auth_token) {
+      token = raw.ssl_txn_auth_token;
+    }
+
+    if (!token) {
+      return res.status(502).json({
+        success: false,
+        message: "Unable to parse session token from Converge response",
+        upstream: raw,
+      });
+    }
+
+    return res.json({
+      success: true,
+      ssl_txn_auth_token: token,
+      converge: {
+        merchantId,
+        userId,
+      },
+    });
+  } catch (error) {
+    logger.error("createConvergeSessionToken error", {
+      error: error.message,
+      stack: error.stack,
+      upstream: error?.response?.data,
+    });
+    return res.status(error?.response?.status || 500).json({
+      success: false,
+      message: "Failed to create Converge session token",
+      upstream: error?.response?.data || null,
+    });
   }
 }
