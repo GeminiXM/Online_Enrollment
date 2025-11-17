@@ -28,6 +28,8 @@ export default function App() {
 	const [fluidPayReady, setFluidPayReady] = useState(false);
 	const fluidPayTokenizerRef = useRef(null);
 	const [convergeReady, setConvergeReady] = useState(false);
+	// Force React to remount the tokenizer container to avoid DOM removal races
+	const [tokenizerMountKey, setTokenizerMountKey] = useState(0);
 
 	// Club names (sourced from Online_Enrollment ClubContext data)
 	const CLUB_ID_TO_NAME = useMemo(
@@ -221,9 +223,13 @@ export default function App() {
 			} catch (_) {}
 
 			try {
-				const tokenizer = new window.Tokenizer({
-					apikey: fluidPayInfo.publicKey,
-					container: "#fluidpay-tokenizer",
+				// Ask React to remount the container, then initialize after commit
+				setTokenizerMountKey((k) => k + 1);
+
+				const createTokenizer = () => {
+					const tokenizer = new window.Tokenizer({
+						apikey: fluidPayInfo.publicKey,
+						container: "#fluidpay-tokenizer",
 					settings: {
 						payment: { types: ["card"] },
 						user: { showInline: true, showName: true, prefill: true },
@@ -263,20 +269,26 @@ export default function App() {
 							}
 						}
 					},
-					submission: (resp) => {
-						if (resp.status === "success" && resp.token) {
-							handleFluidPayToken(resp.token);
-						} else if (resp.status === "error") {
-							setPaymentError(resp.msg || "Payment form error.");
-							setPaymentSubmitting(false);
-						} else if (resp.status === "validation") {
-							setPaymentError("Please check your payment information and try again.");
-							setPaymentSubmitting(false);
-						}
-					},
+						submission: (resp) => {
+							if (resp.status === "success" && resp.token) {
+								handleFluidPayToken(resp.token);
+							} else if (resp.status === "error") {
+								setPaymentError(resp.msg || "Payment form error.");
+								setPaymentSubmitting(false);
+							} else if (resp.status === "validation") {
+								setPaymentError("Please check your payment information and try again.");
+								setPaymentSubmitting(false);
+							}
+						},
+					});
+					fluidPayTokenizerRef.current = tokenizer;
+					setFluidPayReady(true);
+				};
+
+				// Defer creation until after React commits the remounted container
+				requestAnimationFrame(() => {
+					requestAnimationFrame(createTokenizer);
 				});
-				fluidPayTokenizerRef.current = tokenizer;
-				setFluidPayReady(true);
 			} catch (err) {
 				setPaymentError("Unable to initialize FluidPay form. Please refresh and try again.");
 				setFluidPayReady(false);
@@ -291,13 +303,20 @@ export default function App() {
 			scriptElement.id = "fluidpay-tokenizer-script";
 			scriptElement.src = "https://app.fluidpay.com/tokenizer/tokenizer.js";
 			scriptElement.async = true;
-			scriptElement.onload = initTokenizer;
+			scriptElement.onload = () => {
+				requestAnimationFrame(() => {
+					requestAnimationFrame(initTokenizer);
+				});
+			};
 			scriptElement.onerror = () => {
 				setPaymentError("Unable to load FluidPay payment form. Please refresh and try again.");
 			};
 			document.body.appendChild(scriptElement);
 		} else {
-			initTokenizer();
+			// Defer init one frame to avoid first-paint flicker
+			requestAnimationFrame(() => {
+				requestAnimationFrame(initTokenizer);
+			});
 		}
 
 		return () => {
@@ -496,7 +515,7 @@ export default function App() {
 					{member && club && ptPackage && (
 						<div className="grid">
 							<div className="card">
-								<div className="section-title">Verify Member</div>
+								<div className="section-title">Membership Details</div>
 								<div className="kv">
 									<div className="kv__row">
 										<div className="kv__key">Home Club</div>
@@ -550,7 +569,7 @@ export default function App() {
 										<div className="muted">
 											Colorado detected: enter your card details securely below.
 										</div>
-										<div id="fluidpay-tokenizer" className="tokenizer-container">
+										<div id="fluidpay-tokenizer" className="tokenizer-container" key={tokenizerMountKey}>
 											{!fluidPayReady && (
 												<div className="tokenizer-loading">
 													<div className="loading-spinner" />
