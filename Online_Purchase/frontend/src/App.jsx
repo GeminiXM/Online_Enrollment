@@ -227,6 +227,11 @@ export default function App() {
 				setTokenizerMountKey((k) => k + 1);
 
 				const createTokenizer = () => {
+					// Ensure container is empty and present before injecting the iframe
+					try {
+						const el = document.querySelector("#fluidpay-tokenizer");
+						if (el) el.innerHTML = "";
+					} catch (_) {}
 					const tokenizer = new window.Tokenizer({
 						apikey: fluidPayInfo.publicKey,
 						container: "#fluidpay-tokenizer",
@@ -569,7 +574,8 @@ export default function App() {
 										<div className="muted">
 											Colorado detected: enter your card details securely below.
 										</div>
-										<div id="fluidpay-tokenizer" className="tokenizer-container" key={tokenizerMountKey}>
+										<div className="tokenizer-shell">
+											<div id="fluidpay-tokenizer" className="tokenizer-container" key={tokenizerMountKey} />
 											{!fluidPayReady && (
 												<div className="tokenizer-loading">
 													<div className="loading-spinner" />

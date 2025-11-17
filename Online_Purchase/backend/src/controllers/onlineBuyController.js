@@ -10,6 +10,31 @@ import {
 } from "../services/paymentService.js";
 import emailService from "../services/emailService.js";
 
+// Helpers
+function toFourCharIssuer(brand) {
+  if (!brand) return "";
+  const b = String(brand).toUpperCase();
+  if (b.startsWith("VIS")) return "VISA";
+  if (b.startsWith("AMEX") || b.startsWith("AMX")) return "AMEX";
+  if (b.startsWith("MAS") || b === "MC" || b.startsWith("MSTR")) return "MC";
+  if (b.startsWith("DIS")) return "DISC";
+  return b.slice(0, 4);
+}
+
+function mmYYToDate(mmYY) {
+  if (!mmYY) return null;
+  const s = String(mmYY).replace(/\s+/g, "").replace("/", "");
+  if (s.length !== 4) return null;
+  const mm = s.slice(0, 2);
+  const yy = s.slice(2, 4);
+  const month = parseInt(mm, 10);
+  if (!month || month < 1 || month > 12) return null;
+  const year = 2000 + parseInt(yy, 10);
+  // Format as YYYY-MM-01 which Informix DATE parameter will accept
+  const m = String(month).padStart(2, "0");
+  return `${year}-${m}-01`;
+}
+
 // Lookup membership by membership number (cust_code) and derive club/state
 export async function lookupMembership(req, res) {
   try {
@@ -213,7 +238,96 @@ export async function purchasePT(req, res) {
       });
     }
 
-    // Email receipt (member + PT Manager); no PDFs
+    // Post sale to production POS via web_proc_InsertPurchase (DB-atomic)
+    // Frontend should provide cardBrand, cardMasked, and expDateMMYY when available
+    const cardBrand =
+      payment?.cardBrand || payment?.brand || saleResult?.cardBrand || "";
+    const maskedCard =
+      payment?.cardMasked || payment?.masked || saleResult?.masked || "";
+    const expMMYY =
+      payment?.expDateMMYY || payment?.exp || saleResult?.expDateMMYY || "";
+
+    const issuer4 = toFourCharIssuer(cardBrand);
+    const expDate = mmYYToDate(expMMYY) || null;
+    const qty = 1;
+    const salesRep =
+      parseInt(process.env.ONLINE_SALES_REP_CODE || "1109779", 10) || 1109779;
+    const createGiftCert = "Y";
+    const description =
+      ptPackage?.description ||
+      "New Intro Personal Training Package";
+
+    // Validate required DB params
+    if (!ptPackage?.invtr_upccode) {
+      return res.status(400).json({
+        success: false,
+        message: "PT package UPC is required for posting to POS",
+      });
+    }
+    if (!issuer4 || !maskedCard || !expDate) {
+      // We require masked card and expiration for tender SP
+      return res.status(400).json({
+        success: false,
+        message:
+          "Missing card details (brand, masked number, or expiration) for POS tender posting",
+      });
+    }
+
+    let dbTransactionId = null;
+    try {
+      const rows = await pool.query(
+        clubId,
+        "EXECUTE PROCEDURE web_proc_InsertPurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          member.membershipNumber, // parCustCode
+          clubId, // parClub
+          ptPackage.invtr_upccode, // parUPC
+          qty, // parQty
+          Number(ptPackage.price || amount || 0).toFixed(3), // parPrice (ignored by SP for totals)
+          issuer4, // parCC_Issuer (CHAR(4))
+          expDate, // parCC_Exp (DATE)
+          maskedCard, // parCC_Masked
+          salesRep, // parSalesRepEmpCode
+          createGiftCert, // parCreateGiftCert
+          description, // parDescription
+        ]
+      );
+
+      // rows[0] should contain: result, sql_error, isam_error, error_msg, rsTrans
+      if (Array.isArray(rows) && rows.length > 0) {
+        const r = rows[0];
+        // Heuristic extraction: last column is rsTrans
+        const values = Object.values(r);
+        const rsTrans = values.length ? Number(values[values.length - 1]) : null;
+        const resultCode = Number(values[0] ?? 0);
+
+        if (!rsTrans || resultCode !== 0) {
+          const errMsg =
+            (values.length > 3 && values[3] && String(values[3]).trim()) ||
+            "Purchase posting failed";
+          return res.status(500).json({
+            success: false,
+            message: errMsg,
+            details: { resultCode, rsTrans },
+          });
+        }
+        dbTransactionId = rsTrans;
+      } else {
+        return res.status(500).json({
+          success: false,
+          message:
+            "No result returned from web_proc_InsertPurchase; transaction not created",
+        });
+      }
+    } catch (dbErr) {
+      return res.status(500).json({
+        success: false,
+        message: "Database error while posting purchase",
+        error: dbErr.message,
+      });
+    }
+
+    // Email receipt (member + PT Manager); no PDFs, include DB transaction id when available
     await emailService.sendPTPurchaseReceipt(
       {
         firstName: member.firstName,
@@ -226,6 +340,7 @@ export async function purchasePT(req, res) {
         processorName: saleResult.processorName,
         transactionId: saleResult.transactionId,
         amount,
+        dbTransactionId,
       },
       {
         id: clubId,
