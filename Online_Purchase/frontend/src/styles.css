@@ -249,6 +249,7 @@ body {
 	font-weight: 800;
 	font-size: 20px;
 	letter-spacing: 0.2px;
+	/* lime green */
 	color: #a3e635;
 }
 .price-note {
@@ -358,6 +359,71 @@ body {
 	text-align: center;
 	font-size: 13px;
 	background: rgba(0, 0, 0, 0.18);
+}
+
+/* Modal */
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+}
+.modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(3, 18, 32, 0.55);
+	backdrop-filter: blur(2px);
+}
+.modal__content {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(560px, 92vw);
+	background: #ffffff;
+	border-radius: 14px;
+	box-shadow: 0 24px 60px rgba(3, 18, 32, 0.35);
+	padding: 18px 18px 16px;
+	color: #0e1b35;
+}
+.modal__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 800;
+}
+.receipt-note {
+	color: #334155;
+	line-height: 1.5;
+}
+
+.modal .btn--primary {
+\tbackground: #0082b5;
+\tcolor: #ffffff;
+\tborder: 1px solid #006a94;
+}
+.modal .btn--primary:hover:not([disabled]) {
+\tbackground: #0077a3;
+}
+.modal .btn--primary:focus-visible {
+\toutline: none;
+\tbox-shadow: 0 0 0 3px rgba(0, 130, 181, 0.25);
+}
+
+.modal__header {
+	margin: -18px -18px 12px -18px;
+	padding: 12px 16px;
+	background: linear-gradient(90deg, #00a3a3 0%, #0082b5 60%, #004f6e 100%);
+	color: #ffffff;
+	border-top-left-radius: 14px;
+	border-top-right-radius: 14px;
+}
+.modal__body .kv__key {
+	color: #475569;
+}
+.modal__body .kv__value {
+	color: #0f172a;
 }
 
 

@@ -19,6 +19,8 @@ export default function App() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
+	const [receiptOpen, setReceiptOpen] = useState(false);
+	const [receipt, setReceipt] = useState(null);
 
 	// Payment state
 	const isColorado = club?.state === "CO";
@@ -141,6 +143,14 @@ export default function App() {
 				});
 				if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
 				setSuccess(`Payment successful via ${data.processor}. Transaction #${data.transactionId}`);
+				setReceipt({
+					membershipNumber: memberPayload.membershipNumber,
+					description: ptPackagePayload.description,
+					price: Number(ptPackagePayload.price || 0),
+					last4: data?.last4 || "",
+					date: new Date().toISOString(),
+				});
+				setReceiptOpen(true);
 				setPaymentError("");
 			} catch (err) {
 				setPaymentError(err.message);
@@ -197,6 +207,14 @@ export default function App() {
 				});
 				if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
 				setSuccess(`Payment successful via ${data.processor}. Transaction #${data.transactionId}`);
+				setReceipt({
+					membershipNumber: memberPayload.membershipNumber,
+					description: ptPackagePayload.description,
+					price: Number(ptPackagePayload.price || 0),
+					last4: data?.last4 || "",
+					date: new Date().toISOString(),
+				});
+				setReceiptOpen(true);
 				setPaymentError("");
 			} catch (err) {
 				setPaymentError(err.message);
@@ -505,16 +523,16 @@ export default function App() {
 						{club?.state && (
 							<div className="op-brand" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
 								{club.state === 'NM' && (
-									<img src={`${import.meta.env.BASE_URL}nmsw_logo%20resize50.jpg`} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+									<img src={`${import.meta.env.BASE_URL}nmsw_logo%20resize50_colored.jpg`} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
 								)}
 								{club.state === 'CO' && (
-									<img src={`${import.meta.env.BASE_URL}CAC_Logo%20resize%2040.jpg`} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+									<img src={`${import.meta.env.BASE_URL}CAC_Logo%20resize%2040_colored.jpg`} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
 								)}
 							</div>
 						)}
-						<h1 className="op-title">Purchase Package</h1>
+						<h1 className="op-title">Purchase Form</h1>
 						<p className="op-subtitle">
-							Enter your Membership # to purchase a package.
+							Enter your Membership # to start your purchase.
 						</p>
 					</header>
 					<div className="card">
@@ -653,6 +671,27 @@ export default function App() {
 											? "Open Secure Payment"
 											: "Pay Now"}
 								</button>
+								{import.meta.env.DEV && (
+									<button
+										className="btn"
+										style={{ marginLeft: 10, marginTop: 10 }}
+										onClick={() => {
+											const demo = {
+												membershipNumber:
+													member?.membershipNumber || membershipNumber || "000000",
+												description: ptPackage?.description || "Package",
+												price: Number(ptPackage?.price || 149),
+												last4: "4242",
+												date: new Date().toISOString(),
+											};
+											console.log("Preview Receipt demo", demo);
+											setReceipt(demo);
+											setReceiptOpen(true);
+										}}
+									>
+										Preview Receipt
+									</button>
+								)}
 								<div className="secure-note">Payments are processed securely via hosted payment forms. Your card details are tokenized and never stored on our servers.</div>
 								{success && <div className="alert alert--success">{success}</div>}
 							</div>
@@ -660,6 +699,61 @@ export default function App() {
 					)}
 				</div>
 			</main>
+
+			{receiptOpen && receipt && (
+				<div className="modal" style={{ position: 'fixed', inset: 0, zIndex: 10000 }}>
+					<div className="modal__backdrop" onClick={() => setReceiptOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(3,18,32,0.55)' }} />
+					<div className="modal__content" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(560px, 92vw)', background: '#ffffff', borderRadius: 14, boxShadow: '0 24px 60px rgba(3,18,32,0.35)', padding: '18px 18px 16px', color: '#0e1b35' }}>
+						<div className="modal__header">
+							<h3 className="modal__title">Receipt</h3>
+						</div>
+						<div className="modal__body">
+						<div className="kv" style={{ marginTop: 4 }}>
+							<div className="kv__row">
+								<div className="kv__key">Membership #</div>
+								<div className="kv__value">{receipt.membershipNumber}</div>
+							</div>
+							<div className="kv__row">
+								<div className="kv__key">Package</div>
+								<div className="kv__value">{receipt.description}</div>
+							</div>
+							<div className="kv__row">
+								<div className="kv__key">Price</div>
+								<div className="kv__value">${Number(receipt.price || 0).toFixed(2)}</div>
+							</div>
+							<div className="kv__row">
+								<div className="kv__key">Card</div>
+								<div className="kv__value">{receipt.last4 ? `•••• ${receipt.last4}` : "—"}</div>
+							</div>
+							<div className="kv__row">
+								<div className="kv__key">Date</div>
+								<div className="kv__value">{new Date(receipt.date).toLocaleString()}</div>
+							</div>
+						</div>
+						<p className="receipt-note" style={{ marginTop: 12 }}>
+							Congratulations on enhancing your fitness journey! The above item has been added to your membership.
+							A Club representative will be reaching out to you, or you can go to the club and make arrangements
+							to start using this purchase!
+						</p>
+						{receiptEmail && receiptEmail.trim().length > 0 && (
+							<p className="receipt-note" style={{ marginTop: 8 }}>
+								A copy of this receipt will be emailed to <strong>{receiptEmail.trim()}</strong>.
+							</p>
+						)}
+						<div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end" }}>
+							<button
+								className="btn btn--primary"
+								style={{ background: '#0082b5', color: '#ffffff', border: '1px solid #006a94' }}
+								onClick={() => setReceiptOpen(false)}
+							>
+								Close
+							</button>
+						</div>
+						</div>
+					</div>
+				</div>
+			)}
+
 			<Footer />
 		</div>
 	);
