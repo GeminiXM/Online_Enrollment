@@ -110,19 +110,29 @@ export default function App() {
 
 	const handleFluidPayToken = useCallback(
 		async (token) => {
-			if (!member || !ptPackage || !club) {
+			if (!member?.membershipNumber || !ptPackage?.invtr_upccode || !club?.id) {
 				setPaymentError("Membership details missing. Please lookup again.");
 				setPaymentSubmitting(false);
 				return;
 			}
 			try {
+				// Only send the minimal membership + package data needed by the backend
+				const memberPayload = {
+					membershipNumber: member.membershipNumber,
+				};
+				const ptPackagePayload = {
+					description: ptPackage.description,
+					price: ptPackage.price,
+					invtr_upccode: ptPackage.invtr_upccode,
+				};
+
 				const { ok, data } = await fetchJson("/api/online-buy/purchase", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
 						clubId: club.id,
-						member,
-						ptPackage,
+						member: memberPayload,
+						ptPackage: ptPackagePayload,
 						payment: { processor: "FLUIDPAY", token },
 					}),
 				});
@@ -140,12 +150,22 @@ export default function App() {
 
 	const handleConvergeSuccess = useCallback(
 		async (response) => {
-			if (!member || !ptPackage || !club) {
+			if (!member?.membershipNumber || !ptPackage?.invtr_upccode || !club?.id) {
 				setPaymentError("Membership details missing. Please lookup again.");
 				setPaymentSubmitting(false);
 				return;
 			}
 			try {
+				// Only send the minimal membership + package data needed by the backend
+				const memberPayload = {
+					membershipNumber: member.membershipNumber,
+				};
+				const ptPackagePayload = {
+					description: ptPackage.description,
+					price: ptPackage.price,
+					invtr_upccode: ptPackage.invtr_upccode,
+				};
+
 				const transactionId =
 					response?.ssl_txn_id ||
 					response?.ssl_transaction_id ||
@@ -156,8 +176,8 @@ export default function App() {
 				}
 				const payload = {
 					clubId: club.id,
-					member,
-					ptPackage,
+					member: memberPayload,
+					ptPackage: ptPackagePayload,
 					payment: {
 						processor: "CONVERGE_HPP",
 						alreadyProcessed: true,

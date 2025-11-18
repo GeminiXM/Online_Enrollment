@@ -30,9 +30,9 @@ function mmYYToDate(mmYY) {
   const month = parseInt(mm, 10);
   if (!month || month < 1 || month > 12) return null;
   const year = 2000 + parseInt(yy, 10);
-  // Format as YYYY-MM-01 which Informix DATE parameter will accept
+  // Format as MM/DD/YYYY which matches the working Informix DATE input
   const m = String(month).padStart(2, "0");
-  return `${year}-${m}-01`;
+  return `${m}/01/${year}`;
 }
 
 // Lookup membership by membership number (cust_code) and derive club/state
@@ -275,6 +275,19 @@ export async function purchasePT(req, res) {
 
     let dbTransactionId = null;
     try {
+      logger.info("web_proc_InsertPurchase request", {
+        clubId,
+        membershipNumber: member.membershipNumber,
+        upc: ptPackage.invtr_upccode,
+        qty,
+        price: Number(ptPackage.price || amount || 0).toFixed(3),
+        issuer4,
+        expDate,
+        maskedCard,
+        salesRep,
+        createGiftCert,
+      });
+
       const rows = await pool.query(
         clubId,
         "EXECUTE PROCEDURE web_proc_InsertPurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -301,18 +314,37 @@ export async function purchasePT(req, res) {
         const rsTrans = values.length ? Number(values[values.length - 1]) : null;
         const resultCode = Number(values[0] ?? 0);
 
-        if (!rsTrans || resultCode !== 0) {
+        logger.info("web_proc_InsertPurchase response", {
+          rawRow: r,
+          values,
+          resultCode,
+          rsTrans,
+        });
+
+        if (!rsTrans) {
           const errMsg =
             (values.length > 3 && values[3] && String(values[3]).trim()) ||
-            "Purchase posting failed";
+            "Purchase posting failed (no transaction id returned)";
           return res.status(500).json({
             success: false,
             message: errMsg,
-            details: { resultCode, rsTrans },
+            details: { resultCode, rsTrans, row: r },
           });
         }
+
+        // rsTrans is present, so a POS transaction was created.
+        // If resultCode is non-zero, treat it as a warning but NOT a hard failure.
+        if (resultCode !== 0) {
+          logger.warn("web_proc_InsertPurchase non-zero resultCode with valid rsTrans", {
+            resultCode,
+            rsTrans,
+            rawRow: r,
+          });
+        }
+
         dbTransactionId = rsTrans;
       } else {
+        logger.error("web_proc_InsertPurchase returned no rows");
         return res.status(500).json({
           success: false,
           message:
@@ -320,6 +352,10 @@ export async function purchasePT(req, res) {
         });
       }
     } catch (dbErr) {
+      logger.error("web_proc_InsertPurchase error", {
+        error: dbErr.message,
+        stack: dbErr.stack,
+      });
       return res.status(500).json({
         success: false,
         message: "Database error while posting purchase",

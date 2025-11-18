@@ -95,11 +95,18 @@ export async function processFluidPaySale(clubId, amount, token, customerInfo) {
 	}
 
 	const apiUrl = `${fluidPayInfo.fluidpay_base_url}/api/transaction`;
+
+	// FluidPay expects amount as an unsigned integer (cents), not a string.
+	// Align with the main Online_Enrollment implementation.
+	const amountInCents = Math.round(Number(amount) * 100);
+
 	const payload = {
 		type: "sale",
-		amount: Number(amount).toFixed(2),
-		token,
-		processor_id: fluidPayInfo.merchant_id,
+		amount: amountInCents,
+		payment_method: {
+			token,
+		},
+		processor_id: fluidPayInfo.merchant_id.trim(),
 		billing_address: {
 			first_name: customerInfo?.firstName || "",
 			last_name: customerInfo?.lastName || "",
@@ -110,20 +117,62 @@ export async function processFluidPaySale(clubId, amount, token, customerInfo) {
 	};
 	const headers = {
 		Authorization: fluidPayInfo.fluidpay_api_key,
-		"Content-Type": "application/json",
 	};
-	const response = await axios.post(apiUrl, payload, { headers, timeout: 30000 });
-	const { data } = response;
-	logger.info("FluidPay sale response", { data });
-	if (data?.status === "approved" || data?.status === "success") {
+
+	try {
+		const response = await axios.post(apiUrl, payload, { headers, timeout: 30000 });
+		const { data } = response;
+		logger.info("FluidPay sale response", { data });
+
+		if (data?.status === "approved" || data?.status === "success") {
+			// Try to extract card details for POS tender posting
+			const card = data?.data?.response_body?.card || {};
+			const cardBrand = card.card_type || card.card_brand || "";
+			const maskedCard = card.masked_card || "";
+			const expMMYY = card.expiration_date || card.exp_date || "";
+
+			return {
+				success: true,
+				transactionId: data?.data?.id || data?.id || data?.transaction_id || "",
+				approvalCode:
+					card.auth_code ||
+					data?.authorization_code ||
+					data?.auth_code ||
+					"",
+				vaultToken: data?.customer_id || null,
+				cardBrand,
+				masked: maskedCard,
+				expDateMMYY: expMMYY,
+			};
+		}
+
 		return {
-			success: true,
-			transactionId: data?.id || data?.transaction_id || "",
-			approvalCode: data?.approval_code || "",
-			vaultToken: data?.customer_id || null,
+			success: false,
+			message: data?.message || data?.msg || "FluidPay sale failed",
 		};
+	} catch (error) {
+		logger.error("FluidPay sale error", {
+			message: error.message,
+			status: error?.response?.status,
+			data: error?.response?.data,
+		});
+
+		let userMessage = "FluidPay sale failed";
+		const respData = error?.response?.data;
+		if (respData) {
+			if (typeof respData === "string") {
+				userMessage = respData;
+			} else if (respData.message) {
+				userMessage = respData.message;
+			} else if (respData.error) {
+				userMessage = respData.error;
+			} else if (respData.msg) {
+				userMessage = respData.msg;
+			}
+		}
+
+		return { success: false, message: userMessage };
 	}
-	return { success: false, message: data?.message || "FluidPay sale failed" };
 }
 
 

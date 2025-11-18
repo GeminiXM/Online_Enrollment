@@ -140,15 +140,28 @@ const pool = {
     try {
       conn = await pool.getConnection(clubId);
       return new Promise((resolve, reject) => {
+        // Log every DB call with SQL and parameters for troubleshooting
+        logger.info("DB query start", {
+          clubId,
+          sql,
+          params,
+        });
+
         conn.query(sql, params, (err, data) => {
           if (err) {
             logger.error("DB query error", {
               error: err.message,
               clubId,
               sql,
+              params,
             });
             reject(err);
           } else {
+            logger.info("DB query success", {
+              clubId,
+              sql,
+              rowCount: Array.isArray(data) ? data.length : 0,
+            });
             resolve(data);
           }
         });
