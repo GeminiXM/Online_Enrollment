@@ -262,6 +262,14 @@ body {
 	font-size: 12px;
 	color: rgba(255, 255, 255, 0.85);
 }
+.valid-icon {
+\tcolor: #22c55e;
+\tfont-weight: 800;
+}
+.invalid-icon {
+\tcolor: #ff98a1;
+\tfont-weight: 800;
+}
 .checkbox {
 	display: flex;
 	gap: 10px;
@@ -424,6 +432,15 @@ body {
 }
 .modal__body .kv__value {
 	color: #0f172a;
+}
+
+.modal__header--error {
+\tmargin: -18px -18px 12px -18px;
+\tpadding: 12px 16px;
+\tbackground: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+\tcolor: #ffffff;
+\tborder-top-left-radius: 14px;
+\tborder-top-right-radius: 14px;
 }
 
 

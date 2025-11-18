@@ -7,6 +7,9 @@ import {
   purchasePT,
   getFluidPayInfo,
   createConvergeSessionToken,
+  sendReceiptPreview,
+  validateEmail,
+  sendInternalPTPreview,
 } from "../controllers/onlineBuyController.js";
 
 const router = express.Router();
@@ -25,5 +28,14 @@ router.get("/fluidpay-info", getFluidPayInfo);
 
 // POST /api/online-buy/converge-hpp/session-token
 router.post("/converge-hpp/session-token", createConvergeSessionToken);
+
+// POST /api/online-buy/send-receipt-preview
+router.post("/send-receipt-preview", sendReceiptPreview);
+
+// POST /api/online-buy/validate-email
+router.post("/validate-email", validateEmail);
+
+// POST /api/online-buy/send-internal-pt-preview
+router.post("/send-internal-pt-preview", sendInternalPTPreview);
 
 export default router;

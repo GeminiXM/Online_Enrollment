@@ -9,6 +9,73 @@ import {
   processFluidPaySale,
 } from "../services/paymentService.js";
 import emailService from "../services/emailService.js";
+import dns from "dns/promises";
+
+function isEmailFormatValid(email) {
+  const e = String(email || "").trim();
+  if (!e) return false;
+  // Lightweight format check
+  const re = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/i;
+  return re.test(e);
+}
+
+async function resolveMxWithTimeout(domain, timeoutMs = 1500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    // dns.promises doesn't accept AbortSignal; emulate via race
+    const result = await Promise.race([
+      dns.resolveMx(domain),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("DNS timeout")), timeoutMs)
+      ),
+    ]);
+    return Array.isArray(result) ? result : [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function validateEmail(req, res) {
+  try {
+    const email = (req.body?.email || "").toString().trim();
+    if (!email) {
+      return res.status(400).json({ valid: false, message: "Email is required" });
+    }
+    if (!isEmailFormatValid(email)) {
+      return res.status(200).json({ valid: false, message: "Invalid email format" });
+    }
+    const domain = email.split("@")[1];
+    if (!domain) {
+      return res.status(200).json({ valid: false, message: "Invalid email domain" });
+    }
+
+    // Allowlist corporate domains to avoid false negatives due to DNS policies
+    const allowlist = new Set([
+      "wellbridge.com",
+      "coloradoathleticclubs.com",
+      "sportsandwellness.com",
+    ]);
+    if (allowlist.has(domain.toLowerCase())) {
+      return res.json({ valid: true });
+    }
+
+    // MX lookup (best-effort)
+    try {
+      const mx = await resolveMxWithTimeout(domain, 1500);
+      // If there are no MX records, many deliverable domains still accept mail via A records.
+      // Do not block; treat as soft-pass.
+      return res.json({ valid: true });
+    } catch (e) {
+      logger.warn("MX lookup failed", { domain, error: e.message });
+      // If DNS fails (server policy, firewall, etc.), do not block.
+      return res.json({ valid: true });
+    }
+  } catch (error) {
+    logger.error("validateEmail error", { error: error.message });
+    return res.status(500).json({ valid: false, message: "Server error" });
+  }
+}
 
 // Helpers
 function toFourCharIssuer(brand) {
@@ -49,6 +116,15 @@ export async function lookupMembership(req, res) {
         .json({ success: false, message: "membershipNumber is required" });
     }
 
+    // Basic input validation: digits only, up to 10 chars
+    const digitsOnly = /^[0-9]+$/;
+    if (!digitsOnly.test(membershipNumber) || membershipNumber.length > 10) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid membership number format",
+      });
+    }
+
     // Heuristic: require clubId input to resolve DB; if not provided, try both CO and NM common ranges
     const clubsToTry = clubId
       ? [parseInt(clubId)]
@@ -65,9 +141,17 @@ export async function lookupMembership(req, res) {
           [membershipNumber]
         );
         if (Array.isArray(rows) && rows.length > 0) {
-          found = rows[0];
-          foundClubId = c;
-          break;
+          const row = rows[0];
+          // Validate essential fields
+          const name =
+            (row.membership_name || row.bus_name || "").toString().trim();
+          const num =
+            (row.membership_number || row.cust_code || "").toString().trim();
+          if (name && num) {
+            found = row;
+            foundClubId = c;
+            break;
+          }
         }
       } catch (e) {
         logger.warn("lookup attempt failed", { club: c, error: e.message });
@@ -80,13 +164,21 @@ export async function lookupMembership(req, res) {
         .json({ success: false, message: "Membership not found" });
     }
 
+    // Prefer the member's home club from the returned row; fall back to the DB shard we matched
+    const memberClubIdRaw = (found?.club ?? found?.CLUB);
+    const memberClubId = parseInt(memberClubIdRaw, 10);
+    const resolvedClubId = Number.isFinite(memberClubId) ? memberClubId : foundClubId;
+
     const state =
-      pool.getStateForClub(foundClubId) ||
+      pool.getStateForClub(resolvedClubId) ||
       (found.state || found.STATE || "").toUpperCase();
     const club = {
-      id: foundClubId,
+      // Keep the DB shard id used for connections to avoid invalid IDs breaking subsequent queries
+      id: String(foundClubId),
       state,
-      name: `Club ${foundClubId}`,
+      // Provide the member's actual home club separately for display purposes
+      homeClubId: Number.isFinite(memberClubId) ? String(memberClubId) : null,
+      name: `Club ${Number.isFinite(memberClubId) ? memberClubId : foundClubId}`,
       email: process.env.DEFAULT_CLUB_EMAIL || "",
     };
 
@@ -165,7 +257,7 @@ export async function purchasePT(req, res) {
   try {
     const {
       clubId,
-      member, // { membershipNumber, firstName, lastName, email, address, city, state, zipCode, phone }
+      member, // { membershipNumber, membershipName?, firstName, lastName, email, address, city, state, zipCode, phone }
       ptPackage, // { description, price, invtr_upccode }
       payment, // { processor: "FLUIDPAY"|"CONVERGE", token or card fields }
     } = req.body || {};
@@ -179,6 +271,25 @@ export async function purchasePT(req, res) {
     const state = pool.getStateForClub(clubId);
     const isColorado = state === "CO";
     const isNewMexico = state === "NM";
+
+    // Ensure membershipName for emails; if not provided, fetch from DB
+    let resolvedMemberName = (member?.membershipName || "").toString().trim();
+    if (!resolvedMemberName) {
+      try {
+        const mRows = await pool.query(
+          clubId,
+          "EXECUTE PROCEDURE web_proc_GetMembership(?)",
+          [member.membershipNumber]
+        );
+        if (Array.isArray(mRows) && mRows.length > 0) {
+          const r = mRows[0] || {};
+          resolvedMemberName =
+            (r.membership_name || r.bus_name || "").toString().trim();
+        }
+      } catch (e) {
+        // Non-fatal for purchase flow; continue without name if lookup fails
+      }
+    }
 
     let saleResult;
     const amount = Number(ptPackage.price);
@@ -370,6 +481,7 @@ export async function purchasePT(req, res) {
         lastName: member.lastName,
         email: member.email,
         membershipNumber: member.membershipNumber,
+        membershipName: resolvedMemberName || member.membershipName || "",
       },
       ptPackage,
       {
@@ -386,10 +498,52 @@ export async function purchasePT(req, res) {
       }
     );
 
+    // Internal notifications to PTM/GM/Regional using Online_Enrollment logic
+    try {
+      const clubIdStr = String(clubId);
+      // GM emails by club id sourced from Online_Enrollment ClubContext
+      const clubIdToGm = {
+        "201": "nhpgm@wellbridge.com",
+        "202": "nmtgm@wellbridge.com",
+        "203": "ndtgm@wellbridge.com",
+        "204": "ndngm@wellbridge.com",
+        "205": "nrpgm@wellbridge.com",
+        "252": "cdcgm@wellbridge.com",
+        "254": "ctbgm@wellbridge.com",
+        "257": "cfigm@wellbridge.com",
+        "292": "cmogm@wellbridge.com",
+      };
+      const gmEmail = clubIdToGm[clubIdStr] || "";
+      const derivePtm = (gm) => {
+        if (!gm || !gm.includes("@")) return "";
+        const [local, domain] = gm.split("@");
+        return `${local.replace(/gm$/i, "ptm")}@${domain}`;
+      };
+      const ptmEmail = derivePtm(gmEmail);
+      const regionalEmail = state === "CO" ? "cacregptm@wellbridge.com" : state === "NM" ? "nmswregptm@wellbridge.com" : "";
+      const recipients = [gmEmail, ptmEmail, regionalEmail].filter(Boolean).join(", ");
+      if (recipients) {
+        await emailService.sendPreviewPTInternal(
+          recipients,
+          {
+            membershipNumber: member.membershipNumber,
+            membershipName: resolvedMemberName || member.membershipName || ""
+          },
+          { description: ptPackage.description, price: ptPackage.price },
+          { id: clubId, name: `Club ${clubId}`, state },
+      member.email || "",
+      dbTransactionId || ""
+        );
+      }
+    } catch (e) {
+      logger.warn("Failed to send internal PT notifications", { error: e.message });
+    }
+
     return res.json({
       success: true,
       transactionId: saleResult.transactionId,
       processor: saleResult.processorName,
+      dbTransactionId,
     });
   } catch (error) {
     logger.error("purchasePT error", {
@@ -618,5 +772,89 @@ export async function createConvergeSessionToken(req, res) {
       message: "Failed to create Converge session token",
       upstream: error?.response?.data || null,
     });
+  }
+}
+
+export async function sendReceiptPreview(req, res) {
+  try {
+    const {
+      toEmail = "mmoore@wellbridge.com",
+      receipt = {},
+      club = {},
+    } = req.body || {};
+
+    const ok = await emailService.sendPreviewReceipt(toEmail, {
+      ...receipt,
+      membershipName: receipt?.membershipName || req.body?.member?.membershipName || "",
+      dbTransactionId: receipt?.dbTransactionId || req.body?.dbTransactionId || "DEMO123456",
+    }, {
+      id: club?.id || null,
+      name: club?.name || (club?.id ? `Club ${club.id}` : "Club"),
+      state: club?.state || null,
+    });
+
+    if (!ok) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to send preview receipt" });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error("sendReceiptPreview error", {
+      error: error.message,
+      body: req.body,
+    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error sending preview receipt" });
+  }
+}
+
+export async function sendInternalPTPreview(req, res) {
+  try {
+    const {
+      toEmail = "mmoore@wellbridge.com",
+      member = {},
+      ptPackage = {},
+      club = {},
+      receiptEmail = "",
+      dbTransactionId = "DEMO123456",
+    } = req.body || {};
+
+    const ok = await emailService.sendPreviewPTInternal(
+      toEmail,
+      {
+        membershipNumber: (member?.membershipNumber || "").toString().trim(),
+        membershipName: (member?.membershipName || "").toString().trim(),
+      },
+      {
+        description: ptPackage?.description,
+        price: ptPackage?.price,
+      },
+      {
+        id: club?.id || null,
+        name: club?.name || (club?.id ? `Club ${club.id}` : "Club"),
+        state: club?.state || null,
+      },
+      (receiptEmail || "").toString().trim(),
+      dbTransactionId
+    );
+
+    if (!ok) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to send internal preview PT notification" });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error("sendInternalPTPreview error", {
+      error: error.message,
+      body: req.body,
+    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error sending internal preview PT notification" });
   }
 }

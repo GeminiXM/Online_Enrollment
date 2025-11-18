@@ -16,11 +16,20 @@ export default function App() {
 	const [club, setClub] = useState(null);
 	const [ptPackage, setPtPackage] = useState(null);
 	const [receiptEmail, setReceiptEmail] = useState("");
+	const [emailValid, setEmailValid] = useState(false);
+	const [emailChecking, setEmailChecking] = useState(false);
+	const [emailMsg, setEmailMsg] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
 	const [receiptOpen, setReceiptOpen] = useState(false);
 	const [receipt, setReceipt] = useState(null);
+	const [errorModalOpen, setErrorModalOpen] = useState(false);
+	const [errorModalMessage, setErrorModalMessage] = useState("");
+	const showError = useCallback((message) => {
+		setErrorModalMessage(message || "An unexpected error occurred.");
+		setErrorModalOpen(true);
+	}, []);
 
 	// Payment state
 	const isColorado = club?.state === "CO";
@@ -63,7 +72,10 @@ export default function App() {
 		]),
 		[]
 	);
-	const homeClubName = club?.id ? (CLUB_ID_TO_NAME[String(club.id)] || `Club ${club.id}`) : "";
+	const homeClubName = useMemo(() => {
+		const homeId = (club?.homeClubId && String(club.homeClubId)) || (club?.id && String(club.id)) || "";
+		return homeId ? (CLUB_ID_TO_NAME[homeId] || `Club ${homeId}`) : "";
+	}, [club, CLUB_ID_TO_NAME]);
 
 	const membershipStatusLabel = (status) => {
 		const s = (status || "").toString().trim().toUpperCase();
@@ -87,6 +99,11 @@ export default function App() {
 		setPtPackage(null);
 		setReceiptEmail("");
 		try {
+			// Frontend guard: numeric only, max 10
+			const raw = membershipNumber.trim();
+			if (!/^[0-9]+$/.test(raw) || raw.length > 10) {
+				throw new Error("Please enter a valid membership number (digits only, up to 10).");
+			}
 	const params = new URLSearchParams();
 	params.set("membershipNumber", membershipNumber.trim());
 	if (clubIdOverride.trim()) params.set("clubId", clubIdOverride.trim());
@@ -94,7 +111,15 @@ export default function App() {
 	const { ok, data } = await fetchJson(`/api/online-buy/member?${params.toString()}`);
 			if (!ok || !data?.success) throw new Error(data?.message || "Lookup failed");
 			console.log("Lookup response", data);
-			setMember(data.member);
+			// Validate essential fields
+			const m = data.member || {};
+			const essentialOk =
+				(m.membershipName || "").toString().trim().length > 0 &&
+				(m.membershipNumber || "").toString().trim().length > 0;
+			if (!essentialOk) {
+				throw new Error("Membership not found");
+			}
+			setMember(m);
 			setClub(data.club);
 			if (data?.club?.id) {
 				setClubIdOverride(String(data.club.id));
@@ -107,6 +132,7 @@ export default function App() {
 			setPtPackage(data2.ptPackage);
 		} catch (e) {
 			setError(e.message);
+			showError(`${e.message}. Please contact your club to make this purchase.`);
 		} finally {
 			setIsLoading(false);
 		}
@@ -123,6 +149,7 @@ export default function App() {
 				// Only send the minimal membership + package data needed by the backend
 				const memberPayload = {
 					membershipNumber: member.membershipNumber,
+					membershipName: member.membershipName || "",
 					email: receiptEmail || "",
 				};
 				const ptPackagePayload = {
@@ -148,12 +175,14 @@ export default function App() {
 					description: ptPackagePayload.description,
 					price: Number(ptPackagePayload.price || 0),
 					last4: data?.last4 || "",
+					dbTransactionId: data?.dbTransactionId || "",
 					date: new Date().toISOString(),
 				});
 				setReceiptOpen(true);
 				setPaymentError("");
 			} catch (err) {
 				setPaymentError(err.message);
+				showError(`${err.message}. Please contact your club to make this purchase.`);
 			} finally {
 				setPaymentSubmitting(false);
 			}
@@ -172,6 +201,7 @@ export default function App() {
 				// Only send the minimal membership + package data needed by the backend
 				const memberPayload = {
 					membershipNumber: member.membershipNumber,
+					membershipName: member.membershipName || "",
 					email: receiptEmail || "",
 				};
 				const ptPackagePayload = {
@@ -212,12 +242,14 @@ export default function App() {
 					description: ptPackagePayload.description,
 					price: Number(ptPackagePayload.price || 0),
 					last4: data?.last4 || "",
+					dbTransactionId: data?.dbTransactionId || "",
 					date: new Date().toISOString(),
 				});
 				setReceiptOpen(true);
 				setPaymentError("");
 			} catch (err) {
 				setPaymentError(err.message);
+				showError(`${err.message}. Please contact your club to make this purchase.`);
 			} finally {
 				setPaymentSubmitting(false);
 			}
@@ -239,7 +271,9 @@ export default function App() {
 			if (ok && data?.success && data.fluidPayInfo) {
 				setFluidPayInfo(data.fluidPayInfo);
 			} else if (ok === false) {
-				setPaymentError(data?.message || "Unable to load FluidPay configuration.");
+				const msg = data?.message || "Unable to load FluidPay configuration.";
+				setPaymentError(msg);
+				showError(`${msg} Please contact your club to make this purchase.`);
 			}
 		})();
 
@@ -320,10 +354,14 @@ export default function App() {
 							if (resp.status === "success" && resp.token) {
 								handleFluidPayToken(resp.token);
 							} else if (resp.status === "error") {
-								setPaymentError(resp.msg || "Payment form error.");
+								const msg = resp.msg || "Payment form error.";
+								setPaymentError(msg);
+								showError(`${msg} Please contact your club to make this purchase.`);
 								setPaymentSubmitting(false);
 							} else if (resp.status === "validation") {
-								setPaymentError("Please check your payment information and try again.");
+								const msg = "Please check your payment information and try again.";
+								setPaymentError(msg);
+								showError(`${msg} If this persists, please contact your club to make this purchase.`);
 								setPaymentSubmitting(false);
 							}
 						},
@@ -337,7 +375,9 @@ export default function App() {
 					requestAnimationFrame(createTokenizer);
 				});
 			} catch (err) {
-				setPaymentError("Unable to initialize FluidPay form. Please refresh and try again.");
+				const msg = "Unable to initialize FluidPay form. Please refresh and try again.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
 				setFluidPayReady(false);
 				fluidPayTokenizerRef.current = null;
 				setPaymentSubmitting(false);
@@ -356,7 +396,9 @@ export default function App() {
 				});
 			};
 			scriptElement.onerror = () => {
-				setPaymentError("Unable to load FluidPay payment form. Please refresh and try again.");
+				const msg = "Unable to load FluidPay payment form. Please refresh and try again.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
 			};
 			document.body.appendChild(scriptElement);
 		} else {
@@ -393,8 +435,11 @@ export default function App() {
 			scriptRef.src = "https://api.convergepay.com/hosted-payments/PayWithConverge.js";
 			scriptRef.async = true;
 			scriptRef.onload = () => setConvergeReady(true);
-			scriptRef.onerror = () =>
-				setPaymentError("Unable to load Converge payment window. Please refresh and try again.");
+			scriptRef.onerror = () => {
+				const msg = "Unable to load Converge payment window. Please refresh and try again.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
+			};
 			document.body.appendChild(scriptRef);
 		} else {
 			setConvergeReady(true);
@@ -414,20 +459,26 @@ export default function App() {
 			if (!data || data.converge !== true) return;
 
 			if (data.cancelled) {
-				setPaymentError("Payment cancelled.");
+				const msg = "Payment cancelled.";
+				setPaymentError(msg);
+				showError(`${msg} Please contact your club to make this purchase.`);
 				setPaymentSubmitting(false);
 				return;
 			}
 
 			if (data.errored) {
-				setPaymentError(data.error || "Payment error.");
+				const msg = data.error || "Payment error.";
+				setPaymentError(msg);
+				showError(`${msg} Please contact your club to make this purchase.`);
 				setPaymentSubmitting(false);
 				return;
 			}
 
 			const response = data.response?.data || data.response;
 			if (!response) {
-				setPaymentError("Payment response missing.");
+				const msg = "Payment response missing.";
+				setPaymentError(msg);
+				showError(`${msg} Please contact your club to make this purchase.`);
 				setPaymentSubmitting(false);
 				return;
 			}
@@ -441,7 +492,9 @@ export default function App() {
 			if (approved) {
 				handleConvergeSuccess(response);
 			} else {
-				setPaymentError(response.ssl_result_message || "Payment declined.");
+				const msg = response.ssl_result_message || "Payment declined.";
+				setPaymentError(msg);
+				showError(`${msg} Please contact your club to make this purchase.`);
 				setPaymentSubmitting(false);
 			}
 		};
@@ -457,7 +510,9 @@ export default function App() {
 
 		if (isColorado) {
 			if (!fluidPayTokenizerRef.current) {
-				setPaymentError("Secure payment form is still loading. Please wait a moment and try again.");
+				const msg = "Secure payment form is still loading. Please wait a moment and try again.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
 				return;
 			}
 			setPaymentSubmitting(true);
@@ -465,14 +520,18 @@ export default function App() {
 				fluidPayTokenizerRef.current.submit();
 			} catch (err) {
 				setPaymentSubmitting(false);
-				setPaymentError("Unable to launch FluidPay form. Please refresh and try again.");
+				const msg = "Unable to launch FluidPay form. Please refresh and try again.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
 			}
 			return;
 		}
 
 		if (isNewMexico) {
 			if (!window.PayWithConverge) {
-				setPaymentError("Converge payment window is still loading. Please wait.");
+				const msg = "Converge payment window is still loading. Please wait.";
+				setPaymentError(msg);
+				showError(`${msg} If this persists, please contact your club to make this purchase.`);
 				return;
 			}
 			setPaymentSubmitting(true);
@@ -499,19 +558,23 @@ export default function App() {
 					body: JSON.stringify(body),
 				});
 				if (!ok || !data?.ssl_txn_auth_token) {
-					throw new Error(data?.message || "Failed to start Converge payment session");
+					const msg = data?.message || "Failed to start Converge payment session";
+					throw new Error(msg);
 				}
 				window.PayWithConverge.open({
 					ssl_txn_auth_token: data.ssl_txn_auth_token,
 				});
 			} catch (err) {
 				setPaymentError(err.message);
+				showError(`${err.message}. Please contact your club to make this purchase.`);
 				setPaymentSubmitting(false);
 			}
 			return;
 		}
 
-		setPaymentError("Unsupported club configuration for payment processing.");
+		const msg = "Unsupported club configuration for payment processing.";
+		setPaymentError(msg);
+		showError(`${msg} Please contact your club to make this purchase.`);
 	};
 
 	return (
@@ -523,10 +586,10 @@ export default function App() {
 						{club?.state && (
 							<div className="op-brand" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
 								{club.state === 'NM' && (
-									<img src={`${import.meta.env.BASE_URL}nmsw_logo%20resize50_colored.jpg`} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+									<img src={`${import.meta.env.BASE_URL}nmsw_logo%20resize50_colored.jpg`} alt="New Mexico Sports & Wellness" style={{ height: 111, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
 								)}
 								{club.state === 'CO' && (
-									<img src={`${import.meta.env.BASE_URL}CAC_Logo%20resize%2040_colored.jpg`} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+									<img src={`${import.meta.env.BASE_URL}CAC_Logo%20resize%2040_colored.jpg`} alt="Colorado Athletic Club" style={{ height: 103, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
 								)}
 							</div>
 						)}
@@ -551,7 +614,7 @@ export default function App() {
 								<option value="">Select Club</option>
 								{CLUBS.map((c) => (
 									<option key={c.id} value={c.id}>
-										{c.shortName || c.name} ({c.state})
+										{c.name} ({c.state})
 									</option>
 								))}
 							</select>
@@ -626,12 +689,58 @@ export default function App() {
 							<div className="card">
 								<div className="section-title">Receipt Email</div>
 								<div className="form-row">
-									<input
-										className="input"
-										placeholder="Please enter an email for receipt"
-										value={receiptEmail}
-										onChange={(e) => setReceiptEmail(e.target.value)}
-									/>
+									<div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+										<input
+											className="input"
+											type="email"
+											autoComplete="email"
+											spellCheck={false}
+											inputMode="email"
+											placeholder="Please enter an email for receipt"
+											value={receiptEmail}
+											onChange={(e) => {
+												const val = e.target.value;
+												const email = (val || "").trim();
+												setReceiptEmail(email);
+												// Lenient client validation for autofill/saved entries
+												const looksOk = email.includes("@") && email.split("@")[1]?.includes(".");
+												if (email && looksOk) {
+													setEmailValid(true);
+													setEmailMsg("");
+												} else {
+													setEmailValid(false);
+													setEmailMsg(email ? "Invalid email format" : "");
+												}
+											}}
+											onBlur={(e) => {
+												const email = (receiptEmail || "").trim();
+												if (!email) {
+													setEmailValid(false);
+													setEmailMsg("");
+													return;
+												}
+												// Lenient client-side check to accommodate autofill/saved entries
+												const looksOk = email.includes("@") && email.split("@")[1]?.includes(".");
+												if (looksOk) {
+													setEmailValid(true);
+													setEmailMsg("");
+												} else {
+													setEmailValid(false);
+													setEmailMsg("Invalid email format");
+												}
+											}}
+										/>
+										{emailChecking ? (
+											<span className="valid-icon" title="Verifying…">…</span>
+										) : emailValid ? (
+											<span className="valid-icon" title="Verified">✓</span>
+										) : emailMsg ? (
+											<span className="invalid-icon" title={emailMsg}>!</span>
+										) : null}
+									</div>
+									{emailMsg && !emailValid && (
+										<div className="muted" style={{ color: "#ff98a1" }}>{emailMsg}</div>
+									)}
 								</div>
 							</div>
 
@@ -679,14 +788,39 @@ export default function App() {
 											const demo = {
 												membershipNumber:
 													member?.membershipNumber || membershipNumber || "000000",
+												membershipName: member?.membershipName || "",
 												description: ptPackage?.description || "Package",
 												price: Number(ptPackage?.price || 149),
 												last4: "4242",
+												dbTransactionId: "DEMO123456",
 												date: new Date().toISOString(),
 											};
 											console.log("Preview Receipt demo", demo);
 											setReceipt(demo);
 											setReceiptOpen(true);
+											// Fire-and-forget a preview email to Mark
+											fetch("/api/online-buy/send-receipt-preview", {
+												method: "POST",
+												headers: { "Content-Type": "application/json" },
+												body: JSON.stringify({
+													toEmail: "mmoore@wellbridge.com",
+													receipt: demo,
+													member: { membershipNumber: demo.membershipNumber, membershipName: demo.membershipName },
+													club: { id: club?.id, name: homeClubName, state: club?.state },
+												}),
+											}).catch(() => {});
+											// Fire-and-forget internal notification preview to Mark
+											fetch("/api/online-buy/send-internal-pt-preview", {
+												method: "POST",
+												headers: { "Content-Type": "application/json" },
+												body: JSON.stringify({
+													toEmail: "mmoore@wellbridge.com",
+													member: { membershipNumber: demo.membershipNumber, membershipName: demo.membershipName },
+													ptPackage: { description: demo.description, price: demo.price },
+													club: { id: club?.id, name: homeClubName, state: club?.state },
+													receiptEmail,
+												}),
+											}).catch(() => {});
 										}}
 									>
 										Preview Receipt
@@ -726,6 +860,10 @@ export default function App() {
 								<div className="kv__value">{receipt.last4 ? `•••• ${receipt.last4}` : "—"}</div>
 							</div>
 							<div className="kv__row">
+								<div className="kv__key">Club Transaction #</div>
+								<div className="kv__value">{receipt.dbTransactionId || "—"}</div>
+							</div>
+							<div className="kv__row">
 								<div className="kv__key">Date</div>
 								<div className="kv__value">{new Date(receipt.date).toLocaleString()}</div>
 							</div>
@@ -749,6 +887,32 @@ export default function App() {
 								Close
 							</button>
 						</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			{errorModalOpen && (
+				<div className="modal" style={{ position: 'fixed', inset: 0, zIndex: 10001 }}>
+					<div className="modal__backdrop" onClick={() => setErrorModalOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(3,18,32,0.55)' }} />
+					<div className="modal__content" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'min(520px, 92vw)', background: '#ffffff', borderRadius: 14, boxShadow: '0 24px 60px rgba(3,18,32,0.35)', padding: '18px 18px 16px', color: '#0e1b35' }}>
+						<div className="modal__header modal__header--error">
+							<h3 className="modal__title">There was a problem</h3>
+						</div>
+						<div className="modal__body">
+							<p className="receipt-note" style={{ marginTop: 4 }}>{errorModalMessage}</p>
+							<p className="receipt-note" style={{ marginTop: 10 }}>
+								Please contact your club to make this purchase.
+							</p>
+							<div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+								<button
+									className="btn"
+									onClick={() => setErrorModalOpen(false)}
+									style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#0f172a' }}
+								>
+									Close
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
