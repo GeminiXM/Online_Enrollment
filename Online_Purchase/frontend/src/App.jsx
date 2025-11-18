@@ -15,6 +15,7 @@ export default function App() {
 	const [member, setMember] = useState(null);
 	const [club, setClub] = useState(null);
 	const [ptPackage, setPtPackage] = useState(null);
+	const [receiptEmail, setReceiptEmail] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
@@ -82,6 +83,7 @@ export default function App() {
 		setMember(null);
 		setClub(null);
 		setPtPackage(null);
+		setReceiptEmail("");
 		try {
 	const params = new URLSearchParams();
 	params.set("membershipNumber", membershipNumber.trim());
@@ -119,6 +121,7 @@ export default function App() {
 				// Only send the minimal membership + package data needed by the backend
 				const memberPayload = {
 					membershipNumber: member.membershipNumber,
+					email: receiptEmail || "",
 				};
 				const ptPackagePayload = {
 					description: ptPackage.description,
@@ -145,7 +148,7 @@ export default function App() {
 				setPaymentSubmitting(false);
 			}
 		},
-		[club?.id, member, ptPackage]
+		[club?.id, member, ptPackage, receiptEmail]
 	);
 
 	const handleConvergeSuccess = useCallback(
@@ -159,6 +162,7 @@ export default function App() {
 				// Only send the minimal membership + package data needed by the backend
 				const memberPayload = {
 					membershipNumber: member.membershipNumber,
+					email: receiptEmail || "",
 				};
 				const ptPackagePayload = {
 					description: ptPackage.description,
@@ -200,7 +204,7 @@ export default function App() {
 				setPaymentSubmitting(false);
 			}
 		},
-		[club?.id, member, ptPackage]
+		[club?.id, member, ptPackage, receiptEmail]
 	);
 
 	useEffect(() => {
@@ -498,12 +502,21 @@ export default function App() {
 			<main className="op-main">
 				<div className="op-container">
 					<header className="op-header">
+						{club?.state && (
+							<div className="op-brand" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+								{club.state === 'NM' && (
+									<img src={`${import.meta.env.BASE_URL}nmsw_logo%20resize50.jpg`} alt="New Mexico Sports & Wellness" style={{ height: 84, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+								)}
+								{club.state === 'CO' && (
+									<img src={`${import.meta.env.BASE_URL}CAC_Logo%20resize%2040.jpg`} alt="Colorado Athletic Club" style={{ height: 78, width: 'auto', maxWidth: '90%', objectFit: 'contain' }} />
+								)}
+							</div>
+						)}
 						<h1 className="op-title">Purchase Package</h1>
 						<p className="op-subtitle">
-							Enter your Membership # to purchase the New Intro Personal Training Package.
+							Enter your Membership # to purchase a package.
 						</p>
 					</header>
-
 					<div className="card">
 						<div className="form-row">
 							<input
@@ -583,6 +596,24 @@ export default function App() {
 											<span className="price">${Number(ptPackage.price).toFixed(2)}</span>
 										</div>
 									</div>
+									<div className="kv__row">
+										<div className="kv__key"></div>
+										<div className="kv__value">
+											<div className="price-note">(including applicable taxes)</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="card">
+								<div className="section-title">Receipt Email</div>
+								<div className="form-row">
+									<input
+										className="input"
+										placeholder="Please enter an email for receipt"
+										value={receiptEmail}
+										onChange={(e) => setReceiptEmail(e.target.value)}
+									/>
 								</div>
 							</div>
 
@@ -591,9 +622,6 @@ export default function App() {
 
 								{isColorado && (
 									<div className="stack">
-										<div className="muted">
-											Colorado detected: enter your card details securely below.
-										</div>
 										<div className="tokenizer-shell">
 											<div id="fluidpay-tokenizer" className="tokenizer-container" key={tokenizerMountKey} />
 											{!fluidPayReady && (
@@ -605,18 +633,12 @@ export default function App() {
 										</div>
 									</div>
 								)}
-								{isNewMexico && (
-									<div className="stack">
-										<div className="muted">
-											New Mexico detected: click below to open the secure Converge payment window.
-										</div>
-									</div>
-								)}
+								{isNewMexico && null}
 
 								{paymentError && <div className="alert alert--error">{paymentError}</div>}
 
 								<button
-									className="btn btn--primary"
+									className="btn btn--primary paynow-button"
 									onClick={handlePurchase}
 									disabled={
 										isInactive ||
@@ -631,6 +653,7 @@ export default function App() {
 											? "Open Secure Payment"
 											: "Pay Now"}
 								</button>
+								<div className="secure-note">Payments are processed securely via hosted payment forms. Your card details are tokenized and never stored on our servers.</div>
 								{success && <div className="alert alert--success">{success}</div>}
 							</div>
 						</div>
