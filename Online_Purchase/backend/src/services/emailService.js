@@ -59,6 +59,10 @@ class EmailService {
         process.env.SMTP_FROM_PURCHASE ||
         process.env.SMTP_FROM ||
         "onlinesales@wellbridge.com";
+      const displayName = [member.firstName, member.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim() || (member.membershipName || "");
       const toRecipients = [member.email].filter(Boolean);
       const ccRecipients = [];
       const bccRecipients = [];
@@ -77,7 +81,7 @@ class EmailService {
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Thank you for your purchase!</h2>
           <p style="margin:0 0 16px 0;">We received your order for the New Intro Personal Training Package.</p>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
-            <div><strong>Member:</strong> ${member.firstName} ${member.lastName} (#${member.membershipNumber})</div>
+            <div><strong>Member:</strong> ${displayName} (#${member.membershipNumber})</div>
             <div><strong>Membership Name:</strong> ${member.membershipName || ""}</div>
             <div><strong>Email:</strong> ${member.email || ""}</div>
             <div><strong>Club:</strong> ${club?.name || ""} (${

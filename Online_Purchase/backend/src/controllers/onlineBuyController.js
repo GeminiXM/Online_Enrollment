@@ -125,10 +125,19 @@ export async function lookupMembership(req, res) {
       });
     }
 
-    // Heuristic: require clubId input to resolve DB; if not provided, try both CO and NM common ranges
-    const clubsToTry = clubId
-      ? [parseInt(clubId)]
-      : [203, 252, 253, 254, 201, 202, 204, 205, 292, 257, 375];
+    // Try requested club first, then fall back across both NM and CO clusters to avoid hard failures
+    const preferred = clubId ? [parseInt(clubId, 10)] : [];
+    const nmClubs = [201, 202, 203, 204, 205];
+    const coClubs = [252, 254, 257, 292, 375];
+    const allCandidates = [...preferred, ...nmClubs, ...coClubs];
+    // de-duplicate while preserving order
+    const seen = new Set();
+    const clubsToTry = allCandidates.filter((c) => {
+      const key = String(c);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
 
     let found = null;
     let foundClubId = null;
@@ -397,11 +406,13 @@ export async function purchasePT(req, res) {
         maskedCard,
         salesRep,
         createGiftCert,
+        approvalCode: saleResult?.approvalCode || null,
+        guid: saleResult?.transactionId || null,
       });
 
       const rows = await pool.query(
         clubId,
-        "EXECUTE PROCEDURE web_proc_InsertPurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "EXECUTE PROCEDURE web_proc_InsertPurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           member.membershipNumber, // parCustCode
           clubId, // parClub
@@ -414,6 +425,8 @@ export async function purchasePT(req, res) {
           salesRep, // parSalesRepEmpCode
           createGiftCert, // parCreateGiftCert
           description, // parDescription
+          saleResult?.approvalCode || null, // parApproval_Code
+          saleResult?.transactionId || null, // parGUID
         ]
       );
 

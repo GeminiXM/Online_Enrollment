@@ -46,7 +46,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/api/online-buy", onlineBuyRoutes);
 
-const PORT = process.env.ONLINE_BUY_BACKEND_PORT || 4071;
+const PORT = process.env.ONLINE_BUY_BACKEND_PORT || 4070;
 app.listen(PORT, () => {
   logger.info(`Online_Purchase backend listening on port ${PORT}`);
 });

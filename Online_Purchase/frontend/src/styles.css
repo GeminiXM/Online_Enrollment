@@ -263,12 +263,12 @@ body {
 	color: rgba(255, 255, 255, 0.85);
 }
 .valid-icon {
-\tcolor: #22c55e;
-\tfont-weight: 800;
+	color: #22c55e;
+	font-weight: 800;
 }
 .invalid-icon {
-\tcolor: #ff98a1;
-\tfont-weight: 800;
+	color: #ff98a1;
+	font-weight: 800;
 }
 .checkbox {
 	display: flex;
@@ -407,16 +407,16 @@ body {
 }
 
 .modal .btn--primary {
-\tbackground: #0082b5;
-\tcolor: #ffffff;
-\tborder: 1px solid #006a94;
+	background: #0082b5;
+	color: #ffffff;
+	border: 1px solid #006a94;
 }
 .modal .btn--primary:hover:not([disabled]) {
-\tbackground: #0077a3;
+	background: #0077a3;
 }
 .modal .btn--primary:focus-visible {
-\toutline: none;
-\tbox-shadow: 0 0 0 3px rgba(0, 130, 181, 0.25);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(0, 130, 181, 0.25);
 }
 
 .modal__header {
@@ -435,12 +435,41 @@ body {
 }
 
 .modal__header--error {
-\tmargin: -18px -18px 12px -18px;
-\tpadding: 12px 16px;
-\tbackground: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
-\tcolor: #ffffff;
-\tborder-top-left-radius: 14px;
-\tborder-top-right-radius: 14px;
+	margin: -18px -18px 12px -18px;
+	padding: 12px 16px;
+	background: linear-gradient(90deg, #ef4444 0%, #f97316 100%);
+	color: #ffffff;
+	border-top-left-radius: 14px;
+	border-top-right-radius: 14px;
+}
+
+/* Version badge row (above footer) */
+.op-version-row {
+	width: 100%;
+	margin: 0 0 18px 0;
+	padding: 0 20px;
+	display: flex;
+	justify-content: flex-end;
+}
+
+/* Version badge (subtle text, no bubble) */
+.op-version-badge {
+	display: inline-block;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+	backdrop-filter: none;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	color: rgba(14, 27, 53, 0.45);
+	pointer-events: none;
+}
+
+@media (max-width: 640px) {
+	.op-version-badge { bottom: 180px; }
 }
 
 

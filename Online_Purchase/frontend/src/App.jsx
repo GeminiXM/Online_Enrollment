@@ -34,6 +34,12 @@ export default function App() {
 	// Payment state
 	const isColorado = club?.state === "CO";
 	const isNewMexico = club?.state === "NM";
+	// Use the member's home club for processor credentials and posting; fallback to shard id
+	const paymentClubId = useMemo(() => {
+		const homeId = club?.homeClubId && String(club.homeClubId);
+		const shardId = club?.id && String(club.id);
+		return homeId || shardId || "";
+	}, [club]);
 	const [paymentError, setPaymentError] = useState("");
 	const [paymentSubmitting, setPaymentSubmitting] = useState(false);
 	const [fluidPayInfo, setFluidPayInfo] = useState(null);
@@ -124,9 +130,10 @@ export default function App() {
 			if (data?.club?.id) {
 				setClubIdOverride(String(data.club.id));
 			}
-			// Fetch PT package
+			// Fetch PT package (use home club for pricing when available)
+			const packageClubId = (data?.club?.homeClubId || data?.club?.id || "").toString();
 			const { ok: ok2, data: data2 } = await fetchJson(
-				`/api/online-buy/pt-package?clubId=${data.club.id}`
+				`/api/online-buy/pt-package?clubId=${packageClubId}`
 			);
 			if (!ok2 || !data2?.success) throw new Error(data2?.message || "Failed to get PT package");
 			setPtPackage(data2.ptPackage);
@@ -162,7 +169,7 @@ export default function App() {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify({
-						clubId: club.id,
+						clubId: paymentClubId,
 						member: memberPayload,
 						ptPackage: ptPackagePayload,
 						payment: { processor: "FLUIDPAY", token },
@@ -187,7 +194,7 @@ export default function App() {
 				setPaymentSubmitting(false);
 			}
 		},
-		[club?.id, member, ptPackage, receiptEmail]
+		[paymentClubId, member, ptPackage, receiptEmail]
 	);
 
 	const handleConvergeSuccess = useCallback(
@@ -218,8 +225,35 @@ export default function App() {
 				if (!transactionId) {
 					throw new Error("Missing transaction id from Converge response");
 				}
+
+				// Attempt to extract card details from the Converge response for POS posting (match Online_Enrollment behavior)
+				const rawBrand = (
+					response?.ssl_card_short_description ||
+					response?.aal_card_short_description || // some payloads use 'aal_*'
+					response?.ssl_card_type ||
+					response?.card_type ||
+					""
+				).toString().trim();
+				const last4FromCardNum =
+					(/\d{4}$/.exec((response?.ssl_card_number || "").toString()) || [null])[0];
+				const last4FromMasked =
+					(/\d{4}$/.exec((response?.ssl_card_number_masked || "").toString()) || [null])[0];
+				const last4 = (
+					response?.ssl_last4 ||
+					response?.ssl_last_four_digits ||
+					""
+				).toString().trim() || last4FromCardNum || last4FromMasked || "";
+				const masked = last4 ? `************${last4}` : (response?.ssl_card_number_masked || "").toString().trim();
+				const rawExp = (response?.ssl_exp_date || "").toString().trim(); // often MMYY
+				let expDateMMYY = "";
+				if (/^\d{4}$/.test(rawExp)) {
+					expDateMMYY = `${rawExp.slice(0, 2)}/${rawExp.slice(2)}`;
+				} else if (/^\d{2}\/\d{2}$/.test(rawExp)) {
+					expDateMMYY = rawExp;
+				}
+
 				const payload = {
-					clubId: club.id,
+					clubId: paymentClubId,
 					member: memberPayload,
 					ptPackage: ptPackagePayload,
 					payment: {
@@ -228,6 +262,9 @@ export default function App() {
 						transactionId,
 						approvalCode: response?.ssl_approval_code || "",
 						message: response?.ssl_result_message || "",
+						cardBrand: rawBrand,
+						cardMasked: masked,
+						expDateMMYY,
 					},
 				};
 				const { ok, data } = await fetchJson("/api/online-buy/purchase", {
@@ -241,7 +278,7 @@ export default function App() {
 					membershipNumber: memberPayload.membershipNumber,
 					description: ptPackagePayload.description,
 					price: Number(ptPackagePayload.price || 0),
-					last4: data?.last4 || "",
+					last4: data?.last4 || last4 || "",
 					dbTransactionId: data?.dbTransactionId || "",
 					date: new Date().toISOString(),
 				});
@@ -254,18 +291,18 @@ export default function App() {
 				setPaymentSubmitting(false);
 			}
 		},
-		[club?.id, member, ptPackage, receiptEmail]
+		[paymentClubId, member, ptPackage, receiptEmail]
 	);
 
 	useEffect(() => {
-		if (!isColorado || !club?.id) {
+		if (!isColorado || !paymentClubId) {
 			return;
 		}
 
 		let cancelled = false;
 		(async () => {
 			const { ok, data } = await fetchJson(
-				`/api/online-buy/fluidpay-info?clubId=${club.id}`
+				`/api/online-buy/fluidpay-info?clubId=${paymentClubId}`
 			);
 			if (cancelled) return;
 			if (ok && data?.success && data.fluidPayInfo) {
@@ -283,7 +320,7 @@ export default function App() {
 			setFluidPayReady(false);
 			fluidPayTokenizerRef.current = null;
 		};
-	}, [club?.id, isColorado]);
+	}, [paymentClubId, isColorado]);
 
 	useEffect(() => {
 		if (!isColorado || !fluidPayInfo?.publicKey) {
@@ -475,13 +512,8 @@ export default function App() {
 			}
 
 			const response = data.response?.data || data.response;
-			if (!response) {
-				const msg = "Payment response missing.";
-				setPaymentError(msg);
-				showError(`${msg} Please contact your club to make this purchase.`);
-				setPaymentSubmitting(false);
-				return;
-			}
+			// Some benign messages may not include a response payload; ignore them
+			if (!response) return;
 
 			const approved =
 				response.ssl_result === "0" ||
@@ -539,7 +571,7 @@ export default function App() {
 				const body = {
 					amount: Number(ptPackage.price || 0).toFixed(2),
 					orderId: `PT-${member.membershipNumber || Date.now()}`,
-					clubId: club.id,
+					clubId: paymentClubId,
 					customerId: member.membershipNumber || undefined,
 					memberData: {
 						firstName: member.firstName || "",
@@ -918,6 +950,9 @@ export default function App() {
 				</div>
 			)}
 
+			<div className="op-version-row">
+				<div className="op-version-badge">v1.0.0</div>
+			</div>
 			<Footer />
 		</div>
 	);
