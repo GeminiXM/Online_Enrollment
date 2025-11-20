@@ -269,6 +269,7 @@ export async function purchasePT(req, res) {
       member, // { membershipNumber, membershipName?, firstName, lastName, email, address, city, state, zipCode, phone }
       ptPackage, // { description, price, invtr_upccode }
       payment, // { processor: "FLUIDPAY"|"CONVERGE", token or card fields }
+      contact = {}, // optional: { name, phone, email, goals, preferredTrainer } for internal email only
     } = req.body || {};
 
     if (!clubId || !member?.membershipNumber || !ptPackage?.price || !payment) {
@@ -445,24 +446,20 @@ export async function purchasePT(req, res) {
           rsTrans,
         });
 
-        if (!rsTrans) {
+        // Treat any non-zero result code or missing transaction as failure
+        if (!rsTrans || resultCode !== 0) {
           const errMsg =
             (values.length > 3 && values[3] && String(values[3]).trim()) ||
-            "Purchase posting failed (no transaction id returned)";
-          return res.status(500).json({
-            success: false,
-            message: errMsg,
-            details: { resultCode, rsTrans, row: r },
-          });
-        }
-
-        // rsTrans is present, so a POS transaction was created.
-        // If resultCode is non-zero, treat it as a warning but NOT a hard failure.
-        if (resultCode !== 0) {
-          logger.warn("web_proc_InsertPurchase non-zero resultCode with valid rsTrans", {
+            "Purchase posting failed (transaction not created)";
+          logger.error("web_proc_InsertPurchase indicated failure", {
             resultCode,
             rsTrans,
             rawRow: r,
+          });
+          return res.status(500).json({
+            success: false,
+            message: errMsg,
+            details: { resultCode, rsTrans },
           });
         }
 
@@ -487,6 +484,21 @@ export async function purchasePT(req, res) {
       });
     }
 
+    // Map club id to full display name
+    const clubIdStr = String(clubId);
+    const CLUB_ID_TO_NAME = {
+      "201": "Highpoint Sports & Wellness",
+      "202": "Midtown Sports & Wellness",
+      "203": "Downtown Sports & Wellness",
+      "204": "Del Norte Sports & Wellness",
+      "205": "Riverpoint Sports & Wellness",
+      "252": "Colorado Athletic Club - DTC",
+      "254": "Colorado Athletic Club - Tabor Center",
+      "257": "Colorado Athletic Club - Flatirons",
+      "292": "Colorado Athletic Club - Monaco",
+    };
+    const clubDisplayName = CLUB_ID_TO_NAME[clubIdStr] || `Club ${clubIdStr}`;
+
     // Email receipt (member + PT Manager); no PDFs, include DB transaction id when available
     await emailService.sendPTPurchaseReceipt(
       {
@@ -498,14 +510,14 @@ export async function purchasePT(req, res) {
       },
       ptPackage,
       {
-        processorName: saleResult.processorName,
-        transactionId: saleResult.transactionId,
-        amount,
+        processorName: saleResult.processorName, // will be ignored in simplified template
+        transactionId: saleResult.transactionId, // will be ignored in simplified template
+        amount, // will be ignored in simplified template
         dbTransactionId,
       },
       {
         id: clubId,
-        name: `Club ${clubId}`,
+        name: clubDisplayName,
         state,
         email: process.env.DEFAULT_CLUB_EMAIL || "",
       }
@@ -513,7 +525,6 @@ export async function purchasePT(req, res) {
 
     // Internal notifications to PTM/GM/Regional using Online_Enrollment logic
     try {
-      const clubIdStr = String(clubId);
       // GM emails by club id sourced from Online_Enrollment ClubContext
       const clubIdToGm = {
         "201": "nhpgm@wellbridge.com",
@@ -534,7 +545,8 @@ export async function purchasePT(req, res) {
       };
       const ptmEmail = derivePtm(gmEmail);
       const regionalEmail = state === "CO" ? "cacregptm@wellbridge.com" : state === "NM" ? "nmswregptm@wellbridge.com" : "";
-      const recipients = [gmEmail, ptmEmail, regionalEmail].filter(Boolean).join(", ");
+      // Include Mark for preview copy
+      const recipients = [gmEmail, ptmEmail, regionalEmail, "mmoore@wellbridge.com"].filter(Boolean).join(", ");
       if (recipients) {
         await emailService.sendPreviewPTInternal(
           recipients,
@@ -543,9 +555,16 @@ export async function purchasePT(req, res) {
             membershipName: resolvedMemberName || member.membershipName || ""
           },
           { description: ptPackage.description, price: ptPackage.price },
-          { id: clubId, name: `Club ${clubId}`, state },
-      member.email || "",
-      dbTransactionId || ""
+          { id: clubId, name: clubDisplayName, state },
+          member.email || "",
+          dbTransactionId || "",
+          {
+            name: (contact?.name || "").toString().trim(),
+            phone: (contact?.phone || "").toString().trim(),
+            email: (contact?.email || "").toString().trim(),
+            goals: (contact?.goals || "").toString().trim(),
+            preferredTrainer: (contact?.preferredTrainer || "").toString().trim(),
+          }
         );
       }
     } catch (e) {
@@ -833,6 +852,7 @@ export async function sendInternalPTPreview(req, res) {
       club = {},
       receiptEmail = "",
       dbTransactionId = "DEMO123456",
+      contact = {},
     } = req.body || {};
 
     const ok = await emailService.sendPreviewPTInternal(
@@ -851,7 +871,14 @@ export async function sendInternalPTPreview(req, res) {
         state: club?.state || null,
       },
       (receiptEmail || "").toString().trim(),
-      dbTransactionId
+      dbTransactionId,
+      {
+        name: (contact?.name || "").toString().trim(),
+        phone: (contact?.phone || "").toString().trim(),
+        email: (contact?.email || "").toString().trim(),
+        goals: (contact?.goals || "").toString().trim(),
+        preferredTrainer: (contact?.preferredTrainer || "").toString().trim(),
+      }
     );
 
     if (!ok) {

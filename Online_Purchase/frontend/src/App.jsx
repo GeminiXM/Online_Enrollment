@@ -19,6 +19,8 @@ export default function App() {
 	const [emailValid, setEmailValid] = useState(false);
 	const [emailChecking, setEmailChecking] = useState(false);
 	const [emailMsg, setEmailMsg] = useState("");
+	const [contactEmailValid, setContactEmailValid] = useState(false);
+	const [contactEmailMsg, setContactEmailMsg] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
@@ -48,6 +50,13 @@ export default function App() {
 	const [convergeReady, setConvergeReady] = useState(false);
 	// Force React to remount the tokenizer container to avoid DOM removal races
 	const [tokenizerMountKey, setTokenizerMountKey] = useState(0);
+
+	// Contact info (for internal club emails only; not stored in DB)
+	const [contactName, setContactName] = useState("");
+	const [contactPhone, setContactPhone] = useState("");
+	const [contactEmail, setContactEmail] = useState("");
+	const [contactGoals, setContactGoals] = useState("");
+	const [preferredTrainer, setPreferredTrainer] = useState("");
 
 	// Club names (sourced from Online_Enrollment ClubContext data)
 	const CLUB_ID_TO_NAME = useMemo(
@@ -104,6 +113,11 @@ export default function App() {
 		setClub(null);
 		setPtPackage(null);
 		setReceiptEmail("");
+			setContactName("");
+			setContactPhone("");
+			setContactEmail("");
+			setContactGoals("");
+			setPreferredTrainer("");
 		try {
 			// Frontend guard: numeric only, max 10
 			const raw = membershipNumber.trim();
@@ -173,6 +187,13 @@ export default function App() {
 						member: memberPayload,
 						ptPackage: ptPackagePayload,
 						payment: { processor: "FLUIDPAY", token },
+						contact: {
+							name: contactName,
+							phone: contactPhone,
+							email: contactEmail,
+							goals: contactGoals,
+							preferredTrainer,
+						},
 					}),
 				});
 				if (!ok || !data?.success) throw new Error(data?.message || "Purchase failed");
@@ -265,6 +286,13 @@ export default function App() {
 						cardBrand: rawBrand,
 						cardMasked: masked,
 						expDateMMYY,
+					},
+					contact: {
+						name: contactName,
+						phone: contactPhone,
+						email: contactEmail,
+						goals: contactGoals,
+						preferredTrainer,
 					},
 				};
 				const { ok, data } = await fetchJson("/api/online-buy/purchase", {
@@ -719,6 +747,89 @@ export default function App() {
 							</div>
 
 							<div className="card">
+								<div className="section-title">Contact Information</div>
+								<div className="kv">
+									<div className="kv__row">
+										<div className="kv__key">Name</div>
+										<div className="kv__value">
+											<input className="input" placeholder="Full Name" value={contactName} onChange={(e) => setContactName(e.target.value)} />
+										</div>
+									</div>
+									<div className="kv__row">
+										<div className="kv__key">Preferred Phone</div>
+										<div className="kv__value">
+											<input className="input" placeholder="(555) 555-5555" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
+										</div>
+									</div>
+									<div className="kv__row">
+										<div className="kv__key">Email</div>
+										<div className="kv__value">
+											<div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+												<input
+													className="input"
+													type="email"
+													autoComplete="email"
+													spellCheck={false}
+													inputMode="email"
+													placeholder="name@example.com"
+													value={contactEmail}
+													onChange={(e) => {
+														const val = e.target.value;
+														const email = (val || "").trim();
+														setContactEmail(email);
+														const looksOk = email.includes("@") && email.split("@")[1]?.includes(".");
+														if (email && looksOk) {
+															setContactEmailValid(true);
+															setContactEmailMsg("");
+														} else {
+															setContactEmailValid(false);
+															setContactEmailMsg(email ? "Invalid email format" : "");
+														}
+													}}
+													onBlur={() => {
+														const email = (contactEmail || "").trim();
+														if (!email) {
+															setContactEmailValid(false);
+															setContactEmailMsg("");
+															return;
+														}
+														const looksOk = email.includes("@") && email.split("@")[1]?.includes(".");
+														if (looksOk) {
+															setContactEmailValid(true);
+															setContactEmailMsg("");
+														} else {
+															setContactEmailValid(false);
+															setContactEmailMsg("Invalid email format");
+														}
+													}}
+												/>
+												{contactEmailValid ? (
+													<span className="valid-icon" title="Verified">✓</span>
+												) : contactEmailMsg ? (
+													<span className="invalid-icon" title={contactEmailMsg}>!</span>
+												) : null}
+											</div>
+											{contactEmailMsg && !contactEmailValid && (
+												<div className="muted" style={{ color: "#ff98a1", marginTop: 6 }}>{contactEmailMsg}</div>
+											)}
+										</div>
+									</div>
+									<div className="kv__row">
+										<div className="kv__key">Looking to achieve</div>
+										<div className="kv__value">
+											<textarea className="input" rows={3} placeholder="e.g., want to lose weight" value={contactGoals} onChange={(e) => setContactGoals(e.target.value)} />
+										</div>
+									</div>
+									<div className="kv__row">
+										<div className="kv__key">Preferred Trainer Name</div>
+										<div className="kv__value">
+											<input className="input" placeholder="Preferred Trainer" value={preferredTrainer} onChange={(e) => setPreferredTrainer(e.target.value)} />
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div className="card">
 								<div className="section-title">Receipt Email</div>
 								<div className="form-row">
 									<div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
@@ -851,6 +962,13 @@ export default function App() {
 													ptPackage: { description: demo.description, price: demo.price },
 													club: { id: club?.id, name: homeClubName, state: club?.state },
 													receiptEmail,
+													contact: {
+														name: contactName,
+														phone: contactPhone,
+														email: contactEmail || receiptEmail,
+														goals: contactGoals,
+														preferredTrainer,
+													},
 												}),
 											}).catch(() => {});
 										}}

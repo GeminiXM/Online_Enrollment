@@ -81,12 +81,10 @@ class EmailService {
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Thank you for your purchase!</h2>
           <p style="margin:0 0 16px 0;">We received your order for the New Intro Personal Training Package.</p>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
-            <div><strong>Member:</strong> ${displayName} (#${member.membershipNumber})</div>
+            <div><strong>Member:</strong> #${member.membershipNumber}</div>
             <div><strong>Membership Name:</strong> ${member.membershipName || ""}</div>
             <div><strong>Email:</strong> ${member.email || ""}</div>
-            <div><strong>Club:</strong> ${club?.name || ""} (${
-        club?.state || ""
-      })</div>
+            <div><strong>Club:</strong> ${club?.name || ""}${club?.state ? ` (${club.state})` : ""}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
             <div><strong>Package:</strong> ${
@@ -94,13 +92,6 @@ class EmailService {
             }</div>
             <div><strong>Price:</strong> $${Number(
               ptPackage?.price || ptPackage?.invtr_price || 149
-            ).toFixed(2)}</div>
-          </div>
-          <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
-            <div><strong>Processor:</strong> ${payment?.processorName || ""}</div>
-            <div><strong>Transaction ID:</strong> ${payment?.transactionId || ""}</div>
-            <div><strong>Amount Charged Today:</strong> $${Number(
-              payment?.amount || 0
             ).toFixed(2)}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
@@ -143,26 +134,22 @@ class EmailService {
       const subject = `PT Purchase Receipt Preview - ${club?.name || "Club"}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
-          <h2 style="margin:0 0 10px 0; color:#2c3e50;">Receipt Preview</h2>
+          <h2 style="margin:0 0 10px 0; color:#2c3e50;">Thank you for your purchase!</h2>
+          <p style="margin:0 0 16px 0;">We received your order for the New Intro Personal Training Package.</p>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
-            <div><strong>Membership #:</strong> ${receipt?.membershipNumber || ""}</div>
+            <div><strong>Member:</strong> #${receipt?.membershipNumber || ""}</div>
             <div><strong>Membership Name:</strong> ${receipt?.membershipName || ""}</div>
-            <div><strong>Club:</strong> ${club?.name || ""} (${club?.state || ""})</div>
+            <div><strong>Email:</strong> ${receipt?.email || ""}</div>
+            <div><strong>Club:</strong> ${club?.name || ""}${club?.state ? ` (${club.state})` : ""}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
             <div><strong>Package:</strong> ${receipt?.description || ""}</div>
             <div><strong>Price:</strong> $${Number(receipt?.price || 0).toFixed(2)}</div>
-            <div><strong>Card:</strong> ${receipt?.last4 ? "•••• " + receipt.last4 : "—"}</div>
-            <div><strong>Date:</strong> ${receipt?.date ? new Date(receipt.date).toLocaleString() : new Date().toLocaleString()}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
             <div><strong>Club Transaction #:</strong> ${receipt?.dbTransactionId || ""}</div>
           </div>
-          <p style="margin:16px 0 0 0; color:#2c3e50;">
-            Congratulations on enhancing your fitness journey! The above item has been added to your membership.
-            A Club representative will be reaching out to you, or you can go to the club and make arrangements
-            to start using this purchase!
-          </p>
+          <p style="margin:16px 0 0 0;">A PT Manager will contact you within 24 hours to get you started.</p>
         </div>
       `;
 
@@ -180,7 +167,7 @@ class EmailService {
     }
   }
 
-  async sendPreviewPTInternal(toEmail, member, ptPackage, club, receiptEmail, dbTransactionId = "") {
+  async sendPreviewPTInternal(toEmail, member, ptPackage, club, receiptEmail, dbTransactionId = "", contactInfo = {}) {
     try {
       await this.init();
       const DEFAULT_FROM =
@@ -197,6 +184,14 @@ class EmailService {
             <div><strong>Membership Name:</strong> ${member?.membershipName || ""}</div>
             <div><strong>Club:</strong> ${club?.name || ""} ${club?.state ? `(${club.state})` : ""}</div>
             <div><strong>Email (entered for receipt):</strong> ${receiptEmail || ""}</div>
+          </div>
+          <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
+            <div><strong>Contact Information</strong></div>
+            <div><strong>Name:</strong> ${contactInfo?.name || ""}</div>
+            <div><strong>Preferred Phone:</strong> ${contactInfo?.phone || ""}</div>
+            <div><strong>Email:</strong> ${contactInfo?.email || ""}</div>
+            <div><strong>Looking to achieve:</strong> ${contactInfo?.goals || ""}</div>
+            <div><strong>Preferred Trainer Name:</strong> ${contactInfo?.preferredTrainer || ""}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
             <div><strong>Club Transaction #:</strong> ${dbTransactionId || ""}</div>
