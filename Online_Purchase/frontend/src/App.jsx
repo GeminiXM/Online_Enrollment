@@ -79,15 +79,9 @@ export default function App() {
 	);
 	const CLUBS = useMemo(
 		() => ([
-			{ id: "201", name: "Highpoint Sports & Wellness", shortName: "Highpoint", state: "NM" },
-			{ id: "202", name: "Midtown Sports & Wellness", shortName: "Midtown", state: "NM" },
-			{ id: "203", name: "Downtown Sports & Wellness", shortName: "Downtown", state: "NM" },
-			{ id: "204", name: "Del Norte Sports & Wellness", shortName: "Del Norte", state: "NM" },
-			{ id: "205", name: "Riverpoint Sports & Wellness", shortName: "Riverpoint", state: "NM" },
-			{ id: "252", name: "Colorado Athletic Club - DTC", shortName: "DTC", state: "CO" },
-			{ id: "254", name: "Colorado Athletic Club - Tabor Center", shortName: "Tabor Center", state: "CO" },
-			{ id: "257", name: "Colorado Athletic Club - Flatirons", shortName: "Flatirons", state: "CO" },
-			{ id: "292", name: "Colorado Athletic Club - Monaco", shortName: "Monaco", state: "CO" },
+			// Cluster-level choices for DB routing
+			{ id: "252", name: "Colorado Athletic Clubs", shortName: "Colorado", state: "CO" }, // Denver DB
+			{ id: "201", name: "New Mexico Sports & Wellness", shortName: "New Mexico", state: "NM" }, // NM DB
 		]),
 		[]
 	);
@@ -703,7 +697,7 @@ export default function App() {
 								<option value="">Select Club</option>
 								{CLUBS.map((c) => (
 									<option key={c.id} value={c.id}>
-										{c.name} ({c.state})
+										{c.name}
 									</option>
 								))}
 							</select>
@@ -1109,7 +1103,7 @@ export default function App() {
 			)}
 
 			<div className="op-version-row">
-			<div className="op-version-badge">v1.0.1</div>
+			<div className="op-version-badge">v1.0.2</div>
 			</div>
 			<Footer />
 		</div>

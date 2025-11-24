@@ -721,11 +721,25 @@ export async function purchasePT(req, res) {
       logger.warn("Failed to send internal PT notifications", { error: e.message });
     }
 
+    // Derive last4 for client receipt display
+    const last4 =
+      (
+        /\d{4}$/.exec(
+          (
+            payment?.cardMasked ||
+            payment?.masked ||
+            saleResult?.masked ||
+            ""
+          ).toString()
+        ) || [""]
+      )[0];
+
     return res.json({
       success: true,
       transactionId: saleResult.transactionId,
       processor: saleResult.processorName,
       dbTransactionId,
+      last4,
     });
   } catch (error) {
     logger.error("purchasePT error", {
