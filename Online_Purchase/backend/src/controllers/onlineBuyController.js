@@ -229,35 +229,185 @@ export async function lookupMembership(req, res) {
 export async function getPTPackage(req, res) {
   try {
     const clubId = (req.query.clubId || "").toString().trim() || "001";
+    const clubIdNum = parseInt(clubId, 10);
+    if (!Number.isFinite(clubIdNum)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid clubId" });
+    }
     const rows = await pool.query(
-      clubId,
-      "EXECUTE PROCEDURE procNewMemberPTPackageListSelect1(?)",
-      [clubId]
+      clubIdNum,
+      "EXECUTE PROCEDURE web_proc_GetOnlineSpecials(?)",
+      [clubIdNum]
     );
-    let ptPackage = null;
+
+    // Normalize rows similar to getOnlineSpecials
+    const specials = [];
+    let message = "";
     if (Array.isArray(rows) && rows.length > 0) {
-      const r = rows[0];
-      ptPackage = {
-        description:
+      for (const r of rows) {
+        // Handle both named and unnamed columns (positional): [upc, description, price, tax]
+        const values = Object.values(r);
+        const upc =
+          r.invtr_upccode ||
+          r.upccode ||
+          r.UPCCODE ||
+          r.UPC ||
+          r.upc ||
+          (values.length > 0 ? values[0] : null) ||
+          null;
+        const description =
           r.invtr_desc ||
           r.description ||
-          "New Intro Personal Training Package",
-        price: parseFloat(r.invtr_price || r.price || 149),
-        invtr_upccode: r.invtr_upccode || r.upc || "",
-      };
-    } else {
-      ptPackage = {
-        description: "New Intro Personal Training Package",
-        price: 149,
-        invtr_upccode: "PT001",
+          r.DESC ||
+          r.DESC_TEXT ||
+          r.DESC1 ||
+          (values.length > 1 ? values[1] : "") ||
+          "";
+        const priceRaw =
+          r.invtr_price ?? r.price ?? r.PRICE ?? (values.length > 2 ? values[2] : null);
+        const price =
+          priceRaw !== null && priceRaw !== undefined && priceRaw !== ""
+            ? Number(priceRaw)
+            : null;
+
+        if (!upc && price === null && description) {
+          message = String(description);
+          continue;
+        }
+        if (description) {
+          specials.push({
+            upccode: upc !== null && upc !== undefined ? String(upc).trim() : null,
+            description: description !== null && description !== undefined ? String(description).trim() : "",
+            price: price !== null ? Number(price) : null,
+          });
+        }
+      }
+    }
+
+    // Choose primary package: prefer first with UPC and a price; fall back to first with description
+    let primary =
+      specials.find((s) => s.upccode && s.price !== null) ||
+      specials.find((s) => s.description) ||
+      null;
+
+    // If nothing usable, surface the message as description
+    if (!primary) {
+      primary = {
+        upccode: null,
+        description:
+          message ||
+          "No Online Specials found, please contact your club for our other great promotions!",
+        price: null,
       };
     }
+
+    const ptPackage = {
+      description: primary.description,
+      price: primary.price,
+      invtr_upccode: primary.upccode || "",
+    };
+
     return res.json({ success: true, ptPackage });
   } catch (error) {
     logger.error("getPTPackage error", { error: error.message });
     return res
       .status(500)
-      .json({ success: false, message: "Failed to retrieve PT package" });
+      .json({
+        success: false,
+        message: `Failed to retrieve PT package: ${error.message}`,
+      });
+  }
+}
+
+// Online specials for a club (Online_Purchase only) – displayed under the package card
+export async function getOnlineSpecials(req, res) {
+  try {
+    const clubId = (req.query.clubId || "").toString().trim();
+    if (!clubId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "clubId is required" });
+    }
+    const clubIdNum = parseInt(clubId, 10);
+    if (!Number.isFinite(clubIdNum)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid clubId" });
+    }
+    const rows = await pool.query(
+      clubIdNum,
+      "EXECUTE PROCEDURE web_proc_GetOnlineSpecials(?)",
+      [clubIdNum]
+    );
+
+    // Normalize response
+    const specials = [];
+    let message = "";
+
+    if (Array.isArray(rows) && rows.length > 0) {
+      for (const r of rows) {
+        // The procedure may return a single "message" row with null UPC if none exist
+        // Handle both named and unnamed columns (positional): [upc, description, price, tax]
+        const values = Object.values(r);
+        const upc =
+          r.invtr_upccode ||
+          r.upccode ||
+          r.UPCCODE ||
+          r.UPC ||
+          r.upc ||
+          (values.length > 0 ? values[0] : null) ||
+          null;
+        const description =
+          r.invtr_desc ||
+          r.description ||
+          r.DESC ||
+          r.DESC_TEXT ||
+          r.DESC1 ||
+          (values.length > 1 ? values[1] : "") ||
+          "";
+        const priceRaw =
+          r.invtr_price ?? r.price ?? r.PRICE ?? (values.length > 2 ? values[2] : null);
+        const price =
+          priceRaw !== null && priceRaw !== undefined && priceRaw !== ""
+            ? Number(priceRaw)
+            : null;
+        const taxCode =
+          r.classr_tax_code ||
+          r.tax ||
+          r.tax_code ||
+          r.TAX ||
+          r.TAX_CODE ||
+          (values.length > 3 ? values[3] : null) ||
+          null;
+
+        if (!upc && !price && description) {
+          // Treat this as info message row
+          message = String(description);
+          continue;
+        }
+
+        if (description) {
+          specials.push({
+            upccode: upc !== null && upc !== undefined ? String(upc).trim() : null,
+            description: description !== null && description !== undefined ? String(description).trim() : "",
+            price: price !== null ? Number(price) : null,
+            taxCode:
+              taxCode !== null && taxCode !== undefined ? String(taxCode).trim() : null,
+          });
+        }
+      }
+    }
+
+    return res.json({ success: true, specials, message });
+  } catch (error) {
+    logger.error("getOnlineSpecials error", { error: error.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: `Failed to retrieve online specials: ${error.message}`,
+      });
   }
 }
 

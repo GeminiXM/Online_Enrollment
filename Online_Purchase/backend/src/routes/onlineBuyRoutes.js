@@ -4,6 +4,7 @@ import express from "express";
 import {
   lookupMembership,
   getPTPackage,
+  getOnlineSpecials,
   purchasePT,
   getFluidPayInfo,
   createConvergeSessionToken,
@@ -19,6 +20,9 @@ router.get("/member", lookupMembership);
 
 // GET /api/online-buy/pt-package?clubId=...
 router.get("/pt-package", getPTPackage);
+
+// GET /api/online-buy/specials?clubId=...
+router.get("/specials", getOnlineSpecials);
 
 // POST /api/online-buy/purchase
 router.post("/purchase", purchasePT);

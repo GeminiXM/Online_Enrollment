@@ -1,4 +1,5 @@
 import React from "react";
+import WellbridgeLogo from "../assets/images/wellbridge_white_95c93d.svg";
 
 export default function Footer() {
 	const year = new Date().getFullYear();
@@ -8,7 +9,9 @@ export default function Footer() {
 			<div className="op-footer__top" />
 			<div className="op-footer__content">
 				<div className="op-footer__section">
-					<div className="op-footer__brand">Wellbridge</div>
+					<div className="op-footer__brand">
+						<img src={WellbridgeLogo} alt="Wellbridge" className="op-footer__logo" />
+					</div>
 					<div className="op-footer__tagline">
 						Colorado Athletic Club · Sports &amp; Wellness
 					</div>

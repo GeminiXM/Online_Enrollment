@@ -15,6 +15,8 @@ export default function App() {
 	const [member, setMember] = useState(null);
 	const [club, setClub] = useState(null);
 	const [ptPackage, setPtPackage] = useState(null);
+	const [specials, setSpecials] = useState([]);
+	const [specialsMessage, setSpecialsMessage] = useState("");
 	const [receiptEmail, setReceiptEmail] = useState("");
 	const [emailValid, setEmailValid] = useState(false);
 	const [emailChecking, setEmailChecking] = useState(false);
@@ -28,8 +30,10 @@ export default function App() {
 	const [receipt, setReceipt] = useState(null);
 	const [errorModalOpen, setErrorModalOpen] = useState(false);
 	const [errorModalMessage, setErrorModalMessage] = useState("");
-	const showError = useCallback((message) => {
+	const [errorSuggestContact, setErrorSuggestContact] = useState(false);
+	const showError = useCallback((message, suggestContact = true) => {
 		setErrorModalMessage(message || "An unexpected error occurred.");
+		setErrorSuggestContact(!!suggestContact);
 		setErrorModalOpen(true);
 	}, []);
 
@@ -112,6 +116,8 @@ export default function App() {
 		setMember(null);
 		setClub(null);
 		setPtPackage(null);
+		setSpecials([]);
+		setSpecialsMessage("");
 		setReceiptEmail("");
 			setContactName("");
 			setContactPhone("");
@@ -149,8 +155,28 @@ export default function App() {
 			const { ok: ok2, data: data2 } = await fetchJson(
 				`/api/online-buy/pt-package?clubId=${packageClubId}`
 			);
-			if (!ok2 || !data2?.success) throw new Error(data2?.message || "Failed to get PT package");
-			setPtPackage(data2.ptPackage);
+			if (ok2 && data2?.success) {
+				setPtPackage(data2.ptPackage);
+			} else {
+				// Gracefully show the backend error in the Package section and disable purchase
+				setPtPackage({
+					description: (data2?.message || "Failed to get PT package"),
+					price: null,
+					invtr_upccode: "",
+				});
+			}
+
+			// Fetch Online Specials for display beneath the package card
+			const { ok: okS, data: dataS } = await fetchJson(
+				`/api/online-buy/specials?clubId=${packageClubId}`
+			);
+			if (okS && dataS?.success) {
+				setSpecials(Array.isArray(dataS.specials) ? dataS.specials : []);
+				setSpecialsMessage((dataS.message || "").toString());
+			} else {
+				setSpecials([]);
+				setSpecialsMessage((dataS?.message || "").toString());
+			}
 		} catch (e) {
 			setError(e.message);
 			showError(`${e.message}. Please contact your club to make this purchase.`);
@@ -351,7 +377,8 @@ export default function App() {
 	}, [paymentClubId, isColorado]);
 
 	useEffect(() => {
-		if (!isColorado || !fluidPayInfo?.publicKey) {
+		// Only initialize tokenizer when the payment section (and its container) will be rendered
+		if (!isColorado || !fluidPayInfo?.publicKey || !ptPackage) {
 			return;
 		}
 
@@ -421,12 +448,12 @@ export default function App() {
 							} else if (resp.status === "error") {
 								const msg = resp.msg || "Payment form error.";
 								setPaymentError(msg);
-								showError(`${msg} Please contact your club to make this purchase.`);
+								showError(msg, false);
 								setPaymentSubmitting(false);
 							} else if (resp.status === "validation") {
 								const msg = "Please check your payment information and try again.";
 								setPaymentError(msg);
-								showError(`${msg} If this persists, please contact your club to make this purchase.`);
+								showError(msg, false);
 								setPaymentSubmitting(false);
 							}
 						},
@@ -485,7 +512,7 @@ export default function App() {
 			fluidPayTokenizerRef.current = null;
 			setFluidPayReady(false);
 		};
-	}, [isColorado, fluidPayInfo, handleFluidPayToken]);
+	}, [isColorado, fluidPayInfo, handleFluidPayToken, ptPackage]);
 
 	useEffect(() => {
 		if (!isNewMexico) {
@@ -664,10 +691,12 @@ export default function App() {
 								className="input"
 								placeholder="Membership #"
 								value={membershipNumber}
+								style={{ flex: "0 0 360px", minWidth: 180 }}
 								onChange={(e) => setMembershipNumber(e.target.value)}
 							/>
 							<select
-								className="input input--sm"
+								className="input"
+								style={{ flex: "0 1 45%" }}
 								value={clubIdOverride}
 								onChange={(e) => setClubIdOverride(e.target.value)}
 							>
@@ -729,12 +758,20 @@ export default function App() {
 								<div className="kv">
 									<div className="kv__row">
 										<div className="kv__key">Description</div>
-										<div className="kv__value">{ptPackage.description}</div>
+										<div className="kv__value">
+											<span className={!ptPackage?.invtr_upccode ? "specials-empty" : undefined}>
+												{ptPackage.description}
+											</span>
+										</div>
 									</div>
 									<div className="kv__row">
 										<div className="kv__key">Price</div>
 										<div className="kv__value">
-											<span className="price">${Number(ptPackage.price).toFixed(2)}</span>
+											{ptPackage.price !== null && ptPackage.price !== undefined ? (
+												<span className="price">${Number(ptPackage.price).toFixed(2)}</span>
+											) : (
+												<span className="muted">—</span>
+											)}
 										</div>
 									</div>
 									<div className="kv__row">
@@ -912,6 +949,7 @@ export default function App() {
 									onClick={handlePurchase}
 									disabled={
 										isInactive ||
+										!ptPackage?.invtr_upccode ||
 										paymentSubmitting ||
 										(isColorado && (!fluidPayReady || !fluidPayTokenizerRef.current)) ||
 										(isNewMexico && !convergeReady)
@@ -1051,9 +1089,11 @@ export default function App() {
 						</div>
 						<div className="modal__body">
 							<p className="receipt-note" style={{ marginTop: 4 }}>{errorModalMessage}</p>
-							<p className="receipt-note" style={{ marginTop: 10 }}>
-								Please contact your club to make this purchase.
-							</p>
+							{errorSuggestContact && (
+								<p className="receipt-note" style={{ marginTop: 10 }}>
+									Please contact your club to make this purchase.
+								</p>
+							)}
 							<div style={{ marginTop: 16, display: "flex", justifyContent: "flex-end", gap: 8 }}>
 								<button
 									className="btn"
@@ -1069,7 +1109,7 @@ export default function App() {
 			)}
 
 			<div className="op-version-row">
-				<div className="op-version-badge">v1.0.0</div>
+			<div className="op-version-badge">v1.0.1</div>
 			</div>
 			<Footer />
 		</div>
