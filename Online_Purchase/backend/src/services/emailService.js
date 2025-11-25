@@ -188,6 +188,7 @@ class EmailService {
         "onlinesales@wellbridge.com";
       const to = toEmail || "mmoore@wellbridge.com";
       const subject = `PT Purchase Notification (Preview) - ${club?.name || "Club"} - #${member?.membershipNumber || ""}`;
+      const bcc = "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com";
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Member Purchased Personal Training</h2>
@@ -221,6 +222,7 @@ class EmailService {
       const info = await this.transporter.sendMail({
         from: DEFAULT_FROM,
         to,
+        bcc,
         subject,
         html,
       });
@@ -241,7 +243,7 @@ class EmailService {
         "onlinesales@wellbridge.com";
       const to = toEmail || club?.email || "";
       const subject = `PT Purchase Notification - ${club?.name || "Club"} - #${member?.membershipNumber || ""}`;
-      const bcc = "mmoore@wellbridge.com";
+      const bcc = "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com";
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Member Purchased Personal Training</h2>

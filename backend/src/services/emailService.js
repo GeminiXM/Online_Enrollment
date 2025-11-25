@@ -729,7 +729,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.SMTP_FROM || "noreply@yourclub.com",
         to: gmEmail,
-        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com",
+        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com",
         subject,
         html,
       };
@@ -847,7 +847,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.SMTP_FROM || "noreply@yourclub.com",
         to: recipients.join(", "),
-        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com",
+        bcc: "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com",
         subject,
         html,
       };

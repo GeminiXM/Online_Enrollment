@@ -30,12 +30,21 @@ export default function App() {
 	const [receipt, setReceipt] = useState(null);
 	const [errorModalOpen, setErrorModalOpen] = useState(false);
 	const [errorModalMessage, setErrorModalMessage] = useState("");
-	const [errorSuggestContact, setErrorSuggestContact] = useState(false);
-	const showError = useCallback((message, suggestContact = true) => {
-		setErrorModalMessage(message || "An unexpected error occurred.");
-		setErrorSuggestContact(!!suggestContact);
-		setErrorModalOpen(true);
-	}, []);
+  const [errorSuggestContact, setErrorSuggestContact] = useState(false);
+  const showError = useCallback((message, suggestContact = true) => {
+    const CONTACT_PHRASE = "please contact your club to make this purchase.";
+    let msg = (message || "An unexpected error occurred.").toString().trim();
+    const lower = msg.toLowerCase();
+    const containsContact = lower.includes(CONTACT_PHRASE);
+    if (containsContact) {
+      // Remove the contact phrase (and any preceding 'If this persists,'), we show it separately
+      msg = msg.replace(/\s*\.?\s*if this persists,\s*/i, " ");
+      msg = msg.replace(new RegExp("\\s*\\.?\\s*" + CONTACT_PHRASE.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"), "").trim();
+    }
+    setErrorModalMessage(msg);
+    setErrorSuggestContact(!!suggestContact && !containsContact);
+    setErrorModalOpen(true);
+  }, []);
 
 	// Payment state
 	const isColorado = club?.state === "CO";
