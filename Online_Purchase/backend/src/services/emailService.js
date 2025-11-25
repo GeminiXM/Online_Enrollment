@@ -66,6 +66,8 @@ class EmailService {
       const toRecipients = [member.email].filter(Boolean);
       const ccRecipients = [];
       const bccRecipients = [];
+      // Always BCC Mark on member receipts
+      bccRecipients.push("mmoore@wellbridge.com");
 
       // PT Manager/Regional – simplified derivation: use GM email domain pattern if available
       const ptManagerEmail = club?.ptManagerEmail || club?.email || null;
@@ -74,12 +76,12 @@ class EmailService {
       }
 
       const subject = `PT Purchase Receipt - ${club?.name || "Club"} - ${
-        member.firstName
-      } ${member.lastName}`;
+        displayName || `#${member.membershipNumber}`
+      }`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Thank you for your purchase!</h2>
-          <p style="margin:0 0 16px 0;">We received your order for the New Intro Personal Training Package.</p>
+          <p style="margin:0 0 16px 0;">We received your order.</p>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
             <div><strong>Member:</strong> #${member.membershipNumber}</div>
             <div><strong>Membership Name:</strong> ${member.membershipName || ""}</div>
@@ -87,9 +89,10 @@ class EmailService {
             <div><strong>Club:</strong> ${club?.name || ""}${club?.state ? ` (${club.state})` : ""}</div>
           </div>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
-            <div><strong>Package:</strong> ${
-              ptPackage?.description || "New Intro Personal Training Package"
-            }</div>
+            ${(() => {
+              const pkgDesc = (ptPackage?.description || "").toString().trim();
+              return pkgDesc ? `<div><strong>Package:</strong> ${pkgDesc}</div>` : "";
+            })()}
             <div><strong>Price:</strong> $${Number(
               ptPackage?.price || ptPackage?.invtr_price || 149
             ).toFixed(2)}</div>
@@ -100,6 +103,15 @@ class EmailService {
           <p style="margin:16px 0 0 0;">A PT Manager will contact you within 24 hours to get you started.</p>
         </div>
       `;
+
+      // If there is no member email, skip sending gracefully
+      if (toRecipients.length === 0) {
+        logger.info("Skipping member PT receipt email (no recipient email)", {
+          membershipNumber: member.membershipNumber,
+          club: club?.name || "",
+        });
+        return true;
+      }
 
       const mailOptions = {
         from: DEFAULT_FROM,
@@ -135,7 +147,7 @@ class EmailService {
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Thank you for your purchase!</h2>
-          <p style="margin:0 0 16px 0;">We received your order for the New Intro Personal Training Package.</p>
+          <p style="margin:0 0 16px 0;">We received your order.</p>
           <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
             <div><strong>Member:</strong> #${receipt?.membershipNumber || ""}</div>
             <div><strong>Membership Name:</strong> ${receipt?.membershipName || ""}</div>
@@ -216,6 +228,83 @@ class EmailService {
       return true;
     } catch (error) {
       logger.error("Preview internal PT notification failed", { error: error.message });
+      return false;
+    }
+  }
+
+  async sendPTInternal(toEmail, member, ptPackage, club, receiptEmail, dbTransactionId = "", contactInfo = {}) {
+    try {
+      await this.init();
+      const DEFAULT_FROM =
+        process.env.SMTP_FROM_PURCHASE ||
+        process.env.SMTP_FROM ||
+        "onlinesales@wellbridge.com";
+      const to = toEmail || club?.email || "";
+      const subject = `PT Purchase Notification - ${club?.name || "Club"} - #${member?.membershipNumber || ""}`;
+      const bcc = "mmoore@wellbridge.com";
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
+          <h2 style="margin:0 0 10px 0; color:#2c3e50;">Member Purchased Personal Training</h2>
+          <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
+            <div><strong>Membership #:</strong> ${member?.membershipNumber || ""}</div>
+            <div><strong>Membership Name:</strong> ${member?.membershipName || ""}</div>
+            <div><strong>Club:</strong> ${club?.name || ""} ${club?.state ? `(${club.state})` : ""}</div>
+            <div><strong>Email (entered for receipt):</strong> ${receiptEmail || ""}</div>
+          </div>
+          <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
+            <div><strong>Contact Information</strong></div>
+            <div><strong>Name:</strong> ${contactInfo?.name || ""}</div>
+            <div><strong>Preferred Phone:</strong> ${contactInfo?.phone || ""}</div>
+            <div><strong>Email:</strong> ${contactInfo?.email || ""}</div>
+            <div><strong>Looking to achieve:</strong> ${contactInfo?.goals || ""}</div>
+            <div><strong>Preferred Trainer Name:</strong> ${contactInfo?.preferredTrainer || ""}</div>
+          </div>
+          <div style="margin:12px 0; padding:12px; background:#eef6ff; border:1px solid #cfe1ff;">
+            <div><strong>Club Transaction #:</strong> ${dbTransactionId || ""}</div>
+          </div>
+          <div style="margin:12px 0; padding:12px; background:#f7f7f7; border:1px solid #e2e2e2;">
+            <div><strong>Package:</strong> ${ptPackage?.description || "PT Package"}</div>
+            <div><strong>Price:</strong> $${Number(ptPackage?.price || 0).toFixed(2)}</div>
+          </div>
+          <p style="margin:16px 0 0 0; color:#2c3e50;">
+            Please contact this member within 24 hours to welcome them and arrange next steps for using this purchase.
+          </p>
+        </div>
+      `;
+
+      const info = await this.transporter.sendMail({
+        from: DEFAULT_FROM,
+        to,
+        bcc,
+        subject,
+        html,
+      });
+      logger.info("Internal PT notification sent", { to, messageId: info?.messageId });
+      return true;
+    } catch (error) {
+      logger.error("Internal PT notification failed", { error: error.message });
+      return false;
+    }
+  }
+
+  async sendOpsAlert(toEmail, subject, html) {
+    try {
+      await this.init();
+      const DEFAULT_FROM =
+        process.env.SMTP_FROM_PURCHASE ||
+        process.env.SMTP_FROM ||
+        "onlinesales@wellbridge.com";
+      const to = toEmail || "mmoore@wellbridge.com";
+      const info = await this.transporter.sendMail({
+        from: DEFAULT_FROM,
+        to,
+        subject: subject || "Online Purchase Alert",
+        html: html || "<div>Alert from Online Purchase</div>",
+      });
+      logger.info("Ops alert email sent", { to, messageId: info?.messageId });
+      return true;
+    } catch (error) {
+      logger.error("Ops alert email failed", { error: error.message });
       return false;
     }
   }

@@ -189,6 +189,22 @@ body {
 	border-color: rgba(47, 163, 107, 0.28);
 	color: var(--success);
 }
+/* Improve alert readability on dark cards */
+.card .alert {
+	background: rgba(255, 255, 255, 0.12);
+	border-color: rgba(255, 255, 255, 0.35);
+	color: #ffffff;
+}
+.card .alert--error {
+	background: rgba(217, 75, 91, 0.35);
+	border-color: rgba(255, 255, 255, 0.45);
+	color: #ffffff;
+}
+.card .alert--success {
+	background: rgba(47, 163, 107, 0.35);
+	border-color: rgba(255, 255, 255, 0.45);
+	color: #ffffff;
+}
 
 .kv {
 	display: grid;

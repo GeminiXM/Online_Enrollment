@@ -649,29 +649,64 @@ export async function purchasePT(req, res) {
     };
     const clubDisplayName = CLUB_ID_TO_NAME[clubIdStr] || `Club ${clubIdStr}`;
 
-    // Email receipt (member + PT Manager); no PDFs, include DB transaction id when available
-    await emailService.sendPTPurchaseReceipt(
-      {
-        firstName: member.firstName,
-        lastName: member.lastName,
-        email: member.email,
-        membershipNumber: member.membershipNumber,
-        membershipName: resolvedMemberName || member.membershipName || "",
-      },
-      ptPackage,
-      {
-        processorName: saleResult.processorName, // will be ignored in simplified template
-        transactionId: saleResult.transactionId, // will be ignored in simplified template
-        amount, // will be ignored in simplified template
-        dbTransactionId,
-      },
-      {
-        id: clubId,
-        name: clubDisplayName,
-        state,
-        email: process.env.DEFAULT_CLUB_EMAIL || "",
-      }
-    );
+    // Fire-and-forget member receipt; do not block internal notifications
+    const receiptPromise = emailService
+      .sendPTPurchaseReceipt(
+        {
+          firstName: member.firstName,
+          lastName: member.lastName,
+          email: member.email,
+          membershipNumber: member.membershipNumber,
+          membershipName: resolvedMemberName || member.membershipName || "",
+        },
+        ptPackage,
+        {
+          processorName: saleResult.processorName,
+          transactionId: saleResult.transactionId,
+          amount,
+          dbTransactionId,
+        },
+        {
+          id: clubId,
+          name: clubDisplayName,
+          state,
+          email: process.env.DEFAULT_CLUB_EMAIL || "",
+        }
+      )
+      .then((ok) => {
+        if (ok === false) {
+          const subj = `Alert: Member receipt failed - ${clubDisplayName} - #${member.membershipNumber}`;
+          const html = `
+            <div>
+              <div><strong>Membership #:</strong> ${member.membershipNumber}</div>
+              <div><strong>Membership Name:</strong> ${resolvedMemberName || member.membershipName || ""}</div>
+              <div><strong>Club:</strong> ${clubDisplayName}</div>
+              <div><strong>Club Transaction #:</strong> ${dbTransactionId || ""}</div>
+              <div style="margin-top:8px;">Member receipt email failed to send (non-blocking). Please review logs for details.</div>
+            </div>
+          `;
+          // fire-and-forget ops alert
+          emailService.sendOpsAlert("mmoore@wellbridge.com", subj, html).catch(() => {});
+        }
+        return ok;
+      })
+      .catch((e) => {
+        logger.warn("Member PT receipt email send failed (non-blocking)", {
+          error: e?.message,
+        });
+        const subj = `Alert: Member receipt exception - ${clubDisplayName} - #${member.membershipNumber}`;
+        const html = `
+          <div>
+            <div><strong>Membership #:</strong> ${member.membershipNumber}</div>
+            <div><strong>Membership Name:</strong> ${resolvedMemberName || member.membershipName || ""}</div>
+            <div><strong>Club:</strong> ${clubDisplayName}</div>
+            <div><strong>Club Transaction #:</strong> ${dbTransactionId || ""}</div>
+            <div style="margin-top:8px;"><strong>Error:</strong> ${e?.message || "Unknown error"}</div>
+          </div>
+        `;
+        emailService.sendOpsAlert("mmoore@wellbridge.com", subj, html).catch(() => {});
+        return false;
+      });
 
     // Internal notifications to PTM/GM/Regional using Online_Enrollment logic
     try {
@@ -695,10 +730,10 @@ export async function purchasePT(req, res) {
       };
       const ptmEmail = derivePtm(gmEmail);
       const regionalEmail = state === "CO" ? "cacregptm@wellbridge.com" : state === "NM" ? "nmswregptm@wellbridge.com" : "";
-      // Include Mark for preview copy
-      const recipients = [gmEmail, ptmEmail, regionalEmail, "mmoore@wellbridge.com"].filter(Boolean).join(", ");
+      // Send to GM/PTM/Regional; BCC Mark separately in the email service
+      const recipients = [gmEmail, ptmEmail, regionalEmail].filter(Boolean).join(", ");
       if (recipients) {
-        await emailService.sendPreviewPTInternal(
+        await emailService.sendPTInternal(
           recipients,
           {
             membershipNumber: member.membershipNumber,
