@@ -479,8 +479,19 @@ export async function purchasePT(req, res) {
       saleResult.processorName = "FLUIDPAY";
     } else if (isNewMexico) {
       if (payment?.alreadyProcessed && payment?.transactionId) {
+        // Treat HPP callback as success ONLY if clearly approved
+        const rawMsg = (payment.message || "").toString();
+        const msgLower = rawMsg.toLowerCase();
+        const hasApprovalCode =
+          typeof payment.approvalCode === "string" &&
+          payment.approvalCode.trim().length > 0;
+        const looksApproved =
+          hasApprovalCode ||
+          msgLower.includes("approved") ||
+          msgLower.includes("approval");
+
         saleResult = {
-          success: true,
+          success: !!looksApproved,
           transactionId: payment.transactionId,
           approvalCode: payment.approvalCode || "",
           message: payment.message || "",
