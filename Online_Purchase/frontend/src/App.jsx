@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
+import RestrictedGuestPurchase from "./RestrictedGuestPurchase.jsx";
 import "./styles.css";
 
 const fetchJson = async (url, options) => {
@@ -10,6 +11,7 @@ const fetchJson = async (url, options) => {
 };
 
 export default function App() {
+  const [mode, setMode] = useState("member"); // "member" | "restricted"
 	const [membershipNumber, setMembershipNumber] = useState("");
 	const [clubIdOverride, setClubIdOverride] = useState("");
 	const [member, setMember] = useState(null);
@@ -672,6 +674,28 @@ export default function App() {
 			<Header />
 			<main className="op-main">
 				<div className="op-container">
+          <div className="card" style={{ marginBottom: 24 }}>
+            <div className="mode-toggle">
+              <button
+                type="button"
+                className={mode === "member" ? "btn btn--primary" : "btn"}
+                onClick={() => setMode("member")}
+                style={{ marginRight: 8 }}
+              >
+                Member Purchase
+              </button>
+              <button
+                type="button"
+                className={mode === "restricted" ? "btn btn--primary" : "btn"}
+                onClick={() => setMode("restricted")}
+              >
+                Special Guest Purchase
+              </button>
+            </div>
+          </div>
+
+          {mode === "member" && (
+          <>
 					<header className="op-header">
 						{club?.state && (
 							<div className="op-brand" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
@@ -1022,6 +1046,9 @@ export default function App() {
 							</div>
 						</div>
 					)}
+          </>
+          )}
+          {mode === "restricted" && <RestrictedGuestPurchase />}
 				</div>
 			</main>
 

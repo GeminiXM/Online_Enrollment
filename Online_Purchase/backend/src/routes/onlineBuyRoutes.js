@@ -12,6 +12,7 @@ import {
   validateEmail,
   sendInternalPTPreview,
 } from "../controllers/onlineBuyController.js";
+import { restrictedGuestPurchase } from "../controllers/restrictedGuestController.js";
 
 const router = express.Router();
 
@@ -26,6 +27,9 @@ router.get("/specials", getOnlineSpecials);
 
 // POST /api/online-buy/purchase
 router.post("/purchase", purchasePT);
+
+// POST /api/online-buy/restricted-guest/purchase
+router.post("/restricted-guest/purchase", restrictedGuestPurchase);
 
 // GET /api/online-buy/fluidpay-info
 router.get("/fluidpay-info", getFluidPayInfo);

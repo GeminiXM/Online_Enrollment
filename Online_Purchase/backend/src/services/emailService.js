@@ -59,20 +59,35 @@ class EmailService {
         process.env.SMTP_FROM_PURCHASE ||
         process.env.SMTP_FROM ||
         "onlinesales@wellbridge.com";
-      const displayName = [member.firstName, member.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim() || (member.membershipName || "");
-      const toRecipients = [member.email].filter(Boolean);
+      const displayName =
+        [member.firstName, member.lastName].filter(Boolean).join(" ").trim() ||
+        member.membershipName ||
+        "";
+
+      const clubIdStr =
+        club && club.id !== undefined && club.id !== null
+          ? String(club.id)
+          : "";
+      const isTestClub = clubIdStr === "255";
+
+      const toRecipients = [];
       const ccRecipients = [];
       const bccRecipients = [];
-      // Always BCC Mark on member receipts
-      bccRecipients.push("mmoore@wellbridge.com");
 
-      // PT Manager/Regional – simplified derivation: use GM email domain pattern if available
-      const ptManagerEmail = club?.ptManagerEmail || club?.email || null;
-      if (ptManagerEmail) {
-        ccRecipients.push(ptManagerEmail);
+      if (isTestClub) {
+        // For TEST club 255, only send to Mark
+        toRecipients.push("mmoore@wellbridge.com");
+      } else {
+        toRecipients.push(member.email).filter(Boolean);
+
+        // PT Manager/Regional – simplified derivation: use GM email domain pattern if available
+        const ptManagerEmail = club?.ptManagerEmail || club?.email || null;
+        if (ptManagerEmail) {
+          ccRecipients.push(ptManagerEmail);
+        }
+
+        // Always BCC Mark on member receipts for non-test clubs
+        bccRecipients.push("mmoore@wellbridge.com");
       }
 
       const subject = `PT Purchase Receipt - ${club?.name || "Club"} - ${
@@ -241,9 +256,22 @@ class EmailService {
         process.env.SMTP_FROM_PURCHASE ||
         process.env.SMTP_FROM ||
         "onlinesales@wellbridge.com";
-      const to = toEmail || club?.email || "";
-      const subject = `PT Purchase Notification - ${club?.name || "Club"} - #${member?.membershipNumber || ""}`;
-      const bcc = "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com";
+
+      const clubIdStr =
+        club && club.id !== undefined && club.id !== null
+          ? String(club.id)
+          : "";
+      const isTestClub = clubIdStr === "255";
+
+      const to = isTestClub
+        ? "mmoore@wellbridge.com"
+        : toEmail || club?.email || "";
+      const subject = `PT Purchase Notification - ${
+        club?.name || "Club"
+      } - #${member?.membershipNumber || ""}`;
+      const bcc = isTestClub
+        ? undefined
+        : "mmoore@wellbridge.com, jwelle@wellbridge.com, jpagliarini@wellbridge.com";
       const html = `
         <div style="font-family: Arial, sans-serif; max-width: 640px; line-height: 1.6;">
           <h2 style="margin:0 0 10px 0; color:#2c3e50;">Member Purchased Personal Training</h2>
