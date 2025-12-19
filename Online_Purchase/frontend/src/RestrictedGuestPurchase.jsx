@@ -21,7 +21,6 @@ const CLUB_ID_TO_NAME = {
   "205": "Riverpoint Sports & Wellness",
   "252": "Colorado Athletic Club - DTC",
   "254": "Colorado Athletic Club - Tabor Center",
-  "255": "TEST Club",
   "257": "Colorado Athletic Club - Flatirons",
   "292": "Colorado Athletic Club - Monaco",
 };
@@ -30,7 +29,7 @@ const REGION_CLUBS = [
   {
     id: "CO",
     label: "Colorado",
-    clubs: ["252", "254", "255", "257", "292"],
+    clubs: ["252", "254", "257", "292"],
   },
   {
     id: "NM",
@@ -66,6 +65,11 @@ export default function RestrictedGuestPurchase() {
   const [zipCode, setZipCode] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [goals, setGoals] = useState("");
+  const [preferredTrainer, setPreferredTrainer] = useState("");
+
+  const friendlyPaymentErrorMessage =
+    "We ran into an issue completing your purchase. A team member will review this and contact you shortly, or you can reach out to your club to confirm.";
 
   // Payment (FluidPay / Converge) – reuse shapes from App.jsx
   const isColorado = useMemo(() => region === "CO", [region]);
@@ -81,19 +85,61 @@ export default function RestrictedGuestPurchase() {
     return CLUB_ID_TO_NAME[String(clubId)] || `Club ${clubId}`;
   }, [clubId]);
 
+  const getGuestSnapshot = useCallback(() => {
+    const readInput = (id, fallback) => {
+      try {
+        const el = document.getElementById(id);
+        if (el && typeof el.value === "string") {
+          return el.value;
+        }
+      } catch {
+        // ignore DOM read issues and fall back to state
+      }
+      return fallback;
+    };
+    return {
+      firstName: readInput("sg-first-name", firstName),
+      lastName: readInput("sg-last-name", lastName),
+      middleInitial: readInput("sg-middle-initial", middleInitial),
+      dateOfBirth: readInput("sg-dob", dateOfBirth),
+      gender: readInput("sg-gender", gender),
+      address1: readInput("sg-address1", address1),
+      address2: readInput("sg-address2", address2),
+      city: readInput("sg-city", city),
+      state: readInput("sg-state", state),
+      zipCode: readInput("sg-zip", zipCode),
+      mobilePhone: readInput("sg-phone", phone),
+      homePhone: "",
+      workPhone: "",
+      email: readInput("sg-email", email),
+      goals: readInput("sg-goals", goals),
+      preferredTrainer: readInput("sg-preferred-trainer", preferredTrainer),
+    };
+  }, [
+    firstName,
+    lastName,
+    middleInitial,
+    dateOfBirth,
+    gender,
+    address1,
+    address2,
+    city,
+    state,
+    zipCode,
+    phone,
+    email,
+    goals,
+    preferredTrainer,
+  ]);
+
   const canSubmitGuest =
     region &&
     clubId &&
     firstName.trim() &&
     lastName.trim() &&
-    middleInitial.trim().length <= 1 &&
-    email.trim() &&
     phone.trim() &&
-    address1.trim() &&
-    city.trim() &&
-    state.trim() &&
-    zipCode.trim() &&
-    dateOfBirth.trim();
+    email.trim() &&
+    state.trim();
 
   // Load PT package + specials when club changes
   useEffect(() => {
@@ -356,26 +402,18 @@ export default function RestrictedGuestPurchase() {
 
         const payload = {
           clubId,
-          guest: {
-            firstName,
-            lastName,
-            middleInitial,
-            dateOfBirth,
-            gender,
-            address1,
-            address2,
-            city,
-            state,
-            zipCode,
-            mobilePhone: phone,
-            homePhone: "",
-            workPhone: "",
-            email,
-          },
+          guest: getGuestSnapshot(),
           ptPackage: {
             description: ptPackage.description,
             price: ptPackage.price,
             invtr_upccode: ptPackage.invtr_upccode,
+          },
+          contact: {
+            name: `${firstName} ${lastName}`.trim(),
+            phone,
+            email,
+            goals,
+            preferredTrainer,
           },
           payment: {
             processor: "CONVERGE_HPP",
@@ -416,7 +454,8 @@ export default function RestrictedGuestPurchase() {
         setReceiptOpen(true);
         setPaymentError("");
       } catch (err) {
-        setPaymentError(err.message);
+        console.error("Restricted guest Converge payment error", err);
+        setPaymentError(friendlyPaymentErrorMessage);
       } finally {
         setPaymentSubmitting(false);
       }
@@ -493,26 +532,18 @@ export default function RestrictedGuestPurchase() {
       try {
         const payload = {
           clubId,
-          guest: {
-            firstName,
-            lastName,
-            middleInitial,
-            dateOfBirth,
-            gender,
-            address1,
-            address2,
-            city,
-            state,
-            zipCode,
-            mobilePhone: phone,
-            homePhone: "",
-            workPhone: "",
-            email,
-          },
+          guest: getGuestSnapshot(),
           ptPackage: {
             description: ptPackage.description,
             price: ptPackage.price,
             invtr_upccode: ptPackage.invtr_upccode,
+          },
+          contact: {
+            name: `${firstName} ${lastName}`.trim(),
+            phone,
+            email,
+            goals,
+            preferredTrainer,
           },
           payment: {
             processor: "FLUIDPAY",
@@ -547,7 +578,8 @@ export default function RestrictedGuestPurchase() {
         setReceiptOpen(true);
         setPaymentError("");
       } catch (err) {
-        setPaymentError(err.message);
+        console.error("Restricted guest FluidPay payment error", err);
+        setPaymentError(friendlyPaymentErrorMessage);
       } finally {
         setPaymentSubmitting(false);
       }
@@ -571,9 +603,22 @@ export default function RestrictedGuestPurchase() {
   );
 
   const handlePayNow = async () => {
-    if (!canSubmitGuest || !ptPackage || !clubId) {
+    if (!ptPackage || !clubId || !canSubmitGuest) {
+      const missing = [];
+      if (!firstName.trim()) missing.push("First Name");
+      if (!lastName.trim()) missing.push("Last Name");
+      if (!phone.trim()) missing.push("Phone");
+      if (!email.trim()) missing.push("Email");
+      if (!state.trim()) missing.push("State");
+
+      if (!ptPackage || !clubId) {
+        missing.push("Club / Package");
+      }
+
       setError(
-        "Please complete all required member information and select a club/package."
+        missing.length
+          ? `Please complete the required fields: ${missing.join(", ")}.`
+          : "Please complete all required member information and select a club/package."
       );
       return;
     }
@@ -717,7 +762,7 @@ export default function RestrictedGuestPurchase() {
       <div className="card">
         <div className="section-title">Member Information</div>
         <div className="kv">
-          {/* Row 1: First, Middle Initial, Last */}
+          {/* Row 1: First, Middle Initial, Last (First/Last required) */}
           <div className="kv__row">
             <div className="kv__key" style={{ flex: "0 0 120px" }}>
               Name
@@ -732,13 +777,15 @@ export default function RestrictedGuestPurchase() {
               }}
             >
               <input
+                id="sg-first-name"
                 className="input"
                 style={{ minWidth: 0 }}
-                placeholder="First Name"
+                placeholder="First Name *"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
               />
               <input
+                id="sg-middle-initial"
                 className="input"
                 style={{
                   minWidth: 0,
@@ -752,19 +799,20 @@ export default function RestrictedGuestPurchase() {
                 onChange={(e) => setMiddleInitial(e.target.value)}
               />
               <input
+                id="sg-last-name"
                 className="input"
                 style={{ minWidth: 0 }}
-                placeholder="Last Name"
+                placeholder="Last Name *"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
               />
             </div>
           </div>
 
-          {/* Row 2: DOB, Gender, Phone (single line) + Email below */}
+          {/* Row 2: Required contact info (Phone + Email) */}
           <div className="kv__row">
             <div className="kv__key" style={{ flex: "0 0 120px" }}>
-              Details
+              Contact
             </div>
             <div
               className="kv__value"
@@ -779,42 +827,73 @@ export default function RestrictedGuestPurchase() {
                 }}
               >
                 <input
-                  className="input"
-                  type="date"
-                  style={{ flex: "0 0 150px" }}
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                />
-                <select
-                  className="input"
-                  style={{ flex: "0 0 140px" }}
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                >
-                  <option value="">Gender</option>
-                  <option value="M">Male</option>
-                  <option value="F">Female</option>
-                  <option value="N">Prefer not to say</option>
-                </select>
-                <input
+                  id="sg-phone"
                   className="input"
                   style={{ flex: "1 1 auto", minWidth: 0 }}
-                  placeholder="Phone Number"
+                  placeholder="Phone Number *"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
               <input
+                id="sg-email"
                 className="input"
                 type="email"
-                placeholder="Email"
+                placeholder="Email *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
           </div>
 
-          {/* Row 3: Address, Address2 */}
+          {/* Optional fields explanation */}
+          <div className="kv__row">
+            <div className="kv__key" style={{ flex: "0 0 120px" }} />
+            <div className="kv__value">
+              <div className="muted" style={{ fontStyle: "italic" }}>
+                The optional fields below help us provide better service.
+              </div>
+            </div>
+          </div>
+
+          {/* Optional Row: DOB + Gender */}
+          <div className="kv__row">
+            <div className="kv__key" style={{ flex: "0 0 120px" }}>
+              Birthday / Gender
+            </div>
+            <div
+              className="kv__value"
+              style={{
+                display: "flex",
+                gap: 8,
+                flexWrap: "nowrap",
+                minWidth: 0,
+              }}
+            >
+              <input
+                id="sg-dob"
+                className="input"
+                type="date"
+                style={{ flex: "0 0 150px" }}
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+              />
+              <select
+                id="sg-gender"
+                className="input"
+                style={{ flex: "0 0 140px" }}
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+              >
+                <option value="">Gender</option>
+                <option value="M">Male</option>
+                <option value="F">Female</option>
+                <option value="N">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 3: Address, Address2 (optional) */}
           <div className="kv__row">
             <div className="kv__key" style={{ flex: "0 0 120px" }}>
               Address
@@ -824,6 +903,7 @@ export default function RestrictedGuestPurchase() {
               style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
             >
               <input
+                id="sg-address1"
                 className="input"
                 style={{ flex: "1 1 50%" }}
                 placeholder="Address"
@@ -831,6 +911,7 @@ export default function RestrictedGuestPurchase() {
                 onChange={(e) => setAddress1(e.target.value)}
               />
               <input
+                id="sg-address2"
                 className="input"
                 style={{ flex: "1 1 40%" }}
                 placeholder="Address 2"
@@ -840,7 +921,7 @@ export default function RestrictedGuestPurchase() {
             </div>
           </div>
 
-          {/* Row 4: City, State, Zip */}
+          {/* Row 4: City, State, Zip (optional) */}
           <div className="kv__row">
             <div className="kv__key" style={{ flex: "0 0 120px" }}>
               Location
@@ -850,6 +931,7 @@ export default function RestrictedGuestPurchase() {
               style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
             >
               <input
+                id="sg-city"
                 className="input"
                 style={{ flex: "1 1 40%" }}
                 placeholder="City"
@@ -857,12 +939,13 @@ export default function RestrictedGuestPurchase() {
                 onChange={(e) => setCity(e.target.value)}
               />
               <select
+                id="sg-state"
                 className="input"
                 style={{ flex: "0 0 120px" }}
                 value={state}
                 onChange={(e) => setState(e.target.value)}
               >
-                <option value="">State</option>
+                <option value="">State *</option>
                 {[
                   "AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
                   "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
@@ -876,11 +959,44 @@ export default function RestrictedGuestPurchase() {
                 ))}
               </select>
               <input
+                id="sg-zip"
                 className="input"
                 style={{ flex: "0 0 120px" }}
                 placeholder="ZIP"
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value)}
+              />
+            </div>
+          </div>
+          {/* Row 5: Looking to achieve (optional) */}
+          <div className="kv__row">
+            <div className="kv__key" style={{ flex: "0 0 120px" }}>
+              Looking to achieve
+            </div>
+            <div className="kv__value">
+              <textarea
+                id="sg-goals"
+                className="input"
+                rows={3}
+                placeholder="e.g., want to lose weight"
+                value={goals}
+                onChange={(e) => setGoals(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Row 6: Preferred Trainer Name (optional) */}
+          <div className="kv__row">
+            <div className="kv__key" style={{ flex: "0 0 120px" }}>
+              Preferred Trainer Name
+            </div>
+            <div className="kv__value">
+              <input
+                id="sg-preferred-trainer"
+                className="input"
+                placeholder="Preferred Trainer"
+                value={preferredTrainer}
+                onChange={(e) => setPreferredTrainer(e.target.value)}
               />
             </div>
           </div>

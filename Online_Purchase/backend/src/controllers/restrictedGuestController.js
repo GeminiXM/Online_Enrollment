@@ -66,7 +66,7 @@ export async function restrictedGuestPurchase(req, res) {
       ptPackage,
       payment,
       contact = {},
-    } = req.body || {};
+  } = req.body || {};
 
     if (!clubId) {
       return res
@@ -74,16 +74,7 @@ export async function restrictedGuestPurchase(req, res) {
         .json({ success: false, message: "clubId is required" });
     }
 
-    const clubIdStr = String(clubId);
-    const isTestClub = clubIdStr === "255";
-
-    // For production clubs, enforce basic guest identity requirements.
-    // For the TEST club (255), allow the request to proceed even if the
-    // payload is missing these fields so QA can exercise the full flow.
-    if (
-      !isTestClub &&
-      (!guest || !guest.firstName || !guest.lastName || !guest.email)
-    ) {
+    if (!guest || !guest.firstName || !guest.lastName || !guest.email) {
       return res.status(400).json({
         success: false,
         message: "Guest firstName, lastName, and email are required",
@@ -342,27 +333,59 @@ export async function restrictedGuestPurchase(req, res) {
       });
     }
 
+    const contactInfo = {
+      name:
+        [guest.firstName, guest.lastName].filter(Boolean).join(" ").trim() ||
+        (contact?.name || ""),
+      phone: pickPrimaryPhone(guest) || (contact?.phone || ""),
+      email: (guest.email || contact?.email || "").toString().trim(),
+      goals: (contact?.goals || guest.goals || "").toString().trim(),
+      preferredTrainer: (contact?.preferredTrainer || guest.preferredTrainer || "")
+        .toString()
+        .trim(),
+    };
+
     let dbTransactionId = null;
     try {
-      logger.info("restrictedGuestPurchase: web_proc_InsertPurchase request", {
+      logger.info("restrictedGuestPurchase: pre-posting snapshot", {
         clubId: clubIdNum,
         custCode,
-        upc: ptPackage.invtr_upccode,
-        qty,
-        price: Number(ptPackage.price || amount || 0).toFixed(3),
-        issuer4,
-        expDate,
-        maskedCard,
-        salesRep,
-        createGiftCert,
-        description,
-        approvalCode: saleResult?.approvalCode || null,
-        guid: saleResult?.transactionId || null,
+        guest: {
+          firstName: guest.firstName,
+          lastName: guest.lastName,
+          email: guest.email,
+          phone: pickPrimaryPhone(guest),
+          address1: guest.address1,
+          address2: guest.address2,
+          city: guest.city,
+          state: guest.state,
+          zipCode: guest.zipCode,
+          gender: guest.gender,
+          dob: guest.dateOfBirth,
+          specialtyMembership: guest.specialtyMembership,
+        },
+        contact: contactInfo,
+        package: {
+          description: ptPackage?.description,
+          price: ptPackage?.price,
+          upc: ptPackage?.invtr_upccode,
+        },
+        paymentSummary: {
+          processor: saleResult?.processorName || payment?.processor || "",
+          transactionId: saleResult?.transactionId || "",
+          approvalCode: saleResult?.approvalCode || "",
+          cardBrand: saleResult?.cardBrand || payment?.cardBrand || "",
+          maskedCard:
+            saleResult?.masked ||
+            payment?.cardMasked ||
+            "Unavailable",
+          expDateMMYY: saleResult?.expDateMMYY || payment?.expDateMMYY || "",
+        },
       });
 
       const rows = await pool.query(
         clubIdNum,
-        "EXECUTE PROCEDURE web_proc_InsertPurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "EXECUTE PROCEDURE web_proc_InsertPurchaseRestricted(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         [
           custCode, // parCustCode
           clubIdNum, // parClub
@@ -385,49 +408,217 @@ export async function restrictedGuestPurchase(req, res) {
         const values = Object.values(r);
         const rsTrans = values.length ? Number(values[values.length - 1]) : null;
         const resultCode = Number(values[0] ?? 0);
+        const sqlError = values.length > 1 ? values[1] : null;
+        const isamError = values.length > 2 ? values[2] : null;
+        const errMsg =
+          (values.length > 3 && values[3] && String(values[3]).trim()) ||
+          "Purchase posting failed (transaction not created)";
 
-        logger.info("restrictedGuestPurchase: web_proc_InsertPurchase response", {
-          rawRow: r,
-          values,
-          resultCode,
-          rsTrans,
-        });
+        logger.info(
+          "restrictedGuestPurchase: web_proc_InsertPurchaseRestricted response",
+          {
+            rawRow: r,
+            values,
+            resultCode,
+            sqlError,
+            isamError,
+            rsTrans,
+          }
+        );
 
         if (!rsTrans || resultCode !== 0) {
-          const errMsg =
-            (values.length > 3 && values[3] && String(values[3]).trim()) ||
-            "Purchase posting failed (transaction not created)";
           logger.error(
-            "restrictedGuestPurchase: web_proc_InsertPurchase indicated failure",
+            "restrictedGuestPurchase: web_proc_InsertPurchaseRestricted indicated failure",
             {
               resultCode,
+              sqlError,
+              isamError,
               rsTrans,
               rawRow: r,
             }
           );
+
+          try {
+            const alertSubject =
+              "ALERT: Restricted Guest PT purchase charged but not posted";
+            const alertHtml = `
+              <div>
+                <h3>Restricted Guest PT purchase problem</h3>
+                <p>The card was successfully charged, but posting the purchase to POS failed.</p>
+                <h4>Guest</h4>
+                <ul>
+                  <li><strong>Name:</strong> ${buildBusName(guest)}</li>
+                  <li><strong>Email:</strong> ${(guest.email || "")
+                    .toString()
+                    .trim()}</li>
+                  <li><strong>Phone:</strong> ${pickPrimaryPhone(guest)}</li>
+                  <li><strong>Address:</strong> ${(guest.address1 || "")
+                    .toString()
+                    .trim()} ${(
+              guest.address2 || ""
+            ).toString().trim()}, ${(guest.city || "")
+              .toString()
+              .trim()}, ${(guest.state || "")
+              .toString()
+              .trim()} ${(guest.zipCode || "").toString().trim()}</li>
+                </ul>
+                <h4>Package</h4>
+                <ul>
+                  <li><strong>Description:</strong> ${
+                    ptPackage?.description || ""
+                  }</li>
+                  <li><strong>Price:</strong> $${Number(
+                    ptPackage?.price || amount || 0
+                  ).toFixed(2)}</li>
+                  <li><strong>UPC:</strong> ${ptPackage?.invtr_upccode || ""}</li>
+                </ul>
+                <h4>Payment</h4>
+                <ul>
+                  <li><strong>Processor:</strong> ${
+                    saleResult?.processorName || payment?.processor || ""
+                  }</li>
+                  <li><strong>Transaction ID:</strong> ${
+                    saleResult?.transactionId || ""
+                  }</li>
+                  <li><strong>Approval Code:</strong> ${
+                    saleResult?.approvalCode || ""
+                  }</li>
+                  <li><strong>Card Brand:</strong> ${
+                    saleResult?.cardBrand || payment?.cardBrand || ""
+                  }</li>
+                  <li><strong>Masked Card:</strong> ${
+                    saleResult?.masked ||
+                    payment?.cardMasked ||
+                    "Unavailable"
+                  }</li>
+                  <li><strong>Exp (MM/YY):</strong> ${
+                    saleResult?.expDateMMYY || payment?.expDateMMYY || ""
+                  }</li>
+                </ul>
+                <h4>POS Posting Error</h4>
+                <ul>
+                  <li><strong>Result Code:</strong> ${resultCode}</li>
+                  <li><strong>SQL Error:</strong> ${sqlError || ""}</li>
+                  <li><strong>ISAM Error:</strong> ${isamError || ""}</li>
+                  <li><strong>Transaction #:</strong> ${rsTrans || "(none)"}</li>
+                  <li><strong>Message:</strong> ${errMsg}</li>
+                </ul>
+                <p>Please investigate in POS and FluidPay to reconcile this charge.</p>
+              </div>
+            `;
+            emailService
+              .sendOpsAlert("mmoore@wellbridge.com", alertSubject, alertHtml)
+              .catch(() => {});
+          } catch (e) {
+            logger.warn(
+              "restrictedGuestPurchase: failed to send ops alert for unposted restricted guest purchase",
+              { error: e.message }
+            );
+          }
+
           return res.status(500).json({
             success: false,
             message: errMsg,
-            details: { resultCode, rsTrans },
+            details: { resultCode, sqlError, isamError, rsTrans },
           });
         }
 
         dbTransactionId = rsTrans;
       } else {
         logger.error(
-          "restrictedGuestPurchase: web_proc_InsertPurchase returned no rows"
+          "restrictedGuestPurchase: web_proc_InsertPurchaseRestricted returned no rows"
         );
         return res.status(500).json({
           success: false,
           message:
-            "No result returned from web_proc_InsertPurchase; transaction not created",
+            "No result returned from web_proc_InsertPurchaseRestricted; transaction not created",
         });
       }
     } catch (dbErr) {
-      logger.error("restrictedGuestPurchase: web_proc_InsertPurchase error", {
-        error: dbErr.message,
-        stack: dbErr.stack,
-      });
+      logger.error(
+        "restrictedGuestPurchase: web_proc_InsertPurchaseRestricted error",
+        {
+          error: dbErr.message,
+          sqlcode: dbErr?.sqlcode,
+          sqlstate: dbErr?.sqlstate,
+          stack: dbErr.stack,
+        }
+      );
+
+      // Send an ops alert so we can reconcile charges when POS posting fails unexpectedly
+      try {
+        const alertSubject =
+          "ALERT: Restricted Guest PT purchase error (DB exception)";
+        const alertHtml = `
+          <div>
+            <h3>Restricted Guest PT purchase problem</h3>
+            <p>The card was charged, but posting the purchase threw a database exception.</p>
+            <h4>Guest</h4>
+            <ul>
+              <li><strong>Name:</strong> ${buildBusName(guest)}</li>
+              <li><strong>Email:</strong> ${(guest.email || "")
+                .toString()
+                .trim()}</li>
+              <li><strong>Phone:</strong> ${pickPrimaryPhone(guest)}</li>
+              <li><strong>Address:</strong> ${(guest.address1 || "")
+                .toString()
+                .trim()} ${(
+          guest.address2 || ""
+        ).toString().trim()}, ${(guest.city || "")
+          .toString()
+          .trim()}, ${(guest.state || "")
+          .toString()
+          .trim()} ${(guest.zipCode || "").toString().trim()}</li>
+            </ul>
+            <h4>Package</h4>
+            <ul>
+              <li><strong>Description:</strong> ${
+                ptPackage?.description || ""
+              }</li>
+              <li><strong>Price:</strong> $${Number(
+                ptPackage?.price || amount || 0
+              ).toFixed(2)}</li>
+              <li><strong>UPC:</strong> ${ptPackage?.invtr_upccode || ""}</li>
+            </ul>
+            <h4>Payment</h4>
+            <ul>
+              <li><strong>Processor:</strong> ${
+                saleResult?.processorName || payment?.processor || ""
+              }</li>
+              <li><strong>Transaction ID:</strong> ${
+                saleResult?.transactionId || ""
+              }</li>
+              <li><strong>Approval Code:</strong> ${
+                saleResult?.approvalCode || ""
+              }</li>
+              <li><strong>Card Brand:</strong> ${
+                saleResult?.cardBrand || payment?.cardBrand || ""
+              }</li>
+              <li><strong>Masked Card:</strong> ${
+                saleResult?.masked ||
+                payment?.cardMasked ||
+                "Unavailable"
+              }</li>
+              <li><strong>Exp (MM/YY):</strong> ${
+                saleResult?.expDateMMYY || payment?.expDateMMYY || ""
+              }</li>
+            </ul>
+            <h4>DB Error</h4>
+            <ul>
+              <li><strong>Message:</strong> ${dbErr?.message || ""}</li>
+              <li><strong>SQLCODE:</strong> ${dbErr?.sqlcode || ""}</li>
+              <li><strong>SQLSTATE:</strong> ${dbErr?.sqlstate || ""}</li>
+            </ul>
+            <p>Please investigate in POS and FluidPay to reconcile this charge.</p>
+          </div>
+        `;
+        emailService
+          .sendOpsAlert("mmoore@wellbridge.com", alertSubject, alertHtml)
+          .catch(() => {});
+      } catch (_) {
+        // best-effort alert
+      }
+
       return res.status(500).json({
         success: false,
         message: "Database error while posting purchase",
@@ -435,43 +626,8 @@ export async function restrictedGuestPurchase(req, res) {
       });
     }
 
-    // 5b) Insert header row via web_proc_InsertPurchaseAspTHeade for reporting
-    try {
-      logger.info(
-        "restrictedGuestPurchase: web_proc_InsertPurchaseAspTHeade request",
-        {
-          clubId: clubIdNum,
-          custCode,
-          upc: ptPackage.invtr_upccode,
-          salesRep,
-          totalProrateBilled: Number(ptPackage.price || amount || 0).toFixed(2),
-        }
-      );
-      await pool.query(
-        clubIdNum,
-        "EXECUTE PROCEDURE web_proc_InsertPurchaseAspTHeade(?, ?, ?, ?, ?, ?, ?)",
-        [
-          custCode, // parCustCode
-          ptPackage.invtr_upccode, // parUPC
-          salesRep, // parSalesRepEmpCode
-          0, // parProrateDuesAddon
-          0, // parProrateDuesAddonTax
-          Number(ptPackage.price || amount || 0).toFixed(2), // parTotalProrateBilled
-          clubIdNum, // parClub
-        ]
-      );
-    } catch (e) {
-      logger.warn(
-        "restrictedGuestPurchase: web_proc_InsertPurchaseAspTHeade error (non-blocking)",
-        {
-          clubId,
-          custCode,
-          error: e.message,
-        }
-      );
-    }
-
-    // 6) Send receipt + internal notifications (reuse Online_Purchase behavior)
+    // 5b) Send receipt + internal notifications (reuse Online_Purchase behavior)
+    const clubIdStr = String(clubIdNum);
     const CLUB_ID_TO_NAME = {
       "201": "Highpoint Sports & Wellness",
       "202": "Midtown Sports & Wellness",
@@ -480,7 +636,6 @@ export async function restrictedGuestPurchase(req, res) {
       "205": "Riverpoint Sports & Wellness",
       "252": "Colorado Athletic Club - DTC",
       "254": "Colorado Athletic Club - Tabor Center",
-      "255": "TEST Club",
       "257": "Colorado Athletic Club - Flatirons",
       "292": "Colorado Athletic Club - Monaco",
     };
@@ -489,7 +644,7 @@ export async function restrictedGuestPurchase(req, res) {
     const memberForEmail = {
       firstName: guest.firstName,
       lastName: guest.lastName,
-      email: guest.email,
+      email: contactInfo.email,
       membershipNumber: custCode,
       membershipName: busName,
     };
@@ -591,13 +746,7 @@ export async function restrictedGuestPurchase(req, res) {
           { id: clubIdNum, name: clubDisplayName, state },
           memberForEmail.email || "",
           dbTransactionId || "",
-          {
-            name: (contact?.name || "").toString().trim(),
-            phone: (contact?.phone || "").toString().trim(),
-            email: (contact?.email || "").toString().trim(),
-            goals: (contact?.goals || "").toString().trim(),
-            preferredTrainer: (contact?.preferredTrainer || "").toString().trim(),
-          }
+          contactInfo
         );
       }
     } catch (e) {

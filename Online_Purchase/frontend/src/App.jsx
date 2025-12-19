@@ -674,26 +674,6 @@ export default function App() {
 			<Header />
 			<main className="op-main">
 				<div className="op-container">
-          <div className="card" style={{ marginBottom: 24 }}>
-            <div className="mode-toggle">
-              <button
-                type="button"
-                className={mode === "member" ? "btn btn--primary" : "btn"}
-                onClick={() => setMode("member")}
-                style={{ marginRight: 8 }}
-              >
-                Member Purchase
-              </button>
-              <button
-                type="button"
-                className={mode === "restricted" ? "btn btn--primary" : "btn"}
-                onClick={() => setMode("restricted")}
-              >
-                Special Guest Purchase
-              </button>
-            </div>
-          </div>
-
           {mode === "member" && (
           <>
 					<header className="op-header">
@@ -743,6 +723,29 @@ export default function App() {
 							</button>
 						</div>
 						{error && <div className="alert alert--error">{error}</div>}
+            <div
+              style={{
+                marginTop: 12,
+                textAlign: "right",
+                fontSize: 13,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setMode("restricted")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  color: "#e0f2fe",
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Not a Member? Click here
+              </button>
+            </div>
 					</div>
 
 					{member && club && ptPackage && <div className="divider" />}
@@ -1139,7 +1142,7 @@ export default function App() {
 			)}
 
 			<div className="op-version-row">
-			<div className="op-version-badge">v1.0.2</div>
+			<div className="op-version-badge">v1.0.4</div>
 			</div>
 			<Footer />
 		</div>
