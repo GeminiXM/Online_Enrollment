@@ -22,6 +22,97 @@ const router = express.Router();
 // In-memory storage for drafts (in production, use a database)
 const draftStorage = new Map();
 
+// Very small in-memory throttle to avoid DB spam from debounced autosave events.
+// Keyed by visitorId; allows at most one DB write per WINDOW_MS.
+const visitorLogThrottle = new Map();
+const VISITOR_LOG_WINDOW_MS = 10 * 1000;
+
+const cleanString = (v) => {
+  if (v === null || v === undefined) return "";
+  return String(v).trim();
+};
+
+const formatDateToMMDDYYYY = (dateString) => {
+  const s = cleanString(dateString);
+  if (!s) return "";
+  // Expect YYYY-MM-DD from the UI; convert to MM/DD/YYYY for Informix DATE parsing (MDY).
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return s;
+  return `${m[2]}/${m[3]}/${m[1]}`;
+};
+
+/**
+ * @route POST /api/enrollment/visitor-log
+ * @desc Best-effort visitor logging (partial lead info) for abandoned enrollments
+ * @access Public
+ */
+router.post("/visitor-log", async (req, res) => {
+  try {
+    const visitorId = cleanString(req.body?.visitorId);
+    const sessionId = cleanString(req.body?.sessionId);
+    const clubIdRaw = req.body?.clubId;
+
+    if (!visitorId) {
+      return res.status(200).json({ success: true, skipped: true });
+    }
+
+    const now = Date.now();
+    const last = visitorLogThrottle.get(visitorId) || 0;
+    if (now - last < VISITOR_LOG_WINDOW_MS) {
+      return res.status(200).json({ success: true, throttled: true });
+    }
+    visitorLogThrottle.set(visitorId, now);
+
+    const clubIdNum =
+      clubIdRaw === null || clubIdRaw === undefined || clubIdRaw === ""
+        ? null
+        : parseInt(clubIdRaw, 10);
+
+    // If we don't yet know which club DB to write to, just acknowledge.
+    if (!clubIdNum || Number.isNaN(clubIdNum)) {
+      return res.status(200).json({ success: true, skipped: true });
+    }
+
+    const firstName = cleanString(req.body?.firstName);
+    const lastName = cleanString(req.body?.lastName);
+    const email = cleanString(req.body?.email);
+    const phone = cleanString(req.body?.phone);
+    const requestedStartDate = formatDateToMMDDYYYY(req.body?.requestedStartDate);
+    const lastPath = cleanString(req.body?.path || req.body?.lastPath);
+    const referrer = cleanString(req.body?.referrer || req.get("referer"));
+    const ipAddress = cleanString(req.ip);
+    const userAgent = cleanString(req.get("user-agent"));
+
+    // Best-effort: don't allow this to break enrollment.
+    await pool.query(
+      clubIdNum,
+      "EXECUTE PROCEDURE web_proc_LogEnrollmentVisitor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        visitorId,
+        sessionId,
+        clubIdNum,
+        firstName,
+        lastName,
+        email,
+        phone,
+        requestedStartDate || null,
+        lastPath,
+        referrer,
+        ipAddress,
+        userAgent,
+      ]
+    );
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    // Do NOT throw; avoid triggering alert emails for non-critical telemetry.
+    logger.warn("Visitor log failed (non-blocking)", {
+      error: error.message,
+    });
+    return res.status(200).json({ success: true, skipped: true });
+  }
+});
+
 /**
  * @route POST /api/enrollment/draft
  * @desc Save enrollment draft

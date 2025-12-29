@@ -3,6 +3,74 @@
 
 import api from "./api.js";
 
+// Generate a stable visitor id (persists across browser restarts)
+const generateVisitorId = () => {
+  return (
+    "visitor_" + Date.now() + "_" + Math.random().toString(36).substr(2, 12)
+  );
+};
+
+const getVisitorId = () => {
+  let visitorId = null;
+  try {
+    visitorId = localStorage.getItem("enrollment_visitor_id");
+  } catch (_) {}
+  if (!visitorId) {
+    visitorId = generateVisitorId();
+    try {
+      localStorage.setItem("enrollment_visitor_id", visitorId);
+    } catch (_) {}
+  }
+  return visitorId;
+};
+
+const clean = (v) => {
+  if (v === null || v === undefined) return "";
+  return String(v).trim();
+};
+
+let visitorLogTimer = null;
+let lastVisitorPayloadHash = "";
+
+// Debounced, best-effort visitor log
+const queueVisitorLog = (mergedForm, mergedAdditional) => {
+  try {
+    const visitorId = getVisitorId();
+    const sessionId = getSessionId();
+    const clubId = mergedAdditional?.club || "";
+
+    const payload = {
+      visitorId,
+      sessionId,
+      clubId,
+      firstName: clean(mergedForm?.firstName),
+      lastName: clean(mergedForm?.lastName),
+      email: clean(mergedForm?.email),
+      phone: clean(mergedForm?.mobilePhone),
+      requestedStartDate: clean(mergedForm?.requestedStartDate),
+      path:
+        (typeof window !== "undefined" && window.location
+          ? window.location.pathname
+          : "") || "",
+      referrer:
+        (typeof document !== "undefined" ? document.referrer : "") || "",
+    };
+
+    const payloadHash = JSON.stringify(payload);
+    if (payloadHash === lastVisitorPayloadHash) return;
+    lastVisitorPayloadHash = payloadHash;
+
+    if (visitorLogTimer) clearTimeout(visitorLogTimer);
+    visitorLogTimer = setTimeout(() => {
+      api
+        .post("/enrollment/visitor-log", payload)
+        .catch(() => {}); // non-blocking
+    }, 1200);
+  } catch (_) {
+    // never block autosave
+  }
+};
+
 // Simple encryption/decryption for localStorage data
 // In production, you'd want more robust encryption
 const encryptData = (data) => {
@@ -102,6 +170,10 @@ export const autoSaveFormData = (formData, additionalData = {}) => {
     if (encrypted) {
       localStorage.setItem("enrollment_draft", encrypted);
       console.log("Form data auto-saved successfully");
+
+      // Best-effort telemetry: log visitor snapshot (debounced, non-blocking)
+      queueVisitorLog(mergedForm, mergedAdditional);
+
       return true;
     }
     return false;
