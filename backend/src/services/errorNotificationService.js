@@ -79,7 +79,7 @@ class ErrorNotificationService {
         <tr><td>Error Type:</td><td>${errorName}</td></tr>
         <tr><td>Error Message:</td><td>${errorMessage}</td></tr>
         <tr><td>Timestamp:</td><td>${
-          timestamp || new Date().toISOString()
+          timestamp || new Date().toLocaleString()
         }</td></tr>
         <tr><td>Environment:</td><td>${environment || "production"}</td></tr>
         ${context ? `<tr><td>Context:</td><td>${context}</td></tr>` : ""}
@@ -266,7 +266,7 @@ class ErrorNotificationService {
     const errorData = {
       error,
       context: additionalContext.context || "Backend Error",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toLocaleString(),
       environment: process.env.NODE_ENV || "development",
       stackTrace: error.stack,
       userInfo: {
@@ -301,7 +301,7 @@ class ErrorNotificationService {
         stack: errorPayload.stackTrace,
       },
       context: errorPayload.context || "Frontend Error",
-      timestamp: errorPayload.timestamp || new Date().toISOString(),
+      timestamp: errorPayload.timestamp || new Date().toLocaleString(),
       environment: process.env.NODE_ENV || "production",
       stackTrace: errorPayload.stackTrace,
       userInfo: {

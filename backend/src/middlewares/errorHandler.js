@@ -6,29 +6,43 @@ import errorNotificationService from "../services/errorNotificationService.js";
  * Catches all errors and sends notifications in production
  */
 export const errorHandler = async (err, req, res, next) => {
+  // Determine status code early (used for logging + alerting decisions)
+  const statusCode = err.statusCode || err.status || 500;
+
   // Log the error
-  logger.error("Application error occurred", {
+  const logMeta = {
+    statusCode,
     error: err.message,
     stack: err.stack,
     url: req.originalUrl,
     method: req.method,
     ip: req.ip,
     userAgent: req.get("user-agent"),
-  });
+  };
 
-  // Send error notification email in production
-  try {
-    await errorNotificationService.notifyBackendError(err, req, {
-      context: `${req.method} ${req.originalUrl}`,
-    });
-  } catch (notificationError) {
-    logger.error("Failed to send error notification", {
-      error: notificationError.message,
-    });
+  if (statusCode >= 500) {
+    logger.error("Application error occurred", logMeta);
+  } else {
+    // 4xx errors are expected sometimes (bots probing, bad routes, etc.) — keep visibility without paging via email
+    logger.warn("Request error occurred", logMeta);
   }
 
-  // Determine status code
-  const statusCode = err.statusCode || err.status || 500;
+  // Send error notification email ONLY for server errors (5xx), and skip HEAD probes
+  const shouldNotify =
+    statusCode >= 500 && req.method !== "HEAD" && err?.shouldNotify !== false;
+
+  if (shouldNotify) {
+    try {
+      await errorNotificationService.notifyBackendError(err, req, {
+        context: `${req.method} ${req.originalUrl}`,
+      });
+    } catch (notificationError) {
+      logger.error("Failed to send error notification", {
+        error: notificationError.message,
+      });
+    }
+  }
+
   const message = err.message || "Internal Server Error";
 
   // Send response to client
@@ -58,25 +72,30 @@ export const asyncHandler = (fn) => {
  */
 export const notFoundHandler = (req, res, next) => {
   // Ignore common probe paths to reduce noise (bots scanning for env files, etc.)
+  const reqPath = req.path || req.originalUrl?.split("?")?.[0] || "";
   const ignored404s = [
     "/.env",
     "/.env.example",
     "/api/.env",
     "/api/.env.example",
     // Common API probe endpoints
+    "/api/actions",
     "/api/v1/pods",
     "/api/sonicos/auth",
     "/api/sonicos/tfa",
     "/api/v1/version",
     "/api/v1/system/platform",
     "/api/server/version",
+    "/api/v2/cmdb/system/admin",
   ];
 
-  if (ignored404s.includes(req.originalUrl)) {
+  if (ignored404s.includes(reqPath)) {
     return res.status(404).end();
   }
 
   const error = new Error(`Not Found - ${req.originalUrl}`);
   error.statusCode = 404;
+  // Never notify (email) for 404s — these are almost always scans/mistyped URLs
+  error.shouldNotify = false;
   next(error);
 };
