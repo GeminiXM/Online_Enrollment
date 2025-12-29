@@ -645,6 +645,48 @@ export async function purchasePT(req, res) {
       });
     }
 
+    // Best-effort: log online purchase form row (do not block purchase flow)
+    try {
+      const membershipNameForLog =
+        (resolvedMemberName || member.membershipName || "").toString().trim() ||
+        [member.firstName, member.lastName].filter(Boolean).join(" ").trim();
+      const contactNameForLog =
+        (contact?.name || "").toString().trim() ||
+        [member.firstName, member.lastName].filter(Boolean).join(" ").trim();
+      const phoneForLog =
+        (contact?.phone || member.phone || "").toString().trim();
+      const emailForLog =
+        (contact?.email || member.email || "").toString().trim();
+
+      await pool.query(
+        clubId,
+        "EXECUTE PROCEDURE web_proc_LogOnlinePurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          Number(clubId), // parClubId
+          String(member.membershipNumber || "").trim(), // parMembershipNo
+          membershipNameForLog, // parMembershipName
+          String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
+          String(ptPackage?.description || "").trim(), // parPackageDesc
+          Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
+          contactNameForLog, // parContactName
+          phoneForLog, // parPreferredPhone
+          emailForLog, // parContactEmail
+          (contact?.goals || "").toString().trim(), // parLookingToAchieve
+          (contact?.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
+          String(member.email || emailForLog || "").trim(), // parReceiptEmail
+          Number(dbTransactionId || 0), // parClubTransNo
+          null, // parDatePurchased (use CURRENT in SP)
+        ]
+      );
+    } catch (e) {
+      logger.warn("purchasePT: web_proc_LogOnlinePurchase failed", {
+        error: e.message,
+        clubId,
+        membershipNumber: member.membershipNumber,
+        trans: dbTransactionId,
+      });
+    }
+
     // Map club id to full display name
     const clubIdStr = String(clubId);
     const CLUB_ID_TO_NAME = {

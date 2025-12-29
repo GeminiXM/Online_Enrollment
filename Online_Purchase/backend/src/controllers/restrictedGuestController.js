@@ -503,7 +503,7 @@ export async function restrictedGuestPurchase(req, res) {
                   <li><strong>Transaction #:</strong> ${rsTrans || "(none)"}</li>
                   <li><strong>Message:</strong> ${errMsg}</li>
                 </ul>
-                <p>Please investigate in POS and FluidPay to reconcile this charge.</p>
+                <p>Please investigate in POS and ${saleResult?.processorName || payment?.processor || "the payment processor"} to reconcile this charge.</p>
               </div>
             `;
             emailService
@@ -609,7 +609,7 @@ export async function restrictedGuestPurchase(req, res) {
               <li><strong>SQLCODE:</strong> ${dbErr?.sqlcode || ""}</li>
               <li><strong>SQLSTATE:</strong> ${dbErr?.sqlstate || ""}</li>
             </ul>
-            <p>Please investigate in POS and FluidPay to reconcile this charge.</p>
+            <p>Please investigate in POS and ${saleResult?.processorName || payment?.processor || "the payment processor"} to reconcile this charge.</p>
           </div>
         `;
         emailService
@@ -623,6 +623,45 @@ export async function restrictedGuestPurchase(req, res) {
         success: false,
         message: "Database error while posting purchase",
         error: dbErr.message,
+      });
+    }
+
+    // 5a) Log online purchase form row (best-effort; do not block purchase flow)
+    try {
+      const membershipNameForLog = [guest.firstName, guest.lastName]
+        .filter(Boolean)
+        .join(" ")
+        .trim();
+      const contactNameForLog = membershipNameForLog;
+      const phoneForLog = pickPrimaryPhone(guest) || "";
+      const emailForLog = (contactInfo.email || guest.email || "").toString().trim();
+
+      await pool.query(
+        clubIdNum,
+        "EXECUTE PROCEDURE web_proc_LogOnlinePurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          clubIdNum, // parClubId
+          String(custCode || "").trim(), // parMembershipNo
+          membershipNameForLog, // parMembershipName
+          String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
+          String(ptPackage?.description || "").trim(), // parPackageDesc
+          Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
+          contactNameForLog, // parContactName
+          phoneForLog, // parPreferredPhone
+          emailForLog, // parContactEmail
+          (guest.goals || "").toString().trim(), // parLookingToAchieve
+          (guest.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
+          emailForLog, // parReceiptEmail
+          Number(dbTransactionId || 0), // parClubTransNo
+          null, // parDatePurchased (use CURRENT in SP)
+        ]
+      );
+    } catch (e) {
+      logger.warn("restrictedGuestPurchase: web_proc_LogOnlinePurchase failed", {
+        error: e.message,
+        clubId: clubIdNum,
+        membershipNumber: custCode,
+        trans: dbTransactionId,
       });
     }
 
