@@ -636,26 +636,49 @@ export async function restrictedGuestPurchase(req, res) {
       const phoneForLog = pickPrimaryPhone(guest) || "";
       const emailForLog = (contactInfo.email || guest.email || "").toString().trim();
 
-      await pool.query(
+      const logParams = [
+        clubIdNum, // parClubId
+        String(custCode || "").trim(), // parMembershipNo
+        membershipNameForLog, // parMembershipName
+        String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
+        String(ptPackage?.description || "").trim(), // parPackageDesc
+        Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
+        contactNameForLog, // parContactName
+        phoneForLog, // parPreferredPhone
+        emailForLog, // parContactEmail
+        (guest.goals || "").toString().trim(), // parLookingToAchieve
+        (guest.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
+        emailForLog, // parReceiptEmail
+        Number(dbTransactionId || 0), // parClubTransNo
+        null, // parDatePurchased (use CURRENT in SP)
+      ];
+
+      logger.info("restrictedGuestPurchase: web_proc_LogOnlinePurchase request", {
+        clubId: clubIdNum,
+        membershipNumber: custCode,
+        trans: dbTransactionId,
+      });
+
+      const logRows = await pool.query(
         clubIdNum,
         "EXECUTE PROCEDURE web_proc_LogOnlinePurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          clubIdNum, // parClubId
-          String(custCode || "").trim(), // parMembershipNo
-          membershipNameForLog, // parMembershipName
-          String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
-          String(ptPackage?.description || "").trim(), // parPackageDesc
-          Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
-          contactNameForLog, // parContactName
-          phoneForLog, // parPreferredPhone
-          emailForLog, // parContactEmail
-          (guest.goals || "").toString().trim(), // parLookingToAchieve
-          (guest.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
-          emailForLog, // parReceiptEmail
-          Number(dbTransactionId || 0), // parClubTransNo
-          null, // parDatePurchased (use CURRENT in SP)
-        ]
+        logParams
       );
+
+      if (Array.isArray(logRows) && logRows.length > 0) {
+        const row = logRows[0] || {};
+        const values = [row["1"], row["2"], row["3"], row["4"]].map((v) =>
+          typeof v === "string" ? v.trim() : v
+        );
+        logger.info("restrictedGuestPurchase: web_proc_LogOnlinePurchase response", {
+          values,
+        });
+      } else {
+        logger.info(
+          "restrictedGuestPurchase: web_proc_LogOnlinePurchase response (no rows)",
+          { rowCount: Array.isArray(logRows) ? logRows.length : 0 }
+        );
+      }
     } catch (e) {
       logger.warn("restrictedGuestPurchase: web_proc_LogOnlinePurchase failed", {
         error: e.message,

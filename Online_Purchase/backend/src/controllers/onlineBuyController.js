@@ -658,26 +658,49 @@ export async function purchasePT(req, res) {
       const emailForLog =
         (contact?.email || member.email || "").toString().trim();
 
-      await pool.query(
+      const logParams = [
+        Number(clubId), // parClubId
+        String(member.membershipNumber || "").trim(), // parMembershipNo
+        membershipNameForLog, // parMembershipName
+        String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
+        String(ptPackage?.description || "").trim(), // parPackageDesc
+        Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
+        contactNameForLog, // parContactName
+        phoneForLog, // parPreferredPhone
+        emailForLog, // parContactEmail
+        (contact?.goals || "").toString().trim(), // parLookingToAchieve
+        (contact?.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
+        String(member.email || emailForLog || "").trim(), // parReceiptEmail
+        Number(dbTransactionId || 0), // parClubTransNo
+        null, // parDatePurchased (use CURRENT in SP)
+      ];
+
+      logger.info("purchasePT: web_proc_LogOnlinePurchase request", {
+        clubId,
+        membershipNumber: member.membershipNumber,
+        trans: dbTransactionId,
+      });
+
+      const logRows = await pool.query(
         clubId,
         "EXECUTE PROCEDURE web_proc_LogOnlinePurchase(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [
-          Number(clubId), // parClubId
-          String(member.membershipNumber || "").trim(), // parMembershipNo
-          membershipNameForLog, // parMembershipName
-          String(ptPackage?.invtr_upccode || "").trim(), // parPackageUPC
-          String(ptPackage?.description || "").trim(), // parPackageDesc
-          Number(ptPackage?.price ?? amount ?? 0).toFixed(2), // parPackagePrice
-          contactNameForLog, // parContactName
-          phoneForLog, // parPreferredPhone
-          emailForLog, // parContactEmail
-          (contact?.goals || "").toString().trim(), // parLookingToAchieve
-          (contact?.preferredTrainer || "").toString().trim(), // parPreferredTrainerName
-          String(member.email || emailForLog || "").trim(), // parReceiptEmail
-          Number(dbTransactionId || 0), // parClubTransNo
-          null, // parDatePurchased (use CURRENT in SP)
-        ]
+        logParams
       );
+
+      // Helpful: log returned tuple from the procedure, if any
+      if (Array.isArray(logRows) && logRows.length > 0) {
+        const row = logRows[0] || {};
+        const values = [row["1"], row["2"], row["3"], row["4"]].map((v) =>
+          typeof v === "string" ? v.trim() : v
+        );
+        logger.info("purchasePT: web_proc_LogOnlinePurchase response", {
+          values,
+        });
+      } else {
+        logger.info("purchasePT: web_proc_LogOnlinePurchase response (no rows)", {
+          rowCount: Array.isArray(logRows) ? logRows.length : 0,
+        });
+      }
     } catch (e) {
       logger.warn("purchasePT: web_proc_LogOnlinePurchase failed", {
         error: e.message,
