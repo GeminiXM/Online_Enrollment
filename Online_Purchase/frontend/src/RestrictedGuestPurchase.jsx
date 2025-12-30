@@ -62,6 +62,7 @@ export default function RestrictedGuestPurchase() {
   const [address2, setAddress2] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
+  const [stateTouched, setStateTouched] = useState(false);
   const [zipCode, setZipCode] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -84,6 +85,24 @@ export default function RestrictedGuestPurchase() {
     if (!clubId) return "";
     return CLUB_ID_TO_NAME[String(clubId)] || `Club ${clubId}`;
   }, [clubId]);
+
+  // Default address State based on selected region, but allow manual override.
+  useEffect(() => {
+    if (region !== "CO" && region !== "NM") return;
+
+    // When the user changes region, it's safe to re-default state to match.
+    // After that, they can still change it manually.
+    setStateTouched(false);
+    setState(region);
+  }, [region]);
+
+  // If state is empty (cleared), re-default it to the region value.
+  useEffect(() => {
+    if (stateTouched) return;
+    if (region !== "CO" && region !== "NM") return;
+    if (String(state || "").trim() !== "") return;
+    setState(region);
+  }, [region, state, stateTouched]);
 
   const getGuestSnapshot = useCallback(() => {
     const readInput = (id, fallback) => {
@@ -943,7 +962,10 @@ export default function RestrictedGuestPurchase() {
                 className="input"
                 style={{ flex: "0 0 120px" }}
                 value={state}
-                onChange={(e) => setState(e.target.value)}
+                onChange={(e) => {
+                  setStateTouched(true);
+                  setState(e.target.value);
+                }}
               >
                 <option value="">State *</option>
                 {[
